@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="all" name="Ditl">
 
-  <property name="dest" location="ditl.jar"/>
   <property name="commons" location="include/commons-cli/commons-cli-1.2.jar"/>
   <property name="core" location="core/build"/>
   <property name="modules" location="modules"/>
@@ -19,7 +18,7 @@
   </target>
 
   <target name="ditl-jar" depends="compile-ditl,meta-info">
-    <jar destfile="${dest}" filesetmanifest="mergewithoutmain" >
+    <jar destfile="ditl-jar" filesetmanifest="mergewithoutmain" >
       <manifest>
         <attribute name="Main-Class" value="ditl.cli.CLI"/>
         <attribute name="Class-Path" value="."/>
@@ -42,9 +41,12 @@
     <ant dir="core" target="clean-core"/>
     <ant dir="${modules}" target="clean-modules"/>
     <ant dir="plausible" target="clean-plausible"/>
-    <delete file="${dest}" />
-    <delete file="plausible.jar" />
     <delete dir="build" />
+  </target>
+
+  <target name="proper" depends="clean">
+    <delete file="ditl-jar" />
+    <delete file="plausible.jar" />
   </target>
 
   <target name="all" depends="ditl-jar,plausible-jar" />
