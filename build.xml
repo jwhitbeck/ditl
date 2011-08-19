@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="all" name="Ditl">
+
+  <property name="dest" location="ditl.jar"/>
+  <property name="commons" location="include/commons-cli/commons-cli-1.2.jar"/>
+  <property name="core" location="core/build"/>
+  <property name="modules" location="modules"/>
+  
+  <target name="compile-ditl">
+    <ant dir="core" />
+    <ant dir="${modules}" />
+  </target>  
+
+  <target name="meta-info">
+    <mkdir dir="build/META-INF"/>
+    <copy file="COPYING" todir="build/META-INF" />
+    <copy file="include/commons-cli/LICENSE.txt" todir="build/META-INF" />
+    <copy file="include/commons-cli/NOTICE.txt" todir="build/META-INF" />
+  </target>
+
+  <target name="ditl-jar" depends="compile-ditl,meta-info">
+    <jar destfile="${dest}" filesetmanifest="mergewithoutmain" >
+      <manifest>
+        <attribute name="Main-Class" value="ditl.cli.CLI"/>
+        <attribute name="Class-Path" value="."/>
+      </manifest>
+      <fileset dir="core/build"/>
+      <fileset dir="build/"/>
+      <zipfileset src="${modules}/ditl-modules.jar"/>
+      <zipfileset excludes="META-INF/" src="${commons}"/>
+    </jar>
+  </target>
+
+  <target name="plausible-jar" depends="ditl-jar">
+    <ant dir="plausible" />
+    <jar destfile="plausible.jar" >
+      <fileset dir="plausible/build"/>
+    </jar>
+  </target>
+    
+  <target name="clean" >
+    <ant dir="core" target="clean-core"/>
+    <ant dir="${modules}" target="clean-modules"/>
+    <ant dir="plausible" target="clean-plausible"/>
+    <delete file="${dest}" />
+    <delete dir="build" />
+  </target>
+
+  <target name="all" depends="ditl-jar,plausible-jar" />
+  
+</project>
