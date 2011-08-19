@@ -1,0 +1,6 @@
+PKG_NAME      : transfers
+PKG_ALIASES   : tr
+
+# Commands for the transfers package
+analyze, a    : ditl.transfers.cli.AnalyzeTransfers
+play,p        : ditl.transfers.cli.Player
