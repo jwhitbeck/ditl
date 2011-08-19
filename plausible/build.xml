@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="compile-plausible" name="Ditl-Plausible">
+  <property name="graphs" location="${modules}/graphs/build"/>
+
+  <target name="compile-plausible" >
+    <mkdir dir="build"/>
+    <javac srcdir="src" destdir="build" classpath="${core}:${graphs}" includeantruntime="false" />
+  </target>
+  
+  <target name="clean-plausible" >
+    <delete dir="$build" />
+  </target>
+  
+</project>

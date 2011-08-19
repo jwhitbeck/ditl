@@ -43,6 +43,7 @@
     <ant dir="${modules}" target="clean-modules"/>
     <ant dir="plausible" target="clean-plausible"/>
     <delete file="${dest}" />
+    <delete file="plausible.jar" />
     <delete dir="build" />
   </target>
 

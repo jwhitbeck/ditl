@@ -1,0 +1,25 @@
+PKG_NAME                  : graphs
+PKG_ALIASES               : gr
+
+# Commands for the graph package
+export-movement, xm       : ditl.graphs.cli.ExportMovement
+import-movement, im       : ditl.graphs.cli.ImportMovement
+export-links, xl          : ditl.graphs.cli.ExportLinks
+import-links, il          : ditl.graphs.cli.ImportLinks
+import-groups, ig         : ditl.graphs.cli.ImportStaticGroups
+import-positions, ip      : ditl.graphs.cli.ImportStaticMovement
+import-edges, ie          : ditl.graphs.cli.ImportEdges
+movement-to-links, m2l    : ditl.graphs.cli.MovementToLinks
+movement-to-presence, m2p : ditl.graphs.cli.MovementToPresence
+links-to-presence, l2p    : ditl.graphs.cli.LinksToPresence
+links-to-ccs, l2c         : ditl.graphs.cli.LinksToCCs
+edges-to-links, e2l       : ditl.graphs.cli.EdgesToLinks
+beacons-to-edges, b2e     : ditl.graphs.cli.BeaconsToEdges
+reachable, r              : ditl.graphs.cli.Reachability
+truncate, tr              : ditl.graphs.cli.Truncate
+resample, s               : ditl.graphs.cli.Resample
+analyze, a                : ditl.graphs.cli.Analyze
+filter, f                 : ditl.graphs.cli.Filter
+merge, m                  : ditl.graphs.cli.Merge
+group-links, gl           : ditl.graphs.cli.StaticGroupLinks
+play,p                    : ditl.graphs.cli.Player

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="modules-jar" name="Ditl-Modules">
+
+  <target name="compile-modules">
+    <ant dir="graphs" />
+  </target>
+    
+  <target name="modules-jar" depends="compile-modules">
+    <jar destfile="ditl-modules.jar" >
+      <fileset dir="graphs/build"/>
+    </jar>
+  </target>
+
+  <target name="clean-modules" >
+    <ant dir="graphs" target="clean-graphs"/>
+    <delete file="ditl-modules.jar"/>
+  </target>
+  
+</project>

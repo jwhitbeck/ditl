@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="compile-graphs" name="Ditl-Graphs">
+   
+  <target name="compile-graphs" >
+    <copy todir="build" >
+      <fileset dir="src" excludes="**/*.java" />
+    </copy>
+    <javac srcdir="src" destdir="build" classpath="${core}:${commons}" includeantruntime="false" />
+  </target>
+  
+  <target name="clean-graphs" >
+    <delete dir="build" />
+  </target>
+  
+</project>
