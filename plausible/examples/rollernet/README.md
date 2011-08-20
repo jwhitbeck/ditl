@@ -14,16 +14,34 @@ your CRAWDAD login and password
 3. Infer the node mobility
 
 
+Dataset
+-------
+
+Opportunistic sighting of Bluetooth devices by groups of rollerbladers
+carrying iMotes in a roller tour in Paris, France, on August 20,
+2006. The iMotes iniated neighborhood scans every 15 seconds.
+
+The iMotes were distributed to three types of skaters: staff, members
+of the skating association, and friends of the experimenters. Nodes 27
+and 38 were at all times at the front and back, respectively, of the
+rollerblading tour. Furthermore, the inferred mobility was constrained
+within a thin rectangular area to simulate movement along a road. All
+times are relative to the first unix timestamp in the raw trace.
+
+Original data at [CRAWDAD](http://crawdad.cs.dartmouth.edu/upmc/rollernet).
+
+[Play](http://plausible.lip6.fr/rollernet.jnlp) inferred mobility from [plausible.lip6.fr](http://plausible.lip6.fr) (Uses Java Web Start).
+
 Instructions
 ------------
 
-1. Make sure that the DITL_LIB and PLAUSIBLE_LIB variables point to
+1. Make sure that the DITL\_LIB and PLAUSIBLE\_LIB variables point to
 the proper jar files.
 
 2. To build, run:
 
-     $ make
+    $ make
 
-3. To play the mobility, use the ditl builtin player:
+3. To play the mobility, use the ditl built-in player:
 
-     $ java -jar ../../../ditl.jar graphs play rollernet.jar
+    $ java -jar ../../../ditl.jar graphs play rollernet.jar
