@@ -18,7 +18,7 @@
   </target>
 
   <target name="ditl-jar" depends="compile-ditl,meta-info">
-    <jar destfile="ditl-jar" filesetmanifest="mergewithoutmain" >
+    <jar destfile="ditl.jar" filesetmanifest="mergewithoutmain" >
       <manifest>
         <attribute name="Main-Class" value="ditl.cli.CLI"/>
         <attribute name="Class-Path" value="."/>
@@ -45,7 +45,7 @@
   </target>
 
   <target name="proper" depends="clean">
-    <delete file="ditl-jar" />
+    <delete file="ditl.jar" />
     <delete file="plausible.jar" />
   </target>
 
