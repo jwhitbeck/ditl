@@ -1,7 +1,7 @@
 import java.io.*;
-import plausible.*;
-import plausible.constraints.*;
-import plausible.forces.*;
+import ditl.plausible.*;
+import ditl.plausible.constraints.*;
+import ditl.plausible.forces.*;
 import ditl.*;
 import ditl.graphs.*;
 
