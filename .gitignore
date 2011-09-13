@@ -1,4 +1,5 @@
 build/
+bin/
 *.jar
 !commons-cli-1.2.jar
 .classpath
