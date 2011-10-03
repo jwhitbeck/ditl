@@ -60,7 +60,7 @@ public abstract class Store {
 	}
 	
 	private void buildTypeClassMap() throws IOException{
-		Reflections reflections = new Reflections("/graphs/\\w+\\.class");
+		Reflections reflections = new Reflections("/\\w+\\.class");
 		for ( Class<?> klass : Reflections.getSubClasses(Trace.class, reflections.listClasses("ditl.graphs"))){
 			try {
 				Field f = klass.getField("type");
