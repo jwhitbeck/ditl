@@ -45,7 +45,7 @@ public class DirectoryStore extends WritableStore {
 	}
 	
 	void refresh() throws IOException {
-		for ( File file : new Reflections(infoFile,root).paths() )
+		for ( File file : new Reflections(infoFile+"$",root).paths() )
 			try {
 				loadTrace(file.getParentFile().getName());
 			} catch (LoadTraceException e) {
