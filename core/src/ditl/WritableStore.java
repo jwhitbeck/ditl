@@ -23,10 +23,24 @@ import java.util.*;
 
 public abstract class WritableStore extends Store {
 	
-	private Set<Writer<?>> openWriters = new HashSet<Writer<?>>();
+	private Map<String, Writer<?>> openWriters = new HashMap<String,Writer<?>>();
+	
+	@SuppressWarnings("serial")
+	public class AlreadyExistsException extends Exception {
+		private String trace_name; 
+		public AlreadyExistsException(String traceName){ trace_name = traceName;}
+		@Override
+		public String toString(){
+			return "Error! A trace named '"+trace_name+"' already exists.";
+		}
+	}
+	
+	public WritableStore() throws IOException {
+		super();
+	}
 	
 	public abstract void deleteFile(String name) throws IOException;
-	public abstract void deleteTrace(Trace trace) throws IOException;
+	public abstract void deleteTrace(String name) throws IOException;
 	public abstract OutputStream getOutputStream (String name) throws IOException;
 	
 	public void putFile(File file, String name) throws IOException{
@@ -43,57 +57,64 @@ public abstract class WritableStore extends Store {
 		in.close();
 		out.close();
 	}
-
-	public <E, S> StatefulWriter<E, S> getStatefulWriter(String name,
-			StateUpdater<E, S> stateUpdater, long snapInterval) throws IOException {
-		StatefulWriter<E,S> writer = new StatefulWriter<E,S>(this,getOutputStream(traceFile(name)),
-												getOutputStream(infoFile(name)),
-												getOutputStream(snapshotsFile(name)),
-												snapInterval, stateUpdater, new PersistentMap());
-		openWriters.add(writer);
-		return writer;
-	}
-
-	public <I> Writer<I> getWriter(String name) throws IOException {
-		Writer<I> writer = new Writer<I>(this, getOutputStream(traceFile(name)), 
-				getOutputStream(infoFile(name)), new PersistentMap());
-		openWriters.add(writer);
-		return writer;
+	
+	void notifyClose(String name) throws IOException {
+		openWriters.remove(name);
+		refresh();
 	}
 	
-	void notifyClose(Writer<?> writer) throws IOException {
-		openWriters.remove(writer);
-		refresh();
+	void notifyOpen(String name, Writer<?> writer) throws IOException {
+		openWriters.put(name, writer);
+	}
+	
+	boolean isAlreadyWriting(String name){
+		return openWriters.containsKey(name);
 	}
 	
 	@Override
 	public void close() throws IOException {
 		super.close();
-		for ( Iterator<Writer<?>> i = openWriters.iterator(); i.hasNext(); ){
-			Writer<?> writer = i.next();
-			i.remove();
+		for ( Writer<?> writer : openWriters.values() ){
 			writer.close();
 		}
 	}
 	
 	public static WritableStore open(File file) throws IOException {
-		if ( file.isDirectory() )
+		if ( file.exists() ){
+			if ( file.isDirectory() )
+				return new DirectoryStore(file);
+			return new JarDirectoryStore(file);
+		} else {
+			if ( file.getName().endsWith(".jar") )
+				return new JarDirectoryStore(file);
 			return new DirectoryStore(file);
-		return new JarDirectoryStore(file); 
+		}
 	}
 	
-	public void copyTrace(Store store, Trace trace ) throws IOException {
+	public void copyTrace(Store store, Trace<?> trace ) throws IOException {
 		String[] files = new String[]{
 				infoFile(trace.name()), 
-				snapshotsFile(trace.name()),
+				(trace.isStateful())? snapshotsFile(trace.name()) : null,
 				traceFile(trace.name())};
-		
 		for ( String file : files ){
-			InputStream in = store.getInputStream(file);
-			OutputStream out = getOutputStream(file);
-			copy(in,out);
+			if ( file != null ){
+				InputStream in = store.getInputStream(file);
+				OutputStream out = getOutputStream(file);
+				copy(in,out);
+			}
 		}
 	}
 	
 	abstract void refresh() throws IOException;
+	
+	public Trace<?> newTrace(String name, String type, boolean force) throws AlreadyExistsException, LoadTraceException {
+		if ( traces.containsKey(name) ){
+			if ( ! force )
+				throw new AlreadyExistsException(name);
+			return traces.get(name);
+		}
+		Trace<?> trace = buildTrace(name, new PersistentMap(), type);
+		return trace;
+	}
+	
 }

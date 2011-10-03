@@ -16,39 +16,56 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl;
+package ditl.cli;
 
-import java.io.IOException;
-import java.util.List;
+import java.io.*;
 
-public class StatefulSubtraceConverter<E,S> implements Converter {
+import org.apache.commons.cli.*;
 
-	private StatefulTrace<E,S> _to;
-	private StatefulTrace<E,S> _from;
-	private long _minTime, _maxTime;
+import ditl.*;
+
+public abstract class ConvertApp extends App {
+
+	protected File orig_store_file;
+	protected File dest_store_file;
+	protected Store orig_store;
+	protected WritableStore dest_store;
+	protected boolean force;
 	
-	public StatefulSubtraceConverter( StatefulTrace<E,S> to, StatefulTrace<E,S> from, long minTime, long maxTime){
-		_to = to;
-		_from = from;
-		_minTime = minTime;
-		_maxTime = maxTime;
+	@Override
+	protected void initOptions() {
+		options.addOption(new Option("f", forceOption,false, "Force overwrite existing traces."));
+		options.addOption(null, storeOutputOption, true, "Name of store to output new traces to");
+	}
+	
+	
+	protected void parseArgs(CommandLine cli, String[] args) 
+		throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+		orig_store_file = new File(args[0]);
+		dest_store_file = new File(cli.getOptionValue(storeOutputOption,args[0]));
+		force = cli.hasOption(forceOption);
+	}
+	
+	@Override
+	protected void init() throws IOException {
+		dest_store = WritableStore.open(dest_store_file);
+		if ( orig_store_file.equals(dest_store_file) ){
+			orig_store = dest_store; 
+		} else {
+			orig_store = Store.open(orig_store_file);
+		}
+	}
+	
+	@Override
+	protected void close() throws IOException {
+		dest_store.close();
+		if ( orig_store != dest_store )
+			orig_store.close();
+	}
+	
+	@Override
+	protected String getUsageString() {
+		return "[OPTIONS] STORE";
 	}
 
-	@Override
-	public void convert() throws IOException {
-		StatefulReader<E,S> reader = _from.getReader();
-		StatefulWriter<E,S> writer = _to.getWriter(_from.snapshotInterval());
-		reader.seek(_minTime);
-		writer.setInitState(_minTime, reader.referenceState());
-		while ( reader.hasNext() && reader.nextTime() <= _maxTime){
-			List<E> events = reader.next();
-			for ( E item : events )
-				writer.append(reader.time(), item);
-		}
-		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
-		writer.setProperty(Trace.minTimeKey, _minTime);
-		writer.setProperty(Trace.maxTimeKey, _maxTime);
-		reader.close();
-		writer.close();
-	}
 }

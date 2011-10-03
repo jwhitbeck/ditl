@@ -45,7 +45,6 @@ public class Reader<I> implements Generator {
 	InputStreamOpener opener;
 	String next_line;
 	
-	Trace _trace = null;
 	Store _store;
 	
 	Reader(Store store, InputStreamOpener inputStreamOpener, long seekInterval, ItemFactory<I> factory, int priority, long offset) throws IOException{
@@ -56,14 +55,6 @@ public class Reader<I> implements Generator {
 		_priority = priority;
 		_store = store;
 		init();
-	}
-	
-	void setTrace(Trace trace){
-		_trace = trace;
-	}
-	
-	public Trace trace(){
-		return _trace;
 	}
 	
 	@Override
@@ -155,6 +146,7 @@ public class Reader<I> implements Generator {
 	}
 	
 	private void init() throws IOException{
+		_store.notifyOpen(this);
 		reader = new BufferedReader ( new InputStreamReader(opener.open()) );
 		prev_time = -Trace.INFINITY;
 		buffer = Collections.emptyList();

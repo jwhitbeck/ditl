@@ -23,32 +23,31 @@ import java.util.List;
 
 public class SubtraceConverter<I> implements Converter {
 
-	private Writer<I> _to;
-	private Reader<I> _from;
+	private Trace<I> _to;
+	private Trace<I> _from;
 	private long _minTime, _maxTime;
 	
-	public SubtraceConverter( Writer<I> to, Reader<I> from, long minTime, long maxTime){
+	public SubtraceConverter( Trace<I> to, Trace<I> from, long minTime, long maxTime){
 		_to = to;
 		_from = from;
 		_minTime = minTime;
 		_maxTime = maxTime;
 	}
-	
-	@Override
-	public void close() throws IOException {
-		_to.close();
-	}
 
 	@Override
-	public void run() throws IOException {
-		_from.seek(_minTime);
-		while ( _from.hasNext() && _from.nextTime() <= _maxTime){
-			List<I> events = _from.next();
+	public void convert() throws IOException {
+		Reader<I> reader = _from.getReader();
+		Writer<I> writer = _to.getWriter();
+		reader.seek(_minTime);
+		while ( reader.hasNext() && reader.nextTime() <= _maxTime){
+			List<I> events = reader.next();
 			for ( I item : events )
-				_to.append(_from.time(), item);
+				writer.append(reader.time(), item);
 		}
-		_to.setProperty(Trace.ticsPerSecondKey, _from.trace().ticsPerSecond());
-		_to.setProperty(Trace.minTimeKey, _minTime);
-		_to.setProperty(Trace.maxTimeKey, _maxTime);
+		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
+		writer.setProperty(Trace.minTimeKey, _minTime);
+		writer.setProperty(Trace.maxTimeKey, _maxTime);
+		reader.close();
+		writer.close();
 	}
 }

@@ -32,13 +32,17 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 	PersistentMap _info;
 	OutputStream info_out;
 	WritableStore _store;
+	String _name;
 	
-	Writer(WritableStore store, OutputStream out, OutputStream infoOut, PersistentMap info) throws IOException {
-		_store = store;
+	public Writer(Store store, String name, PersistentMap info) throws IOException {
+		if ( ! ( store instanceof WritableStore )) throw new IOException();
+		_store = (WritableStore)store;
+		if ( _store.isAlreadyWriting(name) ) throw new IOException();
 		_info = info;
-		info_out = infoOut;
-		setProperty(Trace.defaultPriorityKey, Runner.defaultPriority);
-		writer = new BufferedWriter(new OutputStreamWriter(out));
+		_name = name;
+		info_out = _store.getOutputStream(_store.infoFile(_name));
+		_store.notifyOpen(_name, this);
+		writer = new BufferedWriter(new OutputStreamWriter(_store.getOutputStream(_store.traceFile(_name))));
 		last_time = -Trace.INFINITY;
 		addListener(this);
 		min_time = Trace.INFINITY;
@@ -49,20 +53,21 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 	
 	public void close() throws IOException {
 		writer.close();
-		setIfUnset(Trace.maxTimeKey, max_time);
-		setIfUnset(Trace.minTimeKey, min_time);
+		_info.setIfUnset(Trace.maxTimeKey, max_time);
+		_info.setIfUnset(Trace.minTimeKey, min_time);
 		if ( max_interval < 0 ){ // single event trace
 			max_interval = Long.parseLong(_info.get(Trace.maxTimeKey)) - Long.parseLong(_info.get(Trace.minTimeKey));
 			min_interval = max_interval;
 		}
-		setIfUnset(Trace.maxUpdateIntervalKey, max_interval);
-		setIfUnset(Trace.minUpdateIntervalKey, min_interval);
+		_info.setIfUnset(Trace.maxUpdateIntervalKey, max_interval);
+		_info.setIfUnset(Trace.minUpdateIntervalKey, min_interval);
+		_info.setIfUnset(Trace.defaultPriorityKey, Trace.defaultPriority);
 		_info.save(info_out);
-		_store.notifyClose(this);
+		_store.notifyClose(_name);
 	}
 	
 	public void setProperty(String key, Object value){
-		_info.put(key, String.valueOf(value));
+		_info.put(key, value);
 	}
 
 	public void append(long time, I item) throws IOException {
@@ -70,11 +75,6 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 		write(time,item);
 	}
 	
-	private void setIfUnset(String key, Object value){
-		if ( ! _info.containsKey(key) )
-			_info.put(key, String.valueOf(value));
-	}
-
 	@Override
 	public void handle(long time, Collection<I> items) throws IOException {
 		updateTime(time);
@@ -82,7 +82,7 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 			write(time,item);
 	}
 	
-	void write(long time, I item) throws IOException {
+	public void write(long time, I item) throws IOException {
 		writer.write(item+"\n");
 	}
 	

@@ -18,37 +18,26 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.IOException;
-import java.util.List;
+import java.io.*;
 
-public class StatefulSubtraceConverter<E,S> implements Converter {
-
-	private StatefulTrace<E,S> _to;
-	private StatefulTrace<E,S> _from;
-	private long _minTime, _maxTime;
+public class ClassPathStore extends Store {
 	
-	public StatefulSubtraceConverter( StatefulTrace<E,S> to, StatefulTrace<E,S> from, long minTime, long maxTime){
-		_to = to;
-		_from = from;
-		_minTime = minTime;
-		_maxTime = maxTime;
+	public ClassPathStore() throws IOException {
+		super();
+		for ( File f : new Reflections(infoFile).paths() )
+			try {
+				loadTrace(f.getParentFile().getName());
+			} catch (LoadTraceException e) {
+				System.err.println(e);
+			}
 	}
-
+	
+	public InputStream getInputStream(String name) throws IOException {
+		return getClass().getClassLoader().getResourceAsStream(name);
+	}
+	
 	@Override
-	public void convert() throws IOException {
-		StatefulReader<E,S> reader = _from.getReader();
-		StatefulWriter<E,S> writer = _to.getWriter(_from.snapshotInterval());
-		reader.seek(_minTime);
-		writer.setInitState(_minTime, reader.referenceState());
-		while ( reader.hasNext() && reader.nextTime() <= _maxTime){
-			List<E> events = reader.next();
-			for ( E item : events )
-				writer.append(reader.time(), item);
-		}
-		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
-		writer.setProperty(Trace.minTimeKey, _minTime);
-		writer.setProperty(Trace.maxTimeKey, _maxTime);
-		reader.close();
-		writer.close();
+	public boolean hasFile(String name) {
+		return ( getClass().getClassLoader().getResource(name) != null );
 	}
 }

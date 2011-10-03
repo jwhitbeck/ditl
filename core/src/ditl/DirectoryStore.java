@@ -19,13 +19,14 @@
 package ditl;
 
 import java.io.*;
-import java.util.*;
 
 public class DirectoryStore extends WritableStore {
 	
 	File root;
 	
-	DirectoryStore() {};
+	DirectoryStore() throws IOException {
+		super();
+	};
 	
 	public DirectoryStore ( File dir ) throws IOException {
 		root = dir;
@@ -44,11 +45,12 @@ public class DirectoryStore extends WritableStore {
 	}
 	
 	void refresh() throws IOException {
-		for ( String path : getPaths() ){
-			File f = new File(root,path);
-			if ( f.getName().equals(infoFile) )
-				loadTrace(f.getParentFile().getName());
-		}
+		for ( File file : new Reflections(infoFile,root).paths() )
+			try {
+				loadTrace(file.getParentFile().getName());
+			} catch (LoadTraceException e) {
+				System.err.println(e);
+			}
 	}
 	
 	@Override
@@ -64,10 +66,10 @@ public class DirectoryStore extends WritableStore {
 	}
 
 	@Override
-	public void deleteTrace(Trace trace) throws IOException {
-		File traceDir = new File(root, trace.name());
+	public void deleteTrace(String name) throws IOException {
+		File traceDir = new File(root, name);
 		rec_delete(traceDir);
-		traces.remove(trace.name());
+		traces.remove(name);
 	}
 
 	void rec_delete ( File file ) throws IOException {
@@ -86,25 +88,7 @@ public class DirectoryStore extends WritableStore {
 		parent.mkdirs();
 		return new FileOutputStream(new File(root,name));
 	}
-
-	String[] getPaths() {
-		List<String> paths = new LinkedList<String>();
-		recGetPaths(root,"",paths);
-		return paths.toArray(new String[]{});
-	}
 	
-	private void recGetPaths(File dir, String prefix, List<String> paths){
-		for ( File file : dir.listFiles() ){
-			if ( file.isDirectory() ){
-				String dir_path = prefix+file.getName()+File.separator;
-				paths.add(dir_path);
-				recGetPaths(file, dir_path, paths);
-			} else {
-				paths.add(prefix+file.getName());
-			}
-		}
-	}
-
 	@Override
 	public boolean hasFile(String name) {
 		return new File(root,name).exists();

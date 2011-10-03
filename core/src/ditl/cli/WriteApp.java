@@ -16,39 +16,39 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl;
+package ditl.cli;
 
-import java.io.IOException;
-import java.util.List;
+import java.io.*;
 
-public class StatefulSubtraceConverter<E,S> implements Converter {
+import org.apache.commons.cli.*;
 
-	private StatefulTrace<E,S> _to;
-	private StatefulTrace<E,S> _from;
-	private long _minTime, _maxTime;
+import ditl.*;
+
+public abstract class WriteApp extends App {
+
+	protected File store_file;
+	protected WritableStore _store;
+	protected boolean force;
 	
-	public StatefulSubtraceConverter( StatefulTrace<E,S> to, StatefulTrace<E,S> from, long minTime, long maxTime){
-		_to = to;
-		_from = from;
-		_minTime = minTime;
-		_maxTime = maxTime;
+	@Override
+	protected void initOptions() {
+		options.addOption(new Option("f", forceOption,false, "Force overwrite existing traces."));
+	}
+	
+	protected void parseArgs(CommandLine cli, String[] args) 
+		throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+		store_file = new File(args[0]);
+		force = cli.hasOption(forceOption);
+	}
+	
+	@Override
+	protected void init() throws IOException {
+		_store = WritableStore.open(store_file);
+	}
+	
+	@Override
+	protected void close() throws IOException {
+		_store.close();
 	}
 
-	@Override
-	public void convert() throws IOException {
-		StatefulReader<E,S> reader = _from.getReader();
-		StatefulWriter<E,S> writer = _to.getWriter(_from.snapshotInterval());
-		reader.seek(_minTime);
-		writer.setInitState(_minTime, reader.referenceState());
-		while ( reader.hasNext() && reader.nextTime() <= _maxTime){
-			List<E> events = reader.next();
-			for ( E item : events )
-				writer.append(reader.time(), item);
-		}
-		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
-		writer.setProperty(Trace.minTimeKey, _minTime);
-		writer.setProperty(Trace.maxTimeKey, _maxTime);
-		reader.close();
-		writer.close();
-	}
 }

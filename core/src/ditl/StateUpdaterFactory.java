@@ -18,17 +18,6 @@
  *******************************************************************************/
 package ditl;
 
-public class WrappedTrace extends Trace {
-
-	protected Trace wrapped_trace;
-	
-	public WrappedTrace(Trace trace) {
-		wrapped_trace = trace;
-	}
-
-	@Override
-	public String getValue(String key) {
-		return wrapped_trace.getValue(key);
-	}
-
+public interface StateUpdaterFactory<E,S> {
+	public StateUpdater<E,S> getNew();
 }

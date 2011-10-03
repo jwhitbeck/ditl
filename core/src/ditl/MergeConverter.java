@@ -23,42 +23,40 @@ import java.util.*;
 
 public class MergeConverter<I> implements Converter {
 
-	private Writer<I> _to;
-	private Collection<Reader<I>> from_collection;
+	private Trace<I> _to;
+	private Collection<Trace<I>> from_collection;
 	
-	public MergeConverter( Writer<I> to, Collection<Reader<I>> fromCollection ){
+	public MergeConverter( Trace<I> to, Collection<Trace<I>> fromCollection ){
 		_to = to;
 		from_collection = fromCollection;
 	}
-	
-	@Override
-	public void close() throws IOException {
-		_to.close();
-	}
 
 	@Override
-	public void run() throws IOException {
+	public void convert() throws IOException {
 		long ticsPerSecond = 1L;
 		long maxTime = -Trace.INFINITY;
 		long minTime =  Trace.INFINITY;
-		for ( Reader<I> from : from_collection ){
-			Trace trace = from.trace();
-			ticsPerSecond = trace.ticsPerSecond();
-			if ( trace.minTime() < minTime ) minTime = trace.minTime();
-			if ( trace.maxTime() > maxTime ) maxTime = trace.maxTime();
+		for ( Trace<I> from : from_collection ){
+			ticsPerSecond = from.ticsPerSecond();
+			if ( from.minTime() < minTime ) minTime = from.minTime();
+			if ( from.maxTime() > maxTime ) maxTime = from.maxTime();
 		}
-		for ( Reader<I> from : from_collection ){
-			from.setBus(_to);
-			from.seek(minTime);
-			while ( from.hasNext() ){
-				List<I> events = from.next();
+		Writer<I> writer = _to.getWriter();
+		for ( Trace<I> from : from_collection ){
+			Reader<I> reader = from.getReader();
+			reader.setBus(writer);
+			reader.seek(minTime);
+			while ( reader.hasNext() ){
+				List<I> events = reader.next();
 				for ( I item : events )
-					_to.queue(from.time(), item);
+					writer.queue(reader.time(), item);
 			}
+			reader.close();
 		}
-		_to.flush();
-		_to.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
-		_to.setProperty(Trace.minTimeKey, minTime);
-		_to.setProperty(Trace.maxTimeKey, maxTime);
+		writer.flush();
+		writer.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
+		writer.setProperty(Trace.minTimeKey, minTime);
+		writer.setProperty(Trace.maxTimeKey, maxTime);
+		writer.close();
 	}
 }

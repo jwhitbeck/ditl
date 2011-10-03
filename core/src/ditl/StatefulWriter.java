@@ -28,13 +28,13 @@ public class StatefulWriter<E, S> extends Writer<E> {
 	BufferedWriter snap_writer;
 	StateUpdater<E,S> _updater;
 	
-	StatefulWriter(WritableStore store, OutputStream out, OutputStream infoOut, OutputStream stateOut, long snapInterval, 
+	public StatefulWriter(Store store, String name, long snapInterval, 
 			StateUpdater<E,S> updater, PersistentMap info) throws IOException {
-		super(store, out,infoOut,info);
+		super(store, name, info);
 		snap_interval = snapInterval;
 		last_snap = -Trace.INFINITY;
 		_updater = updater;
-		snap_writer = new BufferedWriter( new OutputStreamWriter(stateOut));
+		snap_writer = new BufferedWriter( new OutputStreamWriter(_store.getOutputStream(_store.snapshotsFile(_name))));
 		setProperty(Trace.snapshotIntervalKey, snap_interval);
 	}
 	
@@ -43,7 +43,7 @@ public class StatefulWriter<E, S> extends Writer<E> {
 	}
 	
 	@Override
-	void write(long time, E event) throws IOException {
+	public void write(long time, E event) throws IOException {
 		super.write(time, event);
 		_updater.handleEvent(time, event);
 	}

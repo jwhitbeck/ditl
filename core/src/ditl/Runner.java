@@ -23,8 +23,6 @@ import java.io.IOException;
 
 public class Runner {
 	
-	final public static int defaultPriority = 100;
-	
 	private long min_time = Trace.INFINITY;
 	private long max_time = -Trace.INFINITY;
 	private long incr_time;

@@ -23,10 +23,11 @@ import java.io.IOException;
 import org.apache.commons.cli.*;
 
 import ditl.*;
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
 
 public abstract class App {
 	
-	protected final static String fmtOption = "format";
 	protected final static String offsetOption = "offset";
 	protected final static String origTimeUnitOption = "orig-time-unit";
 	protected final static String destTimeUnitOption = "dest-time-unit";
@@ -37,37 +38,37 @@ public abstract class App {
 	protected final static String traceOption = "trace";
 	protected final static String outputOption = "output";
 	protected final static String storeOutputOption = "out-store";
+	protected final static String forceOption = "force";
 	
 	protected Options options = new Options();
 	protected String usageString;
 	protected boolean showHelp = false;
+	protected String _name;
 	
-	protected abstract void initOptions();
-	protected abstract void setUsageString();
+	protected void initOptions() {}
+	protected abstract String getUsageString();
 	protected abstract void parseArgs(CommandLine cli, String[] args) 
 		throws ParseException, ArrayIndexOutOfBoundsException, HelpException;
 
 	@SuppressWarnings("serial")
 	public class HelpException extends Exception {}
-	@SuppressWarnings("serial")
-	public class MissingTraceException extends Exception {
-		private String trace_name; 
-		public MissingTraceException(String traceName){ trace_name = traceName;}
-		@Override
-		public String toString(){
-			return "Error! Could not find trace '"+trace_name+"'";
-		}
-	}
-
-	public App(String[] args) {
+	
+	protected abstract void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException;
+	
+	protected void init() throws IOException {} 
+	protected void close() throws IOException {};
+	
+	public boolean ready(String name, String[] args){
+		_name = name;
 		options.addOption(new Option("h","help",false,"Print help"));
 		initOptions();
-		setUsageString();
+		usageString = "Usage: "+_name+" "+getUsageString();
 		try {
 			CommandLine cli = new PosixParser().parse(options, args);
 			if ( cli.hasOption("help") )
 				throw new HelpException();
 			parseArgs(cli, cli.getArgs());
+			return true;
 		} catch (ParseException e) {
 			System.err.println(e);
 			printHelp();
@@ -79,17 +80,23 @@ public abstract class App {
 		} catch ( HelpException he ){
 			printHelp();
 		}
+		return false;
 	}
 	
-	protected abstract void run() throws IOException, MissingTraceException;
-	
 	public void exec() throws IOException {
+		init();
 		try {
 			run();
-		} catch ( MissingTraceException mte ){
+		} catch ( Store.NoSuchTraceException mte ){
 			System.err.println(mte);
 			System.exit(1);
+		} catch (AlreadyExistsException e) {
+			System.err.println(e);
+			System.err.println("Use --"+forceOption+" to overwrite existing traces");
+		} catch (LoadTraceException e) {
+			System.err.println(e);
 		}
+		close();
 	}
 	
 	protected void printHelp(){
@@ -115,11 +122,5 @@ public abstract class App {
 			return dtps.doubleValue()/otps.doubleValue(); 
 		}
 		return null;
-	}
-	
-	protected Trace getTrace(Store store, String traceName) throws MissingTraceException {
-		if ( ! store.hasTrace(traceName) )
-			throw new MissingTraceException (traceName);
-		return store.getTrace(traceName);
 	}
 }

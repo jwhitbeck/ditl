@@ -16,39 +16,49 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl;
+package ditl.cli;
 
 import java.io.IOException;
-import java.util.List;
 
-public class StatefulSubtraceConverter<E,S> implements Converter {
+import org.apache.commons.cli.*;
 
-	private StatefulTrace<E,S> _to;
-	private StatefulTrace<E,S> _from;
-	private long _minTime, _maxTime;
+import ditl.*;
+import ditl.Store.NoSuchTraceException;
+
+public class PrintState extends ExportApp {
 	
-	public StatefulSubtraceConverter( StatefulTrace<E,S> to, StatefulTrace<E,S> from, long minTime, long maxTime){
-		_to = to;
-		_from = from;
-		_minTime = minTime;
-		_maxTime = maxTime;
+	private long time;
+	private String trace_name;
+	
+	public final static String PKG_NAME = null;
+	public final static String CMD_NAME = "ps";
+	public final static String CMD_ALIAS = null;
+	
+	@Override
+	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
+		super.parseArgs(cli, args);
+		trace_name = args[1];
+		time = Long.parseLong(args[2]);
+	}
+
+	
+	@Override
+	protected void run() throws IOException, NoSuchTraceException {
+		Trace<?> trace = _store.getTrace(trace_name);
+		if ( ! trace.isStateful() )
+			System.out.println("Trace '"+trace_name+"' is not a stateful trace.");
+		StatefulTrace<?,?> strace = (StatefulTrace<?,?>)trace;
+		time *= strace.ticsPerSecond();
+		StatefulReader<?,?> reader = strace.getReader();
+		reader.seek(time);
+		for ( Object state : reader.referenceState() )
+			System.out.println(state);
+		reader.close();
 	}
 
 	@Override
-	public void convert() throws IOException {
-		StatefulReader<E,S> reader = _from.getReader();
-		StatefulWriter<E,S> writer = _to.getWriter(_from.snapshotInterval());
-		reader.seek(_minTime);
-		writer.setInitState(_minTime, reader.referenceState());
-		while ( reader.hasNext() && reader.nextTime() <= _maxTime){
-			List<E> events = reader.next();
-			for ( E item : events )
-				writer.append(reader.time(), item);
-		}
-		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
-		writer.setProperty(Trace.minTimeKey, _minTime);
-		writer.setProperty(Trace.maxTimeKey, _maxTime);
-		reader.close();
-		writer.close();
+	protected String getUsageString(){
+		return "[OPTIONS] STORE TRACE_NAME TIME";
 	}
+	
 }

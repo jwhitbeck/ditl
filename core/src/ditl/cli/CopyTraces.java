@@ -31,9 +31,9 @@ public class CopyTraces extends App {
 	protected File outStoreFile;
 	protected String[] traceNames;
 	
-	public CopyTraces(String[] args) {
-		super(args);
-	}
+	public final static String PKG_NAME = null;
+	public final static String CMD_NAME = "cp";
+	public final static String CMD_ALIAS = null;
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
@@ -45,16 +45,16 @@ public class CopyTraces extends App {
 	}
 
 	@Override
-	protected void setUsageString() {
-		usageString = "[OPTIONS] STORE OUT_STORE TRACE1 [TRACE2...]";
+	protected String getUsageString() {
+		return "[OPTIONS] STORE OUT_STORE TRACE1 [TRACE2...]";
 	}
 	
 	@Override
-	protected void run() throws IOException, MissingTraceException {
+	protected void run() throws IOException, Store.NoSuchTraceException {
 		Store inStore = Store.open(inStoreFile);
 		WritableStore outStore = WritableStore.open(outStoreFile);
 		for ( String name : traceNames ){
-			Trace trace = getTrace(inStore, name);
+			Trace<?> trace = inStore.getTrace(name);
 			outStore.copyTrace(inStore, trace);
 		}
 		inStore.close();

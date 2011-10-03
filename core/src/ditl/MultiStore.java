@@ -18,37 +18,41 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.IOException;
-import java.util.List;
+import java.io.*;
 
-public class StatefulSubtraceConverter<E,S> implements Converter {
+public class MultiStore extends Store {
 
-	private StatefulTrace<E,S> _to;
-	private StatefulTrace<E,S> _from;
-	private long _minTime, _maxTime;
+	final private Store[] stores;
 	
-	public StatefulSubtraceConverter( StatefulTrace<E,S> to, StatefulTrace<E,S> from, long minTime, long maxTime){
-		_to = to;
-		_from = from;
-		_minTime = minTime;
-		_maxTime = maxTime;
-	}
-
-	@Override
-	public void convert() throws IOException {
-		StatefulReader<E,S> reader = _from.getReader();
-		StatefulWriter<E,S> writer = _to.getWriter(_from.snapshotInterval());
-		reader.seek(_minTime);
-		writer.setInitState(_minTime, reader.referenceState());
-		while ( reader.hasNext() && reader.nextTime() <= _maxTime){
-			List<E> events = reader.next();
-			for ( E item : events )
-				writer.append(reader.time(), item);
+	public MultiStore(File...files) throws IOException {
+		super();
+		stores = new Store[files.length];
+		for ( int i=0; i<files.length; ++i ){
+			stores[i] = Store.open(files[i]);
+			for ( Trace<?> trace : stores[i].listTraces() ){
+				String name = trace.name();
+				if ( hasTrace(name) )
+					System.err.println("Warning: trace '"+name+"' exists in multiple stores. Only keeping first occurence.");
+				else
+					traces.put(name, trace);
+			}
 		}
-		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
-		writer.setProperty(Trace.minTimeKey, _minTime);
-		writer.setProperty(Trace.maxTimeKey, _maxTime);
-		reader.close();
-		writer.close();
+	}
+	
+	@Override
+	public InputStream getInputStream(String name) throws IOException {
+		for ( Store store : stores ){
+			if ( store.hasFile(name) )
+				return store.getInputStream(name);
+		}
+		throw new IOException();
+	}
+	
+	@Override
+	public boolean hasFile(String name) {
+		for ( Store store : stores )
+			if ( store.hasFile(name) )
+				return true;
+		return false;
 	}
 }

@@ -18,20 +18,41 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.*;
-import java.lang.reflect.Constructor;
+import java.io.IOException;
+import java.lang.reflect.*;
 import java.util.*;
-import java.util.jar.*;
+
+import ditl.Reflections;
 
 
 public class CLI {
 	
-	public final static String default_package = "DEFAULT_PACKAGE";
-	public final static String apps_ext = "apps";
+	private final static String default_package = "DEFAULT_PACKAGE";
+	private final static String PKG_NAME = "PKG_NAME";
+	private final static String CMD_NAME = "CMD_NAME";
+	private final static String CMD_ALIAS = "CMD_ALIAS";
 	
-	private Map<String, String> alias_map = new HashMap<String, String>();
-	private Map<String, Set<String> > pkg_aliases = new HashMap<String, Set<String>>();
-	private Map<String,List<CommandMap>> pkg_apps = new HashMap<String,List<CommandMap>>(); 
+	private Map<String, CommandMap> cmd_maps = new HashMap<String, CommandMap>();
+	
+	private class CommandMap {
+		Map<String, String> alias_map = new HashMap<String,String>();
+		Map<String, String> rev_alias_map = new HashMap<String,String>();
+		Map<String, Class<?>> cmd_map = new HashMap<String, Class<?>>();
+		
+		Class<?> getClass(String cmd){
+			if ( alias_map.containsKey(cmd) )
+				return cmd_map.get(alias_map.get(cmd));
+			return cmd_map.get(cmd);
+		}
+		
+		void add(String cmd_name, String cmd_alias, Class<?> klass){
+			if ( cmd_alias != null ){
+				alias_map.put(cmd_alias, cmd_name);
+				rev_alias_map.put(cmd_name, cmd_alias);
+			}
+			cmd_map.put(cmd_name, klass);
+		}
+	}
 	
 	private CLI() throws IOException {
 		findPackages();
@@ -41,24 +62,26 @@ public class CLI {
 		if ( args.length > 0){
 			String pkg = args[0];
 			String[] pkg_args = Arrays.copyOfRange(args,1,args.length);
-			String app, app_path;
+			String app;
+			Class<?> klass;
 			
 			// check if pkg isn't really an app in the default package
-			app_path = getAppPath(default_package, pkg);
-			if ( app_path != null ){
-				startApp(app_path, pkg_args);
+			klass = cmd_maps.get(default_package).getClass(pkg);
+			if ( klass != null ){
+				startApp(pkg, klass, pkg_args);
 				return;
 			}
 			
 			// otherwise proceed normally
-			pkg = alias_map.get(pkg);
 			if ( pkg_args.length > 0 ){
 				app = pkg_args[0];
-				app_path = getAppPath(pkg, app);
-				if ( app_path != null ){
-					String[] app_args = Arrays.copyOfRange(pkg_args,1,pkg_args.length);
-					startApp(app_path, app_args);
-					return;
+				if ( cmd_maps.containsKey(pkg) ){
+					klass = cmd_maps.get(pkg).getClass(app);
+					if ( klass != null ){
+						String[] app_args = Arrays.copyOfRange(pkg_args,1,pkg_args.length);
+						startApp(app, klass, app_args);
+						return;
+					}
 				}
 			}
 			
@@ -68,18 +91,6 @@ public class CLI {
 		
 	}
 	
-	private String getAppPath(String pkg, String app){
-		List<CommandMap> maps = pkg_apps.get(pkg);
-		if ( maps != null ){
-			for ( CommandMap map : maps ){
-				String path = map.target(app);
-				if ( path != null )
-					return path;
-			}
-		}
-		return null;
-	}
-	
 	private void printHelp(){
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("Usage: [PACKAGE] CMD [CMD_OPTIONS]\n\n");
@@ -87,11 +98,9 @@ public class CLI {
 		
 		buffer.append("default package:\n");
 		appendPackageHelp(buffer, default_package);
-		for ( String pkg : pkg_apps.keySet() ){
+		for ( String pkg : cmd_maps.keySet() ){
 			if ( ! pkg.equals(default_package) ){
-				buffer.append("Package: ");
-				appendAliased(buffer, pkg, pkg_aliases.get(pkg) );
-				buffer.append("\n");
+				buffer.append("Package: "+pkg+"\n");
 				appendPackageHelp(buffer, pkg);
 			}
 		}
@@ -101,38 +110,26 @@ public class CLI {
 	}
 	
 	private void appendPackageHelp(StringBuffer buffer, String pkg_name){
-		for ( CommandMap cmd_map : pkg_apps.get(pkg_name) ){
-			for ( String app : cmd_map.commands() ){
-				buffer.append("    ");
-				appendAliased(buffer, app, cmd_map.aliases(app));
-				buffer.append("\n");
-			}
+		CommandMap cmd_map = cmd_maps.get(pkg_name);
+		for ( String cmd_name : cmd_map.cmd_map.keySet() ){
+			buffer.append("    ");
+			buffer.append(cmd_name);
+			String alias = cmd_map.rev_alias_map.get(cmd_name);
+			if ( alias != null )
+				buffer.append(" ("+alias+")");
+			buffer.append("\n");
 		}
 		buffer.append("\n");
 	}
 	
-	private String appendAliased(StringBuffer buffer, String app, Collection<String> aliases){
-		buffer.append(app);
-		if ( ! aliases.isEmpty() ){
-			buffer.append(" (");
-			for ( Iterator<String> i=aliases.iterator(); i.hasNext(); ){
-				String alias = i.next();
-				buffer.append(alias);
-				if ( i.hasNext() )
-					buffer.append(", ");
-			}
-			buffer.append(")");
-		}
-		return buffer.toString();
-	}
 	
-	private void startApp(String path, String[] args){
+	private void startApp(String name, Class<?> klass, String[] args){
 		try {
-			Class<?> klass = Class.forName(path, true, getClass().getClassLoader());
 			Class<? extends App> appClass = klass.asSubclass(App.class);
-			Constructor<? extends App> ctor = appClass.getConstructor(new Class[]{String[].class});
-			App app = ctor.newInstance((Object)args);
-			app.exec();
+			Constructor<? extends App> ctor = appClass.getConstructor();
+			App app = ctor.newInstance();
+			if ( app.ready(name, args) )
+				app.exec();
 		} catch (Throwable e) {
 			e.printStackTrace();
 			System.err.println(e);
@@ -141,53 +138,33 @@ public class CLI {
 	}
 	
 	private void findPackages() throws IOException{
-		for ( String elem : System.getProperty("java.class.path").split(":") ){
-			File path = new File(elem); 
-			if ( path.isFile() )
-				findPackagesFromJar(path);
-			else if ( path.isDirectory() )
-				findPackagesFromDir(path);
-		}
-	}
-	
-	private void findPackagesFromJar(File file) throws IOException {
-		JarFile jarFile = new JarFile(file);
-		Enumeration<JarEntry> entries = jarFile.entries();
-		while ( entries.hasMoreElements() ){
-			JarEntry entry = entries.nextElement();
-			String path = entry.getName();
-			if ( path.endsWith(apps_ext) ){
-				CommandMap map = new CommandMap(jarFile.getInputStream(entry));
-				addCommandMap(map);
+		Set<Class<?>> appKlasses = Reflections.getSubClasses(App.class,
+				new Reflections("\\w+\\.class").listClasses("ditl"));
+		for ( Class<?> klass : appKlasses ){
+			String pkg_name = readStaticField(klass, PKG_NAME);
+			String cmd_name = readStaticField(klass, CMD_NAME);
+			String cmd_alias = readStaticField(klass, CMD_ALIAS);
+			if ( cmd_name != null ){
+				CommandMap cmd_map = get_cmd_map(pkg_name);
+				cmd_map.add(cmd_name, cmd_alias, klass);
 			}
 		}
 	}
 	
-	private void findPackagesFromDir(File dir) throws IOException {
-		for ( File file : dir.listFiles() ){
-			if ( file.isDirectory() ) {
-				findPackagesFromDir(file);
-			} else if ( file.isFile() && file.getPath().endsWith(apps_ext) ){
-				CommandMap map = new CommandMap(new FileInputStream(file));
-				addCommandMap(map);
-			}
-		}
+	private String readStaticField(Class<?> klass, String fieldName ){
+		try {
+			Field field = klass.getField(fieldName);
+			String s = (String)field.get(null);
+			return s;
+		} catch (Exception e) {}
+		return null;
 	}
 	
-	private void addCommandMap(CommandMap cmd_map){
-		String pkg_name = cmd_map.pkgName();
-		if ( pkg_name == null )
-			pkg_name = default_package;
-		Set<String> aliases = cmd_map.pkgAliases();
-		if ( ! pkg_apps.containsKey(pkg_name) )
-			pkg_apps.put(pkg_name, new LinkedList<CommandMap>());
-		pkg_apps.get(pkg_name).add(cmd_map);
-		if ( ! pkg_aliases.containsKey(pkg_name) )
-			pkg_aliases.put(pkg_name, new LinkedHashSet<String>());
-		pkg_aliases.get(pkg_name).addAll(aliases);
-		for ( String alias : aliases )
-			alias_map.put(alias, pkg_name);
-		alias_map.put(pkg_name, pkg_name);
+	private CommandMap get_cmd_map(String pkg_name){
+		String key = ( pkg_name == null )? default_package : pkg_name;
+		if ( ! cmd_maps.containsKey(key) )
+			cmd_maps.put(key, new CommandMap());
+		return cmd_maps.get(key);
 	}
 	
 	public static void main(String args[]) throws IOException{

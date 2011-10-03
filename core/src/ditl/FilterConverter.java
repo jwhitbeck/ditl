@@ -23,33 +23,31 @@ import java.util.List;
 
 public class FilterConverter<I> implements Converter {
 
-	private Writer<I> _to;
-	private Reader<I> _from;
+	private Trace<I> _to;
+	private Trace<I> _from;
 	private Matcher<I> _matcher;
 	
-	public FilterConverter( Writer<I> to, Reader<I> from, Matcher<I> matcher ){
+	public FilterConverter( Trace<I> to, Trace<I> from, Matcher<I> matcher ){
 		_to = to;
 		_from = from;
 		_matcher = matcher;
 	}
-	
-	@Override
-	public void close() throws IOException {
-		_to.close();
-	}
 
 	@Override
-	public void run() throws IOException {
-		Trace trace = _from.trace();
-		_from.seek(trace.minTime());
-		while ( _from.hasNext() ){
-			List<I> events = _from.next();
+	public void convert() throws IOException {
+		Reader<I> reader = _from.getReader();
+		Writer<I> writer = _to.getWriter();
+		reader.seek(_from.minTime());
+		while ( reader.hasNext() ){
+			List<I> events = reader.next();
 			for ( I item : events )
 				if ( _matcher.matches(item) )
-					_to.append(_from.time(), item);
+					writer.append(reader.time(), item);
 		}
-		_to.setProperty(Trace.ticsPerSecondKey, trace.ticsPerSecond());
-		_to.setProperty(Trace.minTimeKey, trace.minTime());
-		_to.setProperty(Trace.maxTimeKey, trace.maxTime());
+		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
+		writer.setProperty(Trace.minTimeKey, _from.minTime());
+		writer.setProperty(Trace.maxTimeKey, _from.maxTime());
+		writer.close();
+		reader.close();
 	}
 }

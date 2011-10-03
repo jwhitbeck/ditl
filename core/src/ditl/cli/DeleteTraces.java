@@ -27,35 +27,40 @@ import ditl.*;
 
 public class DeleteTraces extends App {
 
-	protected File storeFile;
 	protected String[] traceNames;
+	protected File store_file;
+	protected WritableStore _store;
 	
-	public DeleteTraces(String[] args) {
-		super(args);
-	}
-	
+	public final static String PKG_NAME = null;
+	public final static String CMD_NAME = "rm";
+	public final static String CMD_ALIAS = null;
+		
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
-		storeFile = new File(args[0]);
+		store_file = new File(args[0]);
 		traceNames = Arrays.copyOfRange(args, 1, args.length);
 	}
 
 	@Override
-	protected void setUsageString() {
-		usageString = "[OPTIONS] STORE TRACE1 [TRACE2...]";
+	protected String getUsageString() {
+		return "[OPTIONS] STORE TRACE1 [TRACE2...]";
 	}
 	
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		WritableStore store = WritableStore.open(storeFile);
+	protected void run() throws IOException, Store.NoSuchTraceException {
 		for ( String name : traceNames ){
-			Trace trace = getTrace(store,name);
-			store.deleteTrace(trace);
+			if ( _store.hasTrace(name) )
+				_store.deleteTrace(name);
 		}
-		store.close();
 	}
-
-	@Override
-	protected void initOptions() {}
 	
+	@Override
+	protected void init() throws IOException {
+		_store = WritableStore.open(store_file);
+	}
+	
+	@Override
+	protected void close() throws IOException {
+		_store.close();
+	}
 }

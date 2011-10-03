@@ -47,4 +47,13 @@ public class PersistentMap extends LinkedHashMap<String,String> {
 		}
 		bw.close();
 	}
+	
+	public void put(String key, Object value){
+		super.put(key, value.toString());
+	}
+	
+	public void setIfUnset(String key, Object value){
+		if ( ! containsKey(key) )
+			put(key, String.valueOf(value));
+	}
 }

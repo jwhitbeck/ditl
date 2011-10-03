@@ -21,6 +21,5 @@ package ditl;
 import java.io.IOException;
 
 public interface Converter {
-	public void run() throws IOException;
-	public void close() throws IOException;
+	public void convert() throws IOException;
 }

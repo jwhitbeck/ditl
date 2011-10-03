@@ -1,3 +1,0 @@
-ls,l : ditl.cli.ListTraces
-rm   : ditl.cli.DeleteTraces
-cp   : ditl.cli.CopyTraces

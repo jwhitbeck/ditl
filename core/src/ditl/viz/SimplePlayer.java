@@ -95,38 +95,17 @@ public abstract class SimplePlayer extends JFrame {
 		setVisible(true);
 	}
 	
-	public void load(String[] traceNames){
-		close();
-		_store = new JarStore();
-		if ( traceNames.length > 0 ){
-			for ( String name : traceNames ){
-				try {
-					_store.loadTrace(name);
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(this, "Failed to load file '"+name+"'", "Warning", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-			}
-			loadReaders();
-		}
-		enableControls(true);
-	}
-	
 	public void load(File[] files){
 		close();
-		_store = new JarStore();
 		if ( files.length > 0){
-			for ( File file : files ){
-				try {
-					((JarStore)_store).add(file);
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(this, "Failed to load file '"+file+"'", "Warning", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
+			try {
+				_store = Store.open(files);
+				loadReaders();
+				enableControls(true);
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(this, "Failed to load files: '"+files+"'", "Warning", JOptionPane.ERROR_MESSAGE);
 			}
-			loadReaders();
 		}
-		enableControls(true);
 	}
 	
 	protected abstract void loadReaders();

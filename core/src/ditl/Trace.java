@@ -18,7 +18,10 @@
  *******************************************************************************/
 package ditl;
 
-public abstract class Trace {
+import java.io.IOException;
+import java.util.Set;
+
+public abstract class Trace<E> {
 	
 	final public static long INFINITY = Long.MAX_VALUE / 2; // divided by 2 to avoid edge effects on signs of longs
 	
@@ -33,10 +36,31 @@ public abstract class Trace {
 	final public static String defaultPriorityKey = "default priority";
 	final public static String snapshotIntervalKey = "snapshot interval";
 	
-	public abstract String getValue(String key);
+	final public static int defaultPriority = 100;
+	
+	protected String _name;
+	protected Store _store;
+	protected PersistentMap _info;
+	
+	protected ItemFactory<E> event_factory;
+	
+	public interface Filterable<E> {
+		public Matcher<E> eventMatcher(Set<Integer> group); 
+	}
+	
+	public Trace(Store store, String name, PersistentMap info, ItemFactory<E> itemFactory) throws IOException {
+		_store = store;
+		_name = name;
+		_info = info;
+		event_factory = itemFactory;
+	}
+	
+	public String getValue(String key){
+		return _info.get(key);
+	}
 	
 	public String name(){
-		return getValue(nameKey);
+		return _name;
 	}
 	
 	public String description(){
@@ -75,13 +99,35 @@ public abstract class Trace {
 		return Long.parseLong(getValue(ticsPerSecondKey));
 	}
 	
-	public boolean isStateful(){
-		return (getValue(snapshotIntervalKey) != null);
+	public Reader<E> getReader(int priority, long offset) throws IOException {
+		return new Reader<E>(_store, _store.getStreamOpener(_store.traceFile(_name)), 
+				maxUpdateInterval(), event_factory, priority, offset);
+	}
+
+	public Reader<E> getReader(int priority) throws IOException{
+		return getReader(priority,0L);
+	}
+
+	public Reader<E> getReader() throws IOException{
+		return getReader(defaultPriority(), 0L);
+	}
+
+	public Writer<E> getWriter() throws IOException {
+		return new Writer<E>(_store, _name, _info);
 	}
 	
+	public ItemFactory<E> factory(){
+		return event_factory;
+	}
+	
+	public boolean isStateful(){
+		return false;
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object o){
 		Trace t = (Trace)o; 
-		return t.name().equals(name());
+		return t._name.equals(_name) && _store == t._store;
 	}
 }

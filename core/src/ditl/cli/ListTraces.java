@@ -18,55 +18,43 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
+import ditl.Trace;
 
-public class ListTraces extends App {
+public class ListTraces extends ExportApp {
 
 	private final static String detailsOption = "all";
+	private boolean show_descr;
 	
-	protected List<File> storeFiles;
-	protected boolean show_descr;
-	
-	public ListTraces(String[] args) {
-		super(args);
-	}
+	public final static String PKG_NAME = null;
+	public final static String CMD_NAME = "ls";
+	public final static String CMD_ALIAS = null;
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
-		storeFiles = new LinkedList<File>();
-		for ( String path : args )
-			storeFiles.add(new File(path) );
+		super.parseArgs(cli, args);
 		show_descr = cli.hasOption(detailsOption);
 	}
 
-	@Override
-	protected void setUsageString() {
-		usageString = "[OPTIONS] STORE [STORE..]";
-	}
 	
 	@Override
 	protected void run() throws IOException {
-		for ( File storeFile : storeFiles ){
-			Store store = Store.open(storeFile);
-			for ( Trace trace : store.listTraces() ){
-				System.out.println(trace.name());
-				if ( show_descr ){
-					System.out.println("   type:        "+trace.type());
-					System.out.println("   description: "+trace.description());
-					System.out.println();
-				}
+		for ( Trace<?> trace : _store.listTraces() ){
+			System.out.println(trace.name());
+			if ( show_descr ){
+				System.out.println("   type:        "+trace.type());
+				System.out.println("   description: "+trace.description());
+				System.out.println();
 			}
-			store.close();
 		}
 	}
 
 	@Override
 	protected void initOptions() {
+		super.initOptions();
 		options.addOption("a",detailsOption, false, "Show trace descriptions");
 	}
 	

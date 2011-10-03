@@ -23,12 +23,12 @@ import java.util.*;
 
 public class StatefulFilterConverter<E,S> implements Converter {
 
-	private StatefulWriter<E,S> _to;
-	private StatefulReader<E,S> _from;
+	private StatefulTrace<E,S> _to;
+	private StatefulTrace<E,S> _from;
 	private Matcher<E> event_matcher;
 	private Matcher<S> state_matcher;
 	
-	public StatefulFilterConverter( StatefulWriter<E,S> to, StatefulReader<E,S> from, Matcher<E> eventMatcher, Matcher<S> stateMatcher ){
+	public StatefulFilterConverter( StatefulTrace<E,S> to, StatefulTrace<E,S> from, Matcher<E> eventMatcher, Matcher<S> stateMatcher ){
 		_to = to;
 		_from = from;
 		event_matcher = eventMatcher;
@@ -36,29 +36,27 @@ public class StatefulFilterConverter<E,S> implements Converter {
 	}
 	
 	@Override
-	public void close() throws IOException {
-		_to.close();
-	}
-
-	@Override
-	public void run() throws IOException {
-		Trace trace = _from.trace();
-		_from.seek(trace.minTime());
+	public void convert() throws IOException {
+		StatefulReader<E,S> reader = _from.getReader();
+		StatefulWriter<E,S> writer = _to.getWriter(_from.snapshotInterval());
 		
+		reader.seek(_from.minTime());
 		Set<S> initState = new HashSet<S>();
-		for ( S state : _from.referenceState() )
+		for ( S state : reader.referenceState() )
 			if ( state_matcher.matches(state) )
 				initState.add(state);
-		_to.setInitState(trace.minTime(), initState);
+		writer.setInitState(_from.minTime(), initState);
 		
-		while ( _from.hasNext() ){
-			List<E> events = _from.next();
+		while ( reader.hasNext() ){
+			List<E> events = reader.next();
 			for ( E item : events )
 				if ( event_matcher.matches(item) )
-					_to.append(_from.time(), item);
+					writer.append(reader.time(), item);
 		}
-		_to.setProperty(Trace.ticsPerSecondKey, _from.trace().ticsPerSecond());
-		_to.setProperty(Trace.minTimeKey, trace.minTime());
-		_to.setProperty(Trace.maxTimeKey, trace.maxTime());
+		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
+		writer.setProperty(Trace.minTimeKey, _from.minTime());
+		writer.setProperty(Trace.maxTimeKey, _from.maxTime());
+		writer.close();
+		reader.close();
 	}
 }

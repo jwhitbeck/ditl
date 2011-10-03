@@ -23,45 +23,45 @@ import java.util.*;
 
 public class StatefulMergeConverter<E,S> implements Converter {
 
-	private StatefulWriter<E,S> _to;
-	private Collection<StatefulReader<E,S>> from_collection;
+	private StatefulTrace<E,S> _to;
+	private Collection<StatefulTrace<E,S>> from_collection;
 	
-	public StatefulMergeConverter( StatefulWriter<E,S> to, Collection<StatefulReader<E,S>> fromCollection ){
+	public StatefulMergeConverter( StatefulTrace<E,S> to, Collection<StatefulTrace<E,S>> fromCollection ){
 		_to = to;
 		from_collection = fromCollection;
 	}
-	
-	@Override
-	public void close() throws IOException {
-		_to.close();
-	}
 
 	@Override
-	public void run() throws IOException {
+	public void convert() throws IOException {
 		long ticsPerSecond = 1L;
 		long maxTime = Trace.INFINITY;
 		long minTime = -Trace.INFINITY;
+		long snap_interval = 1L;
 		Set<S> initState = new HashSet<S>();
-		for ( StatefulReader<E,S> from : from_collection ){
-			Trace trace = from.trace();
-			ticsPerSecond = trace.ticsPerSecond();
-			if ( trace.minTime() > minTime ) minTime = trace.minTime(); // stateful traces have a first init state. They are not defined prior to that state. 
-			if ( trace.maxTime() > maxTime ) maxTime = trace.maxTime();
+		for ( StatefulTrace<E,S> from : from_collection ){
+			ticsPerSecond = from.ticsPerSecond();
+			snap_interval = from.snapshotInterval();
+			if ( from.minTime() > minTime ) minTime = from.minTime(); // stateful traces have a first init state. They are not defined prior to that state. 
+			if ( from.maxTime() < maxTime ) maxTime = from.maxTime();
 		}
-		for ( StatefulReader<E,S> from : from_collection ){
-			from.setBus(_to);
-			from.seek(minTime);
-			initState.addAll(from.referenceState());
-			while ( from.hasNext() ){
-				List<E> events = from.next();
+		StatefulWriter<E,S> writer = _to.getWriter(snap_interval);
+		for ( StatefulTrace<E,S> from : from_collection ){
+			StatefulReader<E,S> reader = from.getReader();
+			reader.setBus(writer);
+			reader.seek(minTime);
+			initState.addAll(reader.referenceState());
+			while ( reader.hasNext() ){
+				List<E> events = reader.next();
 				for ( E item : events )
-					_to.queue(from.time(), item);
+					writer.queue(reader.time(), item);
 			}
+			reader.close();
 		}
-		_to.setInitState(minTime, initState);
-		_to.flush();
-		_to.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
-		_to.setProperty(Trace.minTimeKey, minTime);
-		_to.setProperty(Trace.maxTimeKey, maxTime);
+		writer.setInitState(minTime, initState);
+		writer.flush();
+		writer.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
+		writer.setProperty(Trace.minTimeKey, minTime);
+		writer.setProperty(Trace.maxTimeKey, maxTime);
+		writer.close();
 	}
 }
