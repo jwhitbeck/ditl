@@ -62,21 +62,19 @@ public class Transfer {
 		return msg_id+" "+_from+" "+_to;
 	}
 	
-	public static ItemFactory<Transfer> factory(){
-		return new ItemFactory<Transfer>(){
-			@Override
-			public Transfer fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer msgId = Integer.parseInt(elems[0]);
-					Integer from = Integer.parseInt(elems[1]);
-					Integer to = Integer.parseInt(elems[2]);
-					return new Transfer(msgId, from, to);					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<Transfer> {
+		@Override
+		public Transfer fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer msgId = Integer.parseInt(elems[0]);
+				Integer from = Integer.parseInt(elems[1]);
+				Integer to = Integer.parseInt(elems[2]);
+				return new Transfer(msgId, from, to);					
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 }

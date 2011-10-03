@@ -44,21 +44,19 @@ public class MessageEvent {
 		return new Message(msg_id);
 	}
 	
-	public static ItemFactory<MessageEvent> factory(){
-		return new ItemFactory<MessageEvent>(){
-			@Override
-			public MessageEvent fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer msgId = Integer.parseInt(elems[0]);
-					boolean isNew = elems[1].equals("NEW");
-					return new MessageEvent(msgId, isNew);
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<MessageEvent> {
+		@Override
+		public MessageEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer msgId = Integer.parseInt(elems[0]);
+				boolean isNew = elems[1].equals("NEW");
+				return new MessageEvent(msgId, isNew);
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	@Override

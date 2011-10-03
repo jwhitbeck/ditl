@@ -32,21 +32,18 @@ public class Message {
 		return msg_id;
 	}
 	
-	public static ItemFactory<Message> factory(){
-		return new ItemFactory<Message>(){
-
-			@Override
-			public Message fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer msgId = Integer.parseInt(elems[1]);
-					return new Message(msgId);
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<Message> {
+		@Override
+		public Message fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer msgId = Integer.parseInt(elems[1]);
+				return new Message(msgId);
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	@Override

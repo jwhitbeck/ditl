@@ -63,24 +63,22 @@ public class Buffer implements Iterable<Integer> {
 		return _id.equals(b._id);
 	}
 	
-	public static ItemFactory<Buffer> factory(){
-		return new ItemFactory<Buffer>(){
-			@Override
-			public Buffer fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id = Integer.parseInt(elems[0]);
-					Buffer b = new Buffer(id);
-					if ( ! elems[1].equals("-") )
-						for ( String m : elems[1].split(delim))
-							b.msg_ids.add(Integer.parseInt(m));
-					return b;					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<Buffer> {
+		@Override
+		public Buffer fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id = Integer.parseInt(elems[0]);
+				Buffer b = new Buffer(id);
+				if ( ! elems[1].equals("-") )
+					for ( String m : elems[1].split(delim))
+						b.msg_ids.add(Integer.parseInt(m));
+				return b;					
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 
 	@Override

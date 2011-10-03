@@ -54,35 +54,33 @@ public class BufferEvent {
 		return msg_id;
 	}
 	
-	public static ItemFactory<BufferEvent> factory(){
-		return new ItemFactory<BufferEvent>(){
-			@Override
-			public BufferEvent fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id = Integer.parseInt(elems[0]);
-					int type;
-					if ( elems[1].equals("IN") )
-						type = IN;
-					else if ( elems[1].equals("ADD") )
-						type = ADD;
-					else if ( elems[1].equals("REMOVE") )
-						type = REMOVE;
-					else
-						type = OUT;
-					
-					if ( type == ADD || type == REMOVE ){
-						Integer msgId = Integer.parseInt(elems[2]); 
-						return new BufferEvent(id, msgId, type);
-					} else {
-						return new BufferEvent(id,type);
-					}
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
+	public static final class Factory implements ItemFactory<BufferEvent> {
+		@Override
+		public BufferEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id = Integer.parseInt(elems[0]);
+				int type;
+				if ( elems[1].equals("IN") )
+					type = IN;
+				else if ( elems[1].equals("ADD") )
+					type = ADD;
+				else if ( elems[1].equals("REMOVE") )
+					type = REMOVE;
+				else
+					type = OUT;
+				
+				if ( type == ADD || type == REMOVE ){
+					Integer msgId = Integer.parseInt(elems[2]); 
+					return new BufferEvent(id, msgId, type);
+				} else {
+					return new BufferEvent(id,type);
 				}
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	@Override

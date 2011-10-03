@@ -24,7 +24,7 @@ import java.util.*;
 import ditl.*;
 
 public class BroadcastDeliveryReport extends Report 
-	implements MessageHandler, BufferHandler {
+	implements MessageTrace.Handler, BufferTrace.Handler {
 
 	private Map<Integer,List<Long>> delivery_times = new HashMap<Integer,List<Long>>();
 	private Map<Integer,Long> ctimes = new HashMap<Integer,Long>();
@@ -34,13 +34,11 @@ public class BroadcastDeliveryReport extends Report
 		appendComment("msg_id | delivery times");
 	}
 
-	public static ReportFactory<BroadcastDeliveryReport> factory(){
-		return new ReportFactory<BroadcastDeliveryReport>(){
-			@Override
-			public BroadcastDeliveryReport getNew(OutputStream out) throws IOException {
-				return new BroadcastDeliveryReport(out);
-			}
-		};
+	public static final class Factory implements ReportFactory<BroadcastDeliveryReport> {
+		@Override
+		public BroadcastDeliveryReport getNew(OutputStream out) throws IOException {
+			return new BroadcastDeliveryReport(out);
+		}
 	};
 	
 	@Override

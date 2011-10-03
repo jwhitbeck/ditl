@@ -27,7 +27,7 @@ import ditl.graphs.viz.*;
 import ditl.transfers.*;
 
 @SuppressWarnings("serial")
-public class TransferScene extends GraphScene implements TransferHandler {
+public class TransferScene extends GraphScene implements TransferTrace.Handler {
 
 	private Map<Link,LinkElement> active_transfers = new HashMap<Link,LinkElement>();
 	private boolean show_transfers = true;

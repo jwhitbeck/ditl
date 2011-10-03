@@ -24,7 +24,7 @@ import java.util.*;
 import ditl.*;
 
 public class MessageTransferReport extends Report 
-	implements TransferHandler {
+	implements TransferTrace.Handler {
 
 	private Map<Integer,Long> bytes_completed = new LinkedHashMap<Integer,Long>();
 	private Map<Integer,Integer> n_completed = new LinkedHashMap<Integer,Integer>();
@@ -36,14 +36,12 @@ public class MessageTransferReport extends Report
 		appendComment("msgId | N Completed | Bytes completed | N Aborted | Bytes aborted");
 	}
 
-	public static ReportFactory<MessageTransferReport> factory(){
-		return new ReportFactory<MessageTransferReport>(){
-			@Override
-			public MessageTransferReport getNew(OutputStream out)
-					throws IOException {
-				return new MessageTransferReport(out);
-			}
-		};
+	public static final class Factory implements ReportFactory<MessageTransferReport> {
+		@Override
+		public MessageTransferReport getNew(OutputStream out)
+				throws IOException {
+			return new MessageTransferReport(out);
+		}
 	}
 	
 	@Override

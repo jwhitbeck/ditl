@@ -25,10 +25,11 @@ import org.apache.commons.cli.*;
 
 import ditl.*;
 import ditl.Reader;
-import ditl.cli.App;
+import ditl.Store.NoSuchTraceException;
+import ditl.cli.ExportApp;
 import ditl.transfers.*;
 
-public class AnalyzeTransfers extends App {
+public class AnalyzeTransfers extends ExportApp {
 	
 	final static String broadcastDeliveryOption = "broadcast-delivery";
 	final static String messageTransferOption = "message-transfers";
@@ -37,8 +38,6 @@ public class AnalyzeTransfers extends App {
 	final static String buffersOption = "buffers";
 	final static String transfersOption = "transfers";
 	
-	private File storeFile;
-	private String outputFile;
 	private String messagesName;
 	private String buffersName;
 	private String transfersName;
@@ -47,16 +46,17 @@ public class AnalyzeTransfers extends App {
 	
 	private ReportFactory<?> factory;
 	
-	public AnalyzeTransfers(String[] args) {
-		super(args);
-	}
+	public final static String PKG_NAME = "transfers";
+	public final static String CMD_NAME = "analyze";
+	public final static String CMD_ALIAS = "a";
+	
 
 	@Override
 	protected void initOptions() {
+		super.initOptions();
 		options.addOption(null, messagesOption, true, "name of messages trace");
 		options.addOption(null, buffersOption, true, "name of buffer trace");
 		options.addOption(null, transfersOption, true, "name of transfers trace");
-		options.addOption(null, outputOption, true, "name of file to write output to");
 		options.addOption(null, minTimeOption, true, "time to begin analysis");
 		options.addOption(null, maxTimeOption, true, "time to end analysis");
 		OptionGroup reportGroup = new OptionGroup();
@@ -70,48 +70,40 @@ public class AnalyzeTransfers extends App {
 	protected void parseArgs(CommandLine cli, String[] args)
 			throws ParseException, ArrayIndexOutOfBoundsException,
 			HelpException {
-		
-		messagesName = cli.getOptionValue(messagesOption, MessageStore.defaultMessagesName);
-		transfersName = cli.getOptionValue(transfersOption, MessageStore.defaultTransfersName);
-		buffersName = cli.getOptionValue(buffersOption, MessageStore.defaultBuffersName);
-		storeFile = new File(args[0]);
-		outputFile = cli.getOptionValue(outputOption);
+		super.parseArgs(cli, args);
+		messagesName = cli.getOptionValue(messagesOption, MessageTrace.defaultName);
+		transfersName = cli.getOptionValue(transfersOption, TransferTrace.defaultName);
+		buffersName = cli.getOptionValue(buffersOption, BufferTrace.defaultName);
 		if ( cli.hasOption(minTimeOption) )
 			minTime = Long.parseLong(cli.getOptionValue(minTimeOption));
 		if ( cli.hasOption(maxTimeOption) )
 			maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption));
 		
 		if ( cli.hasOption(broadcastDeliveryOption) ){
-			factory = BroadcastDeliveryReport.factory();
+			factory = new BroadcastDeliveryReport.Factory();
 		} else if ( cli.hasOption(messageTransferOption) ){
-			factory = MessageTransferReport.factory();
+			factory = new MessageTransferReport.Factory();
 		}
 	}
 	
 	
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store store = Store.open(storeFile);
-		OutputStream out = System.out;
-		if ( outputFile != null )
-			out = new FileOutputStream( outputFile );
-		
-		MessageStore mStore = new MessageStore(store);
-		Report report = factory.getNew(out);
+	protected void run() throws IOException, NoSuchTraceException {
+		Report report = factory.getNew(_out);
 		
 		Long min_time=null, max_time=null, incr_time=null;
 		List<Reader<?>> readers = new LinkedList<Reader<?>>();
 		
-		if ( report instanceof MessageHandler ){
-			Trace messages = getTrace(store,messagesName);
-			StatefulReader<MessageEvent,Message> msgReader = mStore.getMessageReader(messages);
+		if ( report instanceof MessageTrace.Handler ){
+			MessageTrace messages = (MessageTrace)_store.getTrace(messagesName);
+			StatefulReader<MessageEvent,Message> msgReader = messages.getReader();
 			
 			Bus<MessageEvent> msgEventBus = new Bus<MessageEvent>();
 			Bus<Message> msgBus = new Bus<Message>();
 			msgReader.setBus(msgEventBus);
 			msgReader.setStateBus(msgBus);
 			
-			MessageHandler mh = (MessageHandler)report;
+			MessageTrace.Handler mh = (MessageTrace.Handler)report;
 			msgBus.addListener(mh.messageListener());
 			msgEventBus.addListener(mh.messageEventListener());
 			
@@ -122,16 +114,16 @@ public class AnalyzeTransfers extends App {
 			incr_time = messages.maxUpdateInterval();
 		}
 		
-		if ( report instanceof BufferHandler ){
-			Trace buffers = getTrace(store,buffersName);			
-			StatefulReader<BufferEvent,Buffer> bufferReader = mStore.getBufferReader(buffers);
+		if ( report instanceof BufferTrace.Handler ){
+			BufferTrace buffers = (BufferTrace)_store.getTrace(buffersName);			
+			StatefulReader<BufferEvent,Buffer> bufferReader = buffers.getReader();
 			
 			Bus<BufferEvent> bufferEventBus = new Bus<BufferEvent>();
 			Bus<Buffer> bufferBus = new Bus<Buffer>();
 			bufferReader.setBus(bufferEventBus);
 			bufferReader.setStateBus(bufferBus);
 
-			BufferHandler bh = (BufferHandler)report;
+			BufferTrace.Handler bh = (BufferTrace.Handler)report;
 			bufferBus.addListener(bh.bufferListener());
 			bufferEventBus.addListener(bh.bufferEventListener());
 			
@@ -142,16 +134,16 @@ public class AnalyzeTransfers extends App {
 			incr_time = buffers.maxUpdateInterval();
 		}
 		
-		if ( report instanceof TransferHandler ){
-			Trace transfers = getTrace(store,transfersName);			
-			StatefulReader<TransferEvent,Transfer> transferReader = mStore.getTransferReader(transfers);
+		if ( report instanceof TransferTrace.Handler ){
+			TransferTrace transfers = (TransferTrace)_store.getTrace(transfersName);			
+			StatefulReader<TransferEvent,Transfer> transferReader = transfers.getReader();
 			
 			Bus<TransferEvent> transferEventBus = new Bus<TransferEvent>();
 			Bus<Transfer> transferBus = new Bus<Transfer>();
 			transferReader.setBus(transferEventBus);
 			transferReader.setStateBus(transferBus);
 
-			TransferHandler th = (TransferHandler)report;
+			TransferTrace.Handler th = (TransferTrace.Handler)report;
 			transferBus.addListener(th.transferListener());
 			transferEventBus.addListener(th.transferEventListener());
 			
@@ -173,13 +165,5 @@ public class AnalyzeTransfers extends App {
 		runner.run();
 		
 		report.finish();
-		
-		store.close();
 	}
-
-	@Override
-	protected void setUsageString() {
-		usageString = "Analyze [OPTIONS] STORE";
-	}
-	
 }

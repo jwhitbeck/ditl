@@ -20,13 +20,12 @@ package ditl.transfers.viz;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 import java.util.Collection;
 
 import javax.swing.*;
 
 import ditl.*;
-import ditl.transfers.*;
+import ditl.transfers.TransferTrace;
 import ditl.viz.Scene;
 
 
@@ -39,7 +38,7 @@ public class TransferSelectorPanel extends JPanel implements ActionListener, Ite
 	protected TransferRunner runner;
 	protected JCheckBox enabledBox;
 	protected Scene scene;
-	protected StatefulReader<TransferEvent,Transfer> cur_reader = null;
+	protected TransferTrace cur_transfers = null;
 	
 	public TransferSelectorPanel(TransferRunner transferRunner, Scene sc){
 		runner = transferRunner;
@@ -76,12 +75,12 @@ public class TransferSelectorPanel extends JPanel implements ActionListener, Ite
 		_store = store;
 	}
 	
-	public void load(Collection<Trace> traces) {
+	public void load(Collection<Trace<?>> traces) {
 		transferChooser.removeActionListener(this);
 		transferChooser.removeAllItems();
 		enabledBox.removeItemListener(this);
 		if ( ! traces.isEmpty() ){
-			for ( Trace trace : traces ){
+			for ( Trace<?> trace : traces ){
 				transferChooser.addItem(trace.name());
 			}
 			enabledBox.setSelected(true);
@@ -108,15 +107,13 @@ public class TransferSelectorPanel extends JPanel implements ActionListener, Ite
 	private void updateLinkTrace() {
 		String name = "null";
 		try {
-			if ( cur_reader != null )
-				cur_reader.close();
-			cur_reader = null;
+			cur_transfers = null;
 			if ( enabledBox.isSelected() ){
 				name = (String)transferChooser.getSelectedItem();
-				cur_reader = new MessageStore(_store).getTransferReader(_store.getTrace(name));
+				cur_transfers = (TransferTrace)_store.getTrace(name);
 			}
-			runner.setTransferReader(cur_reader);
-        } catch (IOException ioe){
+			runner.setTransferTrace(cur_transfers);
+        } catch (Exception ioe){
         	JOptionPane.showMessageDialog(this, "Failed to load links file '"+name+"'", "Warning", JOptionPane.ERROR_MESSAGE);
         }
         scene.repaint();

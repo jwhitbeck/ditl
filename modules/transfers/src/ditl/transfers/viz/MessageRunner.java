@@ -20,10 +20,9 @@ package ditl.transfers.viz;
 
 import java.io.IOException;
 
-import ditl.StatefulReader;
-import ditl.transfers.*;
+import ditl.transfers.MessageTrace;
 
 public interface MessageRunner {
-	public void setMessageReader(StatefulReader<MessageEvent,Message> messageReader) throws IOException;
-	public void addMessageHandler(MessageHandler handler);
+	public void setMessageTrace(MessageTrace messages) throws IOException;
+	public void addMessageHandler(MessageTrace.Handler handler);
 }

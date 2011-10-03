@@ -19,14 +19,13 @@
 package ditl.transfers.viz;
 
 import java.awt.Dimension;
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 import javax.swing.*;
 
-import ditl.Trace;
 import ditl.graphs.viz.*;
-import ditl.transfers.MessageStore;
+import ditl.transfers.*;
 import ditl.viz.*;
 
 
@@ -70,19 +69,18 @@ public class TransferPlayer extends GraphPlayer {
 		super.loadReaders();
 		
 		transferSelector.setStore(_store);
-		transferSelector.load(_store.listTraces(MessageStore.transferType));
+		transferSelector.load(_store.listTraces(MessageTrace.type));
 		
-		MessageStore msgStore = new MessageStore(_store);
-		Trace buffers = _store.listTraces(MessageStore.bufferType).get(0);
+		BufferTrace buffers = (BufferTrace)_store.listTraces(BufferTrace.type).get(0);
 		try {
-			((RoutingRunner)runner).setBufferReader(msgStore.getBufferReader(buffers));
+			((RoutingRunner)runner).setBufferTrace(buffers);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(this, "Failed to load buffer trace '"+buffers+"'", "Warning", JOptionPane.ERROR_MESSAGE);
 		}
 		
-		Trace messages = _store.listTraces(MessageStore.messageType).get(0);
+		MessageTrace messages = (MessageTrace)_store.listTraces(MessageTrace.type).get(0);
 		try {
-			((RoutingRunner)runner).setMessageReader(msgStore.getMessageReader(messages));
+			((RoutingRunner)runner).setMessageTrace(messages);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(this, "Failed to load buffer trace '"+messages+"'", "Warning", JOptionPane.ERROR_MESSAGE);
 		}

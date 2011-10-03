@@ -41,18 +41,20 @@ public class RoutingRunner extends GraphRunner
 	protected StatefulReader<BufferEvent, Buffer> buffer_reader;
 
 	@Override
-	public void addTransferHandler(TransferHandler handler) {
+	public void addTransferHandler(TransferTrace.Handler handler) {
 		transferBus.addListener(handler.transferListener());
 		transferEventBus.addListener(handler.transferEventListener());
 	}
 
 	@Override
-	public void setTransferReader(StatefulReader<TransferEvent, Transfer> transferReader) throws IOException {
+	public void setTransferTrace(TransferTrace transfers) throws IOException {
 		transferEventBus.reset();
 		transferBus.reset();
-		if ( transfer_reader != null )
+		if ( transfer_reader != null ){
 			runner.removeGenerator(transfer_reader);
-		transfer_reader = transferReader;
+			transfer_reader.close();
+		}
+		transfer_reader = transfers.getReader();
 		if ( transfer_reader != null ){
 			transfer_reader.setBus(transferEventBus);
 			transfer_reader.setStateBus(transferBus);
@@ -63,20 +65,20 @@ public class RoutingRunner extends GraphRunner
 	}
 
 	@Override
-	public void addMessageHandler(MessageHandler handler) {
+	public void addMessageHandler(MessageTrace.Handler handler) {
 		messageBus.addListener(handler.messageListener());
 		messageEventBus.addListener(handler.messageEventListener());
 	}
 
 	@Override
-	public void setMessageReader(
-			StatefulReader<MessageEvent, Message> messageReader)
-			throws IOException {
+	public void setMessageTrace(MessageTrace messages) throws IOException {
 		messageEventBus.reset();
 		messageBus.reset();
-		if ( message_reader != null )
+		if ( message_reader != null ){
 			runner.removeGenerator(message_reader);
-		message_reader = messageReader;
+			message_reader.close();
+		}
+		message_reader = messages.getReader();
 		if ( message_reader != null ){
 			message_reader.setBus(messageEventBus);
 			message_reader.setStateBus(messageBus);
@@ -87,19 +89,20 @@ public class RoutingRunner extends GraphRunner
 	}
 
 	@Override
-	public void addBufferHandler(BufferHandler handler) {
+	public void addBufferHandler(BufferTrace.Handler handler) {
 		bufferBus.addListener(handler.bufferListener());
 		bufferEventBus.addListener(handler.bufferEventListener());
 	}
 
 	@Override
-	public void setBufferReader(StatefulReader<BufferEvent, Buffer> bufferReader)
-			throws IOException {
+	public void setBufferTrace(BufferTrace buffers) throws IOException {
 		bufferEventBus.reset();
 		bufferBus.reset();
-		if ( buffer_reader != null )
+		if ( buffer_reader != null ){
 			runner.removeGenerator(buffer_reader);
-		buffer_reader = bufferReader;
+			buffer_reader.close();
+		}
+		buffer_reader = buffers.getReader();
 		if ( buffer_reader != null ){
 			buffer_reader.setBus(bufferEventBus);
 			buffer_reader.setStateBus(bufferBus);

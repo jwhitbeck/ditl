@@ -32,7 +32,7 @@ import ditl.transfers.*;
 
 @SuppressWarnings("serial")
 public class MessageSelectorPanel extends JPanel 
-	implements ActionListener, ItemListener, MessageHandler, BufferHandler {
+	implements ActionListener, ItemListener, MessageTrace.Handler, BufferTrace.Handler {
 	
 	protected JComboBox messageChooser;
 	protected RoutingRunner runner;

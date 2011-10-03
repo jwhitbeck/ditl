@@ -29,10 +29,11 @@ public class Player extends App {
 
 	private File[] files;
 	
-	public Player(String[] args) {
-		super(args);
-	}
-
+	public final static String PKG_NAME = "transfers";
+	public final static String CMD_NAME = "play";
+	public final static String CMD_ALIAS = "p";
+	
+	
 	@Override
 	protected void initOptions() {}
 
@@ -59,8 +60,8 @@ public class Player extends App {
 	}
 
 	@Override
-	protected void setUsageString() {
-		usageString = "STORE1 [STORE2...]";
+	protected String getUsageString() {
+		return "STORE1 [STORE2...]";
 	}
 	
 	

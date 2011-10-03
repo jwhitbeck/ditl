@@ -20,10 +20,9 @@ package ditl.transfers.viz;
 
 import java.io.IOException;
 
-import ditl.StatefulReader;
-import ditl.transfers.*;
+import ditl.transfers.BufferTrace;
 
 public interface BufferRunner {
-	public void setBufferReader(StatefulReader<BufferEvent,Buffer> bufferReader) throws IOException;
-	public void addBufferHandler(BufferHandler handler);
+	public void setBufferTrace(BufferTrace buffers) throws IOException;
+	public void addBufferHandler(BufferTrace.Handler handler);
 }

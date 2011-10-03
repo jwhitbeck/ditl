@@ -73,35 +73,33 @@ public class TransferEvent {
 		}
 	}
 	
-	public static ItemFactory<TransferEvent> factory(){
-		return new ItemFactory<TransferEvent>(){
-			@Override
-			public TransferEvent fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					String typeString = elems[0];
-					int type;
-					if ( typeString.equals("START") ){
-						type = START;
-					} else if ( typeString.endsWith("COMPLETE") ){
-						type = COMPLETE;
-					} else {
-						type = ABORT;
-					}
-					Integer msgId = Integer.parseInt(elems[1]);
-					Integer from = Integer.parseInt(elems[2]);
-					Integer to = Integer.parseInt(elems[3]);
-					if ( type == START ){
-						return new TransferEvent(msgId, from, to, type);
-					} else {
-						long bytesTransferred = Long.parseLong(elems[4]);
-						return new TransferEvent(msgId, from, to, type, bytesTransferred);
-					}
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
+	public static final class Factory implements ItemFactory<TransferEvent> {
+		@Override
+		public TransferEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				String typeString = elems[0];
+				int type;
+				if ( typeString.equals("START") ){
+					type = START;
+				} else if ( typeString.endsWith("COMPLETE") ){
+					type = COMPLETE;
+				} else {
+					type = ABORT;
 				}
+				Integer msgId = Integer.parseInt(elems[1]);
+				Integer from = Integer.parseInt(elems[2]);
+				Integer to = Integer.parseInt(elems[3]);
+				if ( type == START ){
+					return new TransferEvent(msgId, from, to, type);
+				} else {
+					long bytesTransferred = Long.parseLong(elems[4]);
+					return new TransferEvent(msgId, from, to, type, bytesTransferred);
+				}
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 }
