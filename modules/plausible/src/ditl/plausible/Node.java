@@ -44,7 +44,7 @@ public abstract class Node {
 		return _id;
 	}
 	
-	public abstract void step(long time, long dt, long tps);
+	public abstract void step(long time, double dt);
 	
 	public void commit(){
 		cur.x = next.x;

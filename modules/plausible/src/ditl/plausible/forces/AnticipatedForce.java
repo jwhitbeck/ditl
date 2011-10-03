@@ -25,64 +25,49 @@ import ditl.*;
 import ditl.graphs.*;
 
 public class AnticipatedForce implements Force, Interaction, 
-	LinkHandler, WindowedLinkHandler {
+	LinkTrace.Handler, WindowedLinkTrace.Handler {
+	
+	final static public double defaultK = 50.0; // the hooke parameter
+	final static public double defaultAlpha = 2.0; // coulomb exponent
+	final static public double defaultVmax = 10.0; // the maximal speed m/s
+	final static public double defaultRange = 20; // the transmission range
+	final static public double defaultEpsilon = 1.0; // guard to prevent denom from going to zero
+	final static public double defaultTau = 100.0; // the strength of future events
+	final static public double defaultCutoff = 30; // the distance beyond which we cease to push away
+	final static public double defaultLambda = 5; // spring equilibrium length
 
-	private double K = 50.0; // the hooke parameter
-	private double alpha = 2.0; // coulomb exponent
-	private double vmax = 10.0; // the maximal speed m/s
-	private double range = 20; // the transmission range
-	private double epsilon = 1.0; // guard to prevent denom from going to zero
-	private double tau = 100.0; // the strength of future events
-	private double cutoff = 30; // the distance beyond which we cease to push away
-	private double lambda = 5; // spring equilibrium length
-	private long tps = 1000; // tics per second
-	private double G = defaultG(); // the coulomb parameter
+	private double _K;
+	private double _alpha;
+	private double _vmax;
+	private double _range;
+	private double _epsilon;
+	private double _tau;
+	private double _cutoff;
+	private double _lambda;
+	private long _tps;
+	private double _G;
 	
 	private Collection<Node> _nodes;
 	
 	private Map<Link,WindowedLink> window_map = new HashMap<Link,WindowedLink>();
 	private Set<Link> active_links = new HashSet<Link>();
 	
-	public void setK(double k){
-		K = k;
-		G = defaultG();
-	}
-	
-	public void setAlpha(double a){
-		alpha = a;
-		G = defaultG();
-	}
-	
-	public void setVMax(double v){
-		vmax = v;
-	}
-	
-	public void setRange(double r){
-		range = r;
-		G = defaultG();
-	}
-	
-	public void setEpsilon(double e){
-		epsilon = e;
-		G = defaultG();
-	}
-	
-	public void setTau(double t){
-		tau = t;
-		G = defaultG();
-	}
-	
-	public void setCutoff(double c){
-		cutoff = c;
-	}
-	
-	public void setLambda(double l){
-		lambda = l;
-		G = defaultG();
+	public AnticipatedForce(double K, double alpha, double vmax, double range, 
+			double epsilon, double tau, double cutoff, double lambda, long tps){
+		_K = K;
+		_alpha = alpha;
+		_vmax = vmax;
+		_range = range;
+		_epsilon = epsilon;
+		_tau = tau;
+		_cutoff = cutoff;
+		_lambda = lambda;
+		_tps = tps;
+		_G = defaultG();
 	}
 	
 	private double defaultG(){
-		return K * Math.pow(epsilon+1, alpha)*range*(1-lambda/range); // balance at distance range
+		return _K * Math.pow(_epsilon+1, _alpha)*_range*(1-_lambda/_range); // balance at distance range
 	}
 	
 	@Override
@@ -103,16 +88,16 @@ public class AnticipatedForce implements Force, Interaction,
 		double dx = r.x-or.x;
 		double dy = r.y-or.y;
 		double d2 = dx*dx + dy*dy;
-		if ( d2 < cutoff * cutoff ){
+		if ( d2 < _cutoff * _cutoff ){
 			double d = Math.sqrt(d2);
 			Integer id = node.id();
 			Integer oid = other_node.id();
 			Link l = new Link(id, oid);
 			double dt = 0;
 			if ( active_links.contains(l) ){ // currently connected
-				dt = window_map.get(l).minUpTime(time) / tps;
+				dt = (double)window_map.get(l).minUpTime(time) / (double)_tps;
 			}
-			double F = G / Math.pow( epsilon + (d + vmax*dt)/range, alpha );
+			double F = _G / Math.pow( _epsilon + (d + _vmax*dt)/_range, _alpha );
 			f.x += F * dx/d;
 			f.y += F * dy/d;
 		}
@@ -128,13 +113,13 @@ public class AnticipatedForce implements Force, Interaction,
 		Link l = new Link(id,oid);
 		if ( active_links.contains(l) ){ // are connected
 			double d = Math.sqrt( dx*dx + dy*dy );
-			double F = K*(d-lambda);
+			double F = _K*(d-_lambda);
 			f.x = -F * dx/d;
 			f.y = -F * dy/d;
 		} else if ( window_map.containsKey(l) ){ // a window link exists between them
-			double dt = window_map.get(new Link(id,oid)).minDownTime(time) / tps;
+			double dt = (double)window_map.get(new Link(id,oid)).minDownTime(time) / (double)_tps;
 			double d = Math.sqrt( dx*dx + dy*dy );
-			double F = K*(d-lambda)*Math.exp(-vmax*dt/tau);
+			double F = _K*(d-_lambda)*Math.exp(-_vmax*dt/_tau);
 			f.x += -F * dx/d;
 			f.y += -F * dy/d;
 		}

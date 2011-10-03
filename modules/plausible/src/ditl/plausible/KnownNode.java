@@ -18,9 +18,25 @@
  *******************************************************************************/
 package ditl.plausible;
 
-import ditl.Listener;
+import ditl.graphs.*;
 
-public interface WindowedLinkHandler {
-	public Listener<WindowedLink> windowedLinkListener();
-	public Listener<WindowedLinkEvent> windowedLinkEventListener();
+public class KnownNode extends Node {
+
+	Movement _movement;
+	
+	public KnownNode(long time, Movement movement) {
+		super(movement.id());
+		_movement = movement;
+		cur = _movement.positionAtTime(time);
+		next = _movement.positionAtTime(time);
+	}
+	
+	public void updateMovement(long time, MovementEvent movementEvent){
+		_movement.handleEvent(time, movementEvent);
+	}
+
+	@Override
+	public void step(long time, double dt) {
+		next = _movement.positionAtTime(time);
+	}
 }

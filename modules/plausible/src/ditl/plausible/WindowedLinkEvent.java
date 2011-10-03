@@ -73,41 +73,37 @@ public final class WindowedLinkEvent {
 		}
 	}
 	
-	public static ItemFactory<WindowedLinkEvent> factory(){
-		return new ItemFactory<WindowedLinkEvent>(){
-
-			@Override
-			public WindowedLinkEvent fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id1 = Integer.parseInt(elems[0]);
-					Integer id2 = Integer.parseInt(elems[1]);
-					Link l = new Link(id1,id2);
-					WindowedLinkEvent wle = null;
-					String type_str = elems[2];
-					if ( type_str.equals(_up) )
-						wle = new WindowedLinkEvent(l, WindowedLinkEvent.UP);
-					else if ( type_str.equals(_down) )
-						wle = new WindowedLinkEvent(l, WindowedLinkEvent.DOWN);
-					else {
-						long value = Long.parseLong(elems[3]);
-						if ( type_str.equals(prev_up) )
-							wle = new WindowedLinkEvent(l, WindowedLinkEvent.PREV_UP, value);
-						else if ( type_str.equals(prev_down) )
-							wle = new WindowedLinkEvent(l, WindowedLinkEvent.PREV_DOWN, value);
-						else if ( type_str.equals(next_up) )
-							wle = new WindowedLinkEvent(l, WindowedLinkEvent.NEXT_UP, value);
-						else if ( type_str.equals(next_down) )
-							wle = new WindowedLinkEvent(l, WindowedLinkEvent.NEXT_DOWN, value);
-					}
-					return wle;
-					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
+	public static final class Factory implements ItemFactory<WindowedLinkEvent> {
+		@Override
+		public WindowedLinkEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id1 = Integer.parseInt(elems[0]);
+				Integer id2 = Integer.parseInt(elems[1]);
+				Link l = new Link(id1,id2);
+				WindowedLinkEvent wle = null;
+				String type_str = elems[2];
+				if ( type_str.equals(_up) )
+					wle = new WindowedLinkEvent(l, WindowedLinkEvent.UP);
+				else if ( type_str.equals(_down) )
+					wle = new WindowedLinkEvent(l, WindowedLinkEvent.DOWN);
+				else {
+					long value = Long.parseLong(elems[3]);
+					if ( type_str.equals(prev_up) )
+						wle = new WindowedLinkEvent(l, WindowedLinkEvent.PREV_UP, value);
+					else if ( type_str.equals(prev_down) )
+						wle = new WindowedLinkEvent(l, WindowedLinkEvent.PREV_DOWN, value);
+					else if ( type_str.equals(next_up) )
+						wle = new WindowedLinkEvent(l, WindowedLinkEvent.NEXT_UP, value);
+					else if ( type_str.equals(next_down) )
+						wle = new WindowedLinkEvent(l, WindowedLinkEvent.NEXT_DOWN, value);
 				}
+				return wle;
+				
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-			
-		};
+		}
 	}
 }

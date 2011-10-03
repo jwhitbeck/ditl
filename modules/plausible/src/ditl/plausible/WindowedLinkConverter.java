@@ -24,9 +24,7 @@ import java.util.*;
 import ditl.*;
 import ditl.graphs.*;
 
-public class WindowedLinkConverter implements Converter, Generator, LinkHandler {
-
-	public static final String defaultWindowedLinksName = "windowed_links";
+public class WindowedLinkConverter implements Converter, Generator, LinkTrace.Handler {
 	
 	private long _window;
 	private Bus<Link> expire_bus = new Bus<Link>();
@@ -38,16 +36,24 @@ public class WindowedLinkConverter implements Converter, Generator, LinkHandler 
 	
 	private StatefulWriter<WindowedLinkEvent,WindowedLink> windowed_writer;
 	private StatefulReader<LinkEvent,Link> link_reader;
+	private WindowedLinkTrace windowed_links;
+	private LinkTrace _links;
 	
 	private long cur_time;
 	private Random rng = new Random();
 	
-	public WindowedLinkConverter(StatefulWriter<WindowedLinkEvent,WindowedLink> windowedWriter,
-			StatefulReader<LinkEvent,Link> linkReader,
-			long window){
+	public WindowedLinkConverter(WindowedLinkTrace windowedLinks, LinkTrace links, 
+			long window ){
+		_links = links;
+		windowed_links = windowedLinks; 
 		_window = window;
-		windowed_writer = windowedWriter;
-		link_reader = linkReader;
+	}
+
+	@Override
+	public void convert() throws IOException {
+		windowed_writer = windowed_links.getWriter(_links.snapshotInterval());
+		link_reader = _links.getReader(0,_window);
+		
 		link_reader.setBus(bus);
 		link_reader.setStateBus(state_bus);
 		bus.addListener(linkEventListener());
@@ -55,26 +61,21 @@ public class WindowedLinkConverter implements Converter, Generator, LinkHandler 
 		pop_bus.addListener(popListener());
 		expire_bus.addListener(expireListener());
 		update_bus.addListener(updateListener());
-	}
-	
-	@Override
-	public void close() throws IOException {
-		windowed_writer.close();
-	}
-
-	@Override
-	public void run() throws IOException {
-		Trace links = link_reader.trace();
-		long minTime = links.minTime() - _window;
-		long maxTime = links.maxTime() + _window;
 		
-		Runner runner = new Runner(links.ticsPerSecond(), minTime, maxTime);
+		long minTime = _links.minTime() - _window;
+		long maxTime = _links.maxTime() + _window;
+		
+		Runner runner = new Runner(_links.ticsPerSecond(), minTime, maxTime);
 		runner.addGenerator(link_reader);
 		runner.addGenerator(this);
 		
 		runner.run();
 		
 		windowed_writer.flush();
+		windowed_writer.setProperty(WindowedLinkTrace.windowLengthKey, _window);
+		windowed_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		windowed_writer.close();
+		link_reader.close();
 	}
 	
 	@Override
@@ -84,7 +85,7 @@ public class WindowedLinkConverter implements Converter, Generator, LinkHandler 
 
 	@Override
 	public int priority() {
-		return Runner.defaultPriority;
+		return Trace.defaultPriority;
 	}
 
 	@Override

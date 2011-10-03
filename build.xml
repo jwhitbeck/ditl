@@ -30,25 +30,16 @@
     </jar>
   </target>
 
-  <target name="plausible-jar" depends="ditl-jar">
-    <ant dir="plausible" />
-    <jar destfile="plausible.jar" >
-      <fileset dir="plausible/build"/>
-    </jar>
-  </target>
-    
   <target name="clean" >
     <ant dir="core" target="clean-core"/>
     <ant dir="${modules}" target="clean-modules"/>
-    <ant dir="plausible" target="clean-plausible"/>
     <delete dir="build" />
   </target>
 
   <target name="proper" depends="clean">
     <delete file="ditl.jar" />
-    <delete file="plausible.jar" />
   </target>
 
-  <target name="all" depends="ditl-jar,plausible-jar" />
+  <target name="all" depends="ditl-jar" />
   
 </project>

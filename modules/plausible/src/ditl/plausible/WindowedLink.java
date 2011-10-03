@@ -62,27 +62,25 @@ public final class WindowedLink {
 		return _link+" "+prev_up+" "+prev_down+" "+next_up+" "+next_down;
 	}
 	
-	public static ItemFactory<WindowedLink> factory(){
-		return new ItemFactory<WindowedLink>(){
-			@Override
-			public WindowedLink fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id1 = Integer.parseInt(elems[0]);
-					Integer id2 = Integer.parseInt(elems[1]);
-					WindowedLink wl = new WindowedLink(new Link(id1,id2));
-					wl.prev_up = Long.parseLong(elems[2]);
-					wl.prev_down = Long.parseLong(elems[3]);
-					wl.next_up = Long.parseLong(elems[4]);
-					wl.next_down = Long.parseLong(elems[5]);
-					return wl;
-					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<WindowedLink> {
+		@Override
+		public WindowedLink fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id1 = Integer.parseInt(elems[0]);
+				Integer id2 = Integer.parseInt(elems[1]);
+				WindowedLink wl = new WindowedLink(new Link(id1,id2));
+				wl.prev_up = Long.parseLong(elems[2]);
+				wl.prev_down = Long.parseLong(elems[3]);
+				wl.next_up = Long.parseLong(elems[4]);
+				wl.next_down = Long.parseLong(elems[5]);
+				return wl;
+				
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	public void handleEvent(WindowedLinkEvent wle){

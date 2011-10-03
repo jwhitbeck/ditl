@@ -4,11 +4,11 @@
 
   <target name="compile-plausible" >
     <mkdir dir="build"/>
-    <javac srcdir="src" destdir="build" classpath="${core}:${graphs}" includeantruntime="false" />
+    <javac srcdir="src" destdir="build" classpath="${core}:${commons}:${graphs}" includeantruntime="false" />
   </target>
   
   <target name="clean-plausible" >
-    <delete dir="$build" />
+    <delete dir="build" />
   </target>
   
 </project>

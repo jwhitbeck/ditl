@@ -21,18 +21,19 @@ package ditl.plausible;
 import java.io.IOException;
 import java.util.*;
 
-import ditl.plausible.constraints.BoxConstraint;
 import ditl.*;
 import ditl.graphs.*;
 
 public final class PlausibleMobilityConverter implements Converter, 
-	PresenceHandler, MovementHandler {
+	PresenceTrace.Handler, MovementTrace.Handler {
 	
-	private StatefulReader<MovementEvent,Movement> known_reader = null;
-	private StatefulReader<LinkEvent,Link> link_reader;
-	private StatefulReader<WindowedLinkEvent,WindowedLink> window_reader;
-	private StatefulReader<PresenceEvent,Presence> presence_reader;
 	private StatefulWriter<MovementEvent,Movement> writer;
+	
+	private MovementTrace known_movement;
+	private LinkTrace _links;
+	private WindowedLinkTrace windowed_links;
+	private PresenceTrace _presence;
+	private MovementTrace _movement;
 	
 	private Set<Integer> known_movement_ids = new HashSet<Integer>();
 	private Map<Integer,KnownNode> known_nodes = new HashMap<Integer,KnownNode>();
@@ -44,7 +45,7 @@ public final class PlausibleMobilityConverter implements Converter,
 	private Map<Integer,List<Constraint>> node_constraints = new HashMap<Integer,List<Constraint>>();
 	
 	private double _height, _width;
-	private boolean overlap = true;
+	private boolean _overlap;
 	
 	private final static long rng_seed = 0;
 	private Random rng = new Random(rng_seed);
@@ -52,55 +53,46 @@ public final class PlausibleMobilityConverter implements Converter,
 	private long update_interval;
 	private long tps;
 	private long incr_interval;
-	private int n_steps = 100; // by default, calculate 100 intermediate points between successive updates
-	private long warm_time = 100; // by default warming period is equivalent to 100s of mobility
+	private int n_steps; 
+	private long warm_time;
 	
-	private double _e; // width of "tube" for approximating straight lines
-	private double _s; // distance threshold for deciding whether a node is static or not 
+	public static final int defaultNSteps = 100; // by default, calculate 100 intermediate points between successive updates
+	public static final long defaultWarmTime = 100; // by default warming period is equivalent to 100s of mobility
+	public static final double defaultTubeWidth = 10; // width of "tube" for approximating straight lines
+	public static final double defaultStaticThresh = 0.1; // distance threshold for deciding whether a node is static or not
+	public static final double defaultBorder = 10;
+	public static final long defaultUpdateInterval = 1; // by default calculate positions every second
+	public static final boolean defaultOverlap = true;
 	
-	public PlausibleMobilityConverter(
-			StatefulWriter<MovementEvent,Movement> movementWriter,
-			StatefulReader<PresenceEvent,Presence> presenceReader,
-			StatefulReader<LinkEvent,Link> linkReader,
-			StatefulReader<WindowedLinkEvent,WindowedLink> windowedLinkReader,
-			StatefulReader<MovementEvent,Movement> knownMovement, 
-			double width, double height, double border, double e, double s){
+	private double _e; 
+	private double _s; 
+	
+	public PlausibleMobilityConverter(MovementTrace movement,
+			PresenceTrace presence, LinkTrace links,
+			WindowedLinkTrace windowedLinks, MovementTrace knownMovement,
+			double width, double height, double e, double s, 
+			int nSteps, long updateInterval, long warmTime, boolean overlap){
 		
-		writer = movementWriter;
-		presence_reader = presenceReader;
-		link_reader = linkReader;
-		window_reader = windowedLinkReader;
-		known_reader = knownMovement;
+		_movement = movement;
+		_presence = presence;
+		_links = links;
+		windowed_links = windowedLinks;
+		known_movement = knownMovement;
 		_height = height;
 		_width = width;
-		addGlobalConstraint(new BoxConstraint(_width,_height, border));
-		tps = presence_reader.trace().ticsPerSecond();
-		setUpdateInterval(1); // by default 1 position per second
+		tps = _presence.ticsPerSecond();
+		warm_time = warmTime;
+		n_steps = nSteps;
+		update_interval = updateInterval;
+		incr_interval = update_interval / n_steps;
+		_overlap = overlap;
 		_e = e;
 		_s = s;
 	}
 	
-	public void markKnownMovement(Integer[] ids){
+	public void markKnownMovement(Integer...ids){
 		for ( Integer id : ids )
 			known_movement_ids.add(id);
-	}
-	
-	public void setUpdateInterval(long interval){
-		update_interval = interval*tps;
-		incr_interval = update_interval / n_steps;
-	}
-	
-	public void setWarmTime(long warmTime){
-		warm_time = warmTime;
-	}
-	
-	public void setNSteps(int nSteps){
-		n_steps = nSteps;
-		incr_interval = update_interval / n_steps;
-	}
-	
-	public void setOverlap(boolean b){
-		overlap = b;
 	}
 	
 	public void addGlobalConstraint(Constraint constraint){
@@ -126,38 +118,38 @@ public final class PlausibleMobilityConverter implements Converter,
 			((Interaction)force).setNodeCollection(Collections.unmodifiableList(all_nodes));
 		}
 	}
-	
-	@Override
-	public void close() throws IOException {
-		writer.close();
-	}
 
 	@Override
-	public void run() throws IOException {
+	public void convert() throws IOException {
+		long min_time = _presence.minTime();
+		long max_time = _presence.maxTime();
 		
-		Trace presence = presence_reader.trace();
-		long min_time = presence.minTime();
-		long max_time = presence.maxTime();
+		StatefulReader<MovementEvent,Movement> known_reader = null;
+		writer = _movement.getWriter(_links.snapshotInterval());
 		
 		// init event busses
 		Bus<Presence> presenceBus = new Bus<Presence>();
 		Bus<PresenceEvent> presenceEventBus = new Bus<PresenceEvent>();
+		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader(); 
 		presence_reader.setBus(presenceEventBus);
 		presence_reader.setStateBus(presenceBus);
 		
 		Bus<Link> linkBus = new Bus<Link>();
 		Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
+		StatefulReader<LinkEvent,Link> link_reader = _links.getReader();
 		link_reader.setBus(linkEventBus);
 		link_reader.setStateBus(linkBus);
 		
 		Bus<WindowedLink> windowBus = new Bus<WindowedLink>();
 		Bus<WindowedLinkEvent> windowEventBus = new Bus<WindowedLinkEvent>();
+		StatefulReader<WindowedLinkEvent,WindowedLink> window_reader = windowed_links.getReader();
 		window_reader.setBus(windowEventBus);
 		window_reader.setStateBus(windowBus);
 		
 		Bus<Movement> knownBus = new Bus<Movement>();
 		Bus<MovementEvent> knownEventBus = new Bus<MovementEvent>();
-		if ( known_reader != null ){
+		if ( known_movement != null ){
+			known_reader = known_movement.getReader();
 			known_reader.setBus(knownEventBus);
 			known_reader.setStateBus(knownBus);
 		}
@@ -166,24 +158,24 @@ public final class PlausibleMobilityConverter implements Converter,
 		presenceBus.addListener(this.presenceListener());
 		presenceEventBus.addListener(this.presenceEventListener());
 		for ( Force force : global_forces ){
-			if ( force instanceof PresenceHandler ){
-				PresenceHandler phf = (PresenceHandler)force;
+			if ( force instanceof PresenceTrace.Handler ){
+				PresenceTrace.Handler phf = (PresenceTrace.Handler)force;
 				presenceBus.addListener(phf.presenceListener());
 				presenceEventBus.addListener(phf.presenceEventListener());
 			}
 		}
 		
 		for ( Force force : global_forces ){
-			if ( force instanceof LinkHandler ){
-				LinkHandler lhf = (LinkHandler)force;
+			if ( force instanceof LinkTrace.Handler ){
+				LinkTrace.Handler lhf = (LinkTrace.Handler)force;
 				linkBus.addListener(lhf.linkListener());
 				linkEventBus.addListener(lhf.linkEventListener());
 			}
 		}
 		
 		for ( Force force : global_forces ){
-			if ( force instanceof WindowedLinkHandler ){
-				WindowedLinkHandler wlhf = (WindowedLinkHandler)force;
+			if ( force instanceof WindowedLinkTrace.Handler ){
+				WindowedLinkTrace.Handler wlhf = (WindowedLinkTrace.Handler)force;
 				windowBus.addListener(wlhf.windowedLinkListener());
 				windowEventBus.addListener(wlhf.windowedLinkEventListener());
 			}
@@ -202,11 +194,6 @@ public final class PlausibleMobilityConverter implements Converter,
 		runner.seek(min_time);
 		
 		// get initial state
-		Bounds bounds = new Bounds();
-		bounds.update(new Point(0,0));
-		bounds.update(new Point(_width,_height));
-		bounds.writeToTrace(writer);
-		
 		Set<Movement> init_mv = new HashSet<Movement>();
 		
 		warm(min_time);
@@ -241,9 +228,14 @@ public final class PlausibleMobilityConverter implements Converter,
 		}
 		writer.flush();
 		
-		// a few extras
 		writer.setProperty(Trace.maxTimeKey, max_time);	
 		writer.setProperty(Trace.ticsPerSecondKey, tps);
+		writer.close();
+		link_reader.close();
+		presence_reader.close();
+		window_reader.close();
+		if ( known_reader != null )
+			known_reader.close();
 		
 	}
 	
@@ -380,7 +372,7 @@ public final class PlausibleMobilityConverter implements Converter,
 	
 	private void warm(long time){
 		int i = 0;
-		int ni = (int)(warm_time * tps / incr_interval);
+		int ni = (int)(warm_time / incr_interval);
 		do {
 			step(time);
 			++i;
@@ -394,12 +386,13 @@ public final class PlausibleMobilityConverter implements Converter,
 	
 	private void step(long time){
 		Collections.shuffle(all_nodes, rng);
+		double rdt = (double)incr_interval / (double)tps;
 		for ( Node node : all_nodes ){
-			node.step(time, incr_interval, tps);
-			if ( overlap )
+			node.step(time, rdt);
+			if ( _overlap )
 				node.commit();
 		}
-		if ( ! overlap )
+		if ( ! _overlap )
 			for ( Node node : all_nodes )
 				node.commit();
 	}

@@ -53,9 +53,9 @@ public class InferredNode extends Node {
 	}
 	
 	@Override
-	public void step(long time, long dt, long tps){ // the Runge-Kutta approximations
+	public void step(long time, double rdt){ // the Runge-Kutta approximations
 		
-		double rdt = (double)dt / (double)tps; // the real dt
+		//double rdt = (double)dt / (double)tps; // the real dt
 		
 		// store current values
 		double ox = cur.x, oy = cur.y;

@@ -16,27 +16,22 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.plausible;
+package ditl.plausible.forces;
 
-import ditl.graphs.*;
+import ditl.graphs.Point;
+import ditl.plausible.*;
 
-public class KnownNode extends Node {
+public class DampForce implements Force {
 
-	Movement _movement;
+	public static final double defaultD = 10;
 	
-	public KnownNode(long time, Movement movement) {
-		super(movement.id());
-		_movement = movement;
-		cur = _movement.positionAtTime(time);
-		next = _movement.positionAtTime(time);
-	}
+	private double _D;
 	
-	public void updateMovement(long time, MovementEvent movementEvent){
-		_movement.handleEvent(time, movementEvent);
-	}
-
+	public DampForce(double D){ _D = D; }
+	
 	@Override
-	public void step(long time, long dt, long tps) {
-		next = _movement.positionAtTime(time);
+	public Point apply(long time, InferredNode node) {
+		Point s = node.currentSpeed();
+		return new Point( -_D * s.x, -_D* s.y );
 	}
 }
