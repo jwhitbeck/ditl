@@ -25,44 +25,42 @@ import ditl.*;
 
 
 
-public final class LinksToPresenceConverter implements Converter, LinkHandler{
+public final class LinksToPresenceConverter implements Converter, LinkTrace.Handler{
 	
-	private StatefulWriter<PresenceEvent,Presence> presence_writer;
-	private StatefulReader<LinkEvent,Link> links_reader;
+	private PresenceTrace _presence;
+	private LinkTrace _links;
 	
 	private Set<Presence> ids = new HashSet<Presence>();
 	
-	public LinksToPresenceConverter(StatefulWriter<PresenceEvent,Presence> presenceWriter,
-			StatefulReader<LinkEvent,Link> linksReader){
-		presence_writer = presenceWriter;
-		links_reader = linksReader;
+	public LinksToPresenceConverter(PresenceTrace presence, LinkTrace links){
+		_presence = presence;
+		_links = links;
 	}
 
 	private void addLink(Link l){
 		ids.add(new Presence(l.id1()));
 		ids.add(new Presence(l.id2()));
 	}
-	
-	@Override
-	public void close() throws IOException {
-		presence_writer.close();
-	}
 
 	@Override
-	public void run() throws IOException {
+	public void convert() throws IOException {
+		StatefulWriter<PresenceEvent,Presence> presence_writer = _presence.getWriter(_links.snapshotInterval()); 
+		StatefulReader<LinkEvent,Link> links_reader = _links.getReader();
+		
 		Bus<Link> linkBus = new Bus<Link>();
 		Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
 		linkBus.addListener(linkListener());
 		linkEventBus.addListener(linkEventListener());
 		links_reader.setBus(linkEventBus);
 		links_reader.setStateBus(linkBus);
-		Trace links = links_reader.trace();
-		Runner runner = new Runner(links.maxUpdateInterval(), links.minTime(), links.maxTime());
+		Runner runner = new Runner(_links.maxUpdateInterval(), _links.minTime(), _links.maxTime());
 		runner.addGenerator(links_reader);
 		runner.run();
-		presence_writer.setInitState(links.minTime(), ids);
-		presence_writer.setProperty(Trace.maxTimeKey, links.maxTime());
-		presence_writer.setProperty(Trace.ticsPerSecondKey, links.ticsPerSecond());
+		presence_writer.setInitState(_links.minTime(), ids);
+		presence_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
+		presence_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		presence_writer.close();
+		links_reader.close();
 	}
 
 	@Override

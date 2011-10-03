@@ -27,11 +27,12 @@ import ditl.*;
 
 public class NS2Movement {
 	
-	public static void fromNS2( final StatefulWriter<MovementEvent,Movement> movementWriter,
-				InputStream in, Long maxTime, double timeMul, long offset) throws IOException {
+	public static void fromNS2( MovementTrace movement,
+				InputStream in, Long maxTime, double timeMul, long ticsPerSecond,
+				long offset, long snapInterval, final boolean fixPauseTimes) throws IOException {
 		
+		final StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter(snapInterval);
 		final Map<Integer,Movement> positions = new HashMap<Integer,Movement>();
-		Bounds bounds = new Bounds();
 		BufferedReader br = new BufferedReader( new InputStreamReader(in) );
 		final Bus<MovementEvent> buffer = new Bus<MovementEvent>();
 		String line;
@@ -55,11 +56,9 @@ public class NS2Movement {
 					
 					if ( elems[2].equals("X_") ){
 						m.x = c;
-						bounds.updateX(c);
 					}
 					else if ( elems[2].equals("Y_") ){
 						m.y = c;
-						bounds.updateY(c);
 					}
 					
 				} else if ( line.startsWith("$ns")){
@@ -70,7 +69,6 @@ public class NS2Movement {
 					Point dest = new Point( Double.parseDouble(elems[5]), Double.parseDouble(elems[6]));
 					s = Double.parseDouble(elems[7].substring(0, elems[7].length()-2)) / timeMul;
 					buffer.queue(time, new MovementEvent(id, s, dest));
-					bounds.update(dest);
 				}
 			}
 		}
@@ -92,7 +90,8 @@ public class NS2Movement {
 						}
 					});
 					movementWriter.queue(time, mev);
-					movementWriter.queue(m.arrival, new MovementEvent(mev.id, 0, mev.dest)); // queue the waiting time as well
+					if ( fixPauseTimes )
+						movementWriter.queue(m.arrival, new MovementEvent(mev.id, 0, mev.dest)); // queue the waiting time as well
 				}
 				movementWriter.flush(time);
 			}
@@ -100,16 +99,18 @@ public class NS2Movement {
 		
 		buffer.flush();
 		
-		bounds.writeToTrace(movementWriter);
 		last_time = (maxTime != null)? maxTime : last_time;
 		movementWriter.setProperty(Trace.maxTimeKey, last_time);
+		movementWriter.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
 		movementWriter.close();
 	}
 	
-	public static void toNS2(StatefulReader<MovementEvent,Movement> movementReader, OutputStream out, double timeMul) throws IOException {
+	public static void toNS2(MovementTrace movement, OutputStream out, double timeMul) throws IOException {
+		
+		StatefulReader<MovementEvent,Movement> movementReader = movement.getReader();
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
 		
-		movementReader.seek(movementReader.trace().minTime());
+		movementReader.seek(movement.minTime());
 		for ( Movement mv : movementReader.referenceState() ){
 			bw.write(mv.ns2String());
 		}
@@ -123,5 +124,6 @@ public class NS2Movement {
 			}
 		}	
 		bw.close();
+		movementReader.close();
 	}
 }

@@ -64,25 +64,21 @@ public final class LinkEvent {
 		return new Link(id1,id2);
 	}
 	
-	public static ItemFactory<LinkEvent> factory () {
-		return new ItemFactory<LinkEvent>() {
-
-			@Override
-			public LinkEvent fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id1 = Integer.parseInt(elems[0]);
-					Integer id2 = Integer.parseInt(elems[1]);
-					boolean up = elems[2].equals("UP");
-					return new LinkEvent(id1,id2,up);
-					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<LinkEvent>{
+		@Override
+		public LinkEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id1 = Integer.parseInt(elems[0]);
+				Integer id2 = Integer.parseInt(elems[1]);
+				boolean up = elems[2].equals("UP");
+				return new LinkEvent(id1,id2,up);
+				
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-			
-		};
+		}
 	}
 	
 	@Override
@@ -90,13 +86,13 @@ public final class LinkEvent {
 		return id1+" "+id2+" "+(_up? "UP" : "DOWN");
 	}
 	
-	public static Matcher<LinkEvent> internalLinkEventMatcher(final Set<Integer> group){
-		return new Matcher<LinkEvent>(){
-			@Override
-			public boolean matches(LinkEvent item) {
-				return group.contains(item.id1) && group.contains(item.id2);
-			}
-		};
+	public static final class InternalGroupMatcher implements Matcher<LinkEvent> {
+		private Set<Integer> _group;
+		public InternalGroupMatcher(Set<Integer> group){ _group = group;}
+		@Override
+		public boolean matches(LinkEvent item) {
+			return _group.contains(item.id1) && _group.contains(item.id2);
+		}
 	}
 
 }

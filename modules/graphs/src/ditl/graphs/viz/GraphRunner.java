@@ -41,28 +41,29 @@ public class GraphRunner extends SceneRunner
 	protected StatefulReader<EdgeEvent,Edge> edges_reader;
 	
 	@Override
-	public void setMovementReader(StatefulReader<MovementEvent,Movement> movementReader) {
-		Trace movement = movementReader.trace();
+	public void setMovementTrace(MovementTrace movement) throws IOException {
 		runner = new Runner(incrTime(), movement.minTime(), movement.maxTime());
-		movement_reader = movementReader;
+		movement_reader = movement.getReader();
 		movement_reader.setBus(movementEventBus);
 		movement_reader.setStateBus(movementBus);
 		runner.addGenerator(movement_reader);
 	}
 	
 	@Override
-	public void addMovementHandler(MovementHandler handler) {
+	public void addMovementHandler(MovementTrace.Handler handler) {
 		movementBus.addListener(handler.movementListener());
 		movementEventBus.addListener(handler.movementEventListener());
 	}
 
 	@Override
-	public void setLinkReader(StatefulReader<LinkEvent,Link> linkReader) throws IOException {
+	public void setLinkTrace(LinkTrace links) throws IOException {
 		linkEventBus.reset();
 		linkBus.reset();
-		if ( links_reader != null )
+		if ( links_reader != null ){
 			runner.removeGenerator(links_reader);
-		links_reader = linkReader;
+			links_reader.close();
+		}
+		links_reader = links.getReader();
 		if ( links_reader != null ){
 			links_reader.setBus(linkEventBus);
 			links_reader.setStateBus(linkBus);
@@ -73,18 +74,20 @@ public class GraphRunner extends SceneRunner
 	}
 	
 	@Override
-	public void addLinkHandler(LinkHandler handler) {
+	public void addLinkHandler(LinkTrace.Handler handler) {
 		linkBus.addListener(handler.linkListener());
 		linkEventBus.addListener(handler.linkEventListener());
 	}
 	
 	@Override
-	public void setEdgeReader(StatefulReader<EdgeEvent,Edge> edgesReader) throws IOException {
+	public void setEdgeTrace(EdgeTrace edges) throws IOException {
 		edgeBus.reset();
 		edgeEventBus.reset();
-		if ( edges_reader != null )
+		if ( edges_reader != null ){
 			runner.removeGenerator(edges_reader);
-		edges_reader = edgesReader;
+			edges_reader.close();
+		}
+		edges_reader = edges.getReader();
 		if ( edges_reader != null ){
 			edges_reader.setBus(edgeEventBus);
 			edges_reader.setStateBus(edgeBus);
@@ -95,7 +98,7 @@ public class GraphRunner extends SceneRunner
 	}
 	
 	@Override
-	public void addEdgeHandler(EdgeHandler handler) {
+	public void addEdgeHandler(EdgeTrace.Handler handler) {
 		edgeBus.addListener(handler.edgeListener());
 		edgeEventBus.addListener(handler.edgeEventListener());
 	}

@@ -25,7 +25,7 @@ import ditl.*;
 
 
 public final class AdjacencyMatrix  
-	implements LinkHandler, EdgeHandler {
+	implements LinkTrace.Handler, EdgeTrace.Handler {
 	
 	private Map<Integer, Set<Integer>> map = new HashMap<Integer, Set<Integer>>();
 	

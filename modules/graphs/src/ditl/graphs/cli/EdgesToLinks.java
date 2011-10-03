@@ -18,32 +18,31 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-public class EdgesToLinks extends GraphApp {
+public class EdgesToLinks extends ConvertApp {
 
 	private final static String intersectOption = "intersect";
 	
-	private File origStoreFile;
-	private File destStoreFile;
-	private String edgesName;
-	private String linksName;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.EDGES);
 	private boolean union;
 	
-	public EdgesToLinks(String[] args) {
-		super(args);
-	}
-
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "edges-to-links";
+	public final static String CMD_ALIAS = "e2l";
+	
 	@Override
 	protected void initOptions() {
+		super.initOptions();
+		graph_options.setOptions(options);
 		options.addOption(null, storeOutputOption, true, "write new traces to this store");
-		options.addOption(null, linksOption, true, "name of links trace");
-		options.addOption(null, edgesOption, true, "name of edges trace");
 		options.addOption(null, intersectOption, false, "intersect edges (default: union)");
 	}
 
@@ -51,39 +50,15 @@ public class EdgesToLinks extends GraphApp {
 	protected void parseArgs(CommandLine cli, String[] args)
 			throws ParseException, ArrayIndexOutOfBoundsException,
 			HelpException {
-		origStoreFile = new File(args[0]);
-		destStoreFile = new File(cli.getOptionValue(storeOutputOption,args[0]));
-		linksName = cli.getOptionValue(linksOption, GraphStore.defaultLinksName);
-		edgesName = cli.getOptionValue(edgesOption, GraphStore.defaultEdgesName);
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
 		union = cli.hasOption(intersectOption);
 	}
 
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store origStore;
-		WritableStore destStore = WritableStore.open(destStoreFile);
-		if ( origStoreFile.equals(destStoreFile) ){
-			origStore = destStore; 
-		} else {
-			origStore = Store.open(origStoreFile);
-		}
-		
-		Trace edges = getTrace(origStore, edgesName);
-		StatefulReader<EdgeEvent,Edge> edgesReader = new GraphStore(origStore).getEdgeReader(edges);
-		StatefulWriter<LinkEvent,Link> linksWriter = new GraphStore(destStore).getLinkWriter(linksName, edges.snapshotInterval());
-		
-		Converter converter = new EdgesToLinksConverter(linksWriter, edgesReader, union);
-		converter.run();
-		converter.close();
-		
-		destStore.close();
-		if ( origStore != destStore )
-			origStore.close();
+	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+		LinkTrace links = (LinkTrace) dest_store.newTrace(graph_options.get(GraphOptions.LINKS), LinkTrace.type, force);
+		new EdgesToLinksConverter(links, edges, union).convert();
 	}
-
-	@Override
-	protected void setUsageString() {
-		usageString = "[OPTIONS] STORE";
-	}
-
 }

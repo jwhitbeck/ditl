@@ -41,25 +41,23 @@ public class Group implements Cloneable {
 		return members.size();
 	}
 	
-	public static ItemFactory<Group> factory(){
-		return new ItemFactory<Group>(){
-			@Override
-			public Group fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id = Integer.parseInt(elems[0]);
-					Group g = new Group(id);
-					for ( String m : elems[1].split(delim) ){
-						g.members.add(Integer.parseInt(m));
-					}
-					return g;
-					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
+	public final static class Factory implements ItemFactory<Group> {
+		@Override
+		public Group fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id = Integer.parseInt(elems[0]);
+				Group g = new Group(id);
+				for ( String m : elems[1].split(delim) ){
+					g.members.add(Integer.parseInt(m));
 				}
+				return g;
+				
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	public void handleEvent(GroupEvent event){

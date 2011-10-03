@@ -26,7 +26,7 @@ import ditl.*;
 
 
 
-public final class ContactTimesReport extends Report implements LinkHandler {
+public final class ContactTimesReport extends Report implements LinkTrace.Handler {
 
 	private boolean _contacts;
 	private Map<Link,Long> activeContacts = new HashMap<Link,Long>();
@@ -37,13 +37,13 @@ public final class ContactTimesReport extends Report implements LinkHandler {
 		appendComment("id1 | id2 | begin | end | duration");
 	}
 	
-	public static ReportFactory<ContactTimesReport> factory(final boolean contacts){
-		return new ReportFactory<ContactTimesReport>(){
-			@Override
-			public ContactTimesReport getNew(OutputStream out) throws IOException {
-				return new ContactTimesReport(out, contacts);
-			}
-		};
+	public static final class Factory implements ReportFactory<ContactTimesReport> {
+		private boolean _contacts;
+		public Factory(boolean contacts){ _contacts = contacts;}
+		@Override
+		public ContactTimesReport getNew(OutputStream out) throws IOException {
+			return new ContactTimesReport(out, _contacts);
+		}
 	}
 	
 	@Override

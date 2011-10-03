@@ -18,16 +18,17 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.commons.cli.*;
 
 import ditl.*;
-import ditl.Reader;
+import ditl.Store.NoSuchTraceException;
+import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
-public class Analyze extends GraphApp {
+public class Analyze extends ExportApp {
 	
 	final static String nodeCountOption = "node-count";
 	final static String transitTimesOption = "transit-times";
@@ -41,23 +42,18 @@ public class Analyze extends GraphApp {
 	final static String clusteringOption = "clustering";
 	final static String numCCOption = "ccs";
 	
-	private File storeFile;
-	private String outputFile;
-	private String linksName;
-	private String presenceName;
-	private String ccName;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.CC);
 	private ReportFactory<?> factory;
 	
-	public Analyze(String[] args) {
-		super(args);
-	}
-
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "analyze";
+	public final static String CMD_ALIAS = "a";
+	
+	
 	@Override
 	protected void initOptions() {
-		options.addOption(null, presenceOption, true, "name of presence trace to use (default: "+GraphStore.defaultPresenceName+")");
-		options.addOption(null, linksOption, true, "name of links trace (default: "+GraphStore.defaultLinksName+")");
-		options.addOption(null, linksOption, true, "name of connected components trace (default: "+GraphStore.defaultConnectedComponentsName+")");
-		options.addOption(null, outputOption, true, "name of file to write output to");
+		super.initOptions();
+		graph_options.setOptions(options);
 		OptionGroup reportGroup = new OptionGroup();
 		reportGroup.addOption(new Option(null, nodeCountOption, false, "node count report") );
 		reportGroup.addOption(new Option(null, transitTimesOption, false, "transit times report") );
@@ -79,62 +75,52 @@ public class Analyze extends GraphApp {
 			throws ParseException, ArrayIndexOutOfBoundsException,
 			HelpException {
 		
-		linksName = cli.getOptionValue(linksOption, GraphStore.defaultLinksName);
-		presenceName = cli.getOptionValue(presenceOption, GraphStore.defaultPresenceName);
-		ccName = cli.getOptionValue(ccOption, GraphStore.defaultConnectedComponentsName);
-		storeFile = new File(args[0]);
-		outputFile = cli.getOptionValue(outputOption);
-	
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
 		
 		if ( cli.hasOption(nodeCountOption) ){
-			factory = NodeCountReport.factory();
+			factory = new NodeCountReport.Factory();
 		} else if ( cli.hasOption(transitTimesOption) ){
-			factory = TransitTimesReport.factory();
+			factory = new TransitTimesReport.Factory();
 		} else if ( cli.hasOption(timeToFirstContactOption) ){
-			factory = TimeToFirstContactReport.factory();
+			factory = new TimeToFirstContactReport.Factory();
 		} else if ( cli.hasOption(numContactsOption) ){
-			factory = NumberContactsReport.factory();
+			factory = new NumberContactsReport.Factory();
 		} else if ( cli.hasOption(nodeDegreeOption) ){
-			factory = NodeDegreeReport.factory();
+			factory = new NodeDegreeReport.Factory();
 		} else if ( cli.hasOption(contactsOption) ){
-			factory = ContactTimesReport.factory(true);
+			factory = new ContactTimesReport.Factory(true);
 		} else if ( cli.hasOption(interContactsOption) ){
-			factory = ContactTimesReport.factory(false);
+			factory = new ContactTimesReport.Factory(false);
 		} else if ( cli.hasOption(anyContactsOption) ){
-			factory = AnyContactTimesReport.factory(true);
+			factory = new AnyContactTimesReport.Factory(true);
 		} else if ( cli.hasOption(interAnyContactsOption) ){
-			factory = AnyContactTimesReport.factory(false);
+			factory = new AnyContactTimesReport.Factory(false);
 		} else if ( cli.hasOption(clusteringOption) ){
-			factory = ClusteringCoefficientReport.factory(true);
+			factory = new ClusteringCoefficientReport.Factory(true);
 		} else if ( cli.hasOption(numCCOption) ){
-			factory = ConnectedComponentsReport.factory();
+			factory = new ConnectedComponentsReport.Factory();
 		}
 	}
 	
 	
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store store = Store.open(storeFile);
-		OutputStream out = System.out;
-		if ( outputFile != null )
-			out = new FileOutputStream( outputFile );
-		
-		GraphStore gStore = new GraphStore(store);
-		Report report = factory.getNew(out);
+	protected void run() throws IOException, NoSuchTraceException {
+		Report report = factory.getNew(_out);
 		
 		Long minTime=null, maxTime=null, incrTime=null;
 		List<Reader<?>> readers = new LinkedList<Reader<?>>();
 		
-		if ( report instanceof PresenceHandler ){
-			Trace presence = getTrace(store,presenceName);
-			StatefulReader<PresenceEvent,Presence> presenceReader = gStore.getPresenceReader(presence);
+		if ( report instanceof PresenceTrace.Handler ){
+			PresenceTrace presence = (PresenceTrace)_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+			StatefulReader<PresenceEvent,Presence> presenceReader = presence.getReader();
 			
 			Bus<PresenceEvent> presenceEventBus = new Bus<PresenceEvent>();
 			Bus<Presence> presenceBus = new Bus<Presence>();
 			presenceReader.setBus(presenceEventBus);
 			presenceReader.setStateBus(presenceBus);
 			
-			PresenceHandler ph = (PresenceHandler)report;
+			PresenceTrace.Handler ph = (PresenceTrace.Handler)report;
 			presenceBus.addListener(ph.presenceListener());
 			presenceEventBus.addListener(ph.presenceEventListener());
 			
@@ -145,16 +131,16 @@ public class Analyze extends GraphApp {
 			incrTime = presence.maxUpdateInterval();
 		}		
 		
-		if ( report instanceof LinkHandler ){
-			Trace links = getTrace(store,linksName);			
-			StatefulReader<LinkEvent,Link> linksReader = gStore.getLinkReader(links);
+		if ( report instanceof LinkTrace.Handler ){
+			LinkTrace links = (LinkTrace)_store.getTrace(graph_options.get(GraphOptions.LINKS));			
+			StatefulReader<LinkEvent,Link> linksReader = links.getReader();
 			
 			Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
 			Bus<Link> linkBus = new Bus<Link>();
 			linksReader.setBus(linkEventBus);
 			linksReader.setStateBus(linkBus);
 
-			LinkHandler lh = (LinkHandler)report;
+			LinkTrace.Handler lh = (LinkTrace.Handler)report;
 			linkBus.addListener(lh.linkListener());
 			linkEventBus.addListener(lh.linkEventListener());
 			
@@ -165,16 +151,16 @@ public class Analyze extends GraphApp {
 			incrTime = links.maxUpdateInterval();
 		}
 		
-		if ( report instanceof GroupHandler ){
-			Trace groups = getTrace(store,ccName);
-			StatefulReader<GroupEvent,Group> groupReader = gStore.getGroupReader(groups);
+		if ( report instanceof ConnectedComponentsTrace.Handler ){
+			ConnectedComponentsTrace groups = (ConnectedComponentsTrace)_store.getTrace(graph_options.get(GraphOptions.CC));
+			StatefulReader<GroupEvent,Group> groupReader = groups.getReader();
 			
 			Bus<GroupEvent> groupEventBus = new Bus<GroupEvent>();
 			Bus<Group> groupBus = new Bus<Group>();
 			groupReader.setBus(groupEventBus);
 			groupReader.setStateBus(groupBus);
 			
-			GroupHandler gh = (GroupHandler)report;
+			ConnectedComponentsTrace.Handler gh = (ConnectedComponentsTrace.Handler)report;
 			groupEventBus.addListener(gh.groupEventListener());
 			groupBus.addListener(gh.groupListener());
 			
@@ -191,13 +177,5 @@ public class Analyze extends GraphApp {
 		runner.run();
 		
 		report.finish();
-		
-		store.close();
 	}
-
-	@Override
-	protected void setUsageString() {
-		usageString = "Analyze [OPTIONS] STORE";
-	}
-	
 }

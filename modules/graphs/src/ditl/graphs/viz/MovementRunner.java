@@ -20,12 +20,11 @@ package ditl.graphs.viz;
 
 import java.io.IOException;
 
-import ditl.StatefulReader;
-import ditl.graphs.*;
+import ditl.graphs.MovementTrace;
 
 
 
 public interface MovementRunner {
-	public void setMovementReader(StatefulReader<MovementEvent,Movement> movementReader) throws IOException;
-	public void addMovementHandler(MovementHandler handler);
+	public void setMovementTrace(MovementTrace movement) throws IOException;
+	public void addMovementHandler(MovementTrace.Handler handler);
 }

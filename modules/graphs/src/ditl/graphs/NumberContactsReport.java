@@ -25,7 +25,7 @@ import ditl.*;
 
 
 
-public final class NumberContactsReport extends Report implements LinkHandler {
+public final class NumberContactsReport extends Report implements LinkTrace.Handler {
 
 	private Map<Integer,Integer> contactsCount = new HashMap<Integer,Integer>();
 	
@@ -35,13 +35,11 @@ public final class NumberContactsReport extends Report implements LinkHandler {
 	}
 	
 	
-	public static ReportFactory<NumberContactsReport> factory(){
-		return new ReportFactory<NumberContactsReport>() {
-			@Override
-			public NumberContactsReport getNew(OutputStream out) throws IOException {
-				return new NumberContactsReport(out);
-			}
-		};
+	public static final class Factory implements ReportFactory<NumberContactsReport> {
+		@Override
+		public NumberContactsReport getNew(OutputStream out) throws IOException {
+			return new NumberContactsReport(out);
+		}
 	}
 
 	@Override

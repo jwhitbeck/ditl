@@ -26,7 +26,7 @@ import ditl.*;
 
 
 public final class TimeToFirstContactReport extends Report 
-	implements LinkHandler, PresenceHandler {
+	implements LinkTrace.Handler, PresenceTrace.Handler {
 
 
 	private Map<Integer,Long> entry_times = new HashMap<Integer,Long>();
@@ -36,13 +36,11 @@ public final class TimeToFirstContactReport extends Report
 		super(out);
 	}
 	
-	public static ReportFactory<TimeToFirstContactReport> factory(){
-		return new ReportFactory<TimeToFirstContactReport>(){
-			@Override
-			public TimeToFirstContactReport getNew(OutputStream out) throws IOException {
-				return new TimeToFirstContactReport(out);
-			}
-		};
+	public static final class Factory implements ReportFactory<TimeToFirstContactReport> {
+		@Override
+		public TimeToFirstContactReport getNew(OutputStream out) throws IOException {
+			return new TimeToFirstContactReport(out);
+		}
 	}
 	
 	@Override

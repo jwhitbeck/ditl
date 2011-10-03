@@ -18,9 +18,17 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import ditl.Listener;
+import java.io.IOException;
 
-public interface MovementHandler {
-	public Listener<Movement> movementListener();
-	public Listener<MovementEvent> movementEventListener();
+import ditl.*;
+
+public class ConnectedComponentsTrace extends GroupTrace {
+
+	public final static String type = "ccs";
+	public final static String defaultName = "ccs";
+	
+	public ConnectedComponentsTrace(Store store, String name, PersistentMap info) throws IOException {
+		super(store, name, info);
+		info.put(Trace.typeKey, type);
+	}
 }

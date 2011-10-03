@@ -20,13 +20,12 @@ package ditl.graphs.viz;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 import java.util.Collection;
 
 import javax.swing.*;
 
 import ditl.*;
-import ditl.graphs.*;
+import ditl.graphs.LinkTrace;
 import ditl.viz.Scene;
 
 
@@ -39,7 +38,7 @@ public class LinksSelectorPanel extends JPanel implements ActionListener, ItemLi
 	protected LinkRunner runner;
 	protected JCheckBox enabledBox;
 	protected Scene scene;
-	protected StatefulReader<LinkEvent,Link> cur_reader = null;
+	protected LinkTrace cur_links = null;
 	
 	public LinksSelectorPanel(LinkRunner linkRunner, Scene sc){
 		runner = linkRunner;
@@ -76,12 +75,12 @@ public class LinksSelectorPanel extends JPanel implements ActionListener, ItemLi
 		_store = store;
 	}
 	
-	public void load(Collection<Trace> traces) {
+	public void load(Collection<Trace<?>> traces) {
 		linksChooser.removeActionListener(this);
 		linksChooser.removeAllItems();
 		enabledBox.removeItemListener(this);
 		if ( ! traces.isEmpty() ){
-			for ( Trace trace : traces ){
+			for ( Trace<?> trace : traces ){
 				linksChooser.addItem(trace.name());
 			}
 			enabledBox.setSelected(true);
@@ -108,15 +107,13 @@ public class LinksSelectorPanel extends JPanel implements ActionListener, ItemLi
 	private void updateLinkTrace() {
 		String name = "null";
 		try {
-			if ( cur_reader != null )
-				cur_reader.close();
-			cur_reader = null;
+			cur_links = null;
 			if ( enabledBox.isSelected() ){
 				name = (String)linksChooser.getSelectedItem();
-				cur_reader = new GraphStore(_store).getLinkReader(_store.getTrace(name));
+				cur_links = (LinkTrace)_store.getTrace(name);
 			}
-			runner.setLinkReader(cur_reader);
-        } catch (IOException ioe){
+			runner.setLinkTrace(cur_links);
+        } catch (Exception ioe){
         	JOptionPane.showMessageDialog(this, "Failed to load links file '"+name+"'", "Warning", JOptionPane.ERROR_MESSAGE);
         }
         scene.repaint();

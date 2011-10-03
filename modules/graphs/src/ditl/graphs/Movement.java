@@ -64,28 +64,26 @@ public final class Movement {
 		}
 	}
 	
-	public static ItemFactory<Movement> factory(){
-		return new ItemFactory<Movement>(){
-			@Override
-			public Movement fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id = Integer.parseInt(elems[0]);
-					double ox = Double.parseDouble(elems[1]);
-					double oy = Double.parseDouble(elems[2]);
-					if ( elems.length == 3 )
-						return new Movement(id,new Point(ox,oy));
-					long since = Long.parseLong(elems[3]);
-					double tx = Double.parseDouble(elems[4]);
-					double ty = Double.parseDouble(elems[5]);
-					double sp = Double.parseDouble(elems[6]);
-					return new Movement(id, new Point(ox, oy), since, new Point(tx, ty), sp);					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<Movement> {
+		@Override
+		public Movement fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id = Integer.parseInt(elems[0]);
+				double ox = Double.parseDouble(elems[1]);
+				double oy = Double.parseDouble(elems[2]);
+				if ( elems.length == 3 )
+					return new Movement(id,new Point(ox,oy));
+				long since = Long.parseLong(elems[3]);
+				double tx = Double.parseDouble(elems[4]);
+				double ty = Double.parseDouble(elems[5]);
+				double sp = Double.parseDouble(elems[6]);
+				return new Movement(id, new Point(ox, oy), since, new Point(tx, ty), sp);					
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	public Point positionAtTime(long t){
@@ -187,13 +185,11 @@ public final class Movement {
 		return null;
 	}
 	
-	public static Matcher<Movement> groupMatcher(final Set<Integer> group){
-		return new Matcher<Movement>(){
-			@Override
-			public boolean matches(Movement item) {
-				return group.contains(item.id);
-			}
-		};
+	public static final class GroupMatcher implements Matcher<Movement> {
+		private Set<Integer> _group;
+		public GroupMatcher(Set<Integer> group){ _group = group;}
+		@Override
+		public boolean matches(Movement item) { return _group.contains(item.id);}
 	}
 	
 	@Override

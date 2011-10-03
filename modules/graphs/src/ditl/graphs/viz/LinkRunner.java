@@ -20,12 +20,11 @@ package ditl.graphs.viz;
 
 import java.io.IOException;
 
-import ditl.StatefulReader;
-import ditl.graphs.*;
+import ditl.graphs.LinkTrace;
 
 
 
 public interface LinkRunner {
-	public void setLinkReader(StatefulReader<LinkEvent,Link> linkReader) throws IOException;
-	public void addLinkHandler(LinkHandler handler);
+	public void setLinkTrace(LinkTrace links) throws IOException;
+	public void addLinkHandler(LinkTrace.Handler handler);
 }

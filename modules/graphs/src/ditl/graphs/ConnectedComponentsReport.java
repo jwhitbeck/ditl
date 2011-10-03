@@ -25,22 +25,20 @@ import ditl.*;
 
 
 
-public final class ConnectedComponentsReport extends Report implements GroupHandler {
+public final class ConnectedComponentsReport extends Report implements ConnectedComponentsTrace.Handler {
 
-	private GroupUpdater updater = new GroupUpdater();
+	private GroupTrace.Updater updater = new GroupTrace.Updater();
 	
 	public ConnectedComponentsReport(OutputStream out) throws IOException {
 		super(out);
 		appendComment("time | cc size distribution");
 	}
 	
-	public static ReportFactory<ConnectedComponentsReport> factory(){
-		return new ReportFactory<ConnectedComponentsReport>(){
-			@Override
-			public ConnectedComponentsReport getNew(OutputStream out) throws IOException {
-				return new ConnectedComponentsReport(out);
-			}
-		};
+	public static final class Factory implements ReportFactory<ConnectedComponentsReport> {
+		@Override
+		public ConnectedComponentsReport getNew(OutputStream out) throws IOException {
+			return new ConnectedComponentsReport(out);
+		}
 	}
 	
 	private void update(long time) throws IOException {

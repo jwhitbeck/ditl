@@ -20,12 +20,11 @@ package ditl.graphs.viz;
 
 import java.io.IOException;
 
-import ditl.StatefulReader;
-import ditl.graphs.*;
+import ditl.graphs.EdgeTrace;
 
 
 
 public interface EdgeRunner {
-	public void setEdgeReader(StatefulReader<EdgeEvent,Edge> edgeReader) throws IOException;
-	public void addEdgeHandler(EdgeHandler handler);
+	public void setEdgeTrace(EdgeTrace edges) throws IOException;
+	public void addEdgeHandler(EdgeTrace.Handler handler);
 }

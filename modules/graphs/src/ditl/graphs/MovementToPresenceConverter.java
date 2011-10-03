@@ -25,37 +25,33 @@ import ditl.*;
 
 
 
-public class MovementToPresenceConverter implements Converter, MovementHandler {
+public class MovementToPresenceConverter implements Converter, MovementTrace.Handler {
 
 	private StatefulReader<MovementEvent,Movement> movement_reader;
 	private StatefulWriter<PresenceEvent,Presence> presence_writer;
+	private MovementTrace _movement;
+	private PresenceTrace _presence;
 	
-	public MovementToPresenceConverter(
-			StatefulWriter<PresenceEvent,Presence> presenceWriter,
-			StatefulReader<MovementEvent,Movement> movementReader) {
-		movement_reader = movementReader;
-		presence_writer = presenceWriter;
-	}
-	
-	@Override
-	public void close() throws IOException {
-		presence_writer.close();
+	public MovementToPresenceConverter(PresenceTrace presence, MovementTrace movement) {
+		_movement = movement;
+		_presence = presence;
 	}
 
 	@Override
-	public void run() throws IOException {
-		Trace movement = movement_reader.trace();
+	public void convert() throws IOException {
+		movement_reader = _movement.getReader();
+		presence_writer = _presence.getWriter(_movement.snapshotInterval());
 		Bus<MovementEvent> movementEventBus = new Bus<MovementEvent>();
 		Bus<Movement> movementBus = new Bus<Movement>();
 		movement_reader.setBus(movementEventBus);
 		movement_reader.setStateBus(movementBus);
 		movementEventBus.addListener(movementEventListener());
 		movementBus.addListener(movementListener());
-		Runner runner = new Runner(movement.maxUpdateInterval(), movement.minTime(), movement.maxTime());
+		Runner runner = new Runner(_movement.maxUpdateInterval(), _movement.minTime(), _movement.maxTime());
 		runner.addGenerator(movement_reader);
 		runner.run();
-		presence_writer.setProperty(Trace.maxTimeKey, movement.maxTime());
-		presence_writer.setProperty(Trace.ticsPerSecondKey, movement.ticsPerSecond());
+		presence_writer.setProperty(Trace.maxTimeKey, _movement.maxTime());
+		presence_writer.setProperty(Trace.ticsPerSecondKey, _movement.ticsPerSecond());
 	}
 
 	@Override

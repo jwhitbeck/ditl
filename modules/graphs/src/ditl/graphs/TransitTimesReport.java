@@ -23,7 +23,7 @@ import java.util.*;
 
 import ditl.*;
 
-public final class TransitTimesReport extends Report implements PresenceHandler {
+public final class TransitTimesReport extends Report implements PresenceTrace.Handler {
 
 	private Map<Integer,Long> entry_times = new HashMap<Integer,Long>();
 	
@@ -31,13 +31,11 @@ public final class TransitTimesReport extends Report implements PresenceHandler 
 		super(out);
 	}
 	
-	public static ReportFactory<TransitTimesReport> factory(){
-		return new ReportFactory<TransitTimesReport>(){
-			@Override
-			public TransitTimesReport getNew(OutputStream out) throws IOException {
-				return new TransitTimesReport(out); 
-			}
-		};
+	public static final class Factory implements ReportFactory<TransitTimesReport> {
+		@Override
+		public TransitTimesReport getNew(OutputStream out) throws IOException {
+			return new TransitTimesReport(out); 
+		}
 	}
 	
 	@Override

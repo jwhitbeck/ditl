@@ -18,76 +18,51 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.Set;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-public class StaticGroupLinks extends GraphApp {
+public class StaticGroupLinks extends ConvertApp {
 	
-	private File origStoreFile;
-	private File destStoreFile;
-	private String groupsName;
-	private String linksName;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.GROUPS, GraphOptions.LINKS);
 	private String groupLinksName;
-	private Long snapInterval;
+	
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "group-links";
+	public final static String CMD_ALIAS = "gl";
 
-	public StaticGroupLinks(String[] args) {
-		super(args);
-	}
 
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store origStore;
-		WritableStore destStore = WritableStore.open(destStoreFile);
-		if ( origStoreFile.equals(destStoreFile) ){
-			origStore = destStore; 
-		} else {
-			origStore = Store.open(origStoreFile);
-		}
-		
-		Trace links = getTrace(origStore,linksName);
-		if ( snapInterval == null )
-			snapInterval = links.snapshotInterval();
-		
-		Trace groups = getTrace(origStore,groupsName);
-		Set<Group> static_groups = GroupTrace.staticGroups(new GraphStore(origStore).getGroupReader(groups));
-		StatefulReader<LinkEvent,Link> linkReader = new GraphStore(origStore).getLinkReader(links);
-		StatefulWriter<LinkEvent,Link> groupLinkWriter = new GraphStore(destStore).getLinkWriter(groupLinksName, snapInterval);
-		
-		Converter converter = new StaticGroupLinkConverter(groupLinkWriter, linkReader, static_groups);
-		converter.run();
-		converter.close();
-		
-		destStore.close();
-		if ( origStore != destStore )
-			origStore.close();
+	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
+		LinkTrace links = (LinkTrace)orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
+		GroupTrace groups = (GroupTrace)orig_store.getTrace(graph_options.get(GraphOptions.GROUPS));
+		Set<Group> static_groups = GroupTrace.staticGroups(groups);
+		LinkTrace group_links = (LinkTrace)dest_store.newTrace(groupLinksName, LinkTrace.type, force);
+		new StaticGroupLinkConverter(group_links, links, static_groups).convert();
 	}
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
-		origStoreFile = new File(args[0]);
-		destStoreFile = new File(cli.getOptionValue(storeOutputOption,args[0]));
-		linksName = cli.getOptionValue(linksOption, GraphStore.defaultLinksName);
-		groupLinksName =  args[1];
-		groupsName = cli.getOptionValue(groupsOption, GraphStore.defaultGroupsName);
-		snapInterval = (Long) cli.getParsedOptionValue(snapIntervalOption);
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
+		groupLinksName = args[1];
 	}
 
 	@Override
-	protected void setUsageString() {
-		usageString = "[OPTIONS] STORE GROUP_LINKS_NAME";
+	protected String getUsageString() {
+		return "[OPTIONS] STORE GROUP_LINKS_NAME";
 	}
 	
 	@Override
 	protected void initOptions(){
-		options.addOption(null, storeOutputOption, true, "write new traces to this store");
-		options.addOption(null, linksOption, true, "links trace name (default: '"+GraphStore.defaultLinksName+"')");
-		options.addOption(null, groupsOption, true, "groups trace name (default: '"+GraphStore.defaultGroupsName+"')");
-		options.addOption(null, snapIntervalOption, true, "snapshot interval (default: same as movement trace)");
+		super.initOptions();
+		graph_options.setOptions(options);
 	}
 
 }

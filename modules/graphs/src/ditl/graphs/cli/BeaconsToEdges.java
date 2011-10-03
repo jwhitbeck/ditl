@@ -18,91 +18,57 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
-import ditl.Reader;
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
 
-public class BeaconsToEdges extends GraphApp {
+public class BeaconsToEdges extends ConvertApp {
 	
 	final static String toleranceOption = "tolerance";
 	final static String expandOption = "expand";
 
-	protected File origStoreFile;
-	protected File destStoreFile;
-	protected String beaconsName;
-	protected String edgesName;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.EDGES);
 	
 	long snap_interval;
-	long period;
 	int tol;
 	double expansion;
 	
-	public BeaconsToEdges(String[] args) {
-		super(args);
-	}
-
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "beacons-to-edges";
+	public final static String CMD_ALIAS = "b2e";
+	
 	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException {
-		origStoreFile = new File(args[0]);
-		destStoreFile = new File(cli.getOptionValue(storeOutputOption,args[0]));
-		
-		beaconsName = cli.getOptionValue(beaconsOption, GraphStore.defaultBeaconsName);
-		edgesName = cli.getOptionValue(edgesOption, GraphStore.defaultEdgesName);
-		
-		period = Long.parseLong(args[1]);
+	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
 		tol = Integer.parseInt(cli.getOptionValue(toleranceOption,"0"));
 		expansion = Double.parseDouble(cli.getOptionValue(expandOption, "0.0"));
-		
 		snap_interval = Long.parseLong(cli.getOptionValue(snapIntervalOption, "60")); // by default, snap every minute
 	}
 
 	@Override
 	protected void initOptions() {
+		super.initOptions();
+		graph_options.setOptions(options);
 		options.addOption(null, storeOutputOption, true, "Name of store to output new traces to");
-		options.addOption(null, edgesOption, true, "Name of edges trace to use");
-		options.addOption(null, beaconsOption, true, "Name of intermediary beacons trace");
 		options.addOption(null, toleranceOption, true, "Missed beacon tolerance (default 0)");
 		options.addOption(null, expandOption, true, "Expand contacts by this fraction (default 0.0)");
 		options.addOption(null, snapIntervalOption, true, "snapshot interval in seconds (default 60)");
 	}
 
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store origStore;
-		WritableStore destStore = WritableStore.open(destStoreFile);
-		if ( origStoreFile.equals(destStoreFile) ){
-			origStore = destStore; 
-		} else {
-			origStore = Store.open(origStoreFile);
-		}
-		
-		GraphStore ogStore = new GraphStore(origStore);
-		GraphStore dgStore = new GraphStore(destStore);
-		
-		Trace beacons = getTrace(origStore,beaconsName);
-		
+	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
+		EdgeTrace edges = (EdgeTrace)dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
+		BeaconTrace beacons = (BeaconTrace) orig_store.getTrace(graph_options.get(GraphOptions.BEACONS));		
 		snap_interval *= beacons.ticsPerSecond();
-		period *= beacons.ticsPerSecond();
 		
-		Reader<Edge> beaconsReader = ogStore.getBeaconsReader(beacons);
-		StatefulWriter<EdgeEvent,Edge> edgesWriter = dgStore.getEdgeWriter(edgesName, snap_interval);
-		Converter converter = new BeaconsToEdgesConverter(edgesWriter, beaconsReader, period, tol, expansion);
-		converter.run();
-		converter.close();
-		
-		destStore.close();
-		if ( origStore != destStore )
-			origStore.close();
+		new BeaconsToEdgesConverter(edges, beacons, tol, expansion, snap_interval)
+			.convert();
 	}
-
-	@Override
-	protected void setUsageString() {
-		usageString = "Resample [OPTIONS] STORE BEACONNING_PERIOD";
-	}
-
 }

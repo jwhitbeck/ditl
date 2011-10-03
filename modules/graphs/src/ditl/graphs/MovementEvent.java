@@ -67,31 +67,29 @@ public final class MovementEvent {
 		return new Movement(id, dest);
 	}
 	
-	public static ItemFactory<MovementEvent> factory(){
-		return new ItemFactory<MovementEvent>(){
-			@Override
-			public MovementEvent fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id = Integer.parseInt(elems[0]);
-					if ( elems[1].equals("OUT") ){
-						return new MovementEvent(id);
+	public static final class Factory implements ItemFactory<MovementEvent> {
+		@Override
+		public MovementEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id = Integer.parseInt(elems[0]);
+				if ( elems[1].equals("OUT") ){
+					return new MovementEvent(id);
+				} else {
+					double x = Double.parseDouble(elems[2]);
+					double y = Double.parseDouble(elems[3]);
+					if ( elems[1].equals("IN") ){
+						return new MovementEvent(id,new Point(x,y));
 					} else {
-						double x = Double.parseDouble(elems[2]);
-						double y = Double.parseDouble(elems[3]);
-						if ( elems[1].equals("IN") ){
-							return new MovementEvent(id,new Point(x,y));
-						} else {
-							double sp = Double.parseDouble(elems[1]);
-							return new MovementEvent(id, sp, new Point(x,y));
-						}
+						double sp = Double.parseDouble(elems[1]);
+						return new MovementEvent(id, sp, new Point(x,y));
 					}
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
 				}
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	@Override
@@ -107,12 +105,10 @@ public final class MovementEvent {
 		return "$ns_ at "+time*mul+ " \"$node_("+id+") setdest "+dest+" "+speed/mul+"\"\n";
 	}
 	
-	public static Matcher<MovementEvent> groupMatcher(final Set<Integer> group){
-		return new Matcher<MovementEvent>(){
-			@Override
-			public boolean matches(MovementEvent item) {
-				return group.contains(item.id);
-			}
-		};
+	public static final class GroupMatcher implements Matcher<MovementEvent> {
+		private Set<Integer> _group;
+		public GroupMatcher(Set<Integer> group){ _group = group;}
+		@Override
+		public boolean matches(MovementEvent item) { return _group.contains(item.id);}
 	}
 }

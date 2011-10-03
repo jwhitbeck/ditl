@@ -18,57 +18,55 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.commons.cli.*;
 
 import ditl.*;
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.WriteApp;
 import ditl.graphs.*;
 
 
-public class ImportStaticGroups extends GraphApp {
+public class ImportStaticGroups extends WriteApp {
 
 	private static String labelsOption = "labels";
 	
 	private boolean useLabels;
-	private String presenceName;
-	private String groupsName;
-	private File storeFile;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.GROUPS);
 	private String[] group_specs;
 	
-	public ImportStaticGroups(String[] args) {
-		super(args);
-	}
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "import-groups";
+	public final static String CMD_ALIAS = "ig";
 	
 	@Override
-	protected void setUsageString(){
-		usageString = "Usage: [OPTIONS] STORE GROUP [GROUP..]";
+	protected String getUsageString(){
+		return"[OPTIONS] STORE GROUP [GROUP..]";
 	}
 
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
-		storeFile = new File(args[0]);
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
 		group_specs = Arrays.copyOfRange(args,1,args.length);
 		useLabels = cli.hasOption(labelsOption);
-		presenceName = cli.getOptionValue(presenceOption, GraphStore.defaultPresenceName);
-		groupsName = cli.getOptionValue(groupsOption, GraphStore.defaultGroupsName);
 	}
 
 	@Override
 	protected void initOptions() {
+		super.initOptions();
+		graph_options.setOptions(options);
 		options.addOption(null, labelsOption, false, "consider first element of group specification as the group's label");
-		options.addOption(null, presenceOption, true, "presence trace to use for minTime and maxTime (default: "+GraphStore.defaultPresenceName+")");
-		options.addOption(null, groupsOption, true, "name of imported groups trace (default: "+GraphStore.defaultGroupsName+")");
 	}
 	
 	@Override
-	public void run() throws IOException, MissingTraceException {
-		WritableStore store = WritableStore.open(storeFile);
-		
-		Trace presence = getTrace(store,presenceName);
-		
-		StatefulWriter<GroupEvent,Group> groupWriter = new GraphStore(store).getGroupWriter(groupsName, presence.snapshotInterval());
+	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+		Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+		GroupTrace groups = (GroupTrace) _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
+		StatefulWriter<GroupEvent,Group> groupWriter = groups.getWriter(presence.snapshotInterval()); 
 		Set<Group> initState = new HashSet<Group>();
 		List<String> labels = new LinkedList<String>();
 		int i=0;
@@ -112,8 +110,6 @@ public class ImportStaticGroups extends GraphApp {
 			groupWriter.setProperty(GroupTrace.labelsKey, buffer.toString());
 		}
 		
-		groupWriter.close();
-		
-		store.close();		
+		groupWriter.close();		
 	}
 }

@@ -34,23 +34,19 @@ public final class Presence {
 		return id;
 	}
 	
-	public static ItemFactory<Presence> factory () {
-		return new ItemFactory<Presence>() {
-
-			@Override
-			public Presence fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id = Integer.parseInt(elems[1]);
-					return new Presence(id);
-					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<Presence> {
+		@Override
+		public Presence fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id = Integer.parseInt(elems[1]);
+				return new Presence(id);
+				
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-			
-		};
+		}
 	}
 	
 	@Override
@@ -69,12 +65,10 @@ public final class Presence {
 		return "p "+id;
 	}
 	
-	public static Matcher<Presence> groupMatcher(final Set<Integer> group){
-		return new Matcher<Presence>(){
-			@Override
-			public boolean matches(Presence item) {
-				return group.contains(item.id);
-			}
-		};
+	public static final class GroupMatcher implements Matcher<Presence> {
+		private Set<Integer> _group;
+		public GroupMatcher(Set<Integer> group){ _group = group;}
+		@Override
+		public boolean matches(Presence item) { return _group.contains(item.id);}
 	}
 }

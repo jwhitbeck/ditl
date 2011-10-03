@@ -18,87 +18,55 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
-import ditl.Writer;
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
 
-public class Resample extends GraphApp {
+public class Resample extends ConvertApp {
 	
 	final static String missProbabilityOption = "miss-probability";
 
-	protected File origStoreFile;
-	protected File destStoreFile;
-	protected String beaconsName;
-	protected String presenceName;
-	protected String linksName;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.PRESENCE, GraphOptions.LINKS);
 	long period;
 	double p;
 	
-	public Resample(String[] args) {
-		super(args);
-	}
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "resample";
+	public final static String CMD_ALIAS = "s";
 
+	
 	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException {
-		origStoreFile = new File(args[0]);
-		destStoreFile = new File(cli.getOptionValue(storeOutputOption,args[0]));
-		
-		beaconsName = cli.getOptionValue(beaconsOption, GraphStore.defaultBeaconsName);
-		linksName = cli.getOptionValue(linksOption,GraphStore.defaultLinksName);
-		presenceName = cli.getOptionValue(linksOption,GraphStore.defaultPresenceName);
-		
+	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
 		period = Long.parseLong(args[1]);
 		p = Double.parseDouble(cli.getOptionValue(missProbabilityOption,"0.0"));	
 	}
 
 	@Override
 	protected void initOptions() {
-		options.addOption(null, storeOutputOption, true, "Name of store to output new traces to");
-		options.addOption(null, linksOption, true, "Name of links trace to use");
-		options.addOption(null, presenceOption, true, "Name of presence trace to use");
-		options.addOption(null, beaconsOption, true, "Name of intermediary beacons trace");
+		super.initOptions();
 		options.addOption(null, missProbabilityOption, true, "Missed beacon probability (default 0.0)");
 	}
 
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store origStore;
-		WritableStore destStore = WritableStore.open(destStoreFile);
-		if ( origStoreFile.equals(destStoreFile) ){
-			origStore = destStore; 
-		} else {
-			origStore = Store.open(origStoreFile);
-		}
-		
-		GraphStore gStore = new GraphStore(origStore);
-		
-		Trace links = getTrace(origStore,linksName);
-		Trace presence = getTrace(origStore,presenceName);
-		
+	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
+		PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+		BeaconTrace beacons = (BeaconTrace) dest_store.newTrace(graph_options.get(GraphOptions.BEACONS), BeaconTrace.type, force);
 		period *= links.ticsPerSecond();
-		
-		Converter converter;
-		StatefulReader<LinkEvent,Link> linkReader = gStore.getLinkReader(links);
-		StatefulReader<PresenceEvent,Presence> presenceReader = gStore.getPresenceReader(presence);
-		Writer<Edge> beaconWriter = destStore.getWriter(beaconsName);
-		converter = new BeaconningConverter(beaconWriter, presenceReader, linkReader, period, p, true);
-		converter.run();
-		converter.close();
-		
-		origStore.close();
-		if ( destStore != origStore )
-			destStore.close();
-		
+		new BeaconningConverter(beacons, presence, links, period, p, true).convert();
 	}
 
 	@Override
-	protected void setUsageString() {
-		usageString = "Resample [OPTIONS] STORE BEACONNING_PERIOD";
+	protected String getUsageString() {
+		return "[OPTIONS] STORE BEACONNING_PERIOD";
 	}
 
 }

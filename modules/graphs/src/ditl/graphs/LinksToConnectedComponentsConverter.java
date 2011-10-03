@@ -32,11 +32,12 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 	private StatefulWriter<GroupEvent,Group> group_writer;
 	private StatefulReader<LinkEvent,Link> link_reader;
 	private int counter = 0;
+	private ConnectedComponentsTrace _ccs;
+	private LinkTrace _links;
 	
-	public LinksToConnectedComponentsConverter( StatefulWriter<GroupEvent,Group> groupWriter, 
-			StatefulReader<LinkEvent,Link> linkReader){
-		group_writer = groupWriter;
-		link_reader = linkReader;
+	public LinksToConnectedComponentsConverter( ConnectedComponentsTrace ccs, LinkTrace links){ 
+		_ccs = ccs;
+		_links = links;
 	}
 	
 	private void merge(long time, Group cc1, Group cc2) throws IOException {
@@ -158,11 +159,6 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 		}
 	}
 	
-	@Override
-	public void close() throws IOException {
-		group_writer.close();
-	}
-	
 	private void setInitState(long time) throws IOException{
 		Set<Group> initCCs = new HashSet<Group>();
 		LinkedList<Integer> toVisit = new LinkedList<Integer>(adjacency.nodes());
@@ -201,9 +197,10 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 
 
 	@Override
-	public void run() throws IOException {
-		Trace trace = link_reader.trace();
-		long minTime = trace.minTime();
+	public void convert() throws IOException {
+		link_reader = _links.getReader();
+		group_writer = _ccs.getWriter(_links.snapshotInterval());
+		long minTime = _links.minTime();
 		link_reader.seek(minTime);
 		Collection<Link> initLinks = link_reader.referenceState();
 		for ( Link l : initLinks )
@@ -213,9 +210,10 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 			long time = link_reader.nextTime();
 			handleEvents(time, link_reader.next());
 		}
-		group_writer.setProperty(Trace.maxTimeKey, trace.maxTime());
-		group_writer.setProperty(Trace.ticsPerSecondKey, trace.ticsPerSecond());
-		group_writer.setProperty(Trace.typeKey, GraphStore.connectedComponentsType);
+		group_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
+		group_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		group_writer.close();
+		link_reader.close();
 	}
 
 }

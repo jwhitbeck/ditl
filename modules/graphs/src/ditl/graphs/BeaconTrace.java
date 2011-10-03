@@ -18,33 +18,29 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import ditl.Writer;
+import java.io.IOException;
+import java.util.Set;
 
-public final class Bounds {
-	private double minX = Double.MAX_VALUE;
-	private double maxX = Double.MIN_VALUE;
-	private double minY = Double.MAX_VALUE;
-	private double maxY = Double.MIN_VALUE;
+import ditl.*;
+
+public class BeaconTrace extends Trace<Edge> implements Trace.Filterable<Edge> {
 	
-	public void update(Point p){
-		updateX(p.x);
-		updateY(p.y);
+	public final static String type = "beacons";
+	public final static String defaultName = "beacons";
+	
+	public final static String beaconningPeriod = "beaconning period";
+	
+	public BeaconTrace(Store store, String name, PersistentMap info) throws IOException {
+		super(store, name, info, new Edge.Factory());
+		info.put(Trace.typeKey, type);
+	}
+
+	@Override
+	public Matcher<Edge> eventMatcher(Set<Integer> group) {
+		return new Edge.InternalGroupMatcher(group);
 	}
 	
-	public void updateX(double x){
-		if ( x < minX ) minX = x;
-		if ( x > maxX ) maxX = x;
-	}
-	
-	public void updateY(double y){
-		if ( y < minY ) minY = y;
-		if ( y > maxY ) maxY = y;
-	}
-	
-	public void writeToTrace(Writer<?> writer){
-		writer.setProperty(MovementTrace.minXKey, minX);
-		writer.setProperty(MovementTrace.maxXKey, maxX);
-		writer.setProperty(MovementTrace.minYKey, minY);
-		writer.setProperty(MovementTrace.maxYKey, maxY);
+	public long beaconningPeriod(){
+		return Long.parseLong(getValue(beaconningPeriod));
 	}
 }

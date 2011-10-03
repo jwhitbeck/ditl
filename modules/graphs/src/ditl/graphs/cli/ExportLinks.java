@@ -18,64 +18,51 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
+import ditl.Store.NoSuchTraceException;
+import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
-public class ExportLinks extends GraphApp {
+public class ExportLinks extends ExportApp {
 	
-	private File storeFile = null;
-	private boolean useCRAWDAD;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS);
+	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.CRAWDAD, ExternalFormat.ONE);
 	private Long dtps;
-	private String traceName;
-	private String outFile;
 
-	public ExportLinks(String[] args) {
-		super(args);
-	}
-
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "export-links";
+	public final static String CMD_ALIAS = "xl";
+	
 	@Override
 	protected void initOptions() {
-		options.addOption(null, fmtOption, true, "CRAWDAD or ONE");
+		super.initOptions();
+		graph_options.setOptions(options);
+		ext_fmt.setOptions(options);
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: s)");
-		options.addOption(null, linksOption, true, "links trace name (default: '"+GraphStore.defaultLinksName+"')");
-		options.addOption(null, outputOption, true, "output file");
 	}
 
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args)
 			throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		storeFile = new File(args[0]);
-		useCRAWDAD = cli.getOptionValue(fmtOption, crawdadFormat).equals(crawdadFormat);
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
+		ext_fmt.parse(cli);
 		dtps = getTicsPerSecond( cli.getOptionValue(destTimeUnitOption,"s"));
 		if ( dtps == null )
 			throw new HelpException();
-		traceName = cli.getOptionValue(linksOption, GraphStore.defaultLinksName);
-		outFile = cli.getOptionValue(outputOption);
 	}
 
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store store = Store.open(storeFile);
-		Trace trace = getTrace(store,traceName);
-		long otps = trace.ticsPerSecond();
+	protected void run() throws IOException, NoSuchTraceException {
+		LinkTrace links = (LinkTrace) _store.getTrace(graph_options.get(GraphOptions.LINKS));
+		long otps = links.ticsPerSecond();
 		double timeMul = getTimeMul(otps,dtps);
-		OutputStream out = (outFile != null)? new FileOutputStream(outFile) : System.out;
-		StatefulReader<LinkEvent,Link> linkReader = 
-			new GraphStore(store).getLinkReader(trace);
-		if ( useCRAWDAD )
-			CRAWDADContacts.toCRAWDAD(linkReader, out, timeMul);
+		if ( ext_fmt.is(ExternalFormat.CRAWDAD) )
+			CRAWDADContacts.toCRAWDAD(links, _out, timeMul);
 		else
-			ONEContacts.toONE(linkReader, out, timeMul);
-		store.close();
+			ONEContacts.toONE(links, _out, timeMul);
 	}
-
-	@Override
-	protected void setUsageString() {
-		usageString = "[OPTIONS] STORE";
-	}
-
 }

@@ -25,7 +25,7 @@ import ditl.*;
 
 
 
-public final class BeaconningConverter implements PresenceHandler, Converter, Generator {
+public final class BeaconningConverter implements PresenceTrace.Handler, Converter, Generator {
 
 	protected boolean _randomize;
 	private double _p;
@@ -33,21 +33,21 @@ public final class BeaconningConverter implements PresenceHandler, Converter, Ge
 	private long _period;
 	private Random rng = new Random();
 	private Bus<Integer> next_scans = new Bus<Integer>();
-	
-	private StatefulReader<PresenceEvent,Presence> presence_reader;
-	private StatefulReader<LinkEvent,Link> link_reader;
 	private Writer<Edge> beacon_writer;
 	
+	private BeaconTrace _beacons;
+	private PresenceTrace _presence;
+	private LinkTrace _links;
 	
-	public BeaconningConverter( Writer<Edge> beaconWriter,
-			StatefulReader<PresenceEvent,Presence> presenceReader,
-			StatefulReader<LinkEvent,Link> linkReader, long period, double p, boolean randomize) {
+	
+	public BeaconningConverter( BeaconTrace beacons, PresenceTrace presence, 
+			LinkTrace links, long period, double p, boolean randomize) {
 		_randomize = randomize;
 		_p = p;
 		_period = period;
-		beacon_writer = beaconWriter;
-		presence_reader = presenceReader;
-		link_reader = linkReader;
+		_beacons = beacons;
+		_links = links;
+		_presence = presence;
 		next_scans.addListener(nextScansListener());
 	}
 
@@ -117,14 +117,10 @@ public final class BeaconningConverter implements PresenceHandler, Converter, Ge
 	}
 
 	@Override
-	public void close() throws IOException {
-		beacon_writer.close();
-	}
-
-	@Override
-	public void run() throws IOException {
-		Trace links = link_reader.trace();
-		Trace presence = presence_reader.trace();
+	public void convert() throws IOException {
+		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader();
+		StatefulReader<LinkEvent,Link> link_reader = _links.getReader();
+		beacon_writer = _beacons.getWriter();
 		
 		Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
 		Bus<PresenceEvent> presenceEventBus = new Bus<PresenceEvent>();
@@ -143,13 +139,17 @@ public final class BeaconningConverter implements PresenceHandler, Converter, Ge
 		linkBus.addListener(_adjacency.linkListener());
 		linkEventBus.addListener(_adjacency.linkEventListener());
 		
-		Runner runner = new Runner(links.maxUpdateInterval(), presence.minTime(), presence.maxTime());
+		Runner runner = new Runner(_links.maxUpdateInterval(), _presence.minTime(), _presence.maxTime());
 		runner.addGenerator(presence_reader);
 		runner.addGenerator(link_reader);
 		runner.addGenerator(this);
 		runner.run();
 		
-		beacon_writer.setProperty(Trace.ticsPerSecondKey, links.ticsPerSecond());
+		beacon_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		beacon_writer.setProperty(BeaconTrace.beaconningPeriod, _period);
+		beacon_writer.close();
+		presence_reader.close();
+		link_reader.close();
 	}
 
 	@Override
@@ -159,7 +159,7 @@ public final class BeaconningConverter implements PresenceHandler, Converter, Ge
 
 	@Override
 	public int priority() {
-		return Runner.defaultPriority;
+		return Trace.defaultPriority;
 	}
 
 	@Override

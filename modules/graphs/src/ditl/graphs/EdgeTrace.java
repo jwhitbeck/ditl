@@ -18,52 +18,65 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.*;
 
 import ditl.*;
 
-public final class GroupUpdater implements StateUpdater<GroupEvent, Group> {
-
-	private Map<Integer,Group> group_map = new HashMap<Integer,Group>();
-	private Set<Group> groups = new HashSet<Group>();
+public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge> 
+	implements StatefulTrace.Filterable<EdgeEvent, Edge>{
 	
-	@Override
-	public void setState(Collection<Group> groupState ) {
-		groups.clear();
-		group_map.clear();
-		for ( Group g : groupState ){
-			groups.add(g);
-			group_map.put(g._gid, g);
+	public final static String type = "edges";
+	public final static String defaultName = "edges";
+	
+	public final static class Updater implements StateUpdater<EdgeEvent, Edge> {
+
+		private Set<Edge> edges = new HashSet<Edge>(); 
+		
+		@Override
+		public void setState(Collection<Edge> edgesState ) {
+			edges.clear();
+			for ( Edge e : edgesState )
+				edges.add(e);
 		}
+
+		@Override
+		public Set<Edge> states() {
+			return edges;
+		}
+
+		@Override
+		public void handleEvent(long time, EdgeEvent event) {
+			if ( event.isUp() )
+				edges.add(event.edge());
+			else
+				edges.remove(event.edge());
+		}
+	}
+	
+	public interface Handler {
+		public Listener<Edge> edgeListener();
+		public Listener<EdgeEvent> edgeEventListener();
+	}
+
+	public EdgeTrace(Store store, String name, PersistentMap info) throws IOException {
+		super(store, name, info, new EdgeEvent.Factory(), new Edge.Factory(), 
+				new StateUpdaterFactory<EdgeEvent,Edge>(){
+					@Override
+					public StateUpdater<EdgeEvent, Edge> getNew() {
+						return new EdgeTrace.Updater();
+					}
+		});
+		info.put(Trace.typeKey, type);
 	}
 
 	@Override
-	public Set<Group> states() {
-		return groups;
+	public Matcher<Edge> stateMatcher(Set<Integer> group) {
+		return new Edge.InternalGroupMatcher(group);
 	}
 
 	@Override
-	public void handleEvent(long time, GroupEvent event) {
-		Group g;
-		Integer gid = event._gid;
-		switch ( event._type ){
-		case GroupEvent.NEW: 
-			g = new Group(gid);
-			groups.add(g);
-			group_map.put(gid, g);
-			break;
-		case GroupEvent.JOIN:
-			g = group_map.get(gid);
-			g.handleEvent(event);
-			break;
-		case GroupEvent.LEAVE:
-			g = group_map.get(gid);
-			g.handleEvent(event);
-			break;
-		case GroupEvent.DELETE:
-			g = group_map.get(gid);
-			groups.remove(g);
-			group_map.remove(gid);
-		}
+	public Matcher<EdgeEvent> eventMatcher(Set<Integer> group) {
+		return new EdgeEvent.InternalGroupMatcher(group);
 	}
 }

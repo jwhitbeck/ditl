@@ -27,9 +27,11 @@ import ditl.*;
 
 public class CRAWDADEdges {
 	
-	public static void fromCRAWDAD(StatefulWriter<EdgeEvent,Edge> edgeWriter,
-			InputStream in, double timeMul, long offset) throws IOException{
+	public static void fromCRAWDAD(EdgeTrace edges,
+			InputStream in, double timeMul, long ticsPerSecond,
+			long offset, long snapInterval) throws IOException{
 		
+		StatefulWriter<EdgeEvent,Edge> edgeWriter = edges.getWriter(snapInterval);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		
@@ -43,18 +45,18 @@ public class CRAWDADEdges {
 			edgeWriter.queue(end, new EdgeEvent(id1,id2,EdgeEvent.DOWN));
 		}
 		edgeWriter.flush();
+		edgeWriter.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
 		edgeWriter.close();
-		
 		br.close();
 	}
 	
-	public static void toCRAWDAD(StatefulReader<EdgeEvent,Edge> edgeReader, 
+	public static void toCRAWDAD(EdgeTrace edges, 
 			OutputStream out, double timeMul) throws IOException {
 	
+		StatefulReader<EdgeEvent,Edge> edgeReader = edges.getReader();
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
 		Map<Edge,Long> activeEdges = new HashMap<Edge,Long>();
 		
-		Trace edges = edgeReader.trace();
 		edgeReader.seek(edges.minTime());
 		for ( Edge e : edgeReader.referenceState() )
 			activeEdges.put(e, edges.minTime());
@@ -73,6 +75,7 @@ public class CRAWDADEdges {
 		}
 		
 		bw.close();
+		edgeReader.close();
 	}
 	
 }

@@ -18,72 +18,42 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-public class LinksToCCs extends GraphApp {
+public class LinksToCCs extends ConvertApp {
 
-	private File origStoreFile;
-	private File destStoreFile;
-	private String ccName;
-	private String linksName;
-	private Long snapInterval;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.CC);
 	
-	public LinksToCCs(String[] args) {
-		super(args);
-	}
-
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "links-to-ccs";
+	public final static String CMD_ALIAS = "l2c";
+	
 	@Override
 	protected void initOptions() {
-		options.addOption(null, storeOutputOption, true, "write new traces to this store");
-		options.addOption(null, linksOption, true, "name of links trace (default: "+GraphStore.defaultLinksName+")");
-		options.addOption(null, snapIntervalOption, true, "snapshot interval (default: same as links trace)");
-		options.addOption(null, ccOption, true, "name of connected components trace (default: "+GraphStore.defaultConnectedComponentsName+")");
+		super.initOptions();
+		graph_options.setOptions(options);
 	}
 
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args)
 			throws ParseException, ArrayIndexOutOfBoundsException,
 			HelpException {
-		origStoreFile = new File(args[0]);
-		destStoreFile = new File(cli.getOptionValue(storeOutputOption,args[0]));
-		ccName = cli.getOptionValue(ccOption, GraphStore.defaultConnectedComponentsName);
-		linksName = cli.getOptionValue(linksOption, GraphStore.defaultLinksName);
-		snapInterval = (Long) cli.getParsedOptionValue(snapIntervalOption);
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
 	}
 
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store origStore;
-		WritableStore destStore = WritableStore.open(destStoreFile);
-		if ( origStoreFile.equals(destStoreFile) ){
-			origStore = destStore; 
-		} else {
-			origStore = Store.open(origStoreFile);
-		}
-		
-		Trace links = getTrace(origStore,linksName);
-		if ( snapInterval == null )
-			snapInterval = links.snapshotInterval();
-		StatefulReader<LinkEvent,Link> linksReader = new GraphStore(origStore).getLinkReader(links);
-		StatefulWriter<GroupEvent,Group> groupWriter = new GraphStore(destStore).getGroupWriter(ccName, snapInterval);
-		
-		Converter converter = new LinksToConnectedComponentsConverter(groupWriter, linksReader);
-		converter.run();
-		converter.close();
-		
-		destStore.close();
-		if ( origStore != destStore )
-			origStore.close();
-	}
-
-	@Override
-	protected void setUsageString() {
-		usageString = "[OPTIONS] STORE";
+	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
+		ConnectedComponentsTrace ccs = (ConnectedComponentsTrace) dest_store.newTrace(graph_options.get(GraphOptions.CC), ConnectedComponentsTrace.type, force);
+		new LinksToConnectedComponentsConverter(ccs, links).convert();
 	}
 
 }

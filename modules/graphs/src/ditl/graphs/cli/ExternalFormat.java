@@ -18,24 +18,53 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import ditl.cli.App;
+import org.apache.commons.cli.*;
 
-abstract class GraphApp extends App {
-
-	protected final static String presenceOption = "presence";
-	protected final static String ccOption = "cc";
-	protected final static String linksOption = "links";
-	protected final static String edgesOption = "edges";
-	protected final static String groupsOption = "groups";
-	protected final static String movementOption = "movement";
-	protected final static String beaconsOption = "beacons";
+public final class ExternalFormat {
 	
-	protected final static String ns2Format = "NS2";
-	protected final static String oneFormat = "ONE";
-	protected final static String crawdadFormat = "CRAWDAD";
+	public final static int NS2 = 0;
+	public final static int ONE = 1;
+	public final static int CRAWDAD = 2;
 	
+	public final static String[] labels = {
+		"ns2",
+		"one",
+		"crawdad"
+	};
 	
-	public GraphApp(String[] args) {
-		super(args);
+	private Integer[] _fmts;
+	private Integer cur_fmt;
+	
+	private final static String fmtOption = "format";
+	
+	public ExternalFormat(Integer...fmts){
+		_fmts = fmts;
+		cur_fmt = _fmts[0];
+	}
+	
+	public void setOptions(Options options){
+		StringBuffer buffer = new StringBuffer();
+		for ( int i=0; i<_fmts.length; ++i){
+			buffer.append(labels[_fmts[i]]);
+			if ( i<_fmts.length-1)
+				buffer.append(" | ");
+		}
+		if ( _fmts.length >= 2 )
+			buffer.append(" (default: "+labels[cur_fmt]+")");
+		options.addOption(null, fmtOption, true, buffer.toString());
+	}
+	
+	public void parse(CommandLine cli){
+		if ( cli.hasOption(fmtOption) ){
+			String v = cli.getOptionValue(fmtOption);
+			for ( int i=0; i<labels.length; ++i){
+				if ( labels[i].equals(v.toLowerCase()))
+					cur_fmt = i;
+			}
+		}
+	}
+	
+	public boolean is(Integer fmt){
+		return fmt.equals(cur_fmt);
 	}
 }

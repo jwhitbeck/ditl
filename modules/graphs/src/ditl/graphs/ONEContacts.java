@@ -23,11 +23,12 @@ import java.io.*;
 import ditl.*;
 
 
-
 public class ONEContacts {
 	
-	public static void fromONE(StatefulWriter<LinkEvent,Link> linkWriter, 
-			InputStream in, double timeMul, long offset) throws IOException {
+	public static void fromONE(LinkTrace links, 
+			InputStream in, double timeMul, long ticsPerSecond,
+			long offset, long snapInterval) throws IOException {
+		StatefulWriter<LinkEvent,Link> linkWriter = links.getWriter(snapInterval);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		while ( (line=br.readLine()) != null ){
@@ -41,16 +42,15 @@ public class ONEContacts {
 			else
 				linkWriter.append(time, new LinkEvent(id1, id2, LinkEvent.DOWN));
 		}
-		
+		linkWriter.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
 		linkWriter.close();
 		br.close();
 	}
 	
-	public static void toONE(StatefulReader<LinkEvent,Link> linkReader,
+	public static void toONE(LinkTrace links,
 			OutputStream out, double timeMul) throws IOException {
 		
-		Trace links = linkReader.trace();
-		
+		StatefulReader<LinkEvent,Link> linkReader = links.getReader();
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
 		
 		linkReader.seek(links.minTime());
@@ -61,5 +61,6 @@ public class ONEContacts {
 				bw.write(linkReader.time()*timeMul+" CONN "+ev+"\n");
 			
 		bw.close();
+		linkReader.close();
 	}
 }

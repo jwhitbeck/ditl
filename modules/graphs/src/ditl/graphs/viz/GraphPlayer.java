@@ -67,27 +67,26 @@ public class GraphPlayer extends SimplePlayer {
 	}
 	
 	protected void loadReaders(){
-		movement = new MovementTrace(_store.listTraces(GraphStore.movementType).get(0)); // use first movement trace
+		movement = (MovementTrace)_store.listTraces(MovementTrace.type).get(0); // use first movement trace
 		
 		if ( groups != null ){
-			List<Trace> groupsTraces = _store.listTraces(GraphStore.groupType);
+			List<Trace<?>> groupsTraces = _store.listTraces(GroupTrace.type);
 			if ( ! groupsTraces.isEmpty() )
-				loadGroups(groupsTraces.get(0));
+				loadGroups((GroupTrace)groupsTraces.get(0));
 		}
 		
-		setMovementReader(movement);
+		setMovementTrace(movement);
 		
 		if ( linksSelector != null ){
 			linksSelector.setStore(_store);
-			linksSelector.load(_store.listTraces(GraphStore.linksType));
+			linksSelector.load(_store.listTraces(LinkTrace.type));
 		}		
 	}
 	
-	protected void loadGroups(Trace groupTrace){
+	protected void loadGroups(GroupTrace groupTrace){
 		try {
-			StatefulReader<GroupEvent,Group> groupReader = new GraphStore(_store).getGroupReader(groupTrace);
-			Set<Group> grps = GroupTrace.staticGroups(groupReader);
-			Groups g = new Groups(grps, new GroupTrace(groupTrace));
+			Set<Group> grps = GroupTrace.staticGroups(groupTrace);
+			Groups g = new Groups(grps, groupTrace);
 			if ( g != null ){
 				groups.load(g);
 				scene.setGroups(g);
@@ -97,17 +96,15 @@ public class GraphPlayer extends SimplePlayer {
 		}
 	}
 	
-	protected void setMovementReader(MovementTrace movement) {
-		StatefulReader<MovementEvent, Movement> movementReader = null;
+	protected void setMovementTrace(MovementTrace movement) {
 		try {
-			movementReader = new GraphStore(_store).getMovementReader(movement);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this, "Failed to load movement file '"+movement.name()+"'", "Warning", JOptionPane.ERROR_MESSAGE);
+			scene.updateSize(movement.minX(),movement.minY(),movement.maxX(),movement.maxY());
+			runner.setMovementTrace(movement);
+			runner.setTicsPerSecond(movement.ticsPerSecond());
+			controls.updateTimes(movement.ticsPerSecond(),movement.minTime(), movement.maxTime());
+			runner.seek(movement.minTime());
+		} catch ( IOException ioe ){
+			JOptionPane.showMessageDialog(this, "Error opening movement file", "Warning", JOptionPane.ERROR_MESSAGE);
 		}
-		scene.updateSize(movement.minX(),movement.minY(),movement.maxX(),movement.maxY());
-		runner.setMovementReader(movementReader);
-		runner.setTicsPerSecond(movement.ticsPerSecond());
-		controls.updateTimes(movement.ticsPerSecond(),movement.minTime(), movement.maxTime());
-		runner.seek(movement.minTime());
 	}
 }

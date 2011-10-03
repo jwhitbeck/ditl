@@ -37,14 +37,19 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 	private double _expansion;
 	private StatefulWriter<EdgeEvent, Edge> edge_writer;
 	private Reader<Edge> beacon_reader;
+	private long snap_interval;
 	
-	public BeaconsToEdgesConverter(StatefulWriter<EdgeEvent, Edge> edgeWriter,
-			Reader<Edge> beaconReader, long period, int tol, double expansion) {
-		edge_writer = edgeWriter;
-		beacon_reader = beaconReader;
-		_period = period;
+	private EdgeTrace _edges;
+	private BeaconTrace _beacons;
+	
+	public BeaconsToEdgesConverter(EdgeTrace edges, BeaconTrace beacons,
+			int tol, double expansion, long snapInterval) {
+		_edges = edges;
+		_beacons = beacons;
+		_period = beacons.beaconningPeriod();
 		_tol = tol;
 		_expansion = expansion;
+		snap_interval = snapInterval;
 	}
 	
 	public Listener<Edge> detectedListener(){
@@ -105,23 +110,18 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 	public void seek(long time) {
 		cur_time = time;
 	}
-	
+
 	@Override
-	public void close() throws IOException {
-		edge_writer.close();
-	}
-	
-	@Override
-	public void run() throws IOException {
-		
-		Trace detected = beacon_reader.trace();
+	public void convert() throws IOException {
+		edge_writer = _edges.getWriter(snap_interval);
+		beacon_reader = _beacons.getReader();
 		
 		Bus<Edge> detectedBus = new Bus<Edge>();	
 		beacon_reader.setBus(detectedBus);
 		
 		detectedBus.addListener(detectedListener());
 		
-		Runner runner = new Runner(_period,detected.minTime(),detected.maxTime());
+		Runner runner = new Runner(_period,_beacons.minTime(),_beacons.maxTime());
 		runner.addGenerator(beacon_reader);
 		runner.add(this);
 		
@@ -129,6 +129,9 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 				
 		edge_writer.flush(cur_time+(_tol+1)*_period);
 		
-		edge_writer.setProperty(Trace.ticsPerSecondKey, detected.ticsPerSecond());
+		edge_writer.setProperty(Trace.ticsPerSecondKey, _beacons.ticsPerSecond());
+		
+		edge_writer.close();
+		beacon_reader.close();
 	}
 }

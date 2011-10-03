@@ -23,7 +23,7 @@ import java.util.*;
 
 import ditl.*;
 
-public final class NodeCountReport extends Report implements PresenceHandler {
+public final class NodeCountReport extends Report implements PresenceTrace.Handler {
 
 	private long count;
 	
@@ -32,13 +32,11 @@ public final class NodeCountReport extends Report implements PresenceHandler {
 		appendComment("time | node count");
 	}
 	
-	public static ReportFactory<NodeCountReport> factory(){
-		return new ReportFactory<NodeCountReport>(){
-			@Override
-			public NodeCountReport getNew(OutputStream out) throws IOException {
-				return new NodeCountReport(out);
-			}
-		};
+	public static final class Factory implements ReportFactory<NodeCountReport> {
+		@Override
+		public NodeCountReport getNew(OutputStream out) throws IOException {
+			return new NodeCountReport(out);
+		}
 	}
 	
 	@Override

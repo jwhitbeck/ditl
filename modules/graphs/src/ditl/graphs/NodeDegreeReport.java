@@ -25,7 +25,7 @@ import ditl.*;
 
 
 
-public final class NodeDegreeReport	extends Report implements LinkHandler, PresenceHandler {
+public final class NodeDegreeReport	extends Report implements LinkTrace.Handler, PresenceTrace.Handler {
 
 	private Map<Integer,Integer> degrees = new HashMap<Integer,Integer>();
 	
@@ -34,13 +34,11 @@ public final class NodeDegreeReport	extends Report implements LinkHandler, Prese
 		appendComment("time | node degree distribution");
 	}
 	
-	public static ReportFactory<NodeDegreeReport> factory(){
-		return new ReportFactory<NodeDegreeReport>() {
-			@Override
-			public NodeDegreeReport getNew(OutputStream out) throws IOException {
-				return new NodeDegreeReport(out);
-			}
-		};
+	public static final class Factory implements ReportFactory<NodeDegreeReport> {
+		@Override
+		public NodeDegreeReport getNew(OutputStream out) throws IOException {
+			return new NodeDegreeReport(out);
+		}
 	}
 	
 	@Override

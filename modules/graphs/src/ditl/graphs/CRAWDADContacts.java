@@ -27,9 +27,11 @@ import ditl.*;
 
 public class CRAWDADContacts {
 	
-	public static void fromCRAWDAD(StatefulWriter<LinkEvent,Link> linkWriter,
-			InputStream in, double timeMul, long offset) throws IOException{
+	public static void fromCRAWDAD(LinkTrace links,
+			InputStream in, double timeMul, long ticsPerSecond,
+			long offset, long snapInterval) throws IOException{
 		
+		StatefulWriter<LinkEvent,Link> linkWriter = links.getWriter(snapInterval);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		
@@ -43,18 +45,18 @@ public class CRAWDADContacts {
 			linkWriter.queue(end, new LinkEvent(id1,id2,LinkEvent.DOWN));
 		}
 		linkWriter.flush();
+		linkWriter.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
 		linkWriter.close();
-		
 		br.close();
 	}
 	
-	public static void toCRAWDAD(StatefulReader<LinkEvent,Link> linkReader, 
+	public static void toCRAWDAD(LinkTrace links, 
 			OutputStream out, double timeMul) throws IOException {
 	
+		StatefulReader<LinkEvent,Link> linkReader = links.getReader();
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
 		Map<Link,Long> activeContacts = new HashMap<Link,Long>();
 		
-		Trace links = linkReader.trace();
 		linkReader.seek(links.minTime());
 		for ( Link l : linkReader.referenceState() )
 			activeContacts.put(l, links.minTime());
@@ -71,7 +73,7 @@ public class CRAWDADContacts {
 				}
 			}
 		}
-		
+		linkReader.close();
 		bw.close();
 	}
 	

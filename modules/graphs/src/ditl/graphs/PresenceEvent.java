@@ -47,37 +47,31 @@ public final class PresenceEvent {
 		return new Presence(id);
 	}
 	
-	public static ItemFactory<PresenceEvent> factory () {
-		return new ItemFactory<PresenceEvent>() {
-
-			@Override
-			public PresenceEvent fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					int id = Integer.parseInt(elems[0]);
-					boolean in = elems[1].equals("IN");
-					return new PresenceEvent(id,in);
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<PresenceEvent> {
+		@Override
+		public PresenceEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				int id = Integer.parseInt(elems[0]);
+				boolean in = elems[1].equals("IN");
+				return new PresenceEvent(id,in);
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-			
-		};
+		}
 	}
 	
 	@Override
 	public String toString(){
 		return id+" "+(in? "IN" : "OUT");
 	}
-	
-	public static Matcher<PresenceEvent> groupMatcher(final Set<Integer> group){
-		return new Matcher<PresenceEvent>(){
-			@Override
-			public boolean matches(PresenceEvent item) {
-				return group.contains(item.id);
-			}
-		};
+
+	public static final class GroupMatcher implements Matcher<PresenceEvent> {
+		private Set<Integer> _group;
+		public GroupMatcher(Set<Integer> group){ _group = group;}
+		@Override
+		public boolean matches(PresenceEvent item) { return _group.contains(item.id);}
 	}
 
 }

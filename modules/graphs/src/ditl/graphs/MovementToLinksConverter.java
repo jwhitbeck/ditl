@@ -25,7 +25,7 @@ import ditl.*;
 
 
 
-public class MovementToLinksConverter implements Incrementable, MovementHandler, Converter {
+public class MovementToLinksConverter implements Incrementable, MovementTrace.Handler, Converter {
 
 	private double r2;
 	private long max_interval;
@@ -33,12 +33,14 @@ public class MovementToLinksConverter implements Incrementable, MovementHandler,
 	private Map<Integer,Movement> valid_movements = new HashMap<Integer,Movement>();
 	private StatefulWriter<LinkEvent,Link> links_writer;
 	private StatefulReader<MovementEvent,Movement> movement_reader;
+	private MovementTrace _movement;
+	private LinkTrace _links;
 	private long cur_time;
 	
-	public MovementToLinksConverter(StatefulWriter<LinkEvent,Link> linksWriter,
-			StatefulReader<MovementEvent,Movement> movementReader, double range, long maxInterval) {
-		links_writer = linksWriter;
-		movement_reader = movementReader;
+	public MovementToLinksConverter(LinkTrace links, MovementTrace movement,
+			double range, long maxInterval) {
+		_links = links;
+		_movement = movement;
 		r2 = range*range;
 		max_interval = maxInterval;
 	}
@@ -169,7 +171,10 @@ public class MovementToLinksConverter implements Incrementable, MovementHandler,
 		cur_time = time;
 	}
 	
-	public void run() throws IOException {
+	@Override
+	public void convert() throws IOException {
+		links_writer = _links.getWriter(_movement.snapshotInterval());
+		movement_reader = _movement.getReader();
 		
 		Bus<Movement> movementBus = new Bus<Movement>();
 		Bus<MovementEvent> movementEventBus = new Bus<MovementEvent>();
@@ -179,16 +184,13 @@ public class MovementToLinksConverter implements Incrementable, MovementHandler,
 		movementBus.addListener(movementListener());
 		movementEventBus.addListener(movementEventListener());
 		
-		Trace movement = movement_reader.trace();
-		links_writer.setProperty(Trace.ticsPerSecondKey, movement.ticsPerSecond());
-		Runner runner = new Runner(movement.maxUpdateInterval(), movement.minTime(), movement.maxTime());
+		links_writer.setProperty(Trace.ticsPerSecondKey, _movement.ticsPerSecond());
+		Runner runner = new Runner(_movement.maxUpdateInterval(), _movement.minTime(), _movement.maxTime());
 		runner.addGenerator(movement_reader);
 		runner.add(this);
 		runner.run();
-	}
-
-	@Override
-	public void close() throws IOException {
+		
 		links_writer.close();
+		movement_reader.close();
 	}
 }

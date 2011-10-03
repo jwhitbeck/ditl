@@ -29,7 +29,7 @@ import ditl.viz.Scene;
 
 
 @SuppressWarnings("serial")
-public class GraphScene extends Scene implements MovementHandler, LinkHandler, EdgeHandler {
+public class GraphScene extends Scene implements MovementTrace.Handler, LinkTrace.Handler, EdgeTrace.Handler {
 
 	protected Map<Integer,NodeElement> nodes = new HashMap<Integer,NodeElement>();
 	private Map<Link,LinkElement> links = new HashMap<Link,LinkElement>();

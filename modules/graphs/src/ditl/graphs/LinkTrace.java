@@ -18,34 +18,65 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.*;
 
 import ditl.*;
 
-
-
-public final class PresenceUpdater implements StateUpdater<PresenceEvent, Presence> {
-
-	private Set<Presence> currentIds = new HashSet<Presence>();
+public class LinkTrace extends StatefulTrace<LinkEvent, Link> 
+	implements StatefulTrace.Filterable<LinkEvent, Link>{
 	
-	@Override
-	public void setState(Collection<Presence> presenceState ) {
-		currentIds.clear();
-		for ( Presence p : presenceState )
-			currentIds.add(p);
-	}
-
-	@Override
-	public Set<Presence> states() {
-		return currentIds;
-	}
-
-	@Override
-	public void handleEvent(long time, PresenceEvent event) {
-		if ( event.isIn() ){
-			currentIds.add( event.presence() );
-		} else {
-			currentIds.remove( event.presence() );
+	public final static String type = "links";
+	public final static String defaultName = "links";
+	
+	public final static class Updater implements StateUpdater<LinkEvent,Link> {
+		private Set<Link> links = new HashSet<Link>();
+		
+		@Override
+		public void setState(Collection<Link> contactsState ) {
+			links.clear();
+			for ( Link l : contactsState )
+				links.add(l);
 		}
+
+		@Override
+		public Set<Link> states() {
+			return links;
+		}
+
+		@Override
+		public void handleEvent(long time, LinkEvent event) {
+			if ( event.isUp() ){
+				links.add( event.link() );
+			} else {
+				links.remove( event.link() );
+			}
+		}
+	}
+	
+	public interface Handler {
+		public Listener<Link> linkListener();
+		public Listener<LinkEvent> linkEventListener();
+	}
+
+	public LinkTrace(Store store, String name, PersistentMap info) throws IOException {
+		super(store, name, info, new LinkEvent.Factory(), new Link.Factory(), 
+				new StateUpdaterFactory<LinkEvent,Link>(){
+					@Override
+					public StateUpdater<LinkEvent, Link> getNew() {
+						return new LinkTrace.Updater();
+					}
+		});
+		info.put(Trace.typeKey, type);
+	}
+
+	@Override
+	public Matcher<Link> stateMatcher(Set<Integer> group) {
+		return new Link.InternalGroupMatcher(group);
+	}
+
+	@Override
+	public Matcher<LinkEvent> eventMatcher(Set<Integer> group) {
+		return new LinkEvent.InternalGroupMatcher(group);
 	}
 }

@@ -67,36 +67,34 @@ public class GroupEvent {
 		return _members;
 	}
 	
-	public static ItemFactory<GroupEvent> factory(){
-		return new ItemFactory<GroupEvent>(){
-			@Override
-			public GroupEvent fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					String sType = elems[0];
-					Integer gid = Integer.parseInt(elems[1]);
-					if ( sType.equals(NEW_LABEL) ){
-						return new GroupEvent(gid, NEW);
-					} else if ( sType.equals(DELETE_LABEL) ){
-						return new GroupEvent(gid, DELETE);
-					} else {
-						Set<Integer> members = new HashSet<Integer>();
-						for ( String m : elems[2].split(Group.delim) ){
-							members.add(Integer.parseInt(m));
-						}
-						if ( sType.equals(JOIN_LABEL) ){
-							return new GroupEvent(gid, JOIN, members);
-						} else {
-							return new GroupEvent(gid, LEAVE, members);
-						}
+	public final static class Factory implements ItemFactory<GroupEvent> {
+		@Override
+		public GroupEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				String sType = elems[0];
+				Integer gid = Integer.parseInt(elems[1]);
+				if ( sType.equals(NEW_LABEL) ){
+					return new GroupEvent(gid, NEW);
+				} else if ( sType.equals(DELETE_LABEL) ){
+					return new GroupEvent(gid, DELETE);
+				} else {
+					Set<Integer> members = new HashSet<Integer>();
+					for ( String m : elems[2].split(Group.delim) ){
+						members.add(Integer.parseInt(m));
 					}
-					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
+					if ( sType.equals(JOIN_LABEL) ){
+						return new GroupEvent(gid, JOIN, members);
+					} else {
+						return new GroupEvent(gid, LEAVE, members);
+					}
 				}
+				
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	@Override

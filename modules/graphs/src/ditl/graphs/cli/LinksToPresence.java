@@ -18,72 +18,41 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-public class LinksToPresence extends GraphApp {
+public class LinksToPresence extends ConvertApp {
 
-	private File origStoreFile;
-	private File destStoreFile;
-	private String presenceName;
-	private String linksName;
-	private Long snapInterval;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.PRESENCE);
 	
-	public LinksToPresence(String[] args) {
-		super(args);
-	}
-
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "links-to-presence";
+	public final static String CMD_ALIAS = "l2p";
+	
 	@Override
 	protected void initOptions() {
-		options.addOption(null, storeOutputOption, true, "write new traces to this store");
-		options.addOption(null, presenceOption, true, "name of presence trace");
-		options.addOption(null, linksOption, true, "name of links trace");
-		options.addOption(null, snapIntervalOption, true, "snapshot interval");
+		super.initOptions();
+		graph_options.setOptions(options);
 	}
 
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args)
 			throws ParseException, ArrayIndexOutOfBoundsException,
 			HelpException {
-		origStoreFile = new File(args[0]);
-		destStoreFile = new File(cli.getOptionValue(storeOutputOption,args[0]));
-		presenceName = cli.getOptionValue(presenceOption, GraphStore.defaultPresenceName);
-		linksName = cli.getOptionValue(linksOption, GraphStore.defaultLinksName);
-		snapInterval = (Long) cli.getParsedOptionValue(snapIntervalOption);
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
 	}
 
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store origStore;
-		WritableStore destStore = WritableStore.open(destStoreFile);
-		if ( origStoreFile.equals(destStoreFile) ){
-			origStore = destStore; 
-		} else {
-			origStore = Store.open(origStoreFile);
-		}
-		
-		Trace links = getTrace(origStore,linksName);
-		if ( snapInterval == null )
-			snapInterval = links.snapshotInterval();
-		StatefulReader<LinkEvent,Link> linksReader = new GraphStore(origStore).getLinkReader(links);
-		StatefulWriter<PresenceEvent,Presence> presenceWriter = new GraphStore(destStore).getPresenceWriter(presenceName, snapInterval);
-		
-		Converter converter = new LinksToPresenceConverter(presenceWriter, linksReader);
-		converter.run();
-		converter.close();
-		
-		destStore.close();
-		if ( origStore != destStore )
-			origStore.close();
+	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
+		PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.type, force);
+		new LinksToPresenceConverter(presence, links).convert();
 	}
-
-	@Override
-	protected void setUsageString() {
-		usageString = "[OPTIONS] STORE";
-	}
-
 }

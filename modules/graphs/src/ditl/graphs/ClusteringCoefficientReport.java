@@ -26,7 +26,7 @@ import ditl.*;
 
 
 public final class ClusteringCoefficientReport extends Report 
-	implements PresenceHandler, LinkHandler {
+	implements PresenceTrace.Handler, LinkTrace.Handler {
 	
 	private AdjacencyMatrix adjacency = new AdjacencyMatrix();
 	private Map<Integer,Double> coeffs = new HashMap<Integer,Double>();
@@ -38,13 +38,13 @@ public final class ClusteringCoefficientReport extends Report
 		appendComment("time | clustering coefficient distribution");
 	}
 	
-	public static ReportFactory<ClusteringCoefficientReport> factory(final boolean removeLeaves){
-		return new ReportFactory<ClusteringCoefficientReport>(){
-			@Override
-			public ClusteringCoefficientReport getNew(OutputStream out) throws IOException {
-				return new ClusteringCoefficientReport(out, removeLeaves);
-			}
-		};
+	public static final class Factory implements ReportFactory<ClusteringCoefficientReport> {
+		private boolean remove_leaves;
+		public Factory(boolean removeLeaves){ remove_leaves = removeLeaves;}
+		@Override
+		public ClusteringCoefficientReport getNew(OutputStream out) throws IOException {
+			return new ClusteringCoefficientReport(out, remove_leaves);
+		}
 	}
 	
 	private void updateSurroundingCoeffs(Link link){

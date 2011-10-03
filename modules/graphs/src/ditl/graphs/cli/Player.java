@@ -22,19 +22,17 @@ import java.io.*;
 
 import org.apache.commons.cli.*;
 
+import ditl.cli.App;
 import ditl.graphs.viz.GraphPlayer;
 
-public class Player extends GraphApp {
+public class Player extends App {
 
 	private File[] files;
 	
-	public Player(String[] args) {
-		super(args);
-	}
-
-	@Override
-	protected void initOptions() {}
-
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "play";
+	public final static String CMD_ALIAS = "p";
+	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args)
 			throws ParseException, ArrayIndexOutOfBoundsException,
@@ -58,8 +56,8 @@ public class Player extends GraphApp {
 	}
 
 	@Override
-	protected void setUsageString() {
-		usageString = "STORE1 [STORE2...]";
+	protected String getUsageString() {
+		return "STORE1 [STORE2...]";
 	}
 	
 	

@@ -24,6 +24,8 @@ import ditl.*;
 
 public final class Link {
 	
+	final static int maxNumNodes = 32768; // 2^15
+	
 	final Integer id1;
 	final Integer id2;
 	
@@ -45,23 +47,19 @@ public final class Link {
 		return id2;
 	}
 	
-	public static ItemFactory<Link> factory () {
-		return new ItemFactory<Link>() {
-
-			@Override
-			public Link fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer id1 = Integer.parseInt(elems[0]);
-					Integer id2 = Integer.parseInt(elems[1]);
-					return new Link(id1,id2);
-					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<Link> {
+		@Override
+		public Link fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id1 = Integer.parseInt(elems[0]);
+				Integer id2 = Integer.parseInt(elems[1]);
+				return new Link(id1,id2);	
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	public boolean hasVertex(Integer id){
@@ -76,7 +74,7 @@ public final class Link {
 	
 	@Override
 	public int hashCode(){
-		return GraphStore.maxNumNodes*id1+id2;
+		return maxNumNodes*id1+id2;
 	}
 	
 	@Override
@@ -84,13 +82,13 @@ public final class Link {
 		return id1+" "+id2;
 	}
 	
-	public static Matcher<Link> internalLinkMatcher(final Set<Integer> group){
-		return new Matcher<Link>(){
-			@Override
-			public boolean matches(Link item) {
-				return group.contains(item.id1) && group.contains(item.id2);
-			}
-		};
+	public static final class InternalGroupMatcher implements Matcher<Link> {
+		private Set<Integer> _group;
+		public InternalGroupMatcher(Set<Integer> group){ _group = group;}
+		@Override
+		public boolean matches(Link item) {
+			return _group.contains(item.id1) && _group.contains(item.id2);
+		}
 	}
 
 }

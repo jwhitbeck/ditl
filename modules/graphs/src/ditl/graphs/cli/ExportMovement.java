@@ -18,71 +18,59 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
+import ditl.Store.NoSuchTraceException;
+import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
 
-public class ExportMovement extends GraphApp {
+public class ExportMovement extends ExportApp {
 
-	private File storeFile = null;
-	private boolean useNS2;
 	private Long maxTime;
 	private Long dtps;
-	private String traceName;
+	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.NS2, ExternalFormat.ONE);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
 	private long interval;
-	private String outFile;
 	
-	public ExportMovement(String[] args) {
-		super(args);
-	}
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "export-movement";
+	public final static String CMD_ALIAS = "xm";
 
 	@Override
-	protected void setUsageString(){
-		usageString = "Usage: [OPTIONS] STORE";
-	}
-	
-	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
-		storeFile = new File(args[0]);
-		useNS2 = cli.getOptionValue(fmtOption, ns2Format).equals(ns2Format);
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
+		ext_fmt.parse(cli);
 		maxTime = (Long) cli.getParsedOptionValue(maxTimeOption);
 		dtps = getTicsPerSecond( cli.getOptionValue(destTimeUnitOption,"s"));
 		if ( dtps == null )
 			throw new HelpException();
-		traceName = cli.getOptionValue(movementOption, GraphStore.defaultMovementName);
 		interval = (long)Double.parseDouble(cli.getOptionValue(intervalOption,"1"));
-		outFile = cli.getOptionValue(outputOption);
 	}
 	
 	@Override
 	protected void initOptions() {
-		options.addOption(null, fmtOption, true, "ns2 or one");
+		super.initOptions();
+		graph_options.setOptions(options);
+		ext_fmt.setOptions(options);
 		options.addOption(null, maxTimeOption, true, "maximum movement time (for ONE only)");
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: s)");
-		options.addOption(null, movementOption, true, "movement trace name (default: '"+GraphStore.defaultMovementName+"')");
 		options.addOption(null, intervalOption, true, "interval (for ONE only)");
-		options.addOption(null, outputOption, true, "output file");
 	}
 	
 	@Override
-	protected void run() throws IOException, MissingTraceException {
-		Store store = Store.open(storeFile);
-		Trace trace = getTrace(store, traceName);
-		long otps = trace.ticsPerSecond();
+	protected void run() throws IOException, NoSuchTraceException {
+		MovementTrace movement = (MovementTrace) _store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
+		long otps = movement.ticsPerSecond();
 		interval *= otps;
 		if ( maxTime != null ) maxTime *= otps;
 		double timeMul = getTimeMul(otps,dtps);
-		OutputStream out = (outFile != null)? new FileOutputStream(outFile) : System.out;
-		StatefulReader<MovementEvent,Movement> movementReader = 
-			new GraphStore(store).getMovementReader(trace);
-		if ( useNS2 )
-			NS2Movement.toNS2(movementReader, out, timeMul);
+		if ( ext_fmt.is(ExternalFormat.NS2) )
+			NS2Movement.toNS2(movement, _out, timeMul);
 		else
-			ONEMovement.toONE(movementReader, out, timeMul, interval, maxTime);
-		store.close();
+			ONEMovement.toONE(movement, _out, timeMul, interval, maxTime);
 	}
 }

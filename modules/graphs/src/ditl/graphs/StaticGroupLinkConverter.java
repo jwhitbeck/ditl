@@ -29,11 +29,12 @@ public class StaticGroupLinkConverter implements Converter {
 	private Map<Link,Set<Link>> group_links = new HashMap<Link,Set<Link>>();
 	private StatefulWriter<LinkEvent,Link> group_link_writer;
 	private StatefulReader<LinkEvent,Link> link_reader;
+	private LinkTrace g_links;
+	private LinkTrace _links;
 	
-	public StaticGroupLinkConverter(StatefulWriter<LinkEvent,Link> groupLinkWriter,
-			StatefulReader<LinkEvent,Link> linkReader, Set<Group> groups){
-		group_link_writer = groupLinkWriter;
-		link_reader = linkReader;
+	public StaticGroupLinkConverter(LinkTrace groupLinks, LinkTrace links, Set<Group> groups){
+		g_links = groupLinks;
+		_links = links;
 		group_map = new HashMap<Integer,Integer>();
 		for ( Group g : groups ){
 			Integer gid = g.gid();
@@ -87,15 +88,10 @@ public class StaticGroupLinkConverter implements Converter {
 	}
 	
 	@Override
-	public void close() throws IOException {
-		group_link_writer.close();
-	}
-	
-	@Override
-	public void run() throws IOException {
-		
-		Trace trace = link_reader.trace();
-		long minTime = trace.minTime();
+	public void convert() throws IOException {
+		group_link_writer = g_links.getWriter(_links.snapshotInterval());
+		link_reader = _links.getReader();
+		long minTime = _links.minTime();
 		link_reader.seek(minTime);
 		Collection<Link> initLinks = link_reader.referenceState();
 		setInitState(minTime, initLinks);
@@ -103,8 +99,8 @@ public class StaticGroupLinkConverter implements Converter {
 			long time = link_reader.nextTime();
 			handleEvents(time, link_reader.next());
 		}
-		group_link_writer.setProperty(Trace.maxTimeKey, trace.maxTime());
-		group_link_writer.setProperty(Trace.ticsPerSecondKey, trace.ticsPerSecond());
+		group_link_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
+		group_link_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
 	}
 	
 	

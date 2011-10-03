@@ -18,61 +18,57 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.commons.cli.*;
 
 import ditl.*;
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.WriteApp;
 import ditl.graphs.*;
 
 
-public class ImportStaticMovement extends GraphApp {
+public class ImportStaticMovement extends WriteApp {
 	
-	private String presenceName;
-	private String movementName;
-	private File storeFile;
 	private String[] positions_specs;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.MOVEMENT);
 	
-	public ImportStaticMovement(String[] args) {
-		super(args);
-	}
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "import-positions";
+	public final static String CMD_ALIAS = "ip";
 	
 	@Override
-	protected void setUsageString(){
-		usageString = "Usage: [OPTIONS] STORE ID1:X:Y [ID2:X:Y..]";
+	protected String getUsageString(){
+		return "[OPTIONS] STORE ID1:X:Y [ID2:X:Y..]";
 	}
 
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
-		storeFile = new File(args[0]);
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
 		positions_specs = Arrays.copyOfRange(args,1,args.length);
-		presenceName = cli.getOptionValue(presenceOption, GraphStore.defaultPresenceName);
-		movementName = cli.getOptionValue(movementOption, GraphStore.defaultMovementName);
 	}
 
 	@Override
 	protected void initOptions() {
-		options.addOption(null, presenceOption, true, "presence trace to use for minTime and maxTime (default: "+GraphStore.defaultPresenceName+")");
-		options.addOption(null, movementOption, true, "name of imported movement trace (default: "+GraphStore.defaultMovementName+")");
+		super.initOptions();
+		graph_options.setOptions(options);
 	}
 	
 	@Override
-	public void run() throws IOException, MissingTraceException {
-		WritableStore store = WritableStore.open(storeFile);
-		
-		Trace presence = getTrace(store,presenceName);
-		
-		StatefulWriter<MovementEvent,Movement> movementWriter = new GraphStore(store).getMovementWriter(movementName, presence.snapshotInterval());
+	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+		Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
+		StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter(presence.snapshotInterval());
 		Set<Movement> initState = new HashSet<Movement>();
-		Bounds bounds = new Bounds();
 		for ( String spec : positions_specs ){
 			String[] elems = spec.split(":");
 			Integer id = Integer.parseInt(elems[0]);
 			double x = Double.parseDouble(elems[1]);
 			double y = Double.parseDouble(elems[2]);
 			Point p = new Point(x,y);
-			bounds.update(p);
 			Movement m = new Movement(id, p);
 			initState.add(m);
 		}
@@ -80,10 +76,6 @@ public class ImportStaticMovement extends GraphApp {
 		movementWriter.setInitState(presence.minTime(), initState);
 		movementWriter.setProperty(Trace.maxTimeKey, presence.maxTime());
 		movementWriter.setProperty(Trace.ticsPerSecondKey, presence.ticsPerSecond());
-		bounds.writeToTrace(movementWriter);
-		
-		movementWriter.close();
-		
-		store.close();		
+		movementWriter.close();		
 	}
 }

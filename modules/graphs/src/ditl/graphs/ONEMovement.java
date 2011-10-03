@@ -27,22 +27,21 @@ import ditl.*;
 
 public class ONEMovement {
 
-	public static void fromONE(StatefulWriter<MovementEvent,Movement> movementWriter,
-			InputStream in, Long maxTime, final double timeMul, long offset) throws IOException {
+	public static void fromONE(MovementTrace movement,
+			InputStream in, Long maxTime, final double timeMul, long ticsPerSecond,
+			long offset, long snapInterval) throws IOException {
 		
+		StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter(snapInterval);
 		TreeMap<Long,List<Movement>> buffer = new TreeMap<Long,List<Movement>>();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in) );
 		String line;
-		Bounds bounds = new Bounds();
 		reader.readLine(); // burn first line
 		while ( (line = reader.readLine()) != null ){
 			String[] elems = line.split(" ");
 			long t = (long)(Double.parseDouble(elems[0])*timeMul)+offset;
 			int id = Integer.parseInt(elems[1]);
 			double x = Double.parseDouble(elems[2]);
-			bounds.updateX(x);
 			double y = Double.parseDouble(elems[3]);
-			bounds.updateY(y);
 			if ( ! buffer.containsKey(t) )
 				buffer.put(t, new LinkedList<Movement>());
 			buffer.get(t).add(new Movement(id, new Point(x,y)));
@@ -82,20 +81,21 @@ public class ONEMovement {
 		}
 		last_time = (maxTime != null)? maxTime : last_time; 
 		movementWriter.setProperty(Trace.maxTimeKey, last_time);
-		bounds.writeToTrace(movementWriter);
+		movementWriter.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
 		movementWriter.close();
 	}
 	
-	public static void toONE(StatefulReader<MovementEvent,Movement> movementReader, 
-			OutputStream out, final double timeMul, long interval, Long maxTime) throws IOException { 
+	public static void toONE(MovementTrace movement, 
+			OutputStream out, final double timeMul, long interval, Long maxTime) throws IOException {
+		StatefulReader<MovementEvent,Movement> movementReader = movement.getReader();
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-		MovementTrace movement = new MovementTrace(movementReader.trace());
+
 		// write initial ONE line
 		writer.write(movement.minTime()*timeMul+" "+movement.maxTime()*timeMul+" ");
 		writer.write(movement.minX()+" "+movement.maxX()+" ");
 		writer.write(movement.minY()+" "+movement.maxY()+"\n");
 		// print all positions every interval
-		final MovementUpdater updater = new MovementUpdater();
+		final MovementTrace.Updater updater = new MovementTrace.Updater();
 		Bus<MovementEvent> movementEventBus = new Bus<MovementEvent>();
 		Bus<Movement> movementBus = new Bus<Movement>();
 		movementEventBus.addListener( new Listener<MovementEvent>(){
@@ -134,6 +134,7 @@ public class ONEMovement {
 		});
 		runner.run();
 		writer.close();
+		movementReader.close();
 	}
 	
 	private static double speed(Point o, Point n, double dt){

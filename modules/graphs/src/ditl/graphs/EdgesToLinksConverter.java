@@ -33,12 +33,13 @@ public final class EdgesToLinksConverter implements Converter {
 	private boolean _union; 
 	private Set<Edge> edges = new HashSet<Edge>();
 	private StatefulWriter<LinkEvent,Link> link_writer;
-	private StatefulReader<EdgeEvent,Edge> edge_reader; 
+	private StatefulReader<EdgeEvent,Edge> edge_reader;
+	private LinkTrace _links;
+	private EdgeTrace _edges;
 	
-	public EdgesToLinksConverter(StatefulWriter<LinkEvent,Link> linkWriter, 
-			StatefulReader<EdgeEvent,Edge> edgeReader, boolean union){
-		edge_reader = edgeReader;
-		link_writer = linkWriter;
+	public EdgesToLinksConverter(LinkTrace links, EdgeTrace edges, boolean union){
+		_edges = edges;
+		_links = links;
 		_union = union;
 	}
 	
@@ -79,20 +80,17 @@ public final class EdgesToLinksConverter implements Converter {
 	}
 	
 	@Override
-	public void run() throws IOException{
-		Trace edges = edge_reader.trace();
-		long minTime = edges.minTime();
+	public void convert() throws IOException{
+		edge_reader = _edges.getReader();
+		link_writer = _links.getWriter(_edges.snapshotInterval());
+		long minTime = _edges.minTime();
 		edge_reader.seek(minTime);
 		setInitStateFromEdges(minTime,edge_reader.referenceState());
 		while ( edge_reader.hasNext() )
 			for ( EdgeEvent event : edge_reader.next() )
 				handleEdgeEvent(edge_reader.time(), event);
-		link_writer.setProperty(Trace.ticsPerSecondKey, edges.ticsPerSecond());
-	}
-
-	@Override
-	public void close() throws IOException {
+		link_writer.setProperty(Trace.ticsPerSecondKey, _edges.ticsPerSecond());
+		edge_reader.close();
 		link_writer.close();
 	}
-
 }

@@ -59,25 +59,21 @@ public final class EdgeEvent {
 		return new Edge(_from,_to);
 	}
 	
-	public static ItemFactory<EdgeEvent> factory () {
-		return new ItemFactory<EdgeEvent>() {
-
-			@Override
-			public EdgeEvent fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer from = Integer.parseInt(elems[0]);
-					Integer to = Integer.parseInt(elems[1]);
-					boolean up = elems[2].equals("UP");
-					return new EdgeEvent(from,to,up);
-					
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public static final class Factory implements ItemFactory<EdgeEvent> {
+		@Override
+		public EdgeEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer from = Integer.parseInt(elems[0]);
+				Integer to = Integer.parseInt(elems[1]);
+				boolean up = elems[2].equals("UP");
+				return new EdgeEvent(from,to,up);
+				
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-			
-		};
+		}
 	}
 	
 	@Override
@@ -85,13 +81,13 @@ public final class EdgeEvent {
 		return _from+" "+_to+" "+(_up? "UP" : "DOWN");
 	}
 	
-	public static Matcher<EdgeEvent> internalEdgeEventMatcher(final Set<Integer> group){
-		return new Matcher<EdgeEvent>(){
-			@Override
-			public boolean matches(EdgeEvent item) {
-				return group.contains(item._from) && group.contains(item._to);
-			}
-		};
+	public static final class InternalGroupMatcher implements Matcher<EdgeEvent> {
+		private Set<Integer> _group;
+		public InternalGroupMatcher(Set<Integer> group){ _group = group;}
+		@Override
+		public boolean matches(EdgeEvent item) {
+			return _group.contains(item._from) && _group.contains(item._to);
+		}
 	}
 
 }

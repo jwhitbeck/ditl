@@ -40,22 +40,19 @@ public final class Edge {
 		return _to;
 	}
 	
-	public static ItemFactory<Edge> factory () {
-		return new ItemFactory<Edge>() {
-
-			@Override
-			public Edge fromString(String s) {
-				String[] elems = s.trim().split(" ");
-				try {
-					Integer from = Integer.parseInt(elems[0]);
-					Integer to = Integer.parseInt(elems[1]);
-					return new Edge(from,to);
-				} catch ( Exception e ){
-					System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-					return null;
-				}
+	public final static class Factory implements ItemFactory<Edge> {
+		@Override
+		public Edge fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer from = Integer.parseInt(elems[0]);
+				Integer to = Integer.parseInt(elems[1]);
+				return new Edge(from,to);
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
 	}
 	
 	public Edge reverse(){
@@ -74,7 +71,7 @@ public final class Edge {
 	
 	@Override
 	public int hashCode(){
-		return GraphStore.maxNumNodes*_from+_to;
+		return Link.maxNumNodes*_from+_to;
 	}
 	
 	@Override
@@ -82,13 +79,13 @@ public final class Edge {
 		return _from+" "+_to;
 	}
 	
-	public static Matcher<Edge> internalEdgeMatcher(final Set<Integer> group){
-		return new Matcher<Edge>(){
-			@Override
-			public boolean matches(Edge item) {
-				return group.contains(item._from) && group.contains(item._to);
-			}
-		};
+	public static final class InternalGroupMatcher implements Matcher<Edge> {
+		private Set<Integer> _group;
+		public InternalGroupMatcher(Set<Integer> group){ _group = group;}
+		@Override
+		public boolean matches(Edge item) {
+			return _group.contains(item._from) && _group.contains(item._to);
+		}
 	}
 	
 }
