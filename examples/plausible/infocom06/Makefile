@@ -1,12 +1,10 @@
 DITL_LIB:=../../../ditl.jar
-PLAUSIBLE_LIB:=../../../plausible.jar
 
 ORIG_DATA:=Exp6.tar.gz
 CRAWDAD_URL:=http://www.crawdad.org/download/cambridge/haggle/Exp6.tar.gz
 TARGET:=infocom06.jar
 
 DITL:=java -jar $(DITL_LIB)
-JFLAGS:=-classpath "$(DITL_LIB):$(PLAUSIBLE_LIB):."
 
 SHELL:=/bin/bash
 
@@ -23,7 +21,7 @@ $(ORIG_DATA):
 	wget --password $$pass --user $$login $(CRAWDAD_URL)
 
 
-$(TARGET): $(ORIG_DATA) InferInfocom06.java
+$(TARGET): $(ORIG_DATA)
 	@echo ""
 	@echo "#################################################"
 	@echo " Decrompressing data from CRAWDAD "
@@ -41,7 +39,7 @@ $(TARGET): $(ORIG_DATA) InferInfocom06.java
 		$@ Exp6/contacts.Exp6.dat
 	$(DITL) graphs edges-to-links --links all_links $@
 	$(DITL) rm $@ edges
-	$(DITL) graphs filter $@ all_links links 1-98
+	$(DITL) filter $@ all_links links 1-98
 	$(DITL) rm $@ all_links
 	$(DITL) graphs links-to-presence $@
 	$(DITL) graphs import-groups --labels $@ \
@@ -62,13 +60,12 @@ $(TARGET): $(ORIG_DATA) InferInfocom06.java
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
-	javac $(JFLAGS) InferInfocom06.java
-	java $(JFLAGS) InferInfocom06 $@ static_mv
-	$(DITL) rm $@ static_mv
+	$(DITL) plausible links-to-windowed-links $@ 1000
+	$(DITL) plausible infer --update-interval 5 --known-movement static_mv --known-nodes 1-20 $@ 500 500
+	$(DITL) rm $@ static_mv windowed_links
 
 
 clean:
-	rm -rf *.class
 	rm -rf Exp6
 	rm -rf *.jar.tmp
 

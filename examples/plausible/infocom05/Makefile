@@ -1,12 +1,10 @@
 DITL_LIB:=../../../ditl.jar
-PLAUSIBLE_LIB:=../../../plausible.jar
 
 ORIG_DATA:=imote-trace3.tar.gz
 CRAWDAD_URL:=http://www.crawdad.org/download/cambridge/haggle/imote-trace3.tar.gz
 TARGET:=infocom05.jar
 
 DITL:=java -jar $(DITL_LIB)
-JFLAGS:=-classpath "$(DITL_LIB):$(PLAUSIBLE_LIB):."
 
 SHELL:=/bin/bash
 
@@ -23,7 +21,7 @@ $(ORIG_DATA):
 	wget --password $$pass --user $$login $(CRAWDAD_URL)
 
 
-$(TARGET): $(ORIG_DATA) InferInfocom05.java
+$(TARGET): $(ORIG_DATA)
 	@echo ""
 	@echo "#################################################"
 	@echo " Decrompressing data from CRAWDAD "
@@ -41,19 +39,22 @@ $(TARGET): $(ORIG_DATA) InferInfocom05.java
 		$@ Exp3/contacts.Exp3.dat
 	$(DITL) graphs edges-to-links --links all_links $@
 	$(DITL) rm $@ edges
-	$(DITL) graphs filter $@ all_links links 1-41
+	$(DITL) filter $@ all_links links 1-41
 	$(DITL) rm $@ all_links
 	$(DITL) graphs links-to-presence $@
 	@echo ""
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
+	$(DITL) plausible links-to-windowed-links $@ 1000
+	$(DITL) plausible infer --update-interval 5 $@ 500 500
+	$(DITL) rm $@ windowed_links
+
 	javac $(JFLAGS) InferInfocom05.java
 	java $(JFLAGS) InferInfocom05 $@
 
 
 clean:
-	rm -rf *.class
 	rm -rf Exp3
 	rm -rf *.jar.tmp
 

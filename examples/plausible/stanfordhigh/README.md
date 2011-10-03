@@ -29,8 +29,7 @@ Original data at [www.salathegroup.com](http://www.salathegroup.com/guide/school
 Instructions
 ------------
 
-1. Make sure that the DITL\_LIB and PLAUSIBLE\_LIB variables point to
-the proper jar files.
+1. Make sure that the DITL\_LIB variable point to the proper jar file.
 
 2. To build, run:
 

@@ -1,5 +1,4 @@
 DITL_LIB:=../../../ditl.jar
-PLAUSIBLE_LIB:=../../../plausible.jar
 
 ORIG_DATA:=moteFiles.zip roles.zip
 MOTES_URL:=http://www.salathegroup.com/data/school_2010/moteFiles.zip
@@ -7,7 +6,7 @@ ROLES_URL:=http://www.salathegroup.com/data/school_2010/roles.zip
 TARGET:=stanford.jar
 
 DITL:=java -jar $(DITL_LIB)
-JFLAGS:=-classpath "$(DITL_LIB):$(PLAUSIBLE_LIB):."
+JFLAGS:=-classpath "$(DITL_LIB):."
 
 SHELL:=/bin/bash
 
@@ -40,7 +39,7 @@ groups: roles.zip
 
 
 
-$(TARGET): $(ORIG_DATA) InferStanford.java ImportStanford.java
+$(TARGET): $(ORIG_DATA) ImportStanford.java
 	@echo ""
 	@echo "#################################################"
 	@echo " Decrompressing data"
@@ -54,7 +53,7 @@ $(TARGET): $(ORIG_DATA) InferStanford.java ImportStanford.java
 	@echo "   - Keep the 9 hours between 7AM and 4PM"
 	@echo ""
 	javac $(JFLAGS) ImportStanford.java
-	java $(JFLAGS) ImportStanford $@ moteFiles/*
+	java $(JFLAGS) ImportStanford $@ moteFiles/* 2>/dev/null
 	$(DITL) graphs beacons-to-edges --snap-interval 900 $@ 20
 	$(DITL) rm $@ beacons
 	$(DITL) graphs edges-to-links $@
@@ -66,8 +65,9 @@ $(TARGET): $(ORIG_DATA) InferStanford.java ImportStanford.java
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
-	javac $(JFLAGS) InferStanford.java
-	java $(JFLAGS) InferStanford $@
+	$(DITL) plausible links-to-windowed-links $@ 1000
+	$(DITL) plausible infer --n-steps 10 --tau 200 $@ 1000 1000
+	$(DITL) rm $@ windowed_links
 
 
 clean:

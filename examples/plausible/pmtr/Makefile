@@ -1,12 +1,10 @@
 DITL_LIB:=../../../ditl.jar
-PLAUSIBLE_LIB:=../../../plausible.jar
 
 ORIG_DATA:=pmtr.txt
 CRAWDAD_URL:=http://www.crawdad.org/download/unimi/pmtr/pmtr.txt.gz
 TARGET:=pmtr.jar
 
 DITL:=java -jar $(DITL_LIB)
-JFLAGS:=-classpath "$(DITL_LIB):$(PLAUSIBLE_LIB):."
 
 SHELL:=/bin/bash
 
@@ -24,7 +22,7 @@ $(ORIG_DATA):
 	gunzip pmtr.txt.gz
 
 
-$(TARGET): $(ORIG_DATA) InferPMTR.java
+$(TARGET): $(ORIG_DATA)
 	@echo ""
 	@echo "#################################################"
 	@echo " Importing PMTR trace"
@@ -39,12 +37,12 @@ $(TARGET): $(ORIG_DATA) InferPMTR.java
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
-	javac $(JFLAGS) InferPMTR.java
-	java $(JFLAGS) InferPMTR $@
+	$(DITL) plausible links-to-windowed-links $@ 1800
+	$(DITL) plausible infer --update-interval 5 $@ 500 500
+	$(DITL) rm $@ windowed_links
 
 
 clean:
-	rm -rf *.class
 	rm -rf *.jar.tmp
 
 proper: clean

@@ -32,8 +32,7 @@ Original data at [CRAWDAD](http://crawdad.cs.dartmouth.edu/unimi/pmtr).
 Instructions
 ------------
 
-1. Make sure that the DITL\_LIB and PLAUSIBLE\_LIB variables point to
-the proper jar files.
+1. Make sure that the DITL\_LIB variable point to the proper jar file.
 
 2. To build, run:
 

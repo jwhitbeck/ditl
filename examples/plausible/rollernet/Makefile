@@ -1,12 +1,10 @@
 DITL_LIB:=../../../ditl.jar
-PLAUSIBLE_LIB:=../../../plausible.jar
 
 ORIG_DATA:=imote-traces-RollerNet.tar.gz
 CRAWDAD_URL:=http://www.crawdad.org/download/upmc/rollernet/imote-traces-RollerNet.tar.gz
 TARGET:=rollernet.jar
 
 DITL:=java -jar $(DITL_LIB)
-JFLAGS:=-classpath "$(DITL_LIB):$(PLAUSIBLE_LIB):."
 
 SHELL:=/bin/bash
 
@@ -23,7 +21,7 @@ $(ORIG_DATA):
 	wget --password $$pass --user $$login $(CRAWDAD_URL)
 
 
-$(TARGET): $(ORIG_DATA) InferRollernet.java
+$(TARGET): $(ORIG_DATA)
 	@echo ""
 	@echo "#################################################"
 	@echo " Decrompressing data from CRAWDAD "
@@ -41,7 +39,7 @@ $(TARGET): $(ORIG_DATA) InferRollernet.java
 		--orig-time-unit s \
 		--snap-interval 900 --offset -1156083900 \
 	$@ imote-traces-RollerNet/contacts.dat
-	$(DITL) graphs filter $@ all_links links 1-62
+	$(DITL) filter $@ all_links links 1-62
 	$(DITL) rm $@ all_links
 	$(DITL) graphs links-to-presence $@
 	$(DITL) graphs import-groups --labels $@ members:1-26 staff:27-51 friends:52-62
@@ -49,12 +47,12 @@ $(TARGET): $(ORIG_DATA) InferRollernet.java
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
-	javac $(JFLAGS) InferRollernet.java
-	java $(JFLAGS) InferRollernet $@
-
+	$(DITL) plausible links-to-windowed-links $@ 500
+	$(DITL) plausible infer --constraints "LeftOutlier,node@38:Horizontal,node@38,height@25:RightOutlier,node@27:Horizontal,node@27,height@25" $@ 700 50
+	$(DITL) rm $@ windowed_links
 
 clean:
-	rm -rf *.class *.jar.tmp imote-traces-RollerNet
+	rm -rf *.jar.tmp imote-traces-RollerNet
 
 proper: clean
 	rm -f $(TARGET) $(ORIG_DATA)
