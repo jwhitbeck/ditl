@@ -32,7 +32,6 @@ public class BeaconTrace extends Trace<Edge> implements Trace.Filterable<Edge> {
 	
 	public BeaconTrace(Store store, String name, PersistentMap info) throws IOException {
 		super(store, name, info, new Edge.Factory());
-		info.put(Trace.typeKey, type);
 	}
 
 	@Override

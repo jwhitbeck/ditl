@@ -67,7 +67,6 @@ public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge>
 						return new EdgeTrace.Updater();
 					}
 		});
-		info.put(Trace.typeKey, type);
 	}
 
 	@Override

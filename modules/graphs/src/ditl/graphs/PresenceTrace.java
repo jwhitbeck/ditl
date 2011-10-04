@@ -68,7 +68,6 @@ public class PresenceTrace extends StatefulTrace<PresenceEvent, Presence>
 						return new PresenceTrace.Updater();
 					}
 		});
-		info.put(Trace.typeKey, type);
 		info.setIfUnset(Trace.defaultPriorityKey, defaultPriority);
 	}
 

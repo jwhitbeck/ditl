@@ -29,6 +29,5 @@ public class ConnectedComponentsTrace extends GroupTrace {
 	
 	public ConnectedComponentsTrace(Store store, String name, PersistentMap info) throws IOException {
 		super(store, name, info);
-		info.put(Trace.typeKey, type);
 	}
 }

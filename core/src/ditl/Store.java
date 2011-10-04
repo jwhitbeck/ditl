@@ -169,6 +169,7 @@ public abstract class Store {
 			throw new LoadTraceException(name);
 		try {
 			Constructor<?> ctor = klass.getConstructor(new Class[]{Store.class, String.class, PersistentMap.class});
+			info.put(Trace.typeKey, type);
 			Trace<?> trace = (Trace<?>)ctor.newInstance(this, name, info);
 			return trace;
 		} catch ( Exception e ){

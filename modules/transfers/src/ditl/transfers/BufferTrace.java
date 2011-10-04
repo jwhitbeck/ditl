@@ -87,7 +87,6 @@ public class BufferTrace extends StatefulTrace<BufferEvent, Buffer> {
 						return new BufferTrace.Updater();
 					}
 		});
-		info.put(Trace.typeKey, type);
 	}
 
 }

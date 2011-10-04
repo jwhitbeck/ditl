@@ -121,6 +121,5 @@ public class GroupTrace extends StatefulTrace<GroupEvent,Group> {
 				id++;
 			}
 		}
-		info.put(Trace.typeKey, type);
 	}
 }

@@ -87,7 +87,6 @@ public class WindowedLinkTrace extends StatefulTrace<WindowedLinkEvent,WindowedL
 						return new WindowedLinkTrace.Updater();
 					}
 		});
-		info.put(Trace.typeKey, type);
 	}
 
 	public long windowLength(){

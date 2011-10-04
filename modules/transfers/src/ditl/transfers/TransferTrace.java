@@ -79,7 +79,6 @@ public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
 						return new TransferTrace.Updater();
 					}
 		});
-		info.put(Trace.typeKey, type);
 	}
 
 }

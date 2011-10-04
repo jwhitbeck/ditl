@@ -65,7 +65,6 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 					}
 		});
 		info.setIfUnset(Trace.defaultPriorityKey, defaultPriority);
-		info.put(Trace.typeKey, type);
 	}
 	
 	public final static class Updater implements StateUpdater<MovementEvent,Movement> {

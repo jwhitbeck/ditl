@@ -67,7 +67,6 @@ public class LinkTrace extends StatefulTrace<LinkEvent, Link>
 						return new LinkTrace.Updater();
 					}
 		});
-		info.put(Trace.typeKey, type);
 	}
 
 	@Override

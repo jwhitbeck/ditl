@@ -67,7 +67,6 @@ public class MessageTrace extends StatefulTrace<MessageEvent, Message> {
 						return new MessageTrace.Updater();
 					}
 		});
-		info.put(Trace.typeKey, type);
 		info.put(Trace.defaultPriorityKey, defaultPriority);
 	}
 
