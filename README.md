@@ -82,10 +82,13 @@ Here is a list of the trace types currently in the library:
   * movement
   * beacon (stateless)
   * group
+  * connected components
 * Transfers module
   * message
   * buffer
   * transfer
+* Plausibile module
+  * windowed link
 
 
 ### Store
@@ -98,8 +101,8 @@ potential contact opportunities at various transmission ranges, and
 several _group_ traces representing the pre-calculated connected
 components.
 
-There are two supported store formats: a simple directory, or a jar
-archive file.
+There are several supported store formats: a simple directory, a jar
+archive file, or using the java classpath.
 
 ### Bus
 
@@ -125,16 +128,15 @@ Building
 This project assumes a recent JDK (&ge;1.6). At the project root just run:
     $ ant
 
-This will build two jar archives: _plausible.jar_, containing the
-plausible mobility functions, and _ditl.jar_, containing all the rest.
+This will build a single jar archive _ditl.jar_ containing both the
+core and module classes.
 
 
 Download
 --------
 
-Pre-built jar archives files are available:
-[ditl.jar](http://neush.net/static/ditl.jar) and
-[plausible.jar](http://neush.net/static/plausible.jar).
+A pre-built jar archive file is available for download:
+[ditl.jar](http://neush.net/static/ditl.jar)
 
 
 CLI Interface
@@ -165,7 +167,7 @@ further simplified to:
 
 
 There are many CLI usage examples in the Makefiles for the plausible
-mobility examples (under plausible/examples).
+mobility examples (under examples/plausible).
 
 
 Player
