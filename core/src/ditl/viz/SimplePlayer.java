@@ -26,7 +26,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import ditl.*;
+import ditl.Store;
 
 @SuppressWarnings("serial")
 public abstract class SimplePlayer extends JFrame {
@@ -95,16 +95,27 @@ public abstract class SimplePlayer extends JFrame {
 		setVisible(true);
 	}
 	
-	public void load(File[] files){
+	public void load(File...files){
 		close();
-		if ( files.length > 0){
-			try {
-				_store = Store.open(files);
-				loadReaders();
-				enableControls(true);
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(this, "Failed to load files: '"+files+"'", "Warning", JOptionPane.ERROR_MESSAGE);
-			}
+		try {
+			_store = Store.open(files);
+			loadReaders();
+			enableControls(true);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(this, "Failed to load files: '"+files+"'", "Warning", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	public void loadTracesFromClassPath(String...traceNames){
+		close();
+		try {
+			_store = Store.open();
+			for ( String traceName : traceNames )
+				_store.loadTrace(traceName);
+			loadReaders();
+			enableControls(true);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Failed to load traces from classpath.", "Warning", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	

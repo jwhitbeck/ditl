@@ -21,17 +21,11 @@ package ditl;
 import java.io.*;
 
 public class ClassPathStore extends Store {
-	
+
 	public ClassPathStore() throws IOException {
 		super();
-		for ( File f : new Reflections(infoFile).paths() )
-			try {
-				loadTrace(f.getParentFile().getName());
-			} catch (LoadTraceException e) {
-				System.err.println(e);
-			}
 	}
-	
+
 	public InputStream getInputStream(String name) throws IOException {
 		return getClass().getClassLoader().getResourceAsStream(name);
 	}
