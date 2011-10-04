@@ -42,7 +42,7 @@ public class Analyze extends ExportApp {
 	final static String clusteringOption = "clustering";
 	final static String numCCOption = "ccs";
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.CC);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.CC, GraphOptions.EDGES);
 	private ReportFactory<?> factory;
 	
 	public final static String PKG_NAME = "graphs";
@@ -149,6 +149,25 @@ public class Analyze extends ExportApp {
 			if ( minTime == null ) minTime = links.minTime();
 			if ( maxTime == null ) maxTime = links.maxTime();
 			incrTime = links.maxUpdateInterval();
+		}
+		
+		if ( report instanceof EdgeTrace.Handler ){
+			EdgeTrace edges = (EdgeTrace)_store.getTrace(graph_options.get(GraphOptions.EDGES));		
+			StatefulReader<EdgeEvent,Edge> edgeReader = edges.getReader();
+			Bus<EdgeEvent> edgeEventBus = new Bus<EdgeEvent>();
+			Bus<Edge> edgeBus = new Bus<Edge>();
+			edgeReader.setBus(edgeEventBus);
+			edgeReader.setStateBus(edgeBus);
+
+			EdgeTrace.Handler eh = (EdgeTrace.Handler)report;
+			edgeBus.addListener(eh.edgeListener());
+			edgeEventBus.addListener(eh.edgeEventListener());
+			
+			readers.add(edgeReader);
+			
+			if ( minTime == null || edges.minTime() > minTime ) minTime = edges.minTime();
+			if ( maxTime == null || edges.maxTime() < maxTime ) maxTime = edges.maxTime();
+			incrTime = edges.maxUpdateInterval();
 		}
 		
 		if ( report instanceof ConnectedComponentsTrace.Handler ){
