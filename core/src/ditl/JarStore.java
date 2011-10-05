@@ -27,7 +27,6 @@ public class JarStore extends Store {
 	private JarFile jar_file;
 	
 	public JarStore(File file) throws IOException {
-		super();
 		_file = file;
 		jar_file = new JarFile(_file);
 		for ( File f : new Reflections(infoFile, _file).paths() )

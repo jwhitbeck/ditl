@@ -80,6 +80,7 @@ public abstract class WritableStore extends Store {
 	}
 	
 	public static WritableStore open(File file) throws IOException {
+		buildTypeClassMap();
 		if ( file.exists() ){
 			if ( file.isDirectory() )
 				return new DirectoryStore(file);

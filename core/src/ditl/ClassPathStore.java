@@ -22,10 +22,6 @@ import java.io.*;
 
 public class ClassPathStore extends Store {
 
-	public ClassPathStore() throws IOException {
-		super();
-	}
-
 	public InputStream getInputStream(String name) throws IOException {
 		return getClass().getClassLoader().getResourceAsStream(name);
 	}

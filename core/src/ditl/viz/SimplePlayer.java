@@ -26,7 +26,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import ditl.Store;
+import ditl.*;
 
 @SuppressWarnings("serial")
 public abstract class SimplePlayer extends JFrame {
@@ -106,15 +106,20 @@ public abstract class SimplePlayer extends JFrame {
 		}
 	}
 	
-	public void loadTracesFromClassPath(String...traceNames){
+	public void loadTracesFromClassPath(String[] traceNames, Object[] klasses){
 		close();
 		try {
 			_store = Store.open();
+			for ( Object obj : klasses ){
+				if ( obj instanceof Class<?> )
+					Store.addTraceClass((Class<?>)obj);
+			}
 			for ( String traceName : traceNames )
 				_store.loadTrace(traceName);
 			loadReaders();
 			enableControls(true);
 		} catch (Exception e) {
+			System.err.println(e);
 			JOptionPane.showMessageDialog(this, "Failed to load traces from classpath.", "Warning", JOptionPane.ERROR_MESSAGE);
 		}
 	}

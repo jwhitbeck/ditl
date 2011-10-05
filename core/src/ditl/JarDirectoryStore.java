@@ -28,10 +28,8 @@ public class JarDirectoryStore extends DirectoryStore {
 	private File archive;
 	
 	public JarDirectoryStore(File file) throws IOException {
+		super( new File(file.getPath()+".tmp") );
 		archive = file;
-		separator = File.separator;
-		root = new File(file.getPath()+".tmp");
-		initDir();
 		if ( archive.exists() ){
 			extract();
 			refresh();

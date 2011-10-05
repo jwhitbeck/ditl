@@ -24,10 +24,6 @@ public class DirectoryStore extends WritableStore {
 	
 	File root;
 	
-	DirectoryStore() throws IOException {
-		super();
-	};
-	
 	public DirectoryStore ( File dir ) throws IOException {
 		root = dir;
 		separator = File.separator;

@@ -31,7 +31,7 @@ public abstract class Store {
 	protected String separator = "/";
 	
 	final Map<String,Trace<?>> traces = new HashMap<String,Trace<?>>();
-	final Map<String,Class<?>> type_class_map = new HashMap<String,Class<?>>();
+	final static Map<String,Class<?>> type_class_map = new HashMap<String,Class<?>>();
 	
 	private Set<Reader<?>> openReaders = new HashSet<Reader<?>>();
 	
@@ -55,13 +55,16 @@ public abstract class Store {
 		}
 	}
 	
-	public Store() throws IOException{
-		buildTypeClassMap();
+	public static void buildTypeClassMap() throws IOException{
+		if ( type_class_map.isEmpty() ){
+			Reflections reflections = new Reflections("/\\w+\\.class");
+			for ( Class<?> klass : Reflections.getSubClasses(Trace.class, reflections.listClasses("ditl")))
+				addTraceClass(klass);
+		}
 	}
 	
-	private void buildTypeClassMap() throws IOException{
-		Reflections reflections = new Reflections("/\\w+\\.class");
-		for ( Class<?> klass : Reflections.getSubClasses(Trace.class, reflections.listClasses("ditl.graphs"))){
+	public static void addTraceClass(Class<?> klass){
+		if ( Trace.class.isAssignableFrom(klass) ){
 			try {
 				Field f = klass.getField("type");
 				String type = (String)f.get(null);
@@ -132,11 +135,12 @@ public abstract class Store {
 	}
 	
 	public static Store open(File...files) throws IOException {
+		if ( files.length > 0 ) buildTypeClassMap();
 		switch ( files.length ){
 		case 0: return new ClassPathStore();
 		case 1: if ( files[0].isDirectory() )
-				return new DirectoryStore(files[0]);
-			return new JarStore(files[0]);
+					return new DirectoryStore(files[0]);
+				return new JarStore(files[0]);
 		default: return new MultiStore(files);
 		}
 	}
