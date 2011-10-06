@@ -29,6 +29,9 @@ import ditl.graphs.*;
 
 public class LinksToPresence extends ConvertApp {
 
+	final static String strictOption = "strict"; 
+	private boolean strict; 
+	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.PRESENCE);
 	
 	public final static String PKG_NAME = "graphs";
@@ -39,6 +42,7 @@ public class LinksToPresence extends ConvertApp {
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
+		options.addOption(null, strictOption, false, "Nodes enter with their first contact and leave after their last." );
 	}
 
 	@Override
@@ -47,12 +51,16 @@ public class LinksToPresence extends ConvertApp {
 			HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
+		strict = cli.hasOption(strictOption);
 	}
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
 		PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.type, force);
-		new LinksToPresenceConverter(presence, links).convert();
+		if ( strict )
+			new StrictLinksToPresenceConverter(presence, links).convert();
+		else
+			new LinksToPresenceConverter(presence, links).convert();
 	}
 }
