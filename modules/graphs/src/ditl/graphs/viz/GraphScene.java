@@ -29,13 +29,14 @@ import ditl.viz.Scene;
 
 
 @SuppressWarnings("serial")
-public class GraphScene extends Scene implements MovementTrace.Handler, LinkTrace.Handler, EdgeTrace.Handler {
+public class GraphScene extends Scene implements 
+	MovementTrace.Handler, LinkTrace.Handler, EdgeTrace.Handler, GroupTrace.Handler {
 
 	protected Map<Integer,NodeElement> nodes = new HashMap<Integer,NodeElement>();
 	private Map<Link,LinkElement> links = new HashMap<Link,LinkElement>();
 	private Map<Link,EdgeElement> edges = new HashMap<Link,EdgeElement>();
 	private boolean showIds = false;
-	private Groups groups = null;
+	private Map<Integer,Color> group_color_map = null;
 
 	public GraphScene() {
 		super();
@@ -52,8 +53,8 @@ public class GraphScene extends Scene implements MovementTrace.Handler, LinkTrac
 		});
 	}
 	
-	public void setGroups(Groups g){
-		groups = g;
+	public void setGroupColorMap(Map<Integer,Color> groupColorMap){
+		group_color_map = groupColorMap;
 	}
 	
 	@Override
@@ -63,8 +64,6 @@ public class GraphScene extends Scene implements MovementTrace.Handler, LinkTrac
 			public void handle(long time, Collection<Movement> events) {
 				for ( Movement m : events ){
 					NodeElement node = new NodeElement(m);
-					if ( groups != null )
-						node.setFillColor(groups.getColor(m.id()));
 					node.setShowId(showIds);
 					nodes.put(m.id(), node);
 					addScaleListener(node);
@@ -234,5 +233,48 @@ public class GraphScene extends Scene implements MovementTrace.Handler, LinkTrac
 			node.rescale(this);
 		}
 		super.changeTime(time);
+	}
+
+	@Override
+	public Listener<GroupEvent> groupEventListener() {
+		return new Listener<GroupEvent>(){
+			@Override
+			public void handle(long time, Collection<GroupEvent> events) {
+				for ( GroupEvent gev : events ){
+					switch (gev.type()){
+					case GroupEvent.LEAVE:
+						for ( Integer i : gev.members() )
+							nodes.get(i).setFillColor(GroupsPanel.noGroupColor);
+						break;
+					case GroupEvent.JOIN:
+						for ( Integer i : gev.members() )
+							nodes.get(i).setFillColor(group_color_map.get(gev.gid()));
+						break;
+					}
+				}
+			}
+		};
+	}
+
+	@Override
+	public Listener<Group> groupListener() {
+		return new StatefulListener<Group>(){
+
+			@Override
+			public void reset() {
+				for ( NodeElement node : nodes.values() )
+					node.setFillColor(GroupsPanel.noGroupColor);
+			}
+
+			@Override
+			public void handle(long time, Collection<Group> events) {
+				for ( Group group : events ){
+					Color c =  group_color_map.get(group.gid());
+					for ( Integer i : group.members() )
+						nodes.get(i).setFillColor(c);
+				}
+			}
+			
+		};
 	}
 }

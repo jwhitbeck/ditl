@@ -18,42 +18,10 @@
  *******************************************************************************/
 package ditl.graphs.viz;
 
+import java.io.IOException;
+import ditl.graphs.GroupTrace;
 
-import java.awt.Color;
-import java.util.*;
-
-import ditl.graphs.*;
-
-
-public class Groups {
-
-	private static Color[] colorList = {Color.BLUE, Color.RED, Color.GREEN, 
-										Color.MAGENTA, Color.ORANGE, Color.DARK_GRAY,
-										Color.YELLOW};
-	
-	private static Color noGroupColor = Color.BLACK; 
-		
-	private Map<String,Color> colorMap = new LinkedHashMap<String,Color>();
-	private Map<Integer,Color> colors = new HashMap<Integer,Color>();
-	
-	public Groups(Set<Group> groups, GroupTrace trace){
-		int nextColor = 0;
-		for ( Group g : groups ){
-			Color groupColor = colorList[ (nextColor++ % colorList.length) ];
-			String label = (trace.hasLabels())? trace.getLabel(g.gid()) : g.gid().toString();
-			colorMap.put(label, groupColor);
-			for ( Integer i : g.members() )
-				colors.put(i,groupColor);
-		}
-	}
-	
-	public Color getColor(int id){
-		if ( colors.containsKey(id) )
-			return colors.get(id);
-		return noGroupColor;
-	}
-	
-	public Map<String,Color> colorMap(){
-		return colorMap;
-	}
+public interface GroupRunner {
+	public void setGroupTrace(GroupTrace groups) throws IOException;
+	public void addGroupHandler(GroupTrace.Handler handler);
 }

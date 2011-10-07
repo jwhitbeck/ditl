@@ -28,8 +28,11 @@ import ditl.viz.*;
 
 public class NodeElement implements Clickable, SceneElement, ScaleListener, TimeChangeListener {
 	
-	private Color fill = Color.BLUE;
-	private Color borderColor = Color.BLACK;
+	public final static Color defaultFillColor = Color.BLUE;
+	public final static Color defaultBorderColor = Color.BLACK;
+	
+	private Color fill = defaultFillColor;
+	private Color borderColor = defaultBorderColor;
 	private boolean showId = false;
 	protected int R = 5;
 	private Movement movement;

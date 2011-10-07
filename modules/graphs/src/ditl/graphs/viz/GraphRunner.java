@@ -22,13 +22,14 @@ import java.io.IOException;
 
 import ditl.*;
 import ditl.graphs.*;
+import ditl.graphs.GroupTrace.Handler;
 import ditl.viz.SceneRunner;
 
 
 
 @SuppressWarnings("serial")
 public class GraphRunner extends SceneRunner 
-	implements EdgeRunner, LinkRunner, MovementRunner {
+	implements EdgeRunner, LinkRunner, MovementRunner, GroupRunner {
 	
 	protected Bus<Link> linkBus = new Bus<Link>();
 	protected Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
@@ -36,9 +37,12 @@ public class GraphRunner extends SceneRunner
 	protected Bus<EdgeEvent> edgeEventBus = new Bus<EdgeEvent>();
 	protected Bus<Movement> movementBus = new Bus<Movement>();
 	protected Bus<MovementEvent> movementEventBus = new Bus<MovementEvent>();
+	protected Bus<Group> groupBus = new Bus<Group>();
+	protected Bus<GroupEvent> groupEventBus = new Bus<GroupEvent>();
 	protected StatefulReader<MovementEvent,Movement> movement_reader;
 	protected StatefulReader<LinkEvent,Link> links_reader;
 	protected StatefulReader<EdgeEvent,Edge> edges_reader;
+	protected StatefulReader<GroupEvent,Group> groups_reader;
 	
 	@Override
 	public void setMovementTrace(MovementTrace movement) throws IOException {
@@ -63,8 +67,8 @@ public class GraphRunner extends SceneRunner
 			runner.removeGenerator(links_reader);
 			links_reader.close();
 		}
-		links_reader = links.getReader();
-		if ( links_reader != null ){
+		if ( links != null ){
+			links_reader = links.getReader();
 			links_reader.setBus(linkEventBus);
 			links_reader.setStateBus(linkBus);
 			links_reader.seek(runner.time());
@@ -87,8 +91,8 @@ public class GraphRunner extends SceneRunner
 			runner.removeGenerator(edges_reader);
 			edges_reader.close();
 		}
-		edges_reader = edges.getReader();
-		if ( edges_reader != null ){
+		if ( edges != null ){
+			edges_reader = edges.getReader();
 			edges_reader.setBus(edgeEventBus);
 			edges_reader.setStateBus(edgeBus);
 			edges_reader.seek(runner.time());
@@ -101,5 +105,29 @@ public class GraphRunner extends SceneRunner
 	public void addEdgeHandler(EdgeTrace.Handler handler) {
 		edgeBus.addListener(handler.edgeListener());
 		edgeEventBus.addListener(handler.edgeEventListener());
+	}
+
+	@Override
+	public void addGroupHandler(Handler handler) {
+		groupBus.addListener(handler.groupListener());
+		groupEventBus.addListener(handler.groupEventListener());
+	}
+
+	@Override
+	public void setGroupTrace(GroupTrace groups) throws IOException {
+		groupBus.reset();
+		groupEventBus.reset();
+		if ( groups_reader != null ){
+			runner.removeGenerator(groups_reader);
+			groups_reader.close();
+		}
+		if ( groups != null ){
+			groups_reader = groups.getReader();
+			groups_reader.setBus(groupEventBus);
+			groups_reader.setStateBus(groupBus);
+			groups_reader.seek(runner.time());
+			groupBus.flush();
+			runner.addGenerator(groups_reader);
+		}
 	}
 }

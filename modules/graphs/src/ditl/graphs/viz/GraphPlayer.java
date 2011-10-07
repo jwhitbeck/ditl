@@ -19,12 +19,11 @@
 package ditl.graphs.viz;
 
 import java.awt.Dimension;
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 import javax.swing.*;
 
-import ditl.*;
 import ditl.graphs.*;
 import ditl.viz.*;
 
@@ -47,7 +46,7 @@ public class GraphPlayer extends SimplePlayer {
 		scene = new GraphScene();
 		runner = new GraphRunner();
 		linksSelector = new LinksSelectorPanel(runner, scene);
-		groups = new GroupsPanel();
+		groups = new GroupsPanel(runner, scene);
 		
 		scene.setPreferredSize(new Dimension(700,500));
 		runner.addMovementHandler(scene);
@@ -69,31 +68,19 @@ public class GraphPlayer extends SimplePlayer {
 	protected void loadReaders(){
 		movement = (MovementTrace)_store.listTraces(MovementTrace.type).get(0); // use first movement trace
 		
-		if ( groups != null ){
-			List<Trace<?>> groupsTraces = _store.listTraces(GroupTrace.type);
-			if ( ! groupsTraces.isEmpty() )
-				loadGroups((GroupTrace)groupsTraces.get(0));
-		}
-		
 		setMovementTrace(movement);
+		
+		if ( groups != null ){
+			scene.setGroupColorMap(groups.colorMap());
+			runner.addGroupHandler(scene);
+			groups.setStore(_store);
+			groups.load(_store.listTraces(GroupTrace.type));
+		}
 		
 		if ( linksSelector != null ){
 			linksSelector.setStore(_store);
 			linksSelector.load(_store.listTraces(LinkTrace.type));
 		}		
-	}
-	
-	protected void loadGroups(GroupTrace groupTrace){
-		try {
-			Set<Group> grps = GroupTrace.staticGroups(groupTrace);
-			Groups g = new Groups(grps, groupTrace);
-			if ( g != null ){
-				groups.load(g);
-				scene.setGroups(g);
-			}
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this, "Error opening groups file", "Warning", JOptionPane.ERROR_MESSAGE);
-		}
 	}
 	
 	protected void setMovementTrace(MovementTrace movement) {
