@@ -19,12 +19,18 @@
 package ditl.viz;
 
 import java.awt.*;
+import java.awt.event.*;
+import java.text.DecimalFormat;
+import java.util.*;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 
 @SuppressWarnings("serial")
 public class ControlsPanel extends JPanel { 
+	
+	final ImageIcon playIcon = getIcon("icons/Play24.gif");
+	final ImageIcon pauseIcon = getIcon("icons/Pause24.gif");
 	
 	protected JButton playButton;
 	protected JButton stopButton;
@@ -33,55 +39,27 @@ public class ControlsPanel extends JPanel {
 	protected JLabel timeLabel;
 	protected JTextField timeField;
 	protected long tics_per_second = 1L;
+	protected long min_time;
+	protected long max_time;
+	protected int mod = 1;
+	protected String mod_text = "s";
+	protected DecimalFormat df = new DecimalFormat("0.00");
 	
-	public ControlsPanel(final SceneRunner runner){
+	public ControlsPanel(){
 		/* init components */
-		final ImageIcon playIcon = getIcon("icons/Play24.gif");
-		final ImageIcon pauseIcon = getIcon("icons/Pause24.gif");
-		playButton = new JButton(playIcon);
-		playButton.addActionListener(runner.playpauseListener());
-		runner.addPlayListener(new PlayListener(){
-			@Override
-			public void handlePause() {
-				playButton.setIcon(playIcon);
-			}
-
-			@Override
-			public void handlePlay() {
-				playButton.setIcon(pauseIcon);
-			}
-		});
 		
+		playButton = new JButton(playIcon);		
 		incrButton = new JButton(getIcon("icons/StepForward24.gif"));
-		incrButton.addActionListener(runner.incrListener());
-		
 		stopButton = new JButton(getIcon("icons/Stop24.gif"));
-		stopButton.addActionListener(runner.stopListener());
-		
 			
 		timeSlider = new JSlider();
-		timeSlider.addChangeListener(runner.sliderListener());
 		timeSlider.setPaintTicks(true);
 		timeSlider.setPaintLabels(true);
-		runner.addTimeChangeListener(new TimeChangeListener() {
-			@Override
-			public void changeTime(long time) {
-				timeSlider.setValue((int)(time/tics_per_second));
-			}
-		});
 		
 		timeLabel = new JLabel("Time: ");
-		
 		timeField = new JTextField();
 		timeField.setHorizontalAlignment(JTextField.RIGHT);
 		timeField.setPreferredSize(new Dimension(75,0));
-		runner.addTimeChangeListener(new TimeChangeListener(){
-			@Override
-			public void changeTime(long t) {
-				timeField.setText(String.valueOf(t/tics_per_second));
-			}
-		});
-		timeField.addActionListener(runner.timeEntryListener());
 		
 		/* layout */
 		JPanel buttonsPanel = new JPanel();
@@ -103,6 +81,55 @@ public class ControlsPanel extends JPanel {
 		setReady(false);		
 	}
 	
+	void setRunner(final SceneRunner runner){
+		playButton.addActionListener(runner.playpauseListener());
+		runner.addPlayListener(new PlayListener(){
+			@Override
+			public void handlePause() {
+				playButton.setIcon(playIcon);
+			}
+
+			@Override
+			public void handlePlay() {
+				playButton.setIcon(pauseIcon);
+			}
+		});
+		incrButton.addActionListener(runner.incrListener());
+		stopButton.addActionListener(runner.stopListener());
+		timeSlider.addChangeListener(runner.sliderListener());
+		runner.addTimeChangeListener(new TimeChangeListener() {
+			@Override
+			public void changeTime(long time) {
+				timeSlider.setValue((int)(time/tics_per_second));
+			}
+		});
+        runner.addTimeChangeListener(new TimeChangeListener(){
+        	@Override
+        	public void changeTime(long t) {
+        		setText(t);
+        	}
+        });
+		timeField.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				long t = parseText();
+				runner.pause();
+				runner.seek(t);
+			}
+		});
+	}
+	
+	private void setText(long t){
+		double v = (double)t/(double)(tics_per_second*mod);
+		timeField.setText(df.format(v)+" "+mod_text);
+	}
+	
+	public long parseText(){
+		String s = (String)timeField.getText().split(" ")[0];
+		double v = Double.parseDouble(s);
+		return (long)(v*tics_per_second*mod);
+	}
+	
 	private ImageIcon getIcon(String url){
 		return new ImageIcon(getClass().getResource(url));
 	}
@@ -116,24 +143,44 @@ public class ControlsPanel extends JPanel {
 		timeField.setEnabled(b);
 	}
 	
-	public void updateTimes(long ticsPerSecond, long minTime, long maxTime){
-		tics_per_second = ticsPerSecond;
+	private void updateSlider(){
 		ChangeListener[] listeners = timeSlider.getChangeListeners();
 		for ( ChangeListener listener : listeners )
 			timeSlider.removeChangeListener(listener);
-		int minT = (int)(minTime/ticsPerSecond);
-		int maxT = (int)(maxTime/ticsPerSecond)+1;
+		int minT = (int)(min_time/(tics_per_second));
+		int maxT = (int)(max_time/(tics_per_second))+1;
 		timeSlider.setMinimum(minT);
 		timeSlider.setMaximum(maxT);
-		int tickW = (maxT-minT)/20;
+		int tickW = Math.max(((maxT-minT)/20),mod);
+		tickW -= (tickW % mod);
 		timeSlider.setMajorTickSpacing(tickW*5);
 		timeSlider.setMinorTickSpacing(tickW);
 		timeSlider.setMinimum(minT);
 		timeSlider.setMaximum(maxT);
-		timeSlider.setLabelTable(timeSlider.createStandardLabels(tickW*5));
+		Dictionary<Integer,JLabel> label_map = new Hashtable<Integer,JLabel>();
+		label_map.put(minT, new JLabel(String.valueOf((minT)/mod)));
+		for ( int i=(minT+tickW*5-(minT%tickW*5)); i<=maxT; i+=tickW*5){
+			label_map.put(minT+i, new JLabel(String.valueOf((minT+i)/mod)));
+		}
+		timeSlider.setLabelTable(label_map);
 		for ( ChangeListener listener : listeners)
-			timeSlider.addChangeListener(listener);
-		timeField.setText(String.valueOf(minTime));
+			timeSlider.addChangeListener(listener);		
+	}
+	
+	public void setModifier(int modifier, String modText){
+		long t = parseText();
+		mod = modifier;
+		mod_text = modText;
+		updateSlider();
+		setText(t);
+	}
+	
+	public void setBounds(long ticsPerSecond, long minTime, long maxTime){
+		tics_per_second = ticsPerSecond;
+		min_time = minTime;
+		max_time = maxTime;
+		updateSlider();
+		setText(min_time);
 	}
 	
 }

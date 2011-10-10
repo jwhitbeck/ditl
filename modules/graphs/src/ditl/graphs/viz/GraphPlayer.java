@@ -35,6 +35,7 @@ public class GraphPlayer extends SimplePlayer {
 	protected GraphScene scene;
 	protected GraphRunner runner;
 	protected LinksSelectorPanel linksSelector;
+	protected TimeUnitPanel timeUnitPanel;
 	protected GroupsPanel groups;
 	protected MovementTrace movement;
 	
@@ -47,13 +48,17 @@ public class GraphPlayer extends SimplePlayer {
 		runner = new GraphRunner();
 		linksSelector = new LinksSelectorPanel(runner, scene);
 		groups = new GroupsPanel(runner, scene);
+		timeUnitPanel = new TimeUnitPanel(controls);
 		
 		scene.setPreferredSize(new Dimension(700,500));
 		runner.addMovementHandler(scene);
 		runner.addLinkHandler(scene);
 		runner.addEdgeHandler(scene);
+		runner.addGroupHandler(scene);
+		scene.setGroupColorMap(groups.colorMap());
 		
 		List<JPanel> widgets = new LinkedList<JPanel>();
+		widgets.add(timeUnitPanel);
 		widgets.add(new SpeedPanel(runner));
 		widgets.add(new FPSPanel(runner));
 		widgets.add(new ShowIdsPanel(scene));
@@ -70,17 +75,11 @@ public class GraphPlayer extends SimplePlayer {
 		
 		setMovementTrace(movement);
 		
-		if ( groups != null ){
-			scene.setGroupColorMap(groups.colorMap());
-			runner.addGroupHandler(scene);
-			groups.setStore(_store);
-			groups.load(_store.listTraces(GroupTrace.type));
-		}
+		groups.setStore(_store);
+		groups.load(_store.listTraces(GroupTrace.type));
 		
-		if ( linksSelector != null ){
-			linksSelector.setStore(_store);
-			linksSelector.load(_store.listTraces(LinkTrace.type));
-		}		
+		linksSelector.setStore(_store);
+		linksSelector.load(_store.listTraces(LinkTrace.type));
 	}
 	
 	protected void setMovementTrace(MovementTrace movement) {
@@ -88,7 +87,8 @@ public class GraphPlayer extends SimplePlayer {
 			scene.updateSize(movement.minX(),movement.minY(),movement.maxX(),movement.maxY());
 			runner.setMovementTrace(movement);
 			runner.setTicsPerSecond(movement.ticsPerSecond());
-			controls.updateTimes(movement.ticsPerSecond(),movement.minTime(), movement.maxTime());
+			controls.setBounds(movement.ticsPerSecond(),movement.minTime(), movement.maxTime());
+			timeUnitPanel.setPreferredTimeUnit(movement);
 			runner.seek(movement.minTime());
 		} catch ( IOException ioe ){
 			JOptionPane.showMessageDialog(this, "Error opening movement file", "Warning", JOptionPane.ERROR_MESSAGE);

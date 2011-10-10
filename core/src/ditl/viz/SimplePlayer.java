@@ -32,7 +32,7 @@ import ditl.*;
 public abstract class SimplePlayer extends JFrame {
 	
 	private JPanel sidebar;
-	protected ControlsPanel controls;
+	protected ControlsPanel controls = new ControlsPanel();
 	protected JButton openButton;
 	protected Store _store;
 	
@@ -57,7 +57,7 @@ public abstract class SimplePlayer extends JFrame {
 		JPanel toolbarPanel = new JPanel();
 		toolbarPanel.setLayout(new BoxLayout(toolbarPanel, BoxLayout.LINE_AXIS) );
 		toolbarPanel.add(openButton);
-		controls = new ControlsPanel(runner);
+		controls.setRunner(runner);
 		toolbarPanel.add(controls);
 		
 		JPanel widgetsPanel = new JPanel();
