@@ -18,16 +18,66 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 
 import ditl.*;
 
-public class ConnectedComponentsTrace extends GroupTrace {
 
-	public final static String type = "ccs";
-	public final static String defaultName = "ccs";
+
+public final class GroupSizeReport extends Report implements GroupTrace.Handler {
+
+	private GroupTrace.Updater updater = new GroupTrace.Updater();
 	
-	public ConnectedComponentsTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info);
+	public GroupSizeReport(OutputStream out) throws IOException {
+		super(out);
+		appendComment("time | group size distribution");
 	}
+	
+	public static final class Factory implements ReportFactory<GroupSizeReport> {
+		@Override
+		public GroupSizeReport getNew(OutputStream out) throws IOException {
+			return new GroupSizeReport(out);
+		}
+	}
+	
+	private void update(long time) throws IOException {
+		StringBuffer buffer = new StringBuffer();
+		buffer.append(time);
+		for ( Group g : updater.states() )
+			buffer.append(" "+g.size());
+		append(buffer.toString());
+	}
+
+	@Override
+	public Listener<GroupEvent> groupEventListener() {
+		return new Listener<GroupEvent>(){
+			@Override
+			public void handle(long time, Collection<GroupEvent> events)
+					throws IOException {
+				for ( GroupEvent gev : events )
+					updater.handleEvent(time, gev);
+				update(time);
+			}
+		};
+	}
+
+	@Override
+	public Listener<Group> groupListener() {
+		return new StatefulListener<Group>(){
+			@Override
+			public void reset() {
+				updater.setState(Collections.<Group>emptySet());
+			}
+
+			@Override
+			public void handle(long time, Collection<Group> events)
+					throws IOException {
+				updater.setState(events);
+				update(time);
+			}
+		};
+	}
+	
+	
 }

@@ -42,7 +42,7 @@ public class Analyze extends ExportApp {
 	final static String clusteringOption = "clustering";
 	final static String numCCOption = "ccs";
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.CC, GraphOptions.EDGES);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.GROUPS, GraphOptions.EDGES);
 	private ReportFactory<?> factory;
 	
 	public final static String PKG_NAME = "graphs";
@@ -99,7 +99,7 @@ public class Analyze extends ExportApp {
 		} else if ( cli.hasOption(clusteringOption) ){
 			factory = new ClusteringCoefficientReport.Factory(true);
 		} else if ( cli.hasOption(numCCOption) ){
-			factory = new ConnectedComponentsReport.Factory();
+			factory = new GroupSizeReport.Factory();
 		}
 	}
 	
@@ -170,8 +170,8 @@ public class Analyze extends ExportApp {
 			incrTime = edges.maxUpdateInterval();
 		}
 		
-		if ( report instanceof ConnectedComponentsTrace.Handler ){
-			ConnectedComponentsTrace groups = (ConnectedComponentsTrace)_store.getTrace(graph_options.get(GraphOptions.CC));
+		if ( report instanceof GroupTrace.Handler ){
+			GroupTrace groups = (GroupTrace)_store.getTrace(graph_options.get(GraphOptions.GROUPS));
 			StatefulReader<GroupEvent,Group> groupReader = groups.getReader();
 			
 			Bus<GroupEvent> groupEventBus = new Bus<GroupEvent>();
@@ -179,7 +179,7 @@ public class Analyze extends ExportApp {
 			groupReader.setBus(groupEventBus);
 			groupReader.setStateBus(groupBus);
 			
-			ConnectedComponentsTrace.Handler gh = (ConnectedComponentsTrace.Handler)report;
+			GroupTrace.Handler gh = (GroupTrace.Handler)report;
 			groupEventBus.addListener(gh.groupEventListener());
 			groupBus.addListener(gh.groupListener());
 			

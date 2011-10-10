@@ -30,7 +30,6 @@ public class GraphOptions {
 	public final static int MOVEMENT = 3;
 	public final static int GROUPS = 4;
 	public final static int BEACONS = 5;
-	public final static int CC = 6;
 	
 	private final static String[] _options = {
 		"presence",
@@ -39,7 +38,6 @@ public class GraphOptions {
 		"movement",
 		"groups",
 		"beacons",
-		"cc"
 	};
 	
 	private final static String[] _defaults = {
@@ -49,7 +47,6 @@ public class GraphOptions {
 		MovementTrace.defaultName,
 		GroupTrace.defaultName,
 		BeaconTrace.defaultName,
-		ConnectedComponentsTrace.defaultName
 	};
 	
 	private final static String[] _help = {
@@ -59,7 +56,6 @@ public class GraphOptions {
 		"name of movement trace (default: "+MovementTrace.defaultName+")",
 		"name of group trace (default: "+GroupTrace.defaultName+")",
 		"name of beacon trace (default: "+BeaconTrace.defaultName+")",
-		"name of connected components trace (default: "+ConnectedComponentsTrace.defaultName+")",
 	};
 	
 	private Integer[] _opts;

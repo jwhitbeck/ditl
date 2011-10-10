@@ -32,10 +32,10 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 	private StatefulWriter<GroupEvent,Group> group_writer;
 	private StatefulReader<LinkEvent,Link> link_reader;
 	private int counter = 0;
-	private ConnectedComponentsTrace _ccs;
+	private GroupTrace _ccs;
 	private LinkTrace _links;
 	
-	public LinksToConnectedComponentsConverter( ConnectedComponentsTrace ccs, LinkTrace links){ 
+	public LinksToConnectedComponentsConverter( GroupTrace ccs, LinkTrace links){ 
 		_ccs = ccs;
 		_links = links;
 	}

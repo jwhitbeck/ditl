@@ -82,7 +82,6 @@ Here is a list of the trace types currently in the library:
   * movement
   * beacon (stateless)
   * group
-  * connected components
 * Transfers module
   * message
   * buffer

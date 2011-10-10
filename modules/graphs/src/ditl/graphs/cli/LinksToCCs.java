@@ -29,7 +29,7 @@ import ditl.graphs.*;
 
 public class LinksToCCs extends ConvertApp {
 
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.CC);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.GROUPS);
 	
 	public final static String PKG_NAME = "graphs";
 	public final static String CMD_NAME = "links-to-ccs";
@@ -52,7 +52,7 @@ public class LinksToCCs extends ConvertApp {
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
-		ConnectedComponentsTrace ccs = (ConnectedComponentsTrace) dest_store.newTrace(graph_options.get(GraphOptions.CC), ConnectedComponentsTrace.type, force);
+		GroupTrace ccs = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
 		new LinksToConnectedComponentsConverter(ccs, links).convert();
 	}
 
