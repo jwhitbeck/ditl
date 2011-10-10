@@ -270,8 +270,11 @@ public class GraphScene extends Scene implements
 			public void handle(long time, Collection<Group> events) {
 				for ( Group group : events ){
 					Color c =  group_color_map.get(group.gid());
-					for ( Integer i : group.members() )
-						nodes.get(i).setFillColor(c);
+					for ( Integer i : group.members() ){
+						NodeElement node = nodes.get(i);
+						if ( node != null )
+							node.setFillColor(c);
+					}
 				}
 			}
 			
