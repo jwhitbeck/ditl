@@ -40,7 +40,7 @@ public class Analyze extends ExportApp {
 	final static String anyContactsOption = "any-contacts";
 	final static String interAnyContactsOption = "inter-any-contacts";
 	final static String clusteringOption = "clustering";
-	final static String numCCOption = "ccs";
+	final static String groupSizeOption = "group-size";
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.GROUPS, GraphOptions.EDGES);
 	private ReportFactory<?> factory;
@@ -65,7 +65,7 @@ public class Analyze extends ExportApp {
 		reportGroup.addOption(new Option(null, anyContactsOption, false, "any-contact time distribution") );
 		reportGroup.addOption(new Option(null, interAnyContactsOption, false, "inter-any-contact time distribution") );
 		reportGroup.addOption(new Option(null, clusteringOption, false, "clustering coefficient distribution over time") );
-		reportGroup.addOption(new Option(null, numCCOption, false, "distribution of connected component sizes over time") );
+		reportGroup.addOption(new Option(null, groupSizeOption, false, "distribution of group sizes over time") );
 		reportGroup.setRequired(true);
 		options.addOptionGroup(reportGroup);
 	}
@@ -98,7 +98,7 @@ public class Analyze extends ExportApp {
 			factory = new AnyContactTimesReport.Factory(false);
 		} else if ( cli.hasOption(clusteringOption) ){
 			factory = new ClusteringCoefficientReport.Factory(true);
-		} else if ( cli.hasOption(numCCOption) ){
+		} else if ( cli.hasOption(groupSizeOption) ){
 			factory = new GroupSizeReport.Factory();
 		}
 	}
@@ -146,8 +146,8 @@ public class Analyze extends ExportApp {
 			
 			readers.add(linksReader);
 			
-			if ( minTime == null ) minTime = links.minTime();
-			if ( maxTime == null ) maxTime = links.maxTime();
+			if ( minTime == null || links.minTime() > minTime ) minTime = links.minTime();
+			if ( maxTime == null || links.maxTime() < maxTime ) maxTime = links.maxTime();
 			incrTime = links.maxUpdateInterval();
 		}
 		
@@ -185,8 +185,8 @@ public class Analyze extends ExportApp {
 			
 			readers.add(groupReader);
 			
-			if ( minTime == null ) minTime = groups.minTime();
-			if ( maxTime == null ) maxTime = groups.maxTime();
+			if ( minTime == null || groups.minTime() > minTime ) minTime = groups.minTime();
+			if ( maxTime == null || groups.maxTime() < maxTime ) maxTime = groups.maxTime();
 			incrTime = groups.maxUpdateInterval();
 		}
 
