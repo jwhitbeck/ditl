@@ -263,11 +263,13 @@ public class GraphScene extends Scene implements
 			@Override
 			public void reset() {
 				for ( NodeElement node : nodes.values() )
-					node.setFillColor(GroupsPanel.noGroupColor);
+					node.setFillColor(NodeElement.defaultFillColor);
 			}
 
 			@Override
 			public void handle(long time, Collection<Group> events) {
+				for ( NodeElement node : nodes.values() )
+					node.setFillColor(GroupsPanel.noGroupColor);
 				for ( Group group : events ){
 					Color c =  group_color_map.get(group.gid());
 					for ( Integer i : group.members() ){
