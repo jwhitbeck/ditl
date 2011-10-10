@@ -102,7 +102,12 @@ public abstract class SimplePlayer extends JFrame {
 			loadReaders();
 			enableControls(true);
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this, "Failed to load files: '"+files+"'", "Warning", JOptionPane.ERROR_MESSAGE);
+			StringBuffer s = new StringBuffer();
+			for ( int i=0; i<files.length-1; ++i){
+				s.append(files[i]+", ");
+			}
+			s.append(files[files.length-1]);				
+			JOptionPane.showMessageDialog(this, "Failed to load files: '"+s.toString()+"'", "Warning", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	
