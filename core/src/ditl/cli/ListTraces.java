@@ -19,6 +19,7 @@
 package ditl.cli;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import org.apache.commons.cli.*;
 
@@ -26,8 +27,9 @@ import ditl.Trace;
 
 public class ListTraces extends ExportApp {
 
-	private final static String detailsOption = "all";
+	private final static String detailsOption = "all"; 
 	private boolean show_descr;
+	private String type;
 	
 	public final static String PKG_NAME = null;
 	public final static String CMD_NAME = "ls";
@@ -37,12 +39,14 @@ public class ListTraces extends ExportApp {
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
 		super.parseArgs(cli, args);
 		show_descr = cli.hasOption(detailsOption);
+		type = cli.getOptionValue(typeOption);
 	}
 
 	
 	@Override
 	protected void run() throws IOException {
-		for ( Trace<?> trace : _store.listTraces() ){
+		Collection<Trace<?>> traces = (type==null)? _store.listTraces() : _store.listTraces(type);
+		for ( Trace<?> trace : traces ){
 			System.out.println(trace.name());
 			if ( show_descr ){
 				System.out.println("   type:        "+trace.type());
@@ -56,6 +60,7 @@ public class ListTraces extends ExportApp {
 	protected void initOptions() {
 		super.initOptions();
 		options.addOption("a",detailsOption, false, "Show trace descriptions");
+		options.addOption("t", typeOption, true, "Show only traces of type <arg>");
 	}
 	
 }

@@ -39,6 +39,7 @@ public abstract class App {
 	protected final static String outputOption = "output";
 	protected final static String storeOutputOption = "out-store";
 	protected final static String forceOption = "force";
+	protected final static String typeOption = "type";
 	
 	protected Options options = new Options();
 	protected String usageString;
