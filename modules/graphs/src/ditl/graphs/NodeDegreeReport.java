@@ -25,13 +25,13 @@ import ditl.*;
 
 
 
-public final class NodeDegreeReport	extends Report implements LinkTrace.Handler, PresenceTrace.Handler {
+public final class NodeDegreeReport	extends StateTimeReport implements LinkTrace.Handler, PresenceTrace.Handler {
 
 	private Map<Integer,Integer> degrees = new HashMap<Integer,Integer>();
 	
 	public NodeDegreeReport(OutputStream out) throws IOException {
 		super(out);
-		appendComment("time | node degree distribution");
+		appendComment("time | duration | node degree distribution");
 	}
 	
 	public static final class Factory implements ReportFactory<NodeDegreeReport> {
@@ -108,10 +108,9 @@ public final class NodeDegreeReport	extends Report implements LinkTrace.Handler,
 	
 	private void update(long time) throws IOException {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append(time);
 		for ( Integer d : degrees.values() )
-			buffer.append(" "+d);
-		append(buffer.toString());
+			buffer.append(d+" ");
+		append(time, buffer.toString());
 	}
 	
 	private void incrDegree(Integer id, int incr){

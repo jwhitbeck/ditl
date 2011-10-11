@@ -195,6 +195,9 @@ public class Analyze extends ExportApp {
 			runner.addGenerator(reader);
 		runner.run();
 		
-		report.finish();
+		if ( report instanceof StateTimeReport )
+			((StateTimeReport)report).finish(maxTime);
+		else
+			report.finish();
 	}
 }

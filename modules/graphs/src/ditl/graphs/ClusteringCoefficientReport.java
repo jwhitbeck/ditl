@@ -25,7 +25,7 @@ import ditl.*;
 
 
 
-public final class ClusteringCoefficientReport extends Report 
+public final class ClusteringCoefficientReport extends StateTimeReport 
 	implements PresenceTrace.Handler, LinkTrace.Handler {
 	
 	private AdjacencyMatrix adjacency = new AdjacencyMatrix();
@@ -35,7 +35,7 @@ public final class ClusteringCoefficientReport extends Report
 	public ClusteringCoefficientReport(OutputStream out, boolean removeLeaves) throws IOException {
 		super(out);
 		remove_leaves = removeLeaves;
-		appendComment("time | clustering coefficient distribution");
+		appendComment("time | duration | clustering coefficient distribution");
 	}
 	
 	public static final class Factory implements ReportFactory<ClusteringCoefficientReport> {
@@ -88,12 +88,12 @@ public final class ClusteringCoefficientReport extends Report
 
 	private void update(long time) throws IOException {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append(time);
+		//buffer.append(time);
 		for ( Double c : coeffs.values() ){
 			if ( c > 0 || ! remove_leaves )
-				buffer.append(" "+c);
+				buffer.append(c+" ");
 		}
-		append( buffer.toString() );
+		append( time, buffer.toString() );
 	}
 	
 

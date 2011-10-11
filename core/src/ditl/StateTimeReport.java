@@ -16,67 +16,30 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs;
+package ditl;
 
 import java.io.*;
-import java.util.*;
 
-import ditl.*;
-
-
-
-public final class GroupSizeReport extends StateTimeReport implements GroupTrace.Handler {
-
-	private GroupTrace.Updater updater = new GroupTrace.Updater();
+public class StateTimeReport extends Report {
 	
-	public GroupSizeReport(OutputStream out) throws IOException {
+	protected long prev_time;
+	protected Object prev_state;
+
+	public StateTimeReport(OutputStream out) throws IOException {
 		super(out);
-		appendComment("time | duration | group size distribution");
 	}
 	
-	public static final class Factory implements ReportFactory<GroupSizeReport> {
-		@Override
-		public GroupSizeReport getNew(OutputStream out) throws IOException {
-			return new GroupSizeReport(out);
+	public void append(long time, Object s) throws IOException{
+		if ( prev_state != null ){
+			append(prev_time+" "+(time-prev_time)+" "+prev_state);
 		}
+		prev_time = time;
+		prev_state = s;
 	}
 	
-	private void update(long time) throws IOException {
-		StringBuffer buffer = new StringBuffer();
-		for ( Group g : updater.states() )
-			buffer.append(g.size()+" ");
-		append(time, buffer.toString());
+	public void finish(long time) throws IOException{
+		append(prev_time+" "+(time-prev_time)+" "+prev_state);
+		finish();
 	}
 
-	@Override
-	public Listener<GroupEvent> groupEventListener() {
-		return new Listener<GroupEvent>(){
-			@Override
-			public void handle(long time, Collection<GroupEvent> events)
-					throws IOException {
-				for ( GroupEvent gev : events )
-					updater.handleEvent(time, gev);
-				update(time);
-			}
-		};
-	}
-
-	@Override
-	public Listener<Group> groupListener() {
-		return new StatefulListener<Group>(){
-			@Override
-			public void reset() {
-				updater.setState(Collections.<Group>emptySet());
-			}
-
-			@Override
-			public void handle(long time, Collection<Group> events)
-					throws IOException {
-				updater.setState(events);
-				update(time);
-			}
-		};
-	}
-	
-	
 }
