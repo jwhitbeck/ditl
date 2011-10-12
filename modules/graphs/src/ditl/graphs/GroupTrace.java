@@ -41,12 +41,12 @@ public class GroupTrace extends StatefulTrace<GroupEvent,Group> {
 		return ! labels.isEmpty();
 	}
 	
-	public static Set<Group> staticGroups(StatefulTrace<GroupEvent,Group> trace) throws IOException{
-		return staticGroups(trace, trace.minTime());
+	public Set<Group> staticGroups() throws IOException{
+		return staticGroups(minTime());
 	}
 	
-	public static Set<Group> staticGroups(StatefulTrace<GroupEvent,Group> trace, long time) throws IOException{
-		StatefulReader<GroupEvent,Group> reader = trace.getReader();
+	public Set<Group> staticGroups(long time) throws IOException{
+		StatefulReader<GroupEvent,Group> reader = getReader();
 		reader.seek(time);
 		Set<Group> groups = reader.referenceState();
 		reader.close();

@@ -42,7 +42,7 @@ public class StaticGroupLinks extends ConvertApp {
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
 		LinkTrace links = (LinkTrace)orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
 		GroupTrace groups = (GroupTrace)orig_store.getTrace(graph_options.get(GraphOptions.GROUPS));
-		Set<Group> static_groups = GroupTrace.staticGroups(groups);
+		Set<Group> static_groups = groups.staticGroups();
 		LinkTrace group_links = (LinkTrace)dest_store.newTrace(groupLinksName, LinkTrace.type, force);
 		new StaticGroupLinkConverter(group_links, links, static_groups).convert();
 	}
