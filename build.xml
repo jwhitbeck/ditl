@@ -33,7 +33,7 @@
 	<name name="**/*.class"/>
 	<archives>
 	  <zips>
-	    <fileset dir="${dist}" includes="*.jar"/>
+	    <fileset dir="${dist}" includes="*.jar" excludes="ditl.jar"/>
 	  </zips>
 	</archives>
       </restrict>
