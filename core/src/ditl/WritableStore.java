@@ -60,7 +60,11 @@ public abstract class WritableStore extends Store {
 	
 	void notifyClose(String name) throws IOException {
 		openWriters.remove(name);
-		refresh();
+		try {
+			loadTrace(name);
+		} catch (LoadTraceException e) {
+			System.err.println(e);
+		}
 	}
 	
 	void notifyOpen(String name, Writer<?> writer) throws IOException {
@@ -105,8 +109,6 @@ public abstract class WritableStore extends Store {
 			}
 		}
 	}
-	
-	abstract void refresh() throws IOException;
 	
 	public Trace<?> newTrace(String name, String type, boolean force) throws AlreadyExistsException, LoadTraceException {
 		if ( traces.containsKey(name) ){
