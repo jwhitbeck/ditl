@@ -42,6 +42,7 @@ public class TransferPlayer extends GraphPlayer {
 		runner = new RoutingRunner();
 		linksSelector = new LinksSelectorPanel(runner, scene);
 		transferSelector = new TransferSelectorPanel((RoutingRunner)runner,scene);
+		timeUnitPanel = new TimeUnitPanel(controls);
 		messageSelector = new MessageSelectorPanel((RoutingRunner)runner,(TransferScene)scene);
 		
 		scene.setPreferredSize(new Dimension(700,500));
@@ -51,6 +52,7 @@ public class TransferPlayer extends GraphPlayer {
 		((RoutingRunner)runner).addTransferHandler((TransferScene)scene);
 		
 		List<JPanel> widgets = new LinkedList<JPanel>();
+		widgets.add(timeUnitPanel);
 		widgets.add(new SpeedPanel(runner));
 		widgets.add(new FPSPanel(runner));
 		widgets.add(new ShowIdsPanel(scene));
@@ -69,7 +71,7 @@ public class TransferPlayer extends GraphPlayer {
 		super.loadReaders();
 		
 		transferSelector.setStore(_store);
-		transferSelector.load(_store.listTraces(MessageTrace.type));
+		transferSelector.load(_store.listTraces(TransferTrace.type));
 		
 		BufferTrace buffers = (BufferTrace)_store.listTraces(BufferTrace.type).get(0);
 		try {

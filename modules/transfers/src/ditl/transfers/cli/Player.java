@@ -33,10 +33,6 @@ public class Player extends App {
 	public final static String CMD_NAME = "play";
 	public final static String CMD_ALIAS = "p";
 	
-	
-	@Override
-	protected void initOptions() {}
-
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args)
 			throws ParseException, ArrayIndexOutOfBoundsException,

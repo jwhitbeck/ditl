@@ -75,11 +75,15 @@ public class GraphPlayer extends SimplePlayer {
 		
 		setMovementTrace(movement);
 		
-		groups.setStore(_store);
-		groups.load(_store.listTraces(GroupTrace.type));
+		if ( groups != null ){
+			groups.setStore(_store);
+			groups.load(_store.listTraces(GroupTrace.type));
+		}
 		
-		linksSelector.setStore(_store);
-		linksSelector.load(_store.listTraces(LinkTrace.type));
+		if ( linksSelector != null ){
+			linksSelector.setStore(_store);
+			linksSelector.load(_store.listTraces(LinkTrace.type));
+		}
 	}
 	
 	protected void setMovementTrace(MovementTrace movement) {
