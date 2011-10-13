@@ -30,7 +30,10 @@
         <attribute name="Class-Path" value="."/>
       </manifest>
       <restrict>
-	<name name="**/*.class"/>
+	<or>
+	  <name name="**/*.class"/>
+	  <name name="**/*.gif"/>
+	</or>
 	<archives>
 	  <zips>
 	    <fileset dir="${dist}" includes="*.jar" excludes="ditl.jar"/>
