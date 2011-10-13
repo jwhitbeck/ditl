@@ -8,6 +8,12 @@
     </copy>
     <javac srcdir="src" destdir="build" classpath="${core}:${commons}:${graphs}" includeantruntime="false" />
   </target>
+
+  <target name="dist-transfers" depends="compile-transfers">
+    <jar destfile="${dist}/ditl-transfers.jar">
+      <fileset dir="build"/>
+    </jar>
+  </target>
   
   <target name="clean-transfers" >
     <delete dir="build" />

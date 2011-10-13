@@ -1,25 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="modules-jar" name="Ditl-Modules">
+<project default="compile-modules" name="Ditl-Modules">
 
   <target name="compile-modules">
     <ant dir="graphs" />
     <ant dir="transfers" />
     <ant dir="plausible" />
   </target>
-    
-  <target name="modules-jar" depends="compile-modules">
-    <jar destfile="ditl-modules.jar" >
-      <fileset dir="graphs/build"/>
-      <fileset dir="transfers/build"/>
-      <fileset dir="plausible/build"/>
-    </jar>
+
+  <target name="dist-modules">
+    <ant dir="graphs" target="dist-graphs"/>
+    <ant dir="transfers" target="dist-transfers"/>
+    <ant dir="plausible" target="dist-plausible"/>
   </target>
 
   <target name="clean-modules" >
     <ant dir="graphs" target="clean-graphs"/>
     <ant dir="transfers" target="clean-transfers"/>
     <ant dir="plausible" target="clean-plausible"/>
-    <delete file="ditl-modules.jar"/>
   </target>
   
 </project>

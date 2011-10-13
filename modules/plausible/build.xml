@@ -6,6 +6,12 @@
     <mkdir dir="build"/>
     <javac srcdir="src" destdir="build" classpath="${core}:${commons}:${graphs}" includeantruntime="false" />
   </target>
+
+  <target name="dist-plausible" depends="compile-plausible">
+    <jar destfile="${dist}/ditl-plausible.jar">
+      <fileset dir="build"/>
+    </jar>
+  </target>
   
   <target name="clean-plausible" >
     <delete dir="build" />

@@ -7,6 +7,12 @@
     </copy>
     <javac srcdir="src" destdir="build" classpath="${commons}" includeantruntime="false" />
   </target>
+
+  <target name="dist-core" depends="compile-core">
+    <jar destfile="${dist}/ditl-core.jar">
+      <fileset dir="build"/>
+    </jar>
+  </target>
   
   <target name="clean-core" >
     <delete dir="build" />

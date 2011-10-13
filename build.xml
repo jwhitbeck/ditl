@@ -4,11 +4,17 @@
   <property name="commons" location="include/commons-cli/commons-cli-1.2.jar"/>
   <property name="core" location="core/build"/>
   <property name="modules" location="modules"/>
+  <property name="dist" location="dist"/>
   
   <target name="compile-ditl">
-    <ant dir="core" />
-    <ant dir="${modules}" />
-  </target>  
+    <ant dir="core"/>
+    <ant dir="${modules}"/>
+  </target>
+
+  <target name="dist-ditl">
+    <ant dir="core" target="dist-core"/>
+    <ant dir="${modules}" target="dist-modules"/>
+  </target>
 
   <target name="meta-info">
     <mkdir dir="build/META-INF"/>
@@ -17,15 +23,21 @@
     <copy file="include/commons-cli/NOTICE.txt" todir="build/META-INF" />
   </target>
 
-  <target name="ditl-jar" depends="compile-ditl,meta-info">
-    <jar destfile="ditl.jar" filesetmanifest="mergewithoutmain" >
+  <target name="ditl-jar" depends="dist-ditl,meta-info">
+    <jar destfile="dist/ditl.jar" filesetmanifest="mergewithoutmain" >
       <manifest>
         <attribute name="Main-Class" value="ditl.cli.CLI"/>
         <attribute name="Class-Path" value="."/>
       </manifest>
-      <fileset dir="core/build"/>
+      <restrict>
+	<name name="**/*.class"/>
+	<archives>
+	  <zips>
+	    <fileset dir="${dist}" includes="*.jar"/>
+	  </zips>
+	</archives>
+      </restrict>
       <fileset dir="build/"/>
-      <zipfileset src="${modules}/ditl-modules.jar"/>
       <zipfileset excludes="META-INF/" src="${commons}"/>
     </jar>
   </target>
@@ -33,11 +45,11 @@
   <target name="clean" >
     <ant dir="core" target="clean-core"/>
     <ant dir="${modules}" target="clean-modules"/>
-    <delete dir="build" />
+    <delete dir="build"/>
   </target>
 
   <target name="proper" depends="clean">
-    <delete file="ditl.jar" />
+    <delete dir="${dist}" />
   </target>
 
   <target name="all" depends="ditl-jar" />
