@@ -46,7 +46,7 @@ public class Merge extends WriteApp {
 			orig_store_names[i-1] = args[i];
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		for ( String traceName : getCommonTraceNames() ){

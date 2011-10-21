@@ -83,7 +83,7 @@ public class Filter extends ConvertApp {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void filter(Trace<?> dest, Trace<?> orig) throws IOException {
 		Converter filterer = null;
 		Matcher<?> state_matcher, event_matcher;

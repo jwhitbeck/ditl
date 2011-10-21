@@ -124,10 +124,9 @@ public abstract class Trace<E> {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object o){
-		Trace t = (Trace)o; 
+		Trace<?> t = (Trace<?>)o; 
 		return t._name.equals(_name) && _store == t._store;
 	}
 }

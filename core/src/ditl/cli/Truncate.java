@@ -70,7 +70,7 @@ public class Truncate extends ConvertApp {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void truncate(Trace<?> dest, Trace<?> orig) throws IOException {
 		long min_time = minTime * orig.ticsPerSecond();
 		long max_time = maxTime * orig.ticsPerSecond();
