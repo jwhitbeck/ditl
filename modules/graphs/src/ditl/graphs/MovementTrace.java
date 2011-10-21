@@ -128,8 +128,10 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 		}
 		
 		public void update(Point p){
-			updateX(p.x);
-			updateY(p.y);
+			if ( p != null ){ // p can be null
+				updateX(p.x);
+				updateY(p.y);
+			}
 		}
 		
 		public void updateX(double x){
