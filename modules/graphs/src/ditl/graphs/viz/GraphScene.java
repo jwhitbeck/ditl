@@ -243,8 +243,11 @@ public class GraphScene extends Scene implements
 				for ( GroupEvent gev : events ){
 					switch (gev.type()){
 					case GroupEvent.LEAVE:
-						for ( Integer i : gev.members() )
-							nodes.get(i).setFillColor(GroupsPanel.noGroupColor);
+						for ( Integer i : gev.members() ){
+							NodeElement node = nodes.get(i);
+							if ( node != null ) // node is null if it has also left the simulation
+								node.setFillColor(GroupsPanel.noGroupColor);
+						}
 						break;
 					case GroupEvent.JOIN:
 						for ( Integer i : gev.members() )
