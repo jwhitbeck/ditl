@@ -54,8 +54,8 @@ public class RoutingRunner extends GraphRunner
 			runner.removeGenerator(transfer_reader);
 			transfer_reader.close();
 		}
-		transfer_reader = transfers.getReader();
-		if ( transfer_reader != null ){
+		if ( transfers != null ){
+			transfer_reader = transfers.getReader();
 			transfer_reader.setBus(transferEventBus);
 			transfer_reader.setStateBus(transferBus);
 			transfer_reader.seek(runner.time());
@@ -78,8 +78,8 @@ public class RoutingRunner extends GraphRunner
 			runner.removeGenerator(message_reader);
 			message_reader.close();
 		}
-		message_reader = messages.getReader();
-		if ( message_reader != null ){
+		if ( messages != null ){
+			message_reader = messages.getReader();
 			message_reader.setBus(messageEventBus);
 			message_reader.setStateBus(messageBus);
 			message_reader.seek(runner.time());
@@ -102,8 +102,8 @@ public class RoutingRunner extends GraphRunner
 			runner.removeGenerator(buffer_reader);
 			buffer_reader.close();
 		}
-		buffer_reader = buffers.getReader();
-		if ( buffer_reader != null ){
+		if ( buffers != null ){
+			buffer_reader = buffers.getReader();
 			buffer_reader.setBus(bufferEventBus);
 			buffer_reader.setStateBus(bufferBus);
 			buffer_reader.seek(runner.time());

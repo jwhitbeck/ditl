@@ -114,7 +114,7 @@ public class TransferSelectorPanel extends JPanel implements ActionListener, Ite
 			}
 			runner.setTransferTrace(cur_transfers);
         } catch (Exception ioe){
-        	JOptionPane.showMessageDialog(this, "Failed to load links file '"+name+"'", "Warning", JOptionPane.ERROR_MESSAGE);
+        	JOptionPane.showMessageDialog(this, "Failed to load transfers file '"+name+"'", "Warning", JOptionPane.ERROR_MESSAGE);
         }
         scene.repaint();
 	}
