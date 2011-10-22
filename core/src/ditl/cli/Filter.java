@@ -56,9 +56,9 @@ public class Filter extends ConvertApp {
 	
 	private void parseGroups(String group_string){
 		group = new HashSet<Integer>();
-		String[] ranges = group_string.split(":");
+		String[] ranges = group_string.split(",");
 		for ( String range : ranges ){
-			String[] bounds = range.split("-");
+			String[] bounds = range.split(":");
 			if ( bounds.length == 1 )
 				group.add( Integer.parseInt(bounds[0]) );
 			else {

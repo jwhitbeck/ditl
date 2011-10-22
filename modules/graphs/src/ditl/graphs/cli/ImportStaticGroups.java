@@ -72,14 +72,14 @@ public class ImportStaticGroups extends WriteApp {
 		int i=0;
 		for ( String spec : group_specs ){
 			Group group = new Group(i);
-			String[] ranges = spec.split(":");
+			String[] ranges = spec.split(",");
 			int j = 0;
 			if ( useLabels ){
 				labels.add(ranges[j]);
 				++j;
 			}
 			while ( j < ranges.length ){
-				String[] bounds = ranges[j].split("-");
+				String[] bounds = ranges[j].split(":");
 				Integer n;
 				if ( bounds.length == 1 ) {
 					n = Integer.parseInt(bounds[0]);
