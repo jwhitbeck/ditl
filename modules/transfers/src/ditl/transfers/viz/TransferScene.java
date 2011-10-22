@@ -30,6 +30,7 @@ import ditl.transfers.*;
 public class TransferScene extends GraphScene implements TransferTrace.Handler {
 
 	private Map<Link,LinkElement> active_transfers = new HashMap<Link,LinkElement>();
+	private Map<Link,Integer> transfer_count = new HashMap<Link,Integer>();
 	private boolean show_transfers = true;
 
 	@Override
@@ -40,11 +41,9 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 				for ( TransferEvent tev : events ){
 					Link l = tev.edge().link();
 					if ( tev.type() == TransferEvent.START ){
-						NodeElement n1 = nodes.get(l.id1());
-						NodeElement n2 = nodes.get(l.id2());
-						active_transfers.put(l, new LinkElement(n1,n2));
+						incrTransfer(l);
 					} else {
-						active_transfers.remove(l);
+						decrTransfer(l);
 					}
 				}
 			}
@@ -58,15 +57,14 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 			public void handle(long time, Collection<Transfer> events) {
 				for ( Transfer transfer : events ){
 					Link l = transfer.edge().link();
-					NodeElement n1 = nodes.get(l.id1());
-					NodeElement n2 = nodes.get(l.id2());
-					active_transfers.put(l, new LinkElement(n1,n2));
+					incrTransfer(l);
 				}
 			}
 
 			@Override
 			public void reset() {
 				active_transfers.clear();
+				transfer_count.clear();
 			}
 		};
 	}
@@ -105,5 +103,27 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 	public void removeInfected(Integer id){
 		NodeElement node = nodes.get(id);
 		node.setFillColor(Color.BLUE);
+	}
+	
+	private void incrTransfer(Link l){
+		if ( ! transfer_count.containsKey(l) ){
+			transfer_count.put(l, 1);
+			NodeElement n1 = nodes.get(l.id1());
+			NodeElement n2 = nodes.get(l.id2());
+			active_transfers.put(l, new LinkElement(n1,n2));
+		} else {
+			int c = transfer_count.get(l);
+			transfer_count.put(l, c+1);
+		}
+	}
+	
+	private void decrTransfer(Link l){
+		int c = transfer_count.get(l);
+		if ( c > 1 ){
+			transfer_count.put(l, c-1);
+		} else {
+			active_transfers.remove(l);
+			transfer_count.remove(l);
+		}
 	}
 }
