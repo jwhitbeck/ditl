@@ -163,24 +163,21 @@ public final class EdgesToDominatingSetConverter implements Converter,
 		Set<Integer> new_ds = new HashSet<Integer>();
 		
 		DSCalculator() {
-			// Nodes with no incoming edges must be chosen
 			for ( Integer id : present ){
-				if ( reverse_matrix.getNext(id) == null ){ // no incoming edges
+				if ( reverse_matrix.getNext(id) == null ){ // no incoming edges, must be chosen
 					new_ds.add(id);
 					covered.add(id);
 					Set<Integer> dests = matrix.getNext(id);
 					if ( dests != null )
 						covered.addAll(dests);
-				}
-			}
-			// prepare the remainder map for the remaining candidates
-			for ( Integer id : reverse_matrix.nodes() ){
-				Set<Integer> dests = matrix.getNext(id);
-				if ( dests != null ){ // nodes with incoming but no outgoing edges should never be in the dominating set
-					Set<Integer> r_dests = new HashSet<Integer>(dests);
-					r_dests.removeAll(covered);
-					remainders.put(id, r_dests);
-					setNodeDegree(id, r_dests.size());
+				} else { // prepare entry in the remainder map 
+					Set<Integer> dests = matrix.getNext(id);
+					if ( dests != null ){ // nodes with incoming but no outgoing edges should never be in the dominating set
+						Set<Integer> r_dests = new HashSet<Integer>(dests);
+						r_dests.removeAll(covered);
+						remainders.put(id, r_dests);
+						setNodeDegree(id, r_dests.size());
+					}
 				}
 			}
 		}
@@ -193,7 +190,7 @@ public final class EdgesToDominatingSetConverter implements Converter,
 		}
 		
 		boolean allCovered(){
-			return covered.size() == present.size();
+			return covered.size() >= present.size(); // covered may be greater than the number of present nodes (e.g., edges in reachability traces)
 		}
 		
 		void pick(Integer node){
