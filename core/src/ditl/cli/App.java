@@ -63,7 +63,7 @@ public abstract class App {
 		_name = name;
 		options.addOption(new Option("h","help",false,"Print help"));
 		initOptions();
-		usageString = "Usage: "+_name+" "+getUsageString();
+		usageString = _name+" "+getUsageString();
 		try {
 			CommandLine cli = new PosixParser().parse(options, args);
 			if ( cli.hasOption("help") )
