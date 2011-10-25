@@ -28,7 +28,7 @@ import ditl.viz.*;
 
 public class NodeElement implements Clickable, SceneElement, ScaleListener, TimeChangeListener {
 	
-	public final static Color defaultFillColor = Color.BLUE;
+	public final static Color defaultFillColor = GroupsPanel.noGroupColor;
 	public final static Color defaultBorderColor = Color.BLACK;
 	
 	private Color fill = defaultFillColor;
