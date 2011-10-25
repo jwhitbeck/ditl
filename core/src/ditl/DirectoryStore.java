@@ -90,4 +90,15 @@ public class DirectoryStore extends WritableStore {
 		return new File(root,name).exists();
 	}
 
+	@Override
+	public void moveTrace(String origName, String destName, boolean force) throws AlreadyExistsException, IOException {
+		File dest = new File(root,destName);
+		if ( dest.exists() )
+			if ( force )
+				deleteTrace(destName);
+			else
+				throw new AlreadyExistsException(destName);
+		new File(root,origName).renameTo(dest);
+	}
+
 }

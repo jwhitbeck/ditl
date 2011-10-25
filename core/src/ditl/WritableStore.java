@@ -42,6 +42,7 @@ public abstract class WritableStore extends Store {
 	public abstract void deleteFile(String name) throws IOException;
 	public abstract void deleteTrace(String name) throws IOException;
 	public abstract OutputStream getOutputStream (String name) throws IOException;
+	public abstract void moveTrace(String origName, String destName, boolean force) throws AlreadyExistsException, IOException;
 	
 	public void putFile(File file, String name) throws IOException{
 		copy ( new FileInputStream(file), getOutputStream(name) );
