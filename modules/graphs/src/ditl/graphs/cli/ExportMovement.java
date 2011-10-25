@@ -44,7 +44,8 @@ public class ExportMovement extends ExportApp {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
 		ext_fmt.parse(cli);
-		maxTime = (Long) cli.getParsedOptionValue(maxTimeOption);
+		if ( cli.hasOption(maxTimeOption) )
+			maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption));
 		dtps = getTicsPerSecond( cli.getOptionValue(destTimeUnitOption,"s"));
 		if ( dtps == null )
 			throw new HelpException();

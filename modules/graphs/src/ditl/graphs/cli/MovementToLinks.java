@@ -54,7 +54,8 @@ public class MovementToLinks extends ConvertApp {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
 		range = Double.parseDouble(args[1]);
-		max_interval = (Long) cli.getParsedOptionValue(intervalOption);
+		if ( cli.hasOption(intervalOption) )
+			max_interval = Long.parseLong(cli.getOptionValue(intervalOption));
 	}
 
 	@Override

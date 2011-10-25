@@ -50,7 +50,6 @@ public class ImportMovement extends ImportApp {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
 		ext_fmt.parse(cli);
-		maxTime = (Long) cli.getParsedOptionValue(maxTimeOption);
 		ticsPerSecond = getTicsPerSecond(cli.getOptionValue(destTimeUnitOption,"ms"));
 		Long otps = getTicsPerSecond(cli.getOptionValue(origTimeUnitOption,"s"));
 		timeMul = getTimeMul(otps,ticsPerSecond);
@@ -58,6 +57,8 @@ public class ImportMovement extends ImportApp {
 			throw new HelpException();
 		offset = Long.parseLong(cli.getOptionValue(offsetOption,"0")) * ticsPerSecond;	
 		interval = Long.parseLong(cli.getOptionValue(snapIntervalOption, "60")) * ticsPerSecond; // by default, snap every minute
+		if ( cli.hasOption(maxTimeOption) )
+			maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption)) * ticsPerSecond;
 		fix_pause_times = cli.hasOption(fixPauseTimesOption);
 	}
 	
@@ -76,7 +77,7 @@ public class ImportMovement extends ImportApp {
 		super.initOptions();
 		graph_options.setOptions(options);
 		ext_fmt.setOptions(options);
-		options.addOption(null, maxTimeOption, true, "maximum movement time");
+		options.addOption(null, maxTimeOption, true, "maximum movement time in seconds");
 		options.addOption(null, origTimeUnitOption, true, "time unit of original trace [s, ms, us, ns] (default: s)");
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: ms)");
 		options.addOption(null, snapIntervalOption, true, "snapshot interval in seconds (default 60)");
