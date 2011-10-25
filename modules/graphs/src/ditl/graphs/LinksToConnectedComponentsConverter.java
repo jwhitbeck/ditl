@@ -163,7 +163,7 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 		Set<Group> initCCs = new HashSet<Group>();
 		LinkedList<Integer> toVisit = new LinkedList<Integer>(adjacency.nodes());
 		LinkedList<Integer> toVisitInCC = new LinkedList<Integer>();
-		Set<Integer> visited = new HashSet<Integer>();
+		Set<Integer> visited = new HashSet<Integer>(toVisit.size()*2);
 		while ( ! toVisit.isEmpty() ){
 			Integer i = toVisit.pop();
 			if ( ! visited.contains(i) ){
@@ -174,20 +174,27 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 					visited.add(i);
 					g.members.add(i);
 					toVisitInCC.clear();
-					toVisitInCC.addAll(neighbs);
+					for ( Integer k : neighbs )
+						if ( ! visited.contains(k) ){
+							toVisitInCC.add(k);
+							visited.add(k);
+						}
 					while ( ! toVisitInCC.isEmpty() ){
 						Integer j = toVisitInCC.pop();
-						visited.add(j);
 						g.members.add(j);
-						Set<Integer> ns = new HashSet<Integer>(adjacency.getNext(j));
-						ns.removeAll(visited);
-						toVisitInCC.addAll(ns);
+						for ( Integer k : adjacency.getNext(j) ){
+							if ( ! visited.contains(k) ){
+								toVisitInCC.add(k);
+								visited.add(k);
+							}
+						}
 					}
 				}
 			}
 		}
 		for ( Group g : initCCs ){
-			Group h = g.clone();
+			Group h = new Group(g.gid());
+			h.members = new HashSet<Integer>(g.members); 
 			for ( Integer i : h.members )
 				cc_map.put(i, h);
 		}

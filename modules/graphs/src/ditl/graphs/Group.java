@@ -93,13 +93,6 @@ public class Group implements Cloneable {
 		return _gid;
 	}
 	
-	@Override
-	public Group clone(){
-		Group g = new Group(_gid);
-		g.members = new HashSet<Integer>(members);
-		return g;
-	}
-	
 	public Set<Integer> members(){
 		return Collections.unmodifiableSet(members);
 	}
