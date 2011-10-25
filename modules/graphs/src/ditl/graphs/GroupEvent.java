@@ -20,7 +20,7 @@ package ditl.graphs;
 
 import java.util.*;
 
-import ditl.ItemFactory;
+import ditl.*;
 
 public class GroupEvent {
 
@@ -36,7 +36,7 @@ public class GroupEvent {
 	
 	int _type;
 	Integer _gid;
-	Integer[] _members;
+	Set<Integer> _members;
 	
 	public GroupEvent(Integer gid, int type){ // NEW and DELETE events
 		_gid = gid;
@@ -46,13 +46,15 @@ public class GroupEvent {
 	public GroupEvent(Integer gid, int type, Integer[] members){
 		_gid = gid;
 		_type = type;
-		_members = members;
+		_members = new HashSet<Integer>();
+		for ( Integer i : members )
+			_members.add(i);
 	}
 	
-	public GroupEvent(Integer gid, int type, Collection<Integer> members){
+	public GroupEvent(Integer gid, int type, Set<Integer> members){
 		_gid = gid;
 		_type = type;
-		_members = members.toArray(new Integer[]{});
+		_members = members;
 	}
 	
 	public int type(){
@@ -63,14 +65,14 @@ public class GroupEvent {
 		return _gid;
 	}
 	
-	public Integer[] members(){
-		return _members;
+	public Set<Integer> members(){
+		return Collections.unmodifiableSet(_members);
 	}
 	
 	public final static class Factory implements ItemFactory<GroupEvent> {
 		@Override
 		public GroupEvent fromString(String s) {
-			String[] elems = s.trim().split(" ");
+			String[] elems = s.trim().split(" ",3);
 			try {
 				String sType = elems[0];
 				Integer gid = Integer.parseInt(elems[1]);
@@ -79,10 +81,7 @@ public class GroupEvent {
 				} else if ( sType.equals(DELETE_LABEL) ){
 					return new GroupEvent(gid, DELETE);
 				} else {
-					Set<Integer> members = new HashSet<Integer>();
-					for ( String m : elems[2].split(Group.delim) ){
-						members.add(Integer.parseInt(m));
-					}
+					Set<Integer> members = GroupSpecification.parse(elems[2]);
 					if ( sType.equals(JOIN_LABEL) ){
 						return new GroupEvent(gid, JOIN, members);
 					} else {
@@ -101,8 +100,8 @@ public class GroupEvent {
 	public String toString(){
 		switch ( _type ){
 		case NEW: return NEW_LABEL+" "+_gid;
-		case JOIN: return JOIN_LABEL+" "+_gid+" "+Group.groupToString(_members);
-		case LEAVE: return LEAVE_LABEL+" "+_gid+" "+Group.groupToString(_members);
+		case JOIN: return JOIN_LABEL+" "+_gid+" "+GroupSpecification.toString(_members);
+		case LEAVE: return LEAVE_LABEL+" "+_gid+" "+GroupSpecification.toString(_members);
 		default: return DELETE_LABEL+" "+_gid;
 		}
 	}

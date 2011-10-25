@@ -16,74 +16,62 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs;
+package ditl;
 
 import java.util.*;
 
-import ditl.*;
+public class GroupSpecification {
+	
+	private final static String range_sep = ":";
+	private final static String gap_sep = ",";
 
-public class Group implements Cloneable {
-	
-	Integer _gid;
-	Set<Integer> _members;
-	
-	public Group(Integer gid){
-		_gid = gid;
-		_members = new HashSet<Integer>();
-	}
-	
-	public Group(Integer gid, Set<Integer> members){
-		_gid = gid;
-		_members = members;
-	}
-	
-	public Integer gid(){
-		return _gid;
-	}
-	
-	public int size(){
-		return _members.size();
-	}
-	
-	public final static class Factory implements ItemFactory<Group> {
-		@Override
-		public Group fromString(String s) {
-			String[] elems = s.trim().split(" ", 2);
-			try {
-				Integer gid = Integer.parseInt(elems[0]);
-				Set<Integer> members = GroupSpecification.parse(elems[1]);
-				return new Group(gid, members);
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
+	public static Set<Integer> parse(String s){
+		Set<Integer> group = new HashSet<Integer>();
+		String[] ranges = s.split(gap_sep);
+		for ( String range : ranges ){
+			String[] bounds = range.split(range_sep);
+			if ( bounds.length == 1 )
+				group.add( Integer.parseInt(bounds[0]) );
+			else {
+				for ( Integer i = Integer.parseInt(bounds[0]); i<=Integer.parseInt(bounds[1]); ++i){
+					group.add(i);
+				}
 			}
 		}
+		return group;
 	}
 	
-	public void handleEvent(GroupEvent event){
-		switch ( event._type ){
-		case GroupEvent.JOIN:  
-			for ( Integer m : event._members )
-				_members.add(m); 
-			break;
-		case GroupEvent.LEAVE: 
-			for ( Integer m : event._members )
-				_members.remove(m);
-			break;
+	public static String toString(Set<Integer> group){
+		List<Integer> list = new LinkedList<Integer>(group);
+		Collections.sort(list);
+		StringBuffer s = new StringBuffer();
+		Iterator<Integer> i = list.iterator();
+		Integer prev = null;
+		Integer b = null;
+		while ( i.hasNext() ){
+			Integer n = i.next();
+			if ( b == null )
+				b = n;
+			if ( prev != null ){
+				if ( n - prev > 1 ){ // left range
+					if ( prev.equals(b) ){ // singleton range 
+						s.append(prev);
+					} else {
+						s.append(b+range_sep+prev);
+					}
+					b = n;
+					s.append(gap_sep);
+				}
+			}
+			if ( ! i.hasNext() ){
+				if ( n.equals(b) ){ // singleton range 
+					s.append(n);
+				} else {
+					s.append(b+range_sep+n);
+				}
+			}
+			prev = n;
 		}
-	}
-	
-	@Override
-	public String toString(){
-		return _gid+" "+GroupSpecification.toString(_members);
-	}
-	
-	@Override
-	public int hashCode(){
-		return _gid;
-	}
-	
-	public Set<Integer> members(){
-		return Collections.unmodifiableSet(_members);
+		return s.toString();
 	}
 }

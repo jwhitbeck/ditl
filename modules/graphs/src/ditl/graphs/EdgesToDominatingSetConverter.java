@@ -263,8 +263,7 @@ public final class EdgesToDominatingSetConverter implements Converter,
 		Set<Integer> new_ds_nodes = calc.calculateNewDS();
 		if ( time == min_time ){ // set the init state
 			ds_nodes = new_ds_nodes;
-			Group grp = new Group(gid);
-			grp.members.addAll(new_ds_nodes);
+			Group grp = new Group(gid, new_ds_nodes);
 			group_writer.setInitState(min_time, Collections.singleton(grp));
 		} else {
 			Set<Integer> to_del = new HashSet<Integer>();

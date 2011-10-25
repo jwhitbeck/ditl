@@ -45,27 +45,12 @@ public class Filter extends ConvertApp {
 			super.parseArgs(cli, args);
 			orig_trace_name = args[1];
 			dest_trace_name = args[2];
-			parseGroups(args[3]);
+			group = GroupSpecification.parse(args[3]);
 		} else {
 			orig_store_file = new File(args[0]);
 			dest_store_file = new File(args[1]);
-			parseGroups(args[2]);
+			group = GroupSpecification.parse(args[2]);
 			force = cli.hasOption(forceOption);
-		}
-	}
-	
-	private void parseGroups(String group_string){
-		group = new HashSet<Integer>();
-		String[] ranges = group_string.split(",");
-		for ( String range : ranges ){
-			String[] bounds = range.split(":");
-			if ( bounds.length == 1 )
-				group.add( Integer.parseInt(bounds[0]) );
-			else {
-				for ( Integer i = Integer.parseInt(bounds[0]); i<=Integer.parseInt(bounds[1]); ++i){
-					group.add(i);
-				}
-			}
 		}
 	}
 

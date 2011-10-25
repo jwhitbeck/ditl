@@ -41,12 +41,12 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 	}
 	
 	private void merge(long time, Group cc1, Group cc2) throws IOException {
-		cc1.members.addAll(cc2.members);
-		for ( Integer i : cc2.members )
+		cc1._members.addAll(cc2._members);
+		for ( Integer i : cc2._members )
 			cc_map.put(i, cc1);
-		group_writer.append(time, new GroupEvent(cc2.gid(), GroupEvent.LEAVE, cc2.members));
+		group_writer.append(time, new GroupEvent(cc2.gid(), GroupEvent.LEAVE, cc2._members));
 		delCC(time, cc2.gid());
-		group_writer.append(time, new GroupEvent(cc1.gid(), GroupEvent.JOIN, cc2.members));
+		group_writer.append(time, new GroupEvent(cc1.gid(), GroupEvent.JOIN, cc2._members));
 	}
 	
 	private void checkSplit(long time, Integer i, Group cc) throws IOException {
@@ -66,17 +66,17 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 		if ( visited.size() != cc.size() ){ // the CC has split!
 			int half = cc.size() / 2;
 			Group ncc = newCC(time);
-			cc.members.removeAll(visited);
+			cc._members.removeAll(visited);
 			if ( visited.size() > half ){ // those in 'visited' remain in current cc, the others go to ncc
-				ncc.members = cc.members;
-				cc.members = visited;
+				ncc._members = cc._members;
+				cc._members = visited;
 			} else { // all those in 'visited' go to ncc
-				ncc.members = visited;
+				ncc._members = visited;
 			}
-			group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.LEAVE, ncc.members));
-			for ( Integer j : ncc.members )
+			group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.LEAVE, ncc._members));
+			for ( Integer j : ncc._members )
 				cc_map.put(j, ncc);
-			group_writer.append(time, new GroupEvent(ncc.gid(), GroupEvent.JOIN, ncc.members));
+			group_writer.append(time, new GroupEvent(ncc.gid(), GroupEvent.JOIN, ncc._members));
 		}
 	}
 	
@@ -95,22 +95,22 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 		if ( ! cc_map.containsKey(l.id1) ){ 
 			if ( ! cc_map.containsKey(l.id2) ){ // new isolated link
 				cc = newCC(time);
-				cc.members.add(l.id1);
-				cc.members.add(l.id2);
+				cc._members.add(l.id1);
+				cc._members.add(l.id2);
 				cc_map.put(l.id1, cc);
 				cc_map.put(l.id2, cc);
 				group_writer.append(time, 
 						new GroupEvent(cc.gid(), GroupEvent.JOIN, new Integer[]{l.id1,l.id2}));
 			} else { // add id1 to id2's cc
 				cc = cc_map.get(l.id2);
-				cc.members.add(l.id1);
+				cc._members.add(l.id1);
 				cc_map.put(l.id1, cc);
 				group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.JOIN, Collections.singleton(l.id1)));
 			}
 		} else {
 			if ( ! cc_map.containsKey(l.id2) ){ // add id2 to id1's cc
 				cc = cc_map.get(l.id1);
-				cc.members.add(l.id2);
+				cc._members.add(l.id2);
 				cc_map.put(l.id2, cc);
 				group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.JOIN, Collections.singleton(l.id2)));
 			} else {
@@ -128,10 +128,10 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 	
 	private void removeSingleton(long time, Integer i) throws IOException {
 		Group cc = cc_map.get(i);
-		cc.members.remove(i);
+		cc._members.remove(i);
 		cc_map.remove(i);
 		group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.LEAVE, new Integer[]{i}));
-		if ( cc.members.isEmpty() )
+		if ( cc._members.isEmpty() )
 			delCC(time, cc.gid());
 	}
 	
@@ -172,7 +172,7 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 					Group g = new Group(counter++);
 					initCCs.add(g);
 					visited.add(i);
-					g.members.add(i);
+					g._members.add(i);
 					toVisitInCC.clear();
 					for ( Integer k : neighbs )
 						if ( ! visited.contains(k) ){
@@ -181,7 +181,7 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 						}
 					while ( ! toVisitInCC.isEmpty() ){
 						Integer j = toVisitInCC.pop();
-						g.members.add(j);
+						g._members.add(j);
 						for ( Integer k : adjacency.getNext(j) ){
 							if ( ! visited.contains(k) ){
 								toVisitInCC.add(k);
@@ -193,9 +193,8 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 			}
 		}
 		for ( Group g : initCCs ){
-			Group h = new Group(g.gid());
-			h.members = new HashSet<Integer>(g.members); 
-			for ( Integer i : h.members )
+			Group h = new Group(g.gid(), new HashSet<Integer>(g._members)); 
+			for ( Integer i : h._members )
 				cc_map.put(i, h);
 		}
 		

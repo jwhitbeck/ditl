@@ -34,9 +34,9 @@ public class ImportStaticGroups extends WriteApp {
 
 	private static String labelsOption = "labels";
 	
-	private boolean useLabels;
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.GROUPS);
 	private String[] group_specs;
+	String[] labels;
 	
 	public final static String PKG_NAME = "graphs";
 	public final static String CMD_NAME = "import-groups";
@@ -52,14 +52,15 @@ public class ImportStaticGroups extends WriteApp {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
 		group_specs = Arrays.copyOfRange(args,1,args.length);
-		useLabels = cli.hasOption(labelsOption);
+		if ( cli.hasOption(labelsOption) )
+			labels = cli.getOptionValue(labelsOption).split(",");
 	}
 
 	@Override
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
-		options.addOption(null, labelsOption, false, "consider first element of group specification as the group's label");
+		options.addOption(null, labelsOption, true, "comma-separated list of groups labels");
 	}
 	
 	@Override
@@ -68,43 +69,22 @@ public class ImportStaticGroups extends WriteApp {
 		GroupTrace groups = (GroupTrace) _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
 		StatefulWriter<GroupEvent,Group> groupWriter = groups.getWriter(presence.snapshotInterval()); 
 		Set<Group> initState = new HashSet<Group>();
-		List<String> labels = new LinkedList<String>();
-		int i=0;
-		for ( String spec : group_specs ){
-			Group group = new Group(i);
-			String[] ranges = spec.split(",");
-			int j = 0;
-			if ( useLabels ){
-				labels.add(ranges[j]);
-				++j;
-			}
-			while ( j < ranges.length ){
-				String[] bounds = ranges[j].split(":");
-				Integer n;
-				if ( bounds.length == 1 ) {
-					n = Integer.parseInt(bounds[0]);
-					group.handleEvent(new GroupEvent(group.gid(), GroupEvent.JOIN, new Integer[]{n}));
-				} else {
-					for ( n = Integer.parseInt(bounds[0]); n<=Integer.parseInt(bounds[1]); ++n){
-						group.handleEvent(new GroupEvent(group.gid(), GroupEvent.JOIN, new Integer[]{n}));
-					}
-				}
-				++j;
-			}
-			initState.add(group);
-			++i;
+		int i = 0;
+		for ( String g_spec : group_specs ){
+			Set<Integer> members = GroupSpecification.parse(g_spec);
+			initState.add(new Group(i, members));
+			i++;
 		}
 		
 		groupWriter.setInitState(presence.minTime(), initState);
 		groupWriter.setProperty(Trace.maxTimeKey, presence.maxTime());
 		groupWriter.setProperty(Trace.ticsPerSecondKey, presence.ticsPerSecond());
 		
-		if ( useLabels ){
+		if ( labels != null ){
 			StringBuffer buffer = new StringBuffer();
-			Iterator<String> si = labels.iterator();
-			while ( si.hasNext() ){
-				buffer.append(si.next());
-				if ( si.hasNext() )
+			for ( int j=0; j<labels.length; ++j){
+				buffer.append(labels[j]);
+				if ( j<labels.length-1)
 					buffer.append(",");
 			}
 			groupWriter.setProperty(GroupTrace.labelsKey, buffer.toString());
