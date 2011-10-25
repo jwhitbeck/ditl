@@ -60,8 +60,4 @@ public class CopyTraces extends App {
 		inStore.close();
 		outStore.close();
 	}
-
-	@Override
-	protected void initOptions() {}
-	
 }
