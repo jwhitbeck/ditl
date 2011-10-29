@@ -33,7 +33,7 @@ public class MessageTransferReport extends Report
 	
 	public MessageTransferReport(OutputStream out) throws IOException {
 		super(out);
-		appendComment("msgId | N Completed | Bytes completed | N Aborted | Bytes aborted");
+		appendComment("msgId | N Completed | Bytes completed | N Aborted | Bytes aborted");
 	}
 
 	public static final class Factory implements ReportFactory<MessageTransferReport> {
