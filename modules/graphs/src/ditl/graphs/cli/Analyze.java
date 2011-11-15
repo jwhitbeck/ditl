@@ -44,6 +44,8 @@ public class Analyze extends ExportApp {
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.GROUPS, GraphOptions.EDGES);
 	private ReportFactory<?> factory;
+	private Long min_time;
+	private Long max_time;
 	
 	public final static String PKG_NAME = "graphs";
 	public final static String CMD_NAME = "analyze";
@@ -68,6 +70,8 @@ public class Analyze extends ExportApp {
 		reportGroup.addOption(new Option(null, groupSizeOption, false, "distribution of group sizes over time") );
 		reportGroup.setRequired(true);
 		options.addOptionGroup(reportGroup);
+		options.addOption(null, maxTimeOption, true, "Ignore event after <arg> seconds");
+		options.addOption(null, minTimeOption, true, "Ignore event before <arg> seconds");
 	}
 
 	@Override
@@ -101,6 +105,11 @@ public class Analyze extends ExportApp {
 		} else if ( cli.hasOption(groupSizeOption) ){
 			factory = new GroupSizeReport.Factory();
 		}
+		
+		if ( cli.hasOption(minTimeOption) )
+			min_time = Long.parseLong(cli.getOptionValue(minTimeOption));
+		if ( cli.hasOption(maxTimeOption) )
+			max_time = Long.parseLong(cli.getOptionValue(maxTimeOption));
 	}
 	
 	
@@ -110,6 +119,8 @@ public class Analyze extends ExportApp {
 		
 		Long minTime=null, maxTime=null, incrTime=null;
 		List<Reader<?>> readers = new LinkedList<Reader<?>>();
+		
+		Long tps = null;
 		
 		if ( report instanceof PresenceTrace.Handler ){
 			PresenceTrace presence = (PresenceTrace)_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
@@ -129,6 +140,7 @@ public class Analyze extends ExportApp {
 			minTime = presence.minTime();
 			maxTime = presence.maxTime();
 			incrTime = presence.maxUpdateInterval();
+			tps = presence.ticsPerSecond();
 		}		
 		
 		if ( report instanceof LinkTrace.Handler ){
@@ -149,6 +161,7 @@ public class Analyze extends ExportApp {
 			if ( minTime == null || links.minTime() > minTime ) minTime = links.minTime();
 			if ( maxTime == null || links.maxTime() < maxTime ) maxTime = links.maxTime();
 			incrTime = links.maxUpdateInterval();
+			tps = links.ticsPerSecond();
 		}
 		
 		if ( report instanceof EdgeTrace.Handler ){
@@ -168,6 +181,7 @@ public class Analyze extends ExportApp {
 			if ( minTime == null || edges.minTime() > minTime ) minTime = edges.minTime();
 			if ( maxTime == null || edges.maxTime() < maxTime ) maxTime = edges.maxTime();
 			incrTime = edges.maxUpdateInterval();
+			tps = edges.ticsPerSecond();
 		}
 		
 		if ( report instanceof GroupTrace.Handler ){
@@ -188,8 +202,14 @@ public class Analyze extends ExportApp {
 			if ( minTime == null || groups.minTime() > minTime ) minTime = groups.minTime();
 			if ( maxTime == null || groups.maxTime() < maxTime ) maxTime = groups.maxTime();
 			incrTime = groups.maxUpdateInterval();
+			tps = groups.ticsPerSecond();
 		}
 
+		if ( min_time != null && max_time != null && tps != null){
+			minTime = min_time * tps;
+			maxTime = max_time * tps;
+		}
+		
 		Runner runner = new Runner(incrTime, minTime, maxTime);
 		for ( Reader<?> reader : readers )
 			runner.addGenerator(reader);
