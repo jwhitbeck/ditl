@@ -96,23 +96,19 @@ public class ONEMovement {
 		writer.write(movement.minY()+" "+movement.maxY()+"\n");
 		// print all positions every interval
 		final MovementTrace.Updater updater = new MovementTrace.Updater();
-		Bus<MovementEvent> movementEventBus = new Bus<MovementEvent>();
-		Bus<Movement> movementBus = new Bus<Movement>();
-		movementEventBus.addListener( new Listener<MovementEvent>(){
+		movementReader.bus().addListener( new Listener<MovementEvent>(){
 			@Override
 			public void handle(long time, Collection<MovementEvent> events) {
 				for ( MovementEvent event : events )
 					updater.handleEvent(time, event);
 			}
 		});
-		movementBus.addListener( new Listener<Movement>(){
+		movementReader.stateBus().addListener( new Listener<Movement>(){
 			@Override
 			public void handle(long time, Collection<Movement> events){
 				updater.setState(events);
 			}
 		});
-		movementReader.setStateBus(movementBus);
-		movementReader.setBus(movementEventBus);
 		
 		long max_time = (maxTime != null)? maxTime : movement.maxTime();
 		Runner runner = new Runner(interval, movement.minTime(), max_time);

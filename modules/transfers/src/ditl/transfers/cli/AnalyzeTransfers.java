@@ -98,14 +98,9 @@ public class AnalyzeTransfers extends ExportApp {
 			MessageTrace messages = (MessageTrace)_store.getTrace(messagesName);
 			StatefulReader<MessageEvent,Message> msgReader = messages.getReader();
 			
-			Bus<MessageEvent> msgEventBus = new Bus<MessageEvent>();
-			Bus<Message> msgBus = new Bus<Message>();
-			msgReader.setBus(msgEventBus);
-			msgReader.setStateBus(msgBus);
-			
 			MessageTrace.Handler mh = (MessageTrace.Handler)report;
-			msgBus.addListener(mh.messageListener());
-			msgEventBus.addListener(mh.messageEventListener());
+			msgReader.stateBus().addListener(mh.messageListener());
+			msgReader.bus().addListener(mh.messageEventListener());
 			
 			readers.add(msgReader);
 			
@@ -117,15 +112,10 @@ public class AnalyzeTransfers extends ExportApp {
 		if ( report instanceof BufferTrace.Handler ){
 			BufferTrace buffers = (BufferTrace)_store.getTrace(buffersName);			
 			StatefulReader<BufferEvent,Buffer> bufferReader = buffers.getReader();
-			
-			Bus<BufferEvent> bufferEventBus = new Bus<BufferEvent>();
-			Bus<Buffer> bufferBus = new Bus<Buffer>();
-			bufferReader.setBus(bufferEventBus);
-			bufferReader.setStateBus(bufferBus);
 
 			BufferTrace.Handler bh = (BufferTrace.Handler)report;
-			bufferBus.addListener(bh.bufferListener());
-			bufferEventBus.addListener(bh.bufferEventListener());
+			bufferReader.stateBus().addListener(bh.bufferListener());
+			bufferReader.bus().addListener(bh.bufferEventListener());
 			
 			readers.add(bufferReader);
 			
@@ -137,15 +127,10 @@ public class AnalyzeTransfers extends ExportApp {
 		if ( report instanceof TransferTrace.Handler ){
 			TransferTrace transfers = (TransferTrace)_store.getTrace(transfersName);			
 			StatefulReader<TransferEvent,Transfer> transferReader = transfers.getReader();
-			
-			Bus<TransferEvent> transferEventBus = new Bus<TransferEvent>();
-			Bus<Transfer> transferBus = new Bus<Transfer>();
-			transferReader.setBus(transferEventBus);
-			transferReader.setStateBus(transferBus);
 
 			TransferTrace.Handler th = (TransferTrace.Handler)report;
-			transferBus.addListener(th.transferListener());
-			transferEventBus.addListener(th.transferEventListener());
+			transferReader.stateBus().addListener(th.transferListener());
+			transferReader.bus().addListener(th.transferEventListener());
 			
 			readers.add(transferReader);
 			

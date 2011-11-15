@@ -127,62 +127,46 @@ public final class PlausibleMobilityConverter implements Converter,
 		StatefulReader<MovementEvent,Movement> known_reader = null;
 		writer = _movement.getWriter(_links.snapshotInterval());
 		
-		// init event busses
-		Bus<Presence> presenceBus = new Bus<Presence>();
-		Bus<PresenceEvent> presenceEventBus = new Bus<PresenceEvent>();
-		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader(); 
-		presence_reader.setBus(presenceEventBus);
-		presence_reader.setStateBus(presenceBus);
-		
-		Bus<Link> linkBus = new Bus<Link>();
-		Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
+		// init event readers
+		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader();		
 		StatefulReader<LinkEvent,Link> link_reader = _links.getReader();
-		link_reader.setBus(linkEventBus);
-		link_reader.setStateBus(linkBus);
-		
-		Bus<WindowedLink> windowBus = new Bus<WindowedLink>();
-		Bus<WindowedLinkEvent> windowEventBus = new Bus<WindowedLinkEvent>();
 		StatefulReader<WindowedLinkEvent,WindowedLink> window_reader = windowed_links.getReader();
-		window_reader.setBus(windowEventBus);
-		window_reader.setStateBus(windowBus);
 		
-		Bus<Movement> knownBus = new Bus<Movement>();
-		Bus<MovementEvent> knownEventBus = new Bus<MovementEvent>();
 		if ( known_movement != null ){
 			known_reader = known_movement.getReader();
-			known_reader.setBus(knownEventBus);
-			known_reader.setStateBus(knownBus);
 		}
 		
 		// add bus listeners
-		presenceBus.addListener(this.presenceListener());
-		presenceEventBus.addListener(this.presenceEventListener());
+		presence_reader.stateBus().addListener(this.presenceListener());
+		presence_reader.bus().addListener(this.presenceEventListener());
 		for ( Force force : global_forces ){
 			if ( force instanceof PresenceTrace.Handler ){
 				PresenceTrace.Handler phf = (PresenceTrace.Handler)force;
-				presenceBus.addListener(phf.presenceListener());
-				presenceEventBus.addListener(phf.presenceEventListener());
+				presence_reader.stateBus().addListener(phf.presenceListener());
+				presence_reader.bus().addListener(phf.presenceEventListener());
 			}
 		}
 		
 		for ( Force force : global_forces ){
 			if ( force instanceof LinkTrace.Handler ){
 				LinkTrace.Handler lhf = (LinkTrace.Handler)force;
-				linkBus.addListener(lhf.linkListener());
-				linkEventBus.addListener(lhf.linkEventListener());
+				link_reader.stateBus().addListener(lhf.linkListener());
+				link_reader.bus().addListener(lhf.linkEventListener());
 			}
 		}
 		
 		for ( Force force : global_forces ){
 			if ( force instanceof WindowedLinkTrace.Handler ){
 				WindowedLinkTrace.Handler wlhf = (WindowedLinkTrace.Handler)force;
-				windowBus.addListener(wlhf.windowedLinkListener());
-				windowEventBus.addListener(wlhf.windowedLinkEventListener());
+				window_reader.stateBus().addListener(wlhf.windowedLinkListener());
+				window_reader.bus().addListener(wlhf.windowedLinkEventListener());
 			}
 		}
 		
-		knownBus.addListener(this.movementListener());
-		knownEventBus.addListener(this.movementEventListener());
+		if ( known_reader != null ){
+			known_reader.stateBus().addListener(this.movementListener());
+			known_reader.bus().addListener(this.movementEventListener());
+		}
 		
 		Runner runner = new Runner(incr_interval, min_time, max_time);
 		runner.addGenerator(presence_reader);
@@ -211,7 +195,7 @@ public final class PlausibleMobilityConverter implements Converter,
 		long prev_time;
 		
 		// infer node mobility
-		while ( cur_time < max_time + incr_interval ){
+		while ( cur_time < max_time ){
 			prev_time = cur_time;
 			runner.incr();
 			cur_time = runner.time();

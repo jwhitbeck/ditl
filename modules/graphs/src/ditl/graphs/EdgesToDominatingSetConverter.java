@@ -57,20 +57,10 @@ public final class EdgesToDominatingSetConverter implements Converter,
 		group_writer = dominating_set.getWriter(_edges.snapshotInterval());
 		update_bus.addListener(this);
 		
-		Bus<EdgeEvent> edgeEventBus = new Bus<EdgeEvent>();
-		Bus<Edge> edgeBus = new Bus<Edge>();
-		Bus<PresenceEvent> presenceEventBus = new Bus<PresenceEvent>();
-		Bus<Presence> presenceBus = new Bus<Presence>();
-		
-		edge_reader.setBus(edgeEventBus);
-		edge_reader.setStateBus(edgeBus);
-		presence_reader.setBus(presenceEventBus);
-		presence_reader.setStateBus(presenceBus);
-		
-		edgeEventBus.addListener(this.edgeEventListener());
-		edgeBus.addListener(this.edgeListener());
-		presenceEventBus.addListener(this.presenceEventListener());
-		presenceBus.addListener(this.presenceListener());
+		edge_reader.bus().addListener(this.edgeEventListener());
+		edge_reader.stateBus().addListener(this.edgeListener());
+		presence_reader.bus().addListener(this.presenceEventListener());
+		presence_reader.stateBus().addListener(this.presenceListener());
 		
 		Runner runner = new Runner(_edges.maxUpdateInterval(), _presence.minTime(), _presence.maxTime());
 		runner.addGenerator(edge_reader);

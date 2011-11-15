@@ -25,7 +25,7 @@ public class StatefulReader<E, S> extends Reader<E> {
 
 	StateUpdater<E,S> _updater;
 	Reader<S> snapshots_iterator;
-	Bus<S> state_bus = null;
+	Bus<S> state_bus = new Bus<S>();
 	
 	
 	StatefulReader(Store store, InputStreamOpener inputStreamOpener, long eventSeekInterval, ItemFactory<E> fact, 
@@ -56,8 +56,7 @@ public class StatefulReader<E, S> extends Reader<E> {
 				}
 			}
 		}
-		if ( state_bus != null )
-			state_bus.queue(time, _updater.states());
+		state_bus.queue(time, _updater.states());
 		cur_time = time+_offset;
 	}
 	

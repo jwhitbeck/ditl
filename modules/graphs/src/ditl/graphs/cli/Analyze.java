@@ -125,15 +125,10 @@ public class Analyze extends ExportApp {
 		if ( report instanceof PresenceTrace.Handler ){
 			PresenceTrace presence = (PresenceTrace)_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
 			StatefulReader<PresenceEvent,Presence> presenceReader = presence.getReader();
-			
-			Bus<PresenceEvent> presenceEventBus = new Bus<PresenceEvent>();
-			Bus<Presence> presenceBus = new Bus<Presence>();
-			presenceReader.setBus(presenceEventBus);
-			presenceReader.setStateBus(presenceBus);
-			
+
 			PresenceTrace.Handler ph = (PresenceTrace.Handler)report;
-			presenceBus.addListener(ph.presenceListener());
-			presenceEventBus.addListener(ph.presenceEventListener());
+			presenceReader.stateBus().addListener(ph.presenceListener());
+			presenceReader.bus().addListener(ph.presenceEventListener());
 			
 			readers.add(presenceReader);
 			
@@ -146,15 +141,10 @@ public class Analyze extends ExportApp {
 		if ( report instanceof LinkTrace.Handler ){
 			LinkTrace links = (LinkTrace)_store.getTrace(graph_options.get(GraphOptions.LINKS));			
 			StatefulReader<LinkEvent,Link> linksReader = links.getReader();
-			
-			Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
-			Bus<Link> linkBus = new Bus<Link>();
-			linksReader.setBus(linkEventBus);
-			linksReader.setStateBus(linkBus);
 
 			LinkTrace.Handler lh = (LinkTrace.Handler)report;
-			linkBus.addListener(lh.linkListener());
-			linkEventBus.addListener(lh.linkEventListener());
+			linksReader.stateBus().addListener(lh.linkListener());
+			linksReader.bus().addListener(lh.linkEventListener());
 			
 			readers.add(linksReader);
 			
@@ -167,14 +157,10 @@ public class Analyze extends ExportApp {
 		if ( report instanceof EdgeTrace.Handler ){
 			EdgeTrace edges = (EdgeTrace)_store.getTrace(graph_options.get(GraphOptions.EDGES));		
 			StatefulReader<EdgeEvent,Edge> edgeReader = edges.getReader();
-			Bus<EdgeEvent> edgeEventBus = new Bus<EdgeEvent>();
-			Bus<Edge> edgeBus = new Bus<Edge>();
-			edgeReader.setBus(edgeEventBus);
-			edgeReader.setStateBus(edgeBus);
 
 			EdgeTrace.Handler eh = (EdgeTrace.Handler)report;
-			edgeBus.addListener(eh.edgeListener());
-			edgeEventBus.addListener(eh.edgeEventListener());
+			edgeReader.stateBus().addListener(eh.edgeListener());
+			edgeReader.bus().addListener(eh.edgeEventListener());
 			
 			readers.add(edgeReader);
 			
@@ -188,14 +174,9 @@ public class Analyze extends ExportApp {
 			GroupTrace groups = (GroupTrace)_store.getTrace(graph_options.get(GraphOptions.GROUPS));
 			StatefulReader<GroupEvent,Group> groupReader = groups.getReader();
 			
-			Bus<GroupEvent> groupEventBus = new Bus<GroupEvent>();
-			Bus<Group> groupBus = new Bus<Group>();
-			groupReader.setBus(groupEventBus);
-			groupReader.setStateBus(groupBus);
-			
 			GroupTrace.Handler gh = (GroupTrace.Handler)report;
-			groupEventBus.addListener(gh.groupEventListener());
-			groupBus.addListener(gh.groupListener());
+			groupReader.bus().addListener(gh.groupEventListener());
+			groupReader.stateBus().addListener(gh.groupListener());
 			
 			readers.add(groupReader);
 			

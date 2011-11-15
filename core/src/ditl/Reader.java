@@ -34,7 +34,7 @@ public class Reader<I> implements Generator {
 	
 	ItemFactory<I> _factory;
 	List<I> buffer;
-	Bus<I> _bus = null;
+	Bus<I> _bus = new Bus<I>();
 	int _priority;
 	long _offset;
 	
@@ -70,8 +70,7 @@ public class Reader<I> implements Generator {
 		cur_time += incr_time;
 		while ( cur_time> next_time){
 			step();
-			if ( _bus != null )
-				_bus.queue(prev_time-_offset,buffer);
+			_bus.queue(prev_time-_offset,buffer);
 		}
 	}
 	

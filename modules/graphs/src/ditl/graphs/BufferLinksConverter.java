@@ -54,12 +54,9 @@ public final class BufferLinksConverter implements Converter,
 		buffer_writer = buffered_links.getWriter(_links.snapshotInterval()); 
 		StatefulReader<LinkEvent,Link> links_reader = _links.getReader();
 		
-		Bus<Link> linkBus = new Bus<Link>();
-		Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
-		linkBus.addListener(linkListener());
-		linkEventBus.addListener(linkEventListener());
-		links_reader.setBus(linkEventBus);
-		links_reader.setStateBus(linkBus);
+		links_reader.stateBus().addListener(linkListener());
+		links_reader.bus().addListener(linkEventListener());
+		
 		Runner runner = new Runner(_links.maxUpdateInterval(), _links.minTime(), _links.maxTime());
 		runner.addGenerator(links_reader);
 		runner.add(this);

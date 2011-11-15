@@ -122,22 +122,11 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 		StatefulReader<LinkEvent,Link> link_reader = _links.getReader();
 		beacon_writer = _beacons.getWriter();
 		
-		Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
-		Bus<PresenceEvent> presenceEventBus = new Bus<PresenceEvent>();
-		Bus<Presence> presenceBus = new Bus<Presence>();
-		Bus<Link> linkBus = new Bus<Link>();
+		presence_reader.bus().addListener(presenceEventListener());
+		presence_reader.stateBus().addListener(presenceListener());
 		
-		presence_reader.setBus(presenceEventBus);
-		presence_reader.setStateBus(presenceBus);
-		
-		presenceEventBus.addListener(presenceEventListener());
-		presenceBus.addListener(presenceListener());
-		
-		link_reader.setBus(linkEventBus);
-		link_reader.setStateBus(linkBus);
-		
-		linkBus.addListener(_adjacency.linkListener());
-		linkEventBus.addListener(_adjacency.linkEventListener());
+		link_reader.stateBus().addListener(_adjacency.linkListener());
+		link_reader.bus().addListener(_adjacency.linkEventListener());
 		
 		Runner runner = new Runner(_links.maxUpdateInterval(), _presence.minTime(), _presence.maxTime());
 		runner.addGenerator(presence_reader);

@@ -41,12 +41,8 @@ public class MovementToPresenceConverter implements Converter, MovementTrace.Han
 	public void convert() throws IOException {
 		movement_reader = _movement.getReader();
 		presence_writer = _presence.getWriter(_movement.snapshotInterval());
-		Bus<MovementEvent> movementEventBus = new Bus<MovementEvent>();
-		Bus<Movement> movementBus = new Bus<Movement>();
-		movement_reader.setBus(movementEventBus);
-		movement_reader.setStateBus(movementBus);
-		movementEventBus.addListener(movementEventListener());
-		movementBus.addListener(movementListener());
+		movement_reader.bus().addListener(movementEventListener());
+		movement_reader.stateBus().addListener(movementListener());
 		Runner runner = new Runner(_movement.maxUpdateInterval(), _movement.minTime(), _movement.maxTime());
 		runner.addGenerator(movement_reader);
 		runner.run();

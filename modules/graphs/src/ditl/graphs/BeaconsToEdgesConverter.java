@@ -116,10 +116,7 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 		edge_writer = _edges.getWriter(snap_interval);
 		beacon_reader = _beacons.getReader();
 		
-		Bus<Edge> detectedBus = new Bus<Edge>();	
-		beacon_reader.setBus(detectedBus);
-		
-		detectedBus.addListener(detectedListener());
+		beacon_reader.bus().addListener(detectedListener());
 		
 		Runner runner = new Runner(_period,_beacons.minTime(),_beacons.maxTime());
 		runner.addGenerator(beacon_reader);
