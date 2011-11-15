@@ -44,7 +44,6 @@ public class MergeConverter<I> implements Converter {
 		Writer<I> writer = _to.getWriter();
 		for ( Trace<I> from : from_collection ){
 			Reader<I> reader = from.getReader();
-			reader.setBus(writer);
 			reader.seek(minTime);
 			while ( reader.hasNext() ){
 				List<I> events = reader.next();

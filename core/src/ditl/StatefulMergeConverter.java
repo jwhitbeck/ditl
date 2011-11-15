@@ -47,7 +47,6 @@ public class StatefulMergeConverter<E,S> implements Converter {
 		StatefulWriter<E,S> writer = _to.getWriter(snap_interval);
 		for ( StatefulTrace<E,S> from : from_collection ){
 			StatefulReader<E,S> reader = from.getReader();
-			reader.setBus(writer);
 			reader.seek(minTime);
 			initState.addAll(reader.referenceState());
 			while ( reader.hasNext() ){
