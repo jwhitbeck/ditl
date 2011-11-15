@@ -20,7 +20,7 @@ package ditl.viz;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.text.DecimalFormat;
+import java.text.*;
 import java.util.*;
 
 import javax.swing.*;
@@ -126,7 +126,12 @@ public class ControlsPanel extends JPanel {
 	
 	public long parseText(){
 		String s = (String)timeField.getText().split(" ")[0];
-		double v = Double.parseDouble(s);
+		float v;
+		try {
+			v = df.parse(s).floatValue();
+		} catch (ParseException e) {
+			return min_time;
+		} 
 		return (long)(v*tics_per_second*mod);
 	}
 	
