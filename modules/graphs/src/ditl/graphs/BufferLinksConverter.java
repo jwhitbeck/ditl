@@ -118,7 +118,7 @@ public final class BufferLinksConverter implements Converter,
 	}
 
 	@Override
-	public void incr(long time) throws IOException {
+	public void incr(long dt) throws IOException {
 		if ( cur_time > min_time+b_time ){
 			if ( ! flushed ){
 				buffer_writer.setInitState(min_time, init_state);
@@ -126,7 +126,7 @@ public final class BufferLinksConverter implements Converter,
 			}
 			buffer_writer.flush(cur_time-b_time);
 		}
-		cur_time += time;
+		cur_time += dt;
 	}
 
 	@Override

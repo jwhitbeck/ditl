@@ -163,7 +163,7 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 	}
 
 	@Override
-	public void incr(long time) throws IOException {}
+	public void incr(long dt) throws IOException {}
 
 	@Override
 	public void seek(long time) throws IOException {}

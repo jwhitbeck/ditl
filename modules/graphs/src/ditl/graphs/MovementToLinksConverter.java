@@ -161,9 +161,9 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 	}
 
 	@Override
-	public void incr(long time) throws IOException {
+	public void incr(long dt) throws IOException {
 		links_writer.flush(cur_time);
-		cur_time += time;
+		cur_time += dt;
 	}
 
 	@Override

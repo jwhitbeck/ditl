@@ -250,7 +250,7 @@ public final class EdgesToDominatingSetConverter implements Converter,
 
 
 	@Override
-	public void incr(long time) throws IOException {}
+	public void incr(long dt) throws IOException {}
 
 
 	@Override

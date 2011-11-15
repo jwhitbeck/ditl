@@ -21,6 +21,6 @@ package ditl;
 import java.io.IOException;
 
 public interface Incrementable {
-	public void incr(long time) throws IOException ;
+	public void incr(long dt) throws IOException ;
 	public void seek(long time) throws IOException ;
 }

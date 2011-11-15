@@ -89,9 +89,9 @@ public class WindowedLinkConverter implements Converter, Generator, LinkTrace.Ha
 	}
 
 	@Override
-	public void incr(long time) throws IOException {
+	public void incr(long dt) throws IOException {
 		windowed_writer.flush(cur_time - _window);
-		cur_time += time;
+		cur_time += dt;
 	}
 
 	@Override

@@ -100,10 +100,10 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 	}
 	
 	@Override
-	public void incr(long time) throws IOException {
+	public void incr(long dt) throws IOException {
 		expireBeacons();
 		edge_writer.flush(cur_time-(_tol+1)*_period);
-		cur_time += time;
+		cur_time += dt;
 	}
 
 	@Override

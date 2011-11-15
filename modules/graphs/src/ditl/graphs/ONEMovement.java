@@ -120,11 +120,11 @@ public class ONEMovement {
 		runner.add(new Incrementable(){
 			long cur_time;
 			@Override
-			public void incr(long time) throws IOException {
+			public void incr(long dt) throws IOException {
 				for ( Movement m : updater.states() ){
 					writer.write(m.oneString(cur_time, timeMul));
 				}
-				cur_time += time;
+				cur_time += dt;
 			}
 
 			@Override
