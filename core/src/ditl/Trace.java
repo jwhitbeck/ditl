@@ -37,6 +37,8 @@ public abstract class Trace<E> {
 	final public static String snapshotIntervalKey = "snapshot interval";
 	
 	final public static int defaultPriority = 100;
+	final public static int highestPriority = 0;
+	final public static int lowestPriority = Integer.MAX_VALUE;
 	
 	protected String _name;
 	protected Store _store;

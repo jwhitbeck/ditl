@@ -245,7 +245,7 @@ public final class EdgesToDominatingSetConverter implements Converter,
 
 	@Override
 	public int priority() {
-		return Integer.MAX_VALUE; // this should run with the lowest priority
+		return Trace.lowestPriority; // this should run with the lowest priority
 	}
 
 
