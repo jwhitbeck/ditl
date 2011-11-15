@@ -1,12 +1,16 @@
-DITL_LIB:=../../../ditl.jar
+DITL_LIB:=../../../dist/ditl.jar
 
 ORIG_DATA:=imote-trace3.tar.gz
 CRAWDAD_URL:=http://www.crawdad.org/download/cambridge/haggle/imote-trace3.tar.gz
 TARGET:=infocom05.jar
 
+SHELL:=/bin/bash
+
 DITL:=java -jar $(DITL_LIB)
 
-SHELL:=/bin/bash
+WGET=wget --password $(4) --user $(3) -O $(2) $(1)
+CURL=curl -u $(3):$(4) $(1) > $(2)
+GET=$(WGET); if [ $$? -eq 127 ]; then $(CURL); fi
 
 .DEFAULT_GOAL:=$(TARGET)
 .PHONY: clean proper
@@ -18,7 +22,7 @@ $(ORIG_DATA):
 	@echo ""
 	@read -p "CRAWDAD login: " login && \
 	read -p "CRAWDAD password: " -s pass && \
-	wget --password $$pass --user $$login $(CRAWDAD_URL)
+	$(call GET,$(CRAWDAD_URL),$(ORIG_DATA),$$login,$$pass)
 
 
 $(TARGET): $(ORIG_DATA)
@@ -39,7 +43,7 @@ $(TARGET): $(ORIG_DATA)
 		$@ Exp3/contacts.Exp3.dat
 	$(DITL) graphs edges-to-links --links all_links $@
 	$(DITL) rm $@ edges
-	$(DITL) filter $@ all_links links 1-41
+	$(DITL) filter $@ all_links links 1:41
 	$(DITL) rm $@ all_links
 	$(DITL) graphs links-to-presence $@
 	@echo ""

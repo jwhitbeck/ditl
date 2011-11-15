@@ -1,12 +1,17 @@
-DITL_LIB:=../../../ditl.jar
+DITL_LIB:=../../../dist/ditl.jar
 
 ORIG_DATA:=Exp6.tar.gz
 CRAWDAD_URL:=http://www.crawdad.org/download/cambridge/haggle/Exp6.tar.gz
 TARGET:=infocom06.jar
 
+SHELL:=/bin/bash
+
 DITL:=java -jar $(DITL_LIB)
 
-SHELL:=/bin/bash
+WGET=wget --password $(4) --user $(3) -O $(2) $(1)
+CURL=curl -u $(3):$(4) $(1) > $(2)
+GET=$(WGET); if [ $$? -eq 127 ]; then $(CURL); fi
+
 
 .DEFAULT_GOAL:=$(TARGET)
 .PHONY: clean proper
@@ -18,7 +23,7 @@ $(ORIG_DATA):
 	@echo ""
 	@read -p "CRAWDAD login: " login && \
 	read -p "CRAWDAD password: " -s pass && \
-	wget --password $$pass --user $$login $(CRAWDAD_URL)
+	$(call GET,$(CRAWDAD_URL),$(ORIG_DATA),$$login,$$pass)
 
 
 $(TARGET): $(ORIG_DATA)
@@ -39,17 +44,19 @@ $(TARGET): $(ORIG_DATA)
 		$@ Exp6/contacts.Exp6.dat
 	$(DITL) graphs edges-to-links --links all_links $@
 	$(DITL) rm $@ edges
-	$(DITL) filter $@ all_links links 1-98
+	$(DITL) filter $@ all_links links 1:98
 	$(DITL) rm $@ all_links
 	$(DITL) graphs links-to-presence $@
-	$(DITL) graphs import-groups --labels $@ \
-			"participants:21-98" \
-			"mezzanine:6:8:9:10:12:17" \
-			"floor -1:3:14:16" \
-			"floor -2:1:4:5:7:11:15" \
-			"lifts:18:19:20" \
-			"bar:2" \
-			"concierge:13"
+	$(DITL) graphs import-groups \
+			--labels "participants,mezzanine,floor -1,floor -2,lifts,bar,concierge"\
+			$@ -- \
+			21:98 \
+			6,8,9,10,12,17 \
+			-1,3,14,16 \
+			-2,1,4,5,7,11,15 \
+			18,19,20 \
+			2 \
+			13
 	$(DITL) graphs import-positions --movement static_mv $@ \
 			1:150:350 4:200:350 5:150:300 7:100:400 11:150:400 15:100:350 \
 			3:250:150 14:300:200 16:250:250 \

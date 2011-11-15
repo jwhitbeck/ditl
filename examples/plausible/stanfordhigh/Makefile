@@ -1,14 +1,18 @@
-DITL_LIB:=../../../ditl.jar
+DITL_LIB:=../../../dist/ditl.jar
 
 ORIG_DATA:=moteFiles.zip roles.zip
 MOTES_URL:=http://www.salathegroup.com/data/school_2010/moteFiles.zip
 ROLES_URL:=http://www.salathegroup.com/data/school_2010/roles.zip
 TARGET:=stanford.jar
 
+SHELL:=/bin/bash
+
 DITL:=java -jar $(DITL_LIB)
 JFLAGS:=-classpath "$(DITL_LIB):."
 
-SHELL:=/bin/bash
+WGET=wget -O $(2) $(1)
+CURL=curl $(1) > $(2)
+GET=$(WGET); if [ $$? -eq 127 ]; then $(CURL); fi
 
 .DEFAULT_GOAL:=$(TARGET)
 .PHONY: clean proper
@@ -18,26 +22,15 @@ $(ORIG_DATA):
 	@echo "#################################################"
 	@echo " Downloading data from www.salathegroup.com "
 	@echo ""
-	wget $(MOTES_URL)
-	wget $(ROLES_URL)
-
+	$(call GET,$(MOTES_URL),moteFiles.zip)
+	$(call GET,$(ROLES_URL),roles.zip)
 
 groups: roles.zip
 	rm -f $@
-	S=$$(grep student roles/roles.txt | cut	 -f1) \
-		&& echo -n "student:" >> $@ \
-		&& echo $$S | tr ' ' : >> $@
-	S=$$(grep staff roles/roles.txt | cut	 -f1) \
-		&& echo -n "staff:" >> $@ \
-		&& echo $$S | tr ' ' : >> $@
-	S=$$(grep teacher roles/roles.txt | cut	 -f1) \
-		&& echo -n "teacher:" >> $@ \
-		&& echo $$S | tr ' ' : >> $@
-	S=$$(grep other roles/roles.txt | cut	 -f1) \
-		&& echo -n "other:" >> $@ \
-		&& echo $$S | tr ' ' : >> $@
-
-
+	echo $$(grep student roles/roles.txt | cut -f1) | tr ' ' , >> $@
+	echo $$(grep staff roles/roles.txt | cut -f1) | tr ' ' , >> $@
+	echo $$(grep teacher roles/roles.txt | cut -f1) | tr ' ' , >> $@
+	echo $$(grep other roles/roles.txt | cut -f1) | tr ' ' , >> $@
 
 $(TARGET): $(ORIG_DATA) ImportStanford.java
 	@echo ""
@@ -60,7 +53,7 @@ $(TARGET): $(ORIG_DATA) ImportStanford.java
 	$(DITL) rm $@ edges
 	$(DITL) graphs links-to-presence $@
 	make groups
-	$(DITL) graphs import-groups --labels $@ $$(cat groups)
+	$(DITL) graphs import-groups --labels student,staff,teacher,other $@ $$(cat groups)
 	@echo ""
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"

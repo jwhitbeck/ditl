@@ -1,12 +1,16 @@
-DITL_LIB:=../../../ditl.jar
+DITL_LIB:=../../../dist/ditl.jar
 
 ORIG_DATA:=pmtr.txt
 CRAWDAD_URL:=http://www.crawdad.org/download/unimi/pmtr/pmtr.txt.gz
 TARGET:=pmtr.jar
 
+SHELL:=/bin/bash
+
 DITL:=java -jar $(DITL_LIB)
 
-SHELL:=/bin/bash
+WGET=wget --password $(4) --user $(3) -O $(2) $(1)
+CURL=curl -u $(3):$(4) $(1) > $(2)
+GET=$(WGET); if [ $$? -eq 127 ]; then $(CURL); fi
 
 .DEFAULT_GOAL:=$(TARGET)
 .PHONY: clean proper
@@ -18,7 +22,7 @@ $(ORIG_DATA):
 	@echo ""
 	@read -p "CRAWDAD login: " login && \
 	read -p "CRAWDAD password: " -s pass && \
-	wget --password $$pass --user $$login $(CRAWDAD_URL)
+	$(call GET,$(CRAWDAD_URL),$(ORIG_DATA),$$login,$$pass)
 	gunzip pmtr.txt.gz
 
 
