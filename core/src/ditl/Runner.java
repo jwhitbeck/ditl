@@ -73,7 +73,7 @@ public class Runner {
 	
 	public void run() throws IOException {
 		seek(min_time);
-		while ( cur_time < max_time + incr_time ){
+		while ( cur_time < max_time ){
 			incr();
 		}
 	}
@@ -92,14 +92,15 @@ public class Runner {
 	}
 	
 	public void incr() throws IOException {
+		long dt = Math.min(incr_time, max_time-cur_time);
 		for ( Generator generator : generators ){
-			generator.incr(incr_time);
+			generator.incr(dt);
 		}
 		flush();
 		for ( Incrementable incr : incrementors ){
-			incr.incr(incr_time);
+			incr.incr(dt);
 		}
-		cur_time += incr_time;
+		cur_time += dt;
 	}
 	
 	private void flush() throws IOException {
