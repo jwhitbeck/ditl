@@ -93,6 +93,7 @@ public class Runner {
 	
 	public void incr() throws IOException {
 		long dt = Math.min(incr_time, max_time-cur_time);
+		cur_time += dt;
 		for ( Generator generator : generators ){
 			generator.incr(dt);
 		}
@@ -100,7 +101,6 @@ public class Runner {
 		for ( Incrementable incr : incrementors ){
 			incr.incr(dt);
 		}
-		cur_time += dt;
 	}
 	
 	private void flush() throws IOException {
