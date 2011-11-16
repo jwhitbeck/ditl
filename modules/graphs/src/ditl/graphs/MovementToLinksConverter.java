@@ -186,6 +186,7 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 		runner.add(this);
 		runner.run();
 		
+		links_writer.flush(_movement.maxTime());
 		links_writer.close();
 		movement_reader.close();
 	}
