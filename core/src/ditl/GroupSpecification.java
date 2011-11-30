@@ -24,17 +24,20 @@ public class GroupSpecification {
 	
 	private final static String range_sep = ":";
 	private final static String gap_sep = ",";
+	private final static String empty = "E";
 
 	public static Set<Integer> parse(String s){
 		Set<Integer> group = new HashSet<Integer>();
-		String[] ranges = s.split(gap_sep);
-		for ( String range : ranges ){
-			String[] bounds = range.split(range_sep);
-			if ( bounds.length == 1 )
-				group.add( Integer.parseInt(bounds[0]) );
-			else {
-				for ( Integer i = Integer.parseInt(bounds[0]); i<=Integer.parseInt(bounds[1]); ++i){
-					group.add(i);
+		if ( ! s.equals(empty) ){
+			String[] ranges = s.split(gap_sep);
+			for ( String range : ranges ){
+				String[] bounds = range.split(range_sep);
+				if ( bounds.length == 1 )
+					group.add( Integer.parseInt(bounds[0]) );
+				else {
+					for ( Integer i = Integer.parseInt(bounds[0]); i<=Integer.parseInt(bounds[1]); ++i){
+						group.add(i);
+					}
 				}
 			}
 		}
@@ -42,6 +45,8 @@ public class GroupSpecification {
 	}
 	
 	public static String toString(Set<Integer> group){
+		if ( group.isEmpty() )
+			return empty;
 		List<Integer> list = new LinkedList<Integer>(group);
 		Collections.sort(list);
 		StringBuffer s = new StringBuffer();
