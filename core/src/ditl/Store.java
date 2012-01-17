@@ -57,7 +57,7 @@ public abstract class Store {
 	
 	public static void buildTypeClassMap() throws IOException{
 		if ( type_class_map.isEmpty() ){
-			Reflections reflections = new Reflections("/\\w+\\.class");
+			Reflections reflections = new Reflections("\\w+\\.class");
 			for ( Class<?> klass : Reflections.getSubClasses(Trace.class, reflections.listClasses("ditl")))
 				addTraceClass(klass);
 		}
