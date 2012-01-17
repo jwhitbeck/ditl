@@ -33,7 +33,7 @@ public class ExportMovement extends ExportApp {
 	private Long dtps;
 	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.NS2, ExternalFormat.ONE);
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
-	private long interval;
+	private double d_interval;
 	
 	public final static String PKG_NAME = "graphs";
 	public final static String CMD_NAME = "export-movement";
@@ -49,7 +49,7 @@ public class ExportMovement extends ExportApp {
 		dtps = getTicsPerSecond( cli.getOptionValue(destTimeUnitOption,"s"));
 		if ( dtps == null )
 			throw new HelpException();
-		interval = (long)Double.parseDouble(cli.getOptionValue(intervalOption,"1"));
+		d_interval = Double.parseDouble(cli.getOptionValue(intervalOption,"1"));
 	}
 	
 	@Override
@@ -66,7 +66,7 @@ public class ExportMovement extends ExportApp {
 	protected void run() throws IOException, NoSuchTraceException {
 		MovementTrace movement = (MovementTrace) _store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
 		long otps = movement.ticsPerSecond();
-		interval *= otps;
+		long interval = Math.max( (long)(d_interval * otps), 1);
 		if ( maxTime != null ) maxTime *= otps;
 		double timeMul = getTimeMul(otps,dtps);
 		if ( ext_fmt.is(ExternalFormat.NS2) )
