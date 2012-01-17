@@ -19,7 +19,6 @@
 package ditl.graphs.viz;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.util.*;
 
 import ditl.*;
@@ -37,21 +36,6 @@ public class GraphScene extends Scene implements
 	private Map<Link,EdgeElement> edges = new HashMap<Link,EdgeElement>();
 	private boolean showIds = false;
 	private Map<Integer,Color> group_color_map = null;
-
-	public GraphScene() {
-		super();
-		addMouseListener(new MouseAdapter(){
-			@Override
-			public void mouseClicked(MouseEvent e) { // extremely inefficient!
-				for ( NodeElement node : nodes.values() ){
-					if ( node.contains(e.getX(), e.getY())){
-						System.out.println(node.id());
-						break;
-					}
-				}
-			}
-		});
-	}
 	
 	public void setGroupColorMap(Map<Integer,Color> groupColorMap){
 		group_color_map = groupColorMap;
