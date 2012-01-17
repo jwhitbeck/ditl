@@ -27,7 +27,7 @@ import ditl.Store.NoSuchTraceException;
 
 public class PrintState extends ExportApp {
 	
-	private long time;
+	private double d_time;
 	private String trace_name;
 	
 	public final static String PKG_NAME = null;
@@ -38,7 +38,7 @@ public class PrintState extends ExportApp {
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
 		super.parseArgs(cli, args);
 		trace_name = args[1];
-		time = Long.parseLong(args[2]);
+		d_time = Double.parseDouble(args[2]);
 	}
 
 	
@@ -48,7 +48,7 @@ public class PrintState extends ExportApp {
 		if ( ! trace.isStateful() )
 			System.out.println("Trace '"+trace_name+"' is not a stateful trace.");
 		StatefulTrace<?,?> strace = (StatefulTrace<?,?>)trace;
-		time *= strace.ticsPerSecond();
+		long time = (long)(d_time * strace.ticsPerSecond());
 		StatefulReader<?,?> reader = strace.getReader();
 		reader.seek(time);
 		for ( Object state : reader.referenceState() )
