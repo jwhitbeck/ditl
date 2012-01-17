@@ -83,7 +83,7 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 						if ( begin-time < max_interval ){
 							links_writer.queue(begin, new LinkEvent(l, LinkEvent.UP));
 							if ( end-time < max_interval ){
-								links_writer.queue(begin, new LinkEvent(l, LinkEvent.DOWN));
+								links_writer.queue(end, new LinkEvent(l, LinkEvent.DOWN));
 							}
 						}
 					}
