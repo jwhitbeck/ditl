@@ -25,7 +25,7 @@ import org.apache.commons.cli.*;
 import ditl.*;
 import ditl.Store.NoSuchTraceException;
 
-public class PrintState extends ExportApp {
+public class PrintState extends ReadOnlyApp {
 	
 	private double d_time;
 	private String trace_name;

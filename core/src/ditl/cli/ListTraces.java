@@ -25,7 +25,7 @@ import org.apache.commons.cli.*;
 
 import ditl.Trace;
 
-public class ListTraces extends ExportApp {
+public class ListTraces extends ReadOnlyApp {
 
 	private final static String detailsOption = "all"; 
 	private boolean show_descr;
