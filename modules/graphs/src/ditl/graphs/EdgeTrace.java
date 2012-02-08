@@ -31,7 +31,7 @@ public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge>
 	
 	public final static class Updater implements StateUpdater<EdgeEvent, Edge> {
 
-		private Set<Edge> edges = new HashSet<Edge>(); 
+		private Set<Edge> edges = new TreeSet<Edge>(); 
 		
 		@Override
 		public void setState(Collection<Edge> edgesState ) {

@@ -22,7 +22,7 @@ import java.util.Set;
 
 import ditl.*;
 
-public final class Edge {
+public final class Edge implements Comparable<Edge> {
 	
 	final Integer _from;
 	final Integer _to;
@@ -70,11 +70,6 @@ public final class Edge {
 	}
 	
 	@Override
-	public int hashCode(){
-		return Link.maxNumNodes*_from+_to;
-	}
-	
-	@Override
 	public String toString(){
 		return _from+" "+_to;
 	}
@@ -86,6 +81,13 @@ public final class Edge {
 		public boolean matches(Edge item) {
 			return _group.contains(item._from) && _group.contains(item._to);
 		}
+	}
+
+	@Override
+	public int compareTo(Edge oe) {
+		int c = _from.compareTo(oe._from);
+		if ( c != 0 ) return c;
+		return _to.compareTo(oe._to);
 	}
 	
 }

@@ -32,8 +32,8 @@ public class GraphScene extends Scene implements
 	MovementTrace.Handler, LinkTrace.Handler, EdgeTrace.Handler, GroupTrace.Handler {
 
 	protected Map<Integer,NodeElement> nodes = new HashMap<Integer,NodeElement>();
-	private Map<Link,LinkElement> links = new HashMap<Link,LinkElement>();
-	private Map<Link,EdgeElement> edges = new HashMap<Link,EdgeElement>();
+	private Map<Link,LinkElement> links = new TreeMap<Link,LinkElement>();
+	private Map<Link,EdgeElement> edges = new TreeMap<Link,EdgeElement>();
 	private boolean showIds = false;
 	private Map<Integer,Color> group_color_map = null;
 	

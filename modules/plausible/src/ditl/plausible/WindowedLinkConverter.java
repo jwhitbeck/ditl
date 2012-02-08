@@ -32,7 +32,7 @@ public class WindowedLinkConverter implements Converter, Generator, LinkTrace.Ha
 	private Bus<Link> pop_bus = new Bus<Link>();
 	private Bus<Link> state_bus = new Bus<Link>();
 	private Bus<LinkEvent> bus = new Bus<LinkEvent>();
-	private Map<Link,LinkTimeline> link_timelines = new HashMap<Link,LinkTimeline>();
+	private Map<Link,LinkTimeline> link_timelines = new TreeMap<Link,LinkTimeline>();
 	
 	private StatefulWriter<WindowedLinkEvent,WindowedLink> windowed_writer;
 	private StatefulReader<LinkEvent,Link> link_reader;
@@ -144,7 +144,7 @@ public class WindowedLinkConverter implements Converter, Generator, LinkTrace.Ha
 			@Override
 			public void handle(long time, Collection<Link> links)
 					throws IOException {
-				Set<WindowedLink> init_state = new HashSet<WindowedLink>();
+				Set<WindowedLink> init_state = new TreeSet<WindowedLink>();
 				for ( Link l : links ){
 					LinkTimeline timeline = new LinkTimeline(l, windowed_writer);
 					long delta = (long)(rng.nextDouble()*_window);

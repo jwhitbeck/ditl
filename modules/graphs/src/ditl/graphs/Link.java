@@ -22,9 +22,7 @@ import java.util.Set;
 
 import ditl.*;
 
-public final class Link {
-	
-	final static int maxNumNodes = 32768; // 2^15
+public final class Link implements Comparable<Link> {
 	
 	final Integer id1;
 	final Integer id2;
@@ -73,11 +71,6 @@ public final class Link {
 	}
 	
 	@Override
-	public int hashCode(){
-		return maxNumNodes*id1+id2;
-	}
-	
-	@Override
 	public String toString(){
 		return id1+" "+id2;
 	}
@@ -91,4 +84,10 @@ public final class Link {
 		}
 	}
 
+	@Override
+	public int compareTo(Link ol) {
+		int c = id1.compareTo(ol.id1);
+		if ( c != 0 ) return c;
+		return id2.compareTo(ol.id2);
+	}
 }

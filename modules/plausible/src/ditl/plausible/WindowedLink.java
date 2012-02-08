@@ -21,7 +21,7 @@ package ditl.plausible;
 import ditl.*;
 import ditl.graphs.Link;
 
-public final class WindowedLink {
+public final class WindowedLink implements Comparable<WindowedLink>{
 	
 	long prev_up = -Trace.INFINITY;
 	long prev_down = -Trace.INFINITY;
@@ -50,11 +50,6 @@ public final class WindowedLink {
 	public boolean equals(Object o){
 		WindowedLink wl = (WindowedLink)o;
 		return wl._link.equals(_link);
-	}
-	
-	@Override
-	public int hashCode(){
-		return _link.hashCode();
 	}
 	
 	@Override
@@ -90,6 +85,11 @@ public final class WindowedLink {
 		case WindowedLinkEvent.NEXT_UP: next_up = wle._value; break;
 		case WindowedLinkEvent.NEXT_DOWN: next_down = wle._value; break;
 		}
+	}
+	
+	@Override
+	public int compareTo(WindowedLink owl) {
+		return _link.compareTo(owl._link);
 	}
 
 }

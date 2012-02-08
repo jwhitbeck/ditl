@@ -35,7 +35,7 @@ public final class BufferLinksConverter implements Converter,
 	private Random rng = new Random();
 	private long cur_time;
 	private StatefulWriter<LinkEvent,Link> buffer_writer;
-	private Set<Link> init_state = new HashSet<Link>();
+	private Set<Link> init_state = new TreeSet<Link>();
 	private boolean flushed = false;
 	private long min_time;
 	

@@ -32,7 +32,7 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 	private int _tol = 0;
 	private long cur_time;
 	private TreeMap<Long,Set<Edge>> edgesBuffer = new TreeMap<Long,Set<Edge>>();
-	private Map<Edge,Long> lastEdges = new HashMap<Edge,Long>();
+	private Map<Edge,Long> lastEdges = new TreeMap<Edge,Long>();
 	private Random rng = new Random();
 	private double _expansion;
 	private StatefulWriter<EdgeEvent, Edge> edge_writer;
@@ -76,7 +76,7 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 				edgesBuffer.remove(prevTime);
 		}
 		if ( ! edgesBuffer.containsKey(time) )
-			edgesBuffer.put(time, new HashSet<Edge>() );
+			edgesBuffer.put(time, new TreeSet<Edge>() );
 		edgesBuffer.get(time).add(edge);
 		lastEdges.put(edge, time);
 	}

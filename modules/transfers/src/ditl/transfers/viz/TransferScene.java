@@ -29,8 +29,8 @@ import ditl.transfers.*;
 @SuppressWarnings("serial")
 public class TransferScene extends GraphScene implements TransferTrace.Handler {
 
-	private Map<Link,LinkElement> active_transfers = new HashMap<Link,LinkElement>();
-	private Map<Link,Integer> transfer_count = new HashMap<Link,Integer>();
+	private Map<Link,LinkElement> active_transfers = new TreeMap<Link,LinkElement>();
+	private Map<Link,Integer> transfer_count = new TreeMap<Link,Integer>();
 	private boolean show_transfers = true;
 
 	@Override

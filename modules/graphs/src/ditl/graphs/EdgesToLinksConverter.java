@@ -31,7 +31,7 @@ public final class EdgesToLinksConverter implements Converter {
 	public final static boolean INTERSECTION = false;
 	
 	private boolean _union; 
-	private Set<Edge> edges = new HashSet<Edge>();
+	private Set<Edge> edges = new TreeSet<Edge>();
 	private StatefulWriter<LinkEvent,Link> link_writer;
 	private StatefulReader<EdgeEvent,Edge> edge_reader;
 	private LinkTrace _links;
@@ -45,7 +45,7 @@ public final class EdgesToLinksConverter implements Converter {
 	
 
 	private void setInitStateFromEdges(long time, Set<Edge> states) throws IOException {
-		Set<Link> contacts = new HashSet<Link>();
+		Set<Link> contacts = new TreeSet<Link>();
 		for ( Edge edge : states ){
 			edges.add(edge);
 			if ( _union ){

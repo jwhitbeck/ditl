@@ -29,7 +29,7 @@ import ditl.*;
 public final class ContactTimesReport extends Report implements LinkTrace.Handler {
 
 	private boolean _contacts;
-	private Map<Link,Long> activeContacts = new HashMap<Link,Long>();
+	private Map<Link,Long> activeContacts = new TreeMap<Link,Long>();
 	
 	public ContactTimesReport(OutputStream out, boolean contacts) throws IOException {
 		super(out);

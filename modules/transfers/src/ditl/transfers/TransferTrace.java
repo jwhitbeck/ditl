@@ -30,7 +30,7 @@ public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
 	public final static String defaultName = "transfers";
 	
 	public final static class Updater implements StateUpdater<TransferEvent,Transfer>{
-		private Map<Edge,Transfer> transfer_map = new HashMap<Edge,Transfer>();
+		private Map<Edge,Transfer> transfer_map = new TreeMap<Edge,Transfer>();
 		private Set<Transfer> transfers = new HashSet<Transfer>();
 		
 		@Override

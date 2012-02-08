@@ -49,8 +49,8 @@ public class AnticipatedForce implements Force, Interaction,
 	
 	private Collection<Node> _nodes;
 	
-	private Map<Link,WindowedLink> window_map = new HashMap<Link,WindowedLink>();
-	private Set<Link> active_links = new HashSet<Link>();
+	private Map<Link,WindowedLink> window_map = new TreeMap<Link,WindowedLink>();
+	private Set<Link> active_links = new TreeSet<Link>();
 	
 	public AnticipatedForce(double K, double alpha, double vmax, double range, 
 			double epsilon, double tau, double cutoff, double lambda, long tps){

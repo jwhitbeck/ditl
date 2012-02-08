@@ -26,7 +26,7 @@ import ditl.*;
 public class StaticGroupLinkConverter implements Converter {
 
 	private Map<Integer, Integer> group_map;
-	private Map<Link,Set<Link>> group_links = new HashMap<Link,Set<Link>>();
+	private Map<Link,Set<Link>> group_links = new TreeMap<Link,Set<Link>>();
 	private StatefulWriter<LinkEvent,Link> group_link_writer;
 	private StatefulReader<LinkEvent,Link> link_reader;
 	private LinkTrace g_links;
@@ -56,7 +56,7 @@ public class StaticGroupLinkConverter implements Converter {
 			Link gl = groupLink(l);
 			if ( gl != null ){
 				if ( ! group_links.containsKey(gl) )
-					group_links.put(gl, new HashSet<Link>() );
+					group_links.put(gl, new TreeSet<Link>() );
 				group_links.get(gl).add(l);
 			}
 		}
@@ -71,7 +71,7 @@ public class StaticGroupLinkConverter implements Converter {
 				Set<Link> g_link = group_links.get(gl);
 				if ( lev.isUp() ){
 					if ( g_link == null ){
-						g_link = new HashSet<Link>();
+						g_link = new TreeSet<Link>();
 						group_links.put(gl, g_link);
 						group_link_writer.append(time, new LinkEvent(gl, LinkEvent.UP));
 					}
