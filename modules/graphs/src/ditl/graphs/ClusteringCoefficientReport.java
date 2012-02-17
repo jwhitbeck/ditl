@@ -28,7 +28,7 @@ import ditl.*;
 public final class ClusteringCoefficientReport extends StateTimeReport 
 	implements PresenceTrace.Handler, LinkTrace.Handler {
 	
-	private AdjacencyMatrix adjacency = new AdjacencyMatrix();
+	private AdjacencySet.Links adjacency = new AdjacencySet.Links();
 	private Map<Integer,Double> coeffs = new HashMap<Integer,Double>();
 	private boolean remove_leaves;
 	

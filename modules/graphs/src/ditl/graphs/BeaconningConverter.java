@@ -29,7 +29,7 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 
 	protected boolean _randomize;
 	private double _p;
-	private AdjacencyMatrix _adjacency = new AdjacencyMatrix();
+	private AdjacencySet.Links _adjacency = new AdjacencySet.Links();
 	private long _period;
 	private Random rng = new Random();
 	private Bus<Integer> next_scans = new Bus<Integer>();

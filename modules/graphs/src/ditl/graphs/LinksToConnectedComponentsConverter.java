@@ -27,7 +27,7 @@ import ditl.*;
 
 public final class LinksToConnectedComponentsConverter implements Converter {
 
-	private AdjacencyMatrix adjacency = new AdjacencyMatrix();
+	private AdjacencySet.Links adjacency = new AdjacencySet.Links();
 	private Map<Integer,Group> cc_map = new HashMap<Integer, Group>();
 	private StatefulWriter<GroupEvent,Group> group_writer;
 	private StatefulReader<LinkEvent,Link> link_reader;
@@ -150,10 +150,10 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 		for ( LinkEvent lev : events ){
 			Link l = lev.link();
 			if ( lev.isUp() ){
-				adjacency.addLink(l);
+				adjacency.add(l);
 				addLink(time, l);
 			} else {
-				adjacency.removeLink(l);
+				adjacency.remove(l);
 				removeLink(time, l);
 			}
 		}
@@ -161,7 +161,7 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 	
 	private void setInitState(long time) throws IOException{
 		Set<Group> initCCs = new HashSet<Group>();
-		LinkedList<Integer> toVisit = new LinkedList<Integer>(adjacency.nodes());
+		LinkedList<Integer> toVisit = new LinkedList<Integer>(adjacency.vertices());
 		LinkedList<Integer> toVisitInCC = new LinkedList<Integer>();
 		Set<Integer> visited = new HashSet<Integer>(toVisit.size()*2);
 		while ( ! toVisit.isEmpty() ){
@@ -210,7 +210,7 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 		link_reader.seek(minTime);
 		Collection<Link> initLinks = link_reader.referenceState();
 		for ( Link l : initLinks )
-			adjacency.addLink(l);
+			adjacency.add(l);
 		setInitState(minTime);
 		while ( link_reader.hasNext() ){
 			long time = link_reader.nextTime();

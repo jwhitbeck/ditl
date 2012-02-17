@@ -30,7 +30,7 @@ public class LinkTrace extends StatefulTrace<LinkEvent, Link>
 	public final static String defaultName = "links";
 	
 	public final static class Updater implements StateUpdater<LinkEvent,Link> {
-		private Set<Link> links = new TreeSet<Link>();
+		private Set<Link> links = new AdjacencySet.Links();
 		
 		@Override
 		public void setState(Collection<Link> contactsState ) {

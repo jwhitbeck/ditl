@@ -35,8 +35,8 @@ public final class EdgesToDominatingSetConverter implements Converter,
 	
 	private Set<Integer> ds_nodes = null;
 	private Set<Integer> present = new HashSet<Integer>();
-	private AdjacencyMatrix matrix = new AdjacencyMatrix();
-	private AdjacencyMatrix reverse_matrix = new AdjacencyMatrix();
+	private AdjacencySet.Edges matrix = new AdjacencySet.Edges();
+	private AdjacencySet.Edges reverse_matrix = new AdjacencySet.Edges();
 	private Bus<Object> update_bus = new Bus<Object>();
 	private long min_time;
 	private Integer gid = 0;
@@ -85,11 +85,11 @@ public final class EdgesToDominatingSetConverter implements Converter,
 				for ( EdgeEvent eev : events ){
 					Edge e = eev.edge();
 					if ( eev.isUp() ){
-						matrix.addEdge(e);
-						reverse_matrix.addEdge(e.reverse());
+						matrix.add(e);
+						reverse_matrix.add(e.reverse());
 					} else {
-						matrix.removeEdge(e);
-						reverse_matrix.removeEdge(e.reverse());
+						matrix.remove(e);
+						reverse_matrix.remove(e.reverse());
 					}
 				}
 				scheduleUpdate(time);
@@ -105,8 +105,8 @@ public final class EdgesToDominatingSetConverter implements Converter,
 			@Override
 			public void handle(long time, Collection<Edge> events) {
 				for ( Edge e : events ){
-					matrix.addEdge(e);
-					reverse_matrix.addEdge(e.reverse());
+					matrix.add(e);
+					reverse_matrix.add(e.reverse());
 				}
 				scheduleUpdate(time);
 			}
