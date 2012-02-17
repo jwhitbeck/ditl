@@ -22,7 +22,7 @@ import java.util.Set;
 
 import ditl.*;
 
-public final class Edge implements Comparable<Edge> {
+public final class Edge implements Comparable<Edge>, Couple {
 	
 	final Integer _from;
 	final Integer _to;
@@ -30,6 +30,14 @@ public final class Edge implements Comparable<Edge> {
 	public Edge(Integer from, Integer to){
 		_from = from;
 		_to = to;
+	}
+	
+	public Integer id1(){
+		return _from;
+	}
+	
+	public Integer id2(){
+		return _to;
 	}
 	
 	public Integer from(){

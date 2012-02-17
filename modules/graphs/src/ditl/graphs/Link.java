@@ -22,7 +22,7 @@ import java.util.Set;
 
 import ditl.*;
 
-public final class Link implements Comparable<Link> {
+public final class Link implements Comparable<Link>, Couple {
 	
 	final Integer id1;
 	final Integer id2;
