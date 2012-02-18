@@ -85,7 +85,7 @@ public class Runner {
 			generator.seek(time);
 		}
 		cur_time = time; // important to flush the new states
-		flush();
+		flush(true);
 		for ( Incrementable incr : incrementors ){
 			incr.seek(time);
 		}
@@ -97,13 +97,13 @@ public class Runner {
 		for ( Generator generator : generators ){
 			generator.incr(dt);
 		}
-		flush();
+		flush(false);
 		for ( Incrementable incr : incrementors ){
 			incr.incr(dt);
 		}
 	}
 	
-	private void flush() throws IOException {
+	private void flush(boolean is_seek) throws IOException {
 		while ( true ){
 			long next_bus_time = Long.MAX_VALUE; // should be greater than Trace.INFINITY which is a possible value for next_bus_time
 			Bus<?> nextBus = null;
@@ -116,7 +116,9 @@ public class Runner {
 					}
 				}
 			}
-			if ( next_bus_time <= cur_time )
+			if ( next_bus_time < cur_time )
+				nextBus.signalNext();
+			else if ( is_seek && next_bus_time == cur_time )
 				nextBus.signalNext();
 			else
 				break;
