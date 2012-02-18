@@ -74,7 +74,7 @@ public abstract class AdjacencySet<C extends Couple> implements Set<C> {
 
 	@Override
 	public Iterator<C> iterator() {
-		return map.keysIterator();
+		return map.valuesIterator();
 	}
 
 	@Override
@@ -102,12 +102,12 @@ public abstract class AdjacencySet<C extends Couple> implements Set<C> {
 
 	@Override
 	public Object[] toArray() {
-		return map.keySet().toArray();
+		return map.values().toArray();
 	}
 
 	@Override
 	public <T> T[] toArray(T[] a) {
-		return map.keySet().toArray(a);
+		return map.values().toArray(a);
 	}
 
 	public final static class Links extends AdjacencySet<Link>
