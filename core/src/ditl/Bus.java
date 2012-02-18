@@ -64,7 +64,8 @@ public class Bus <E> {
 		signal(e.getKey(), e.getValue());
 	}
 	
-	public void removeFromQueueAfterTime (long time, Matcher<E> matcher){
+	public boolean removeFromQueueAfterTime (long time, Matcher<E> matcher){
+		boolean changed = false;
 		Iterator<Long> i = buffer.keySet().iterator();
 		while ( i.hasNext() ){
 			Long t = i.next();
@@ -73,13 +74,16 @@ public class Bus <E> {
 				Iterator<E> j = events.iterator();
 				while ( j.hasNext() ){
 					E event = j.next();
-					if ( matcher.matches(event) )
+					if ( matcher.matches(event) ){
 						j.remove();
+						changed = true;
+					}
 				}
 				if (events.isEmpty())
 					i.remove();
 			}
 		}
+		return changed;
 	}
 	
 	public void flush() throws IOException {
