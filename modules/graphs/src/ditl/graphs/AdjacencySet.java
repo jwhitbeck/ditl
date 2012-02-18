@@ -74,7 +74,7 @@ public abstract class AdjacencySet<C extends Couple> implements Set<C> {
 
 	@Override
 	public Iterator<C> iterator() {
-		return map.keyIterator();
+		return map.keysIterator();
 	}
 
 	@Override

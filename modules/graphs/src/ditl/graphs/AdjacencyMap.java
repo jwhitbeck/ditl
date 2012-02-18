@@ -40,7 +40,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 		return prev;
 	}
 	
-	protected T put(Integer id1, Integer id2, T obj){
+	T put(Integer id1, Integer id2, T obj){
 		T prev = null;
 		Map<Integer,T> from_map = map.get(id1);
 		if ( from_map != null ){
@@ -68,7 +68,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 		return obj;
 	}
 	
-	protected T remove(Integer id1, Integer id2){
+	T remove(Integer id1, Integer id2){
 		Map<Integer,T> from_map = map.get(id1);
 		T obj = from_map.remove(id2);
 		if ( from_map.isEmpty() )
@@ -78,105 +78,11 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 	
 	abstract C newCouple(Integer id1, Integer id2);
 	
-	Iterator<T> valuesIterator() {
-		return new Iterator<T>(){
-			Deque<Integer> froms = new LinkedList<Integer>(map.keySet());
-			Iterator<T> vi = null;
-			
-			@Override
-			public boolean hasNext() {
-				if ( vi == null || ! vi.hasNext() ){
-					return ! froms.isEmpty();
-				}
-				return true;
-			}
+	Iterator<T> valuesIterator(){ return new ValuesIterator(); }
 
-			@Override
-			public T next() {
-				if ( vi == null || ! vi.hasNext() ){
-					vi = map.get(froms.pop()).values().iterator();
-				}
-				return vi.next();
-			}
-
-			@Override
-			public void remove() { throw new UnsupportedOperationException(); }
-		};
-	}
+	Iterator<C> keysIterator(){ return new KeysIterator(); }
 	
-	Iterator<C> keyIterator(){
-		return new Iterator<C>(){
-			Deque<Integer> froms = new LinkedList<Integer>(map.keySet());
-			Iterator<Integer> vi = null;
-			Integer id1 = null;
-			Set<Integer> cur_set = null;
-			
-			@Override
-			public boolean hasNext() {
-				if ( vi == null || ! vi.hasNext() ){
-					return ! froms.isEmpty();
-				}
-				return true;
-			}
-
-			@Override
-			public C next() {
-				if ( vi == null || ! vi.hasNext() ){
-					id1 = froms.pop();
-					cur_set = map.get(id1).keySet();
-					vi = cur_set.iterator();
-				}
-				Integer id2 = vi.next();
-				return newCouple(id1,id2);
-			}
-
-			@Override
-			public void remove() {
-				vi.remove();
-				if ( cur_set.isEmpty() )
-					map.remove(id1);
-				size--;
-			}
-		};
-	}
-	
-	Iterator<Map.Entry<C,T>> entryIterator(){
-		return new Iterator<Map.Entry<C,T>>(){
-			Deque<Integer> froms = new LinkedList<Integer>(map.keySet());
-			Iterator<Map.Entry<Integer,T>> vi = null;
-			Integer id1 = null;
-			Map<Integer,T> cur_map = null;
-			
-			@Override
-			public boolean hasNext() {
-				if ( vi == null || ! vi.hasNext() ){
-					return ! froms.isEmpty();
-				}
-				return true;
-			}
-
-			@Override
-			public Map.Entry<C, T> next() {
-				if ( vi == null || ! vi.hasNext() ){
-					id1 = froms.pop();
-					cur_map = map.get(id1);
-					vi = cur_map.entrySet().iterator();
-				}
-				Map.Entry<Integer, T> e = vi.next();
-				Integer id2 = e.getKey();
-				C c = newCouple(id1,id2);
-				return new AbstractMap.SimpleImmutableEntry<C,T>(c,e.getValue());
-			}
-
-			@Override
-			public void remove() {
-				vi.remove();
-				if ( cur_map.isEmpty() )
-					map.remove(id1);
-				size--;
-			}
-		};
-	}
+	Iterator<Map.Entry<C,T>> entriesIterator(){ return new EntriesIterator(); }
 
 
 	@Override
@@ -332,7 +238,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 
 		@Override
 		public Iterator<C> iterator() {
-			return keyIterator();
+			return keysIterator();
 		}
 
 		@Override
@@ -351,7 +257,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 		@Override
 		public boolean retainAll(Collection<?> objects) {
 			boolean changed = false;
-			Iterator<C> i = keyIterator();
+			Iterator<C> i = keysIterator();
 			while ( i.hasNext() ){
 				C c = i.next();
 				if ( ! objects.contains(c) ){
@@ -370,7 +276,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 		@Override
 		public Object[] toArray() {
 			Object[] array = new Object[size];
-			Iterator<C> i = keyIterator();
+			Iterator<C> i = keysIterator();
 			int j=0;
 			while ( i.hasNext() ){
 				array[j] = i.next();
@@ -422,7 +328,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 
 		@Override
 		public Iterator<java.util.Map.Entry<C, T>> iterator() {
-			return entryIterator();
+			return entriesIterator();
 		}
 
 		@Override
@@ -443,7 +349,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 		@Override
 		public boolean retainAll(Collection<?> objects) {
 			boolean changed = false;
-			Iterator<C> i = keyIterator();
+			Iterator<C> i = keysIterator();
 			while ( i.hasNext() ){
 				C c = i.next();
 				for ( Object o : objects ){
@@ -468,7 +374,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 		@Override
 		public Object[] toArray() {
 			Object[] array = new Object[size];
-			Iterator<Map.Entry<C, T>> i = entryIterator();
+			Iterator<Map.Entry<C, T>> i = entriesIterator();
 			int j = 0;
 			while ( i.hasNext() ){
 				array[j] = i.next();
@@ -486,6 +392,138 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 	}
 
 
+	class ValuesIterator implements Iterator<T>{
+		Deque<Integer> froms = new LinkedList<Integer>(map.keySet());
+		Iterator<Map.Entry<Integer, T>> vi = null;
+		Integer id1 = null;
+		Integer id2 = null;
+		T next = null;
+		
+		public ValuesIterator(){
+			peek();
+		}
+		
+		void peek() {
+			if ( vi == null || ! vi.hasNext() ){
+				if ( froms.isEmpty() ){
+					vi = null;
+					id1 = null;
+					id2 = null;
+					next = null;
+					return;
+				}
+				id1 = froms.pop();
+				vi = map.get(id1).entrySet().iterator();
+			}
+			Map.Entry<Integer, T> e = vi.next();
+			next = e.getValue();
+			id2 = e.getKey();
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return next != null;
+		}
+
+		@Override
+		public T next() {
+			T ret = next;
+			peek();
+			return ret;
+		}
+
+		@Override
+		public void remove() { throw new UnsupportedOperationException(); }
+	}
+	
+	
+	class KeysIterator implements Iterator<C>{
+		Deque<Integer> froms = new LinkedList<Integer>(map.keySet());
+		Iterator<Integer> vi = null;
+		Integer id1 = null;
+		Integer id2 = null;
+		
+		public KeysIterator(){
+			peek();
+		}
+		
+		void peek() {
+			if ( vi == null || ! vi.hasNext() ){
+				if ( froms.isEmpty() ){
+					vi = null;
+					id1 = null;
+					id2 = null;
+					return;
+				}
+				id1 = froms.pop();
+				vi = map.get(id1).keySet().iterator();
+			}
+			id2 = vi.next();
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return id2 != null;
+		}
+
+		@Override
+		public C next() {
+			C couple = newCouple(id1,id2);
+			peek();
+			return couple;
+		}
+
+		@Override
+		public void remove() { throw new UnsupportedOperationException(); }
+	}
+
+	
+	class EntriesIterator implements Iterator<Map.Entry<C, T>>{
+		Deque<Integer> froms = new LinkedList<Integer>(map.keySet());
+		Iterator<Map.Entry<Integer,T>> vi = null;
+		Integer id1 = null;
+		Integer id2 = null;
+		T next = null;
+		
+		public EntriesIterator(){
+			peek();
+		}
+		
+		void peek() {
+			if ( vi == null || ! vi.hasNext() ){
+				if ( froms.isEmpty() ){
+					vi = null;
+					id1 = null;
+					id2 = null;
+					next = null;
+					return;
+				}
+				id1 = froms.pop();
+				vi = map.get(id1).entrySet().iterator();
+			}
+			Map.Entry<Integer, T> e = vi.next();
+			id2 = e.getKey();
+			next = e.getValue();
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return id2 != null;
+		}
+
+		@Override
+		public Map.Entry<C, T> next() {
+			C couple = newCouple(id1,id2);
+			T cur = next;
+			peek();
+			return new AbstractMap.SimpleImmutableEntry<C,T>(couple,cur);
+		}
+
+		@Override
+		public void remove() { throw new UnsupportedOperationException(); }
+	}
+
+	
 	public final static class Edges<T> extends AdjacencyMap<Edge,T> {
 		@Override
 		Edge newCouple(Integer id1, Integer id2) {
@@ -500,13 +538,13 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 			return new Link(id1,id2);
 		}
 		@Override
-		protected T put(Integer id1, Integer id2, T obj){
+		T put(Integer id1, Integer id2, T obj){
 			T prev = super.put(id1, id2, obj);
 			super.put(id2, id1, obj);
 			return prev;
 		}
 		@Override
-		protected T remove(Integer id1, Integer id2){
+		T remove(Integer id1, Integer id2){
 			T obj = super.remove(id1,id2);
 			super.remove(id2,id1);
 			return obj;
@@ -515,6 +553,38 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 		public Set<Integer> vertices(){
 			return Collections.unmodifiableSet(map.keySet());
 		}
-		
+		@Override
+		Iterator<T> valuesIterator() {
+			return new ValuesIterator(){
+				@Override
+				void peek() {
+					do {
+						super.peek();
+					} while ( next != null && id2 <= id1 );
+				}
+			};
+		}
+		@Override
+		Iterator<Link> keysIterator() {
+			return new KeysIterator(){
+				@Override
+				void peek() {
+					do {
+						super.peek();
+					} while ( id2 != null && id2 <= id1 );
+				}
+			};
+		}
+		@Override
+		Iterator<Map.Entry<Link, T>> entriesIterator() {
+			return new EntriesIterator() {
+				@Override
+				void peek(){
+					do {
+						super.peek();
+					} while ( next != null && id2 <= id1 );
+				}
+			};
+		}
 	}
 }
