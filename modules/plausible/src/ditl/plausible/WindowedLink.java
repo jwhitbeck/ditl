@@ -19,9 +19,9 @@
 package ditl.plausible;
 
 import ditl.*;
-import ditl.graphs.Link;
+import ditl.graphs.*;
 
-public final class WindowedLink implements Comparable<WindowedLink>{
+public final class WindowedLink implements Couple {
 	
 	long prev_up = -Trace.INFINITY;
 	long prev_down = -Trace.INFINITY;
@@ -36,6 +36,14 @@ public final class WindowedLink implements Comparable<WindowedLink>{
 	
 	public Link link(){
 		return _link;
+	}
+	
+	public Integer id1(){ 
+		return _link.id1();
+	}
+	
+	public Integer id2(){ 
+		return _link.id2();
 	}
 	
 	public long minUpTime(long t){
@@ -86,10 +94,4 @@ public final class WindowedLink implements Comparable<WindowedLink>{
 		case WindowedLinkEvent.NEXT_DOWN: next_down = wle._value; break;
 		}
 	}
-	
-	@Override
-	public int compareTo(WindowedLink owl) {
-		return _link.compareTo(owl._link);
-	}
-
 }

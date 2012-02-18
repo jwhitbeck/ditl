@@ -22,7 +22,7 @@ import java.util.Set;
 
 import ditl.*;
 
-public final class Link implements Comparable<Link>, Couple {
+public final class Link implements Couple {
 	
 	final Integer id1;
 	final Integer id2;
@@ -84,10 +84,4 @@ public final class Link implements Comparable<Link>, Couple {
 		}
 	}
 
-	@Override
-	public int compareTo(Link ol) {
-		int c = id1.compareTo(ol.id1);
-		if ( c != 0 ) return c;
-		return id2.compareTo(ol.id2);
-	}
 }

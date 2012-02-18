@@ -22,7 +22,7 @@ import java.util.Set;
 
 import ditl.*;
 
-public final class Edge implements Comparable<Edge>, Couple {
+public final class Edge implements Couple {
 	
 	final Integer _from;
 	final Integer _to;
@@ -91,11 +91,4 @@ public final class Edge implements Comparable<Edge>, Couple {
 		}
 	}
 
-	@Override
-	public int compareTo(Edge oe) {
-		int c = _from.compareTo(oe._from);
-		if ( c != 0 ) return c;
-		return _to.compareTo(oe._to);
-	}
-	
 }
