@@ -30,20 +30,23 @@ public final class BufferLinksConverter implements Converter,
 	
 	private LinkTrace buffered_links;
 	private LinkTrace _links;
-	private long b_time;
+	private long before_b_time;
+	private long after_b_time;
 	private boolean _randomize;
 	private Random rng = new Random();
 	private long cur_time;
 	private StatefulWriter<LinkEvent,Link> buffer_writer;
 	private Set<Link> init_state = new AdjacencySet.Links();
+	private Map<Link,Integer> up_count = new AdjacencyMap.Links<Integer>();
 	private boolean flushed = false;
 	private long min_time;
 	
 	public BufferLinksConverter(LinkTrace bufferedLinks, LinkTrace links, 
-			long bufferTime, boolean randomize){
+			long beforeBufferTime, long afterBufferTime, boolean randomize){
 		buffered_links = bufferedLinks;
 		_links = links;
-		b_time = bufferTime;
+		before_b_time = beforeBufferTime;
+		after_b_time = afterBufferTime;
 		_randomize = randomize;
 		min_time = _links.minTime();
 	}
@@ -74,14 +77,30 @@ public final class BufferLinksConverter implements Converter,
 			@Override
 			public void handle(long time, Collection<LinkEvent> events) {
 				for ( LinkEvent event : events ){
+					final Link l = event.link();
 					if ( event.isUp() ){
 						long b = begin(time);
-						if ( b <= min_time )
-							init_state.add(event.link());
-						else
-							buffer_writer.queue(b, event);
+						if ( b <= min_time ) {
+							init_state.add(l);
+							incrLinkCount(l);
+						} else {
+							if ( incrLinkCount(l) == 1 ){
+								if ( buffer_writer.removeFromQueueAfterTime(b, new Matcher<LinkEvent>(){
+									@Override
+									public boolean matches(LinkEvent item) {
+										if ( item.link().equals(l) ) // this will necessarily be a down event
+											return true;
+										return false;
+									}
+								}) == false ) { // we have not removed a down event
+									buffer_writer.queue(b, event);
+								}
+							}
+						}
 					} else {
-						buffer_writer.queue(end(time), event);
+						if ( decrLinkCount(l) == 0 ){
+							buffer_writer.queue(end(time), event);
+						}
 					}
 				}
 			}
@@ -93,35 +112,57 @@ public final class BufferLinksConverter implements Converter,
 		return new Listener<Link>(){
 			@Override
 			public void handle(long time, Collection<Link> events) {
-				init_state.addAll(events);
+				for ( Link l : events ){
+					init_state.add(l);
+					incrLinkCount(l);
+				}
 			}
 		};
 	}
 	
-	private long rand(){
-		return Math.abs(rng.nextLong()) % b_time;
+	private long rand(long dt){
+		return Math.abs(rng.nextLong()) % dt;
 	}
 	
 	private long begin(long time){
-		if ( _randomize )
-			return time - rand();
-		return time - b_time;
+		if ( _randomize && before_b_time > 0 )
+			return time - rand(before_b_time);
+		return time - before_b_time;
 	}
 	
 	private long end(long time){
-		if ( _randomize )
-			return time + rand();
-		return time + b_time;
+		if ( _randomize && after_b_time > 0 )
+			return time + rand(after_b_time);
+		return time + after_b_time;
+	}
+	
+	private int incrLinkCount(Link l){
+		Integer i = up_count.get(l);
+		if ( i==null ){
+			up_count.put(l, 1);
+			return 1;
+		}
+		up_count.put(l, i+1);
+		return i+1;
+	}
+	
+	private int decrLinkCount(Link l){
+		Integer i = up_count.remove(l);
+		if ( i > 1 ){
+			up_count.put(l, i+1);
+			return i+1;
+		}
+		return 0;
 	}
 
 	@Override
 	public void incr(long dt) throws IOException {
-		if ( cur_time > min_time+b_time ){
+		if ( cur_time > min_time+before_b_time ){
 			if ( ! flushed ){
 				buffer_writer.setInitState(min_time, init_state);
 				flushed = true;
 			}
-			buffer_writer.flush(cur_time-b_time);
+			buffer_writer.flush(cur_time-before_b_time);
 		}
 		cur_time += dt;
 	}

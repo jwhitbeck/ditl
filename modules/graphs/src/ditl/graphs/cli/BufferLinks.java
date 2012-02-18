@@ -34,7 +34,8 @@ public class BufferLinks extends ConvertApp {
 	final static String bufferedLinksOption = "buffered-links"; 
 	final static String defaultBufferedLinksName = "buffered_links";
 	private String bufferedLinksName;
-	private long buffer_time;
+	private long before_buffer_time;
+	private long after_buffer_time;
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS);
 	
@@ -56,7 +57,11 @@ public class BufferLinks extends ConvertApp {
 			HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
-		buffer_time = Long.parseLong(args[1]);
+		before_buffer_time = Long.parseLong(args[1]);
+		if ( args.length == 2 )
+			after_buffer_time = before_buffer_time;
+		else
+			after_buffer_time = Long.parseLong(args[2]);
 		randomize = cli.hasOption(randomizeOption);
 		bufferedLinksName = cli.getOptionValue(bufferedLinksOption, defaultBufferedLinksName);
 	}
@@ -65,12 +70,13 @@ public class BufferLinks extends ConvertApp {
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
 		LinkTrace buffered_links = (LinkTrace) dest_store.newTrace(bufferedLinksName, LinkTrace.type, force);
-		buffer_time *= links.ticsPerSecond();
-		new BufferLinksConverter(buffered_links, links, buffer_time, randomize).convert();
+		before_buffer_time *= links.ticsPerSecond();
+		after_buffer_time *= links.ticsPerSecond();
+		new BufferLinksConverter(buffered_links, links, before_buffer_time, after_buffer_time, randomize).convert();
 	}
 	
 	@Override
 	public String getUsageString(){
-		return "[OPTIONS] STORE BUFFER_TIME";
+		return "\t[OPTIONS] STORE BUFFER_TIME\n\t[OPTIONS] store BEFORE_BUF_TIME AFTER_BUF_TIME";
 	}
 }
