@@ -55,7 +55,7 @@ public class CRAWDADEdges {
 	
 		StatefulReader<EdgeEvent,Edge> edgeReader = edges.getReader();
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-		Map<Edge,Long> activeEdges = new TreeMap<Edge,Long>();
+		Map<Edge,Long> activeEdges = new AdjacencyMap.Edges<Long>();
 		
 		edgeReader.seek(edges.minTime());
 		for ( Edge e : edgeReader.referenceState() )

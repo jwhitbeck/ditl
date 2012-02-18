@@ -20,9 +20,9 @@ package ditl.plausible.forces;
 
 import java.util.*;
 
-import ditl.plausible.*;
 import ditl.*;
 import ditl.graphs.*;
+import ditl.plausible.*;
 
 public class AnticipatedForce implements Force, Interaction, 
 	LinkTrace.Handler, WindowedLinkTrace.Handler {
@@ -49,8 +49,8 @@ public class AnticipatedForce implements Force, Interaction,
 	
 	private Collection<Node> _nodes;
 	
-	private Map<Link,WindowedLink> window_map = new TreeMap<Link,WindowedLink>();
-	private Set<Link> active_links = new TreeSet<Link>();
+	private Map<Link,WindowedLink> window_map = new AdjacencyMap.Links<WindowedLink>();
+	private Set<Link> active_links = new AdjacencySet.Links();
 	
 	public AnticipatedForce(double K, double alpha, double vmax, double range, 
 			double epsilon, double tau, double cutoff, double lambda, long tps){

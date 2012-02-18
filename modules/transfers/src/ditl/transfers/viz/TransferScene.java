@@ -22,15 +22,15 @@ import java.awt.*;
 import java.util.*;
 
 import ditl.*;
-import ditl.graphs.Link;
+import ditl.graphs.*;
 import ditl.graphs.viz.*;
 import ditl.transfers.*;
 
 @SuppressWarnings("serial")
 public class TransferScene extends GraphScene implements TransferTrace.Handler {
 
-	private Map<Link,LinkElement> active_transfers = new TreeMap<Link,LinkElement>();
-	private Map<Link,Integer> transfer_count = new TreeMap<Link,Integer>();
+	private Map<Link,LinkElement> active_transfers = new AdjacencyMap.Links<LinkElement>();
+	private Map<Link,Integer> transfer_count = new AdjacencyMap.Links<Integer>();
 	private boolean show_transfers = true;
 
 	@Override

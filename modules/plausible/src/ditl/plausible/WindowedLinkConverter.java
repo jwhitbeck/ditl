@@ -18,7 +18,7 @@
  *******************************************************************************/
 package ditl.plausible;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 import ditl.*;
@@ -32,7 +32,7 @@ public class WindowedLinkConverter implements Converter, Generator, LinkTrace.Ha
 	private Bus<Link> pop_bus = new Bus<Link>();
 	private Bus<Link> state_bus = new Bus<Link>();
 	private Bus<LinkEvent> bus = new Bus<LinkEvent>();
-	private Map<Link,LinkTimeline> link_timelines = new TreeMap<Link,LinkTimeline>();
+	private Map<Link,LinkTimeline> link_timelines = new AdjacencyMap.Links<LinkTimeline>();
 	
 	private StatefulWriter<WindowedLinkEvent,WindowedLink> windowed_writer;
 	private StatefulReader<LinkEvent,Link> link_reader;

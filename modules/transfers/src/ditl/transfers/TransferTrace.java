@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.*;
 
 import ditl.*;
-import ditl.graphs.Edge;
+import ditl.graphs.*;
 
 public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
 	
@@ -30,7 +30,7 @@ public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
 	public final static String defaultName = "transfers";
 	
 	public final static class Updater implements StateUpdater<TransferEvent,Transfer>{
-		private Map<Edge,Transfer> transfer_map = new TreeMap<Edge,Transfer>();
+		private Map<Edge,Transfer> transfer_map = new AdjacencyMap.Edges<Transfer>();
 		private Set<Transfer> transfers = new HashSet<Transfer>();
 		
 		@Override

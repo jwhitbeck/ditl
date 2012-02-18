@@ -64,7 +64,7 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 	}
 	
 	private void setInitialState(long time) throws IOException{
-		Set<Link> initLinks = new TreeSet<Link>();
+		Set<Link> initLinks = new AdjacencySet.Links();
 		Iterator<Movement> i = invalid_movements.values().iterator();
 		while ( i.hasNext() ){
 			Movement im = i.next();

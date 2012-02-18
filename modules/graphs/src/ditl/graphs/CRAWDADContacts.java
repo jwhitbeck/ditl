@@ -55,7 +55,7 @@ public class CRAWDADContacts {
 	
 		StatefulReader<LinkEvent,Link> linkReader = links.getReader();
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-		Map<Link,Long> activeContacts = new TreeMap<Link,Long>();
+		Map<Link,Long> activeContacts = new AdjacencyMap.Links<Long>();
 		
 		linkReader.seek(links.minTime());
 		for ( Link l : linkReader.referenceState() )

@@ -34,7 +34,7 @@ public class WindowedLinkTrace extends StatefulTrace<WindowedLinkEvent,WindowedL
 	public final static class Updater implements StateUpdater<WindowedLinkEvent,WindowedLink>{
 
 		private Set<WindowedLink> state = new TreeSet<WindowedLink>();
-		private Map<Link,WindowedLink> map = new TreeMap<Link,WindowedLink>();
+		private Map<Link,WindowedLink> map = new AdjacencyMap.Links<WindowedLink>();
 		
 		@Override
 		public void handleEvent(long time, WindowedLinkEvent event) {
