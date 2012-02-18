@@ -33,7 +33,7 @@ public class WindowedLinkTrace extends StatefulTrace<WindowedLinkEvent,WindowedL
 
 	public final static class Updater implements StateUpdater<WindowedLinkEvent,WindowedLink>{
 
-		private Set<WindowedLink> state = new TreeSet<WindowedLink>();
+		private Set<WindowedLink> state = new WindowedLinkSet();
 		private Map<Link,WindowedLink> map = new AdjacencyMap.Links<WindowedLink>();
 		
 		@Override
@@ -70,6 +70,19 @@ public class WindowedLinkTrace extends StatefulTrace<WindowedLinkEvent,WindowedL
 		@Override
 		public Set<WindowedLink> states() {
 			return state;
+		}
+	}
+	
+	private final static class WindowedLinkMap extends AdjacencyMap<WindowedLink,WindowedLink> {
+		@Override
+		protected WindowedLink newCouple(Integer id1, Integer id2) {
+			throw new UnsupportedOperationException();
+		}
+	}
+	
+	private final static class WindowedLinkSet extends AdjacencySet<WindowedLink> {
+		WindowedLinkSet(){
+			map = new WindowedLinkMap();
 		}
 	}
 	
