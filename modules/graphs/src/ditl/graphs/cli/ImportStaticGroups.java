@@ -83,9 +83,9 @@ public class ImportStaticGroups extends WriteApp {
 		if ( labels != null ){
 			StringBuffer buffer = new StringBuffer();
 			for ( int j=0; j<labels.length; ++j){
-				buffer.append(labels[j]);
+				buffer.append(labels[j].trim());
 				if ( j<labels.length-1)
-					buffer.append(",");
+					buffer.append(GroupTrace.delim);
 			}
 			groupWriter.setProperty(GroupTrace.labelsKey, buffer.toString());
 		}
