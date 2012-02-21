@@ -36,6 +36,7 @@ public abstract class Trace<E> {
 	final public static String maxTimeKey = "max time";
 	final public static String defaultPriorityKey = "default priority";
 	final public static String snapshotIntervalKey = "snapshot interval";
+	final public static String idMapKey = "id map";
 	
 	final public static int defaultPriority = 100;
 	final public static int highestPriority = 0;
@@ -112,6 +113,13 @@ public abstract class Trace<E> {
 			time_unit = Units.toTimeUnit( ticsPerSecond());
 		}
 		return time_unit;
+	}
+	
+	public IdMap idMap(){
+		String id_map_str = getValue ( idMapKey );
+		if ( id_map_str == null )
+			return null;
+		return new IdMap( id_map_str );
 	}
 	
 	public Reader<E> getReader(int priority, long offset) throws IOException {

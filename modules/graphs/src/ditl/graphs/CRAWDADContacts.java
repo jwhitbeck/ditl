@@ -29,16 +29,17 @@ public class CRAWDADContacts {
 	
 	public static void fromCRAWDAD(LinkTrace links,
 			InputStream in, double timeMul, long ticsPerSecond,
-			long offset, long snapInterval) throws IOException{
+			long offset, long snapInterval, boolean useIdMap) throws IOException{
 		
 		StatefulWriter<LinkEvent,Link> linkWriter = links.getWriter(snapInterval);
+		if ( useIdMap ) linkWriter.enableIdMap();
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		
 		while ( (line=br.readLine()) != null ){
 			String[] elems = line.split("[ \t]+");
-			Integer id1 = Integer.parseInt(elems[0]);
-			Integer id2 = Integer.parseInt(elems[1]);
+			Integer id1 = linkWriter.getInternalId(elems[0]);
+			Integer id2 = linkWriter.getInternalId(elems[1]);
 			long begin = (long)(Long.parseLong(elems[2])*timeMul)+offset;
 			long end = (long)(Long.parseLong(elems[3])*timeMul)+offset;
 			linkWriter.queue(begin, new LinkEvent(id1,id2,LinkEvent.UP));

@@ -36,6 +36,7 @@ public class ImportEdges extends ImportApp {
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
 	private long interval;
 	private long offset;
+	private boolean use_id_map;
 	
 	public final static String PKG_NAME = "graphs";
 	public final static String CMD_NAME = "import-edges";
@@ -52,6 +53,7 @@ public class ImportEdges extends ImportApp {
 		if ( timeMul == null )
 			throw new HelpException();
 		interval = Long.parseLong(cli.getOptionValue(snapIntervalOption, "60")) * ticsPerSecond; // by default, snap every minute
+		use_id_map = cli.hasOption(stringIdsOption);
 	}
 
 	@Override
@@ -62,11 +64,12 @@ public class ImportEdges extends ImportApp {
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: ms)");
 		options.addOption(null, snapIntervalOption, true, "snapshot interval in seconds (default 60)");
 		options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
+		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
 	}
 	
 	@Override
 	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		EdgeTrace edges = (EdgeTrace) _store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
-		CRAWDADEdges.fromCRAWDAD(edges, _in, timeMul, ticsPerSecond, offset, interval);
+		CRAWDADEdges.fromCRAWDAD(edges, _in, timeMul, ticsPerSecond, offset, interval, use_id_map);
 	}
 }

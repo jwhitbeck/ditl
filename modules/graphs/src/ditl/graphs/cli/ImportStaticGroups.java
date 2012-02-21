@@ -34,6 +34,7 @@ import ditl.graphs.*;
 public class ImportStaticGroups extends WriteApp {
 
 	private static String labelsOption = "labels";
+	private boolean use_id_map;
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.GROUPS);
 	private String[] group_specs;
@@ -55,6 +56,7 @@ public class ImportStaticGroups extends WriteApp {
 		group_specs = Arrays.copyOfRange(args,1,args.length);
 		if ( cli.hasOption(labelsOption) )
 			labels = cli.getOptionValue(labelsOption).split(",");
+		use_id_map = cli.hasOption(stringIdsOption);
 	}
 
 	@Override
@@ -62,17 +64,19 @@ public class ImportStaticGroups extends WriteApp {
 		super.initOptions();
 		graph_options.setOptions(options);
 		options.addOption(null, labelsOption, true, "comma-separated list of groups labels");
+		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
 	}
 	
 	@Override
 	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+		IdMap id_map = (use_id_map)? presence.idMap() : null;
 		GroupTrace groups = (GroupTrace) _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
 		StatefulWriter<GroupEvent,Group> groupWriter = groups.getWriter(presence.snapshotInterval()); 
 		Set<Group> initState = new HashSet<Group>();
 		int i = 0;
 		for ( String g_spec : group_specs ){
-			Set<Integer> members = GroupSpecification.parse(g_spec);
+			Set<Integer> members = GroupSpecification.parse(g_spec, id_map);
 			initState.add(new Group(i, members));
 			i++;
 		}

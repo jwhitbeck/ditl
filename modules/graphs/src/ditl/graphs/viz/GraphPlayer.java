@@ -89,6 +89,7 @@ public class GraphPlayer extends SimplePlayer {
 	protected void setMovementTrace(MovementTrace movement) {
 		try {
 			scene.updateSize(movement.minX(),movement.minY(),movement.maxX(),movement.maxY());
+			scene.setIdMap(movement.idMap());
 			runner.setMovementTrace(movement);
 			runner.setTicsPerSecond(movement.ticsPerSecond());
 			controls.setBounds(movement.ticsPerSecond(),movement.minTime(), movement.maxTime());

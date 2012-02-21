@@ -29,16 +29,17 @@ public class CRAWDADEdges {
 	
 	public static void fromCRAWDAD(EdgeTrace edges,
 			InputStream in, double timeMul, long ticsPerSecond,
-			long offset, long snapInterval) throws IOException{
+			long offset, long snapInterval, boolean useIdMap) throws IOException{
 		
 		StatefulWriter<EdgeEvent,Edge> edgeWriter = edges.getWriter(snapInterval);
+		if ( useIdMap ) edgeWriter.enableIdMap();
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		
 		while ( (line=br.readLine()) != null ){
 			String[] elems = line.split("[ \t]+");
-			Integer id1 = Integer.parseInt(elems[0]);
-			Integer id2 = Integer.parseInt(elems[1]);
+			Integer id1 = edgeWriter.getInternalId(elems[0]);
+			Integer id2 = edgeWriter.getInternalId(elems[1]);
 			long begin = (long)(Long.parseLong(elems[2])*timeMul)+offset;
 			long end = (long)(Long.parseLong(elems[3])*timeMul)+offset;
 			edgeWriter.queue(begin, new EdgeEvent(id1,id2,EdgeEvent.UP));

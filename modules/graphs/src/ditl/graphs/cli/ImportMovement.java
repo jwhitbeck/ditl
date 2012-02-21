@@ -38,6 +38,7 @@ public class ImportMovement extends ImportApp {
 	private long interval;
 	private long offset;
 	private boolean fix_pause_times;
+	private boolean use_id_map;
 	
 	private String fixPauseTimesOption = "fix-pause-times";
 	
@@ -60,15 +61,16 @@ public class ImportMovement extends ImportApp {
 		if ( cli.hasOption(maxTimeOption) )
 			maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption)) * ticsPerSecond;
 		fix_pause_times = cli.hasOption(fixPauseTimesOption);
+		use_id_map = cli.hasOption(stringIdsOption);
 	}
 	
 	@Override
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException {
 		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
 		if ( ext_fmt.is(ExternalFormat.NS2) )
-			NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval, fix_pause_times);
+			NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval, fix_pause_times, use_id_map);
 		else
-			ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval);
+			ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval, use_id_map);
 	}
 
 
@@ -83,5 +85,6 @@ public class ImportMovement extends ImportApp {
 		options.addOption(null, snapIntervalOption, true, "snapshot interval in seconds (default 60)");
 		options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
 		options.addOption(null, fixPauseTimesOption, false, "fix missing pause times in NS2");
+		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
 	}
 }

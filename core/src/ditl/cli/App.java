@@ -41,6 +41,7 @@ public abstract class App {
 	protected final static String storeOutputOption = "out-store";
 	protected final static String forceOption = "force";
 	protected final static String typeOption = "type";
+	protected final static String stringIdsOption = "string-ids";
 	
 	protected Options options = new Options();
 	protected String usageString;
@@ -97,6 +98,9 @@ public abstract class App {
 			System.err.println("Use --"+forceOption+" to overwrite existing traces");
 		} catch (LoadTraceException e) {
 			System.err.println(e);
+		} catch ( NumberFormatException nfe ){
+			System.err.println(nfe);
+			System.err.println("Use --"+stringIdsOption+" if nodes have ids that are not integers");
 		}
 		close();
 	}

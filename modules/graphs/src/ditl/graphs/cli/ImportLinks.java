@@ -36,6 +36,7 @@ public class ImportLinks extends ImportApp {
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS);
 	private long interval;
 	private long offset;
+	private boolean use_id_map;
 	
 	public final static String PKG_NAME = "graphs";
 	public final static String CMD_NAME = "import-links";
@@ -53,6 +54,7 @@ public class ImportLinks extends ImportApp {
 		if ( timeMul == null )
 			throw new HelpException();	
 		interval = Long.parseLong(cli.getOptionValue(snapIntervalOption, "60")) * ticsPerSecond; // by default, snap every minute
+		use_id_map = cli.hasOption(stringIdsOption);
 	}
 
 	@Override
@@ -64,14 +66,15 @@ public class ImportLinks extends ImportApp {
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: ms)");
 		options.addOption(null, snapIntervalOption, true, "snapshot interval in seconds (default 60)");
 		options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
+		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
 	}
 	
 	@Override
 	public void run() throws IOException, AlreadyExistsException, LoadTraceException {
 		LinkTrace links = (LinkTrace) _store.newTrace(graph_options.get(GraphOptions.LINKS), LinkTrace.type, force);
 		if ( ext_fmt.is(ExternalFormat.CRAWDAD) )
-			CRAWDADContacts.fromCRAWDAD(links, _in, timeMul, ticsPerSecond, offset, interval);
+			CRAWDADContacts.fromCRAWDAD(links, _in, timeMul, ticsPerSecond, offset, interval, use_id_map);
 		else
-			ONEContacts.fromONE(links, _in, timeMul, ticsPerSecond, offset, interval);
+			ONEContacts.fromONE(links, _in, timeMul, ticsPerSecond, offset, interval, use_id_map);
 	}
 }

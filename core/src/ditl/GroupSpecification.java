@@ -27,13 +27,18 @@ public class GroupSpecification {
 	private final static String empty = "E";
 
 	public static Set<Integer> parse(String s){
+		return parse(s, null);
+	}
+	
+	public static Set<Integer> parse(String s, IdMap idMap){
 		Set<Integer> group = new HashSet<Integer>();
 		if ( ! s.equals(empty) ){
 			String[] ranges = s.split(gap_sep);
 			for ( String range : ranges ){
 				String[] bounds = range.split(range_sep);
 				if ( bounds.length == 1 )
-					group.add( Integer.parseInt(bounds[0]) );
+					group.add( (idMap==null)? Integer.parseInt(bounds[0]) : 
+						idMap.getInternalId(bounds[0]));
 				else {
 					for ( Integer i = Integer.parseInt(bounds[0]); i<=Integer.parseInt(bounds[1]); ++i){
 						group.add(i);

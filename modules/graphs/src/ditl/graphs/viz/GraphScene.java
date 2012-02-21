@@ -36,9 +36,14 @@ public class GraphScene extends Scene implements
 	private Map<Link,EdgeElement> edges = new AdjacencyMap.Links<EdgeElement>();
 	private boolean showIds = false;
 	private Map<Integer,Color> group_color_map = null;
+	private IdMap id_map = null;
 	
 	public void setGroupColorMap(Map<Integer,Color> groupColorMap){
 		group_color_map = groupColorMap;
+	}
+	
+	public void setIdMap(IdMap idMap){
+		id_map = idMap;
 	}
 	
 	@Override
@@ -47,7 +52,11 @@ public class GraphScene extends Scene implements
 			@Override
 			public void handle(long time, Collection<Movement> events) {
 				for ( Movement m : events ){
-					NodeElement node = new NodeElement(m);
+					NodeElement node;;
+					if ( id_map == null )
+						node = new NodeElement(m);
+					else
+						node = new NodeElement(m, id_map.getExternalId(m.id()));
 					node.setShowId(showIds);
 					nodes.put(m.id(), node);
 					addScaleListener(node);

@@ -29,9 +29,10 @@ public class ONEMovement {
 
 	public static void fromONE(MovementTrace movement,
 			InputStream in, Long maxTime, final double timeMul, long ticsPerSecond,
-			long offset, long snapInterval) throws IOException {
+			long offset, long snapInterval, boolean useIdMap ) throws IOException {
 		
 		StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter(snapInterval);
+		if ( useIdMap ) movementWriter.enableIdMap();
 		TreeMap<Long,List<Movement>> buffer = new TreeMap<Long,List<Movement>>();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in) );
 		String line;
@@ -39,7 +40,7 @@ public class ONEMovement {
 		while ( (line = reader.readLine()) != null ){
 			String[] elems = line.split(" ");
 			long t = (long)(Double.parseDouble(elems[0])*timeMul)+offset;
-			int id = Integer.parseInt(elems[1]);
+			Integer id = movementWriter.getInternalId(elems[1]);
 			double x = Double.parseDouble(elems[2]);
 			double y = Double.parseDouble(elems[3]);
 			if ( ! buffer.containsKey(t) )

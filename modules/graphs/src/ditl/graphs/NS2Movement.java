@@ -29,9 +29,10 @@ public class NS2Movement {
 	
 	public static void fromNS2( MovementTrace movement,
 				InputStream in, Long maxTime, double timeMul, long ticsPerSecond,
-				long offset, long snapInterval, final boolean fixPauseTimes) throws IOException {
+				long offset, long snapInterval, final boolean fixPauseTimes, boolean useIdMap) throws IOException {
 		
 		final StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter(snapInterval);
+		if ( useIdMap ) movementWriter.enableIdMap();
 		final Map<Integer,Movement> positions = new HashMap<Integer,Movement>();
 		BufferedReader br = new BufferedReader( new InputStreamReader(in) );
 		final Bus<MovementEvent> buffer = new Bus<MovementEvent>();
@@ -40,14 +41,16 @@ public class NS2Movement {
 		
 		while ( (line = br.readLine()) != null ){
 			if ( ! line.isEmpty() ) {
-				int id;
+				Integer id;
+				String id_str;
 				double s;
 				Movement m;
 				long time;
 				String[] elems = line.split("\\p{Blank}+");
 				
 				if ( line.startsWith("$node") ){
-					id = Integer.parseInt( elems[0].split("\\(|\\)")[1] );
+					id_str = elems[0].split("\\(|\\)")[1];
+					id = movementWriter.getInternalId(id_str);
 					double c = Double.parseDouble(elems[3]);
 					
 					if ( ! positions.containsKey(id) )
@@ -65,7 +68,8 @@ public class NS2Movement {
 					time = (long)( Double.parseDouble(elems[2])*timeMul )+offset;
 					if ( time > last_time)
 						last_time = time;
-					id = Integer.parseInt( elems[3].split("\\(|\\)")[1] );
+					id_str = elems[3].split("\\(|\\)")[1];
+					id = movementWriter.getInternalId(id_str);
 					Point dest = new Point( Double.parseDouble(elems[5]), Double.parseDouble(elems[6]));
 					s = Double.parseDouble(elems[7].substring(0, elems[7].length()-2)) / timeMul;
 					buffer.queue(time, new MovementEvent(id, s, dest));

@@ -34,6 +34,7 @@ import ditl.graphs.*;
 public class ImportStaticMovement extends WriteApp {
 	
 	private String[] positions_specs;
+	private boolean use_id_map;
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.MOVEMENT);
 	
 	public final static String PKG_NAME = "graphs";
@@ -50,23 +51,30 @@ public class ImportStaticMovement extends WriteApp {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
 		positions_specs = Arrays.copyOfRange(args,1,args.length);
+		use_id_map = cli.hasOption(stringIdsOption);
 	}
 
 	@Override
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
+		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
 	}
 	
 	@Override
 	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+		IdMap id_map = presence.idMap();
 		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
 		StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter(presence.snapshotInterval());
 		Set<Movement> initState = new HashSet<Movement>();
 		for ( String spec : positions_specs ){
 			String[] elems = spec.split(":");
-			Integer id = Integer.parseInt(elems[0]);
+			Integer id;
+			if ( use_id_map )
+				id = id_map.getInternalId(elems[0]);
+			else
+				id = Integer.parseInt(elems[0]);
 			double x = Double.parseDouble(elems[1]);
 			double y = Double.parseDouble(elems[2]);
 			Point p = new Point(x,y);

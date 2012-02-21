@@ -33,6 +33,7 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 	OutputStream info_out;
 	WritableStore _store;
 	String _name;
+	IdMap.Writer idmap_writer = null;
 	
 	public Writer(Store store, String name, PersistentMap info) throws IOException {
 		if ( ! ( store instanceof WritableStore )) throw new IOException();
@@ -62,6 +63,8 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 		_info.setIfUnset(Trace.maxUpdateIntervalKey, max_interval);
 		_info.setIfUnset(Trace.minUpdateIntervalKey, min_interval);
 		_info.setIfUnset(Trace.defaultPriorityKey, Trace.defaultPriority);
+		if ( idmap_writer != null )
+			_info.put(Trace.idMapKey, idmap_writer.toString());
 		_info.save(info_out);
 		_store.notifyClose(_name);
 	}
@@ -74,6 +77,9 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 		_info.setIfUnset(Trace.minTimeKey, trace.minTime());
 		_info.setIfUnset(Trace.maxTimeKey, trace.maxTime());
 		_info.setIfUnset(Trace.timeUnitKey, trace.timeUnit());
+		String id_map_str = trace.getValue(Trace.idMapKey);
+		if ( id_map_str != null )
+			_info.setIfUnset(Trace.idMapKey, id_map_str);
 	}
 
 	public void append(long time, I item) throws IOException {
@@ -116,4 +122,14 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 
 	@Override
 	public void reset() {}
+	
+	public void enableIdMap(){
+		idmap_writer = new IdMap.Writer();
+	}
+	
+	public Integer getInternalId(String stringId){
+		if ( idmap_writer == null )
+			return Integer.parseInt(stringId);
+		return idmap_writer.getInternalId(stringId);
+	}
 }
