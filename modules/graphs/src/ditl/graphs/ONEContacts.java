@@ -27,15 +27,15 @@ public class ONEContacts {
 	
 	public static void fromONE(LinkTrace links, 
 			InputStream in, double timeMul, long ticsPerSecond,
-			long offset, long snapInterval, boolean useIdMap ) throws IOException {
+			long offset, long snapInterval, IdGenerator idGen ) throws IOException {
 		StatefulWriter<LinkEvent,Link> linkWriter = links.getWriter(snapInterval);
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		while ( (line=br.readLine()) != null ){
 			String[] elems = line.split(" ");
 			long time = (long)(Double.parseDouble(elems[0])*timeMul)+offset;
-			Integer id1 = linkWriter.getInternalId(elems[2]);
-			Integer id2 = linkWriter.getInternalId(elems[3]);
+			Integer id1 = idGen.getInternalId(elems[2]);
+			Integer id2 = idGen.getInternalId(elems[3]);
 			String action = elems[4].toUpperCase();
 			if ( action.equals("UP") )
 				linkWriter.append(time, new LinkEvent(id1, id2, LinkEvent.UP));

@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
+import ditl.*;
 import ditl.Store.LoadTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ImportApp;
@@ -37,6 +38,7 @@ public class ImportLinks extends ImportApp {
 	private long interval;
 	private long offset;
 	private boolean use_id_map;
+	private int min_id;
 	
 	public final static String PKG_NAME = "graphs";
 	public final static String CMD_NAME = "import-links";
@@ -55,6 +57,7 @@ public class ImportLinks extends ImportApp {
 			throw new HelpException();	
 		interval = Long.parseLong(cli.getOptionValue(snapIntervalOption, "60")) * ticsPerSecond; // by default, snap every minute
 		use_id_map = cli.hasOption(stringIdsOption);
+		min_id = Integer.parseInt(cli.getOptionValue(minIdOption, "0"));
 	}
 
 	@Override
@@ -67,14 +70,16 @@ public class ImportLinks extends ImportApp {
 		options.addOption(null, snapIntervalOption, true, "snapshot interval in seconds (default 60)");
 		options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
 		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
+		options.addOption(null, minIdOption, true, "ensure that all imported ids are greater than <arg> (default: 0)");
 	}
 	
 	@Override
 	public void run() throws IOException, AlreadyExistsException, LoadTraceException {
 		LinkTrace links = (LinkTrace) _store.newTrace(graph_options.get(GraphOptions.LINKS), LinkTrace.type, force);
+		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
 		if ( ext_fmt.is(ExternalFormat.CRAWDAD) )
-			CRAWDADContacts.fromCRAWDAD(links, _in, timeMul, ticsPerSecond, offset, interval, use_id_map);
+			CRAWDADContacts.fromCRAWDAD(links, _in, timeMul, ticsPerSecond, offset, interval, id_gen);
 		else
-			ONEContacts.fromONE(links, _in, timeMul, ticsPerSecond, offset, interval, use_id_map);
+			ONEContacts.fromONE(links, _in, timeMul, ticsPerSecond, offset, interval, id_gen);
 	}
 }

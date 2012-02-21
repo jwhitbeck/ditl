@@ -44,8 +44,15 @@ public class StatefulMergeConverter<E,S> implements Converter {
 			if ( from.minTime() > minTime ) minTime = from.minTime(); // stateful traces have a first init state. They are not defined prior to that state. 
 			if ( from.maxTime() < maxTime ) maxTime = from.maxTime();
 		}
+		IdMap.Writer id_map_writer = null;
 		StatefulWriter<E,S> writer = _to.getWriter(snap_interval);
 		for ( StatefulTrace<E,S> from : from_collection ){
+			IdMap id_map = from.idMap();
+			if ( id_map != null ){
+				if ( id_map_writer == null )
+					id_map_writer = new IdMap.Writer(0);
+				id_map_writer.merge(id_map);
+			}
 			StatefulReader<E,S> reader = from.getReader();
 			reader.seek(minTime);
 			initState.addAll(reader.referenceState());
@@ -61,6 +68,8 @@ public class StatefulMergeConverter<E,S> implements Converter {
 		writer.setProperty(Trace.timeUnitKey, time_unit);
 		writer.setProperty(Trace.minTimeKey, minTime);
 		writer.setProperty(Trace.maxTimeKey, maxTime);
+		if ( id_map_writer != null )
+			id_map_writer.writeTraceInfo(writer);
 		writer.close();
 	}
 }

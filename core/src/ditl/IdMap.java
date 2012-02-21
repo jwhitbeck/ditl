@@ -32,13 +32,17 @@ public class IdMap {
 		return eid_map.get(externalId);
 	}
 	
-	public static class Writer {
+	public static class Writer implements IdGenerator {
 		
 		private Map<String,Integer> eid_map = new LinkedHashMap<String,Integer>();
 		private Integer next = 0;
 		
+		public Writer(Integer minId){
+			next = minId;
+		}
+		
 		public static Writer filter( IdMap idMap, Set<Integer> group ){
-			Writer writer = new Writer();
+			Writer writer = new Writer(0);
 			Iterator<Map.Entry<Integer, String>> i = idMap.iid_map.entrySet().iterator();
 			while ( i.hasNext() ){
 				Map.Entry<Integer, String> e = i.next();
@@ -58,6 +62,7 @@ public class IdMap {
 			}
 		}
 		
+		@Override
 		public Integer getInternalId(String externalId){
 			Integer iid = eid_map.get(externalId);
 			if ( iid == null ){
@@ -67,9 +72,9 @@ public class IdMap {
 			}
 			return iid;
 		}
-		
+
 		@Override
-		public String toString(){
+		public void writeTraceInfo(ditl.Writer<?> writer) {
 			StringBuffer buffer = new StringBuffer();
 			Iterator<Map.Entry<String, Integer>> i = eid_map.entrySet().iterator();
 			while ( i.hasNext() ){
@@ -78,7 +83,7 @@ public class IdMap {
 				if ( i.hasNext() )
 					buffer.append(id_sep);
 			}
-			return buffer.toString();
+			writer.setProperty(Trace.idMapKey, buffer.toString());
 		}
 	}
 }

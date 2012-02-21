@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
+import ditl.*;
 import ditl.Store.LoadTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ImportApp;
@@ -39,6 +40,7 @@ public class ImportMovement extends ImportApp {
 	private long offset;
 	private boolean fix_pause_times;
 	private boolean use_id_map;
+	private int min_id;
 	
 	private String fixPauseTimesOption = "fix-pause-times";
 	
@@ -62,15 +64,17 @@ public class ImportMovement extends ImportApp {
 			maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption)) * ticsPerSecond;
 		fix_pause_times = cli.hasOption(fixPauseTimesOption);
 		use_id_map = cli.hasOption(stringIdsOption);
+		min_id = Integer.parseInt(cli.getOptionValue(minIdOption, "0"));
 	}
 	
 	@Override
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException {
 		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
+		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
 		if ( ext_fmt.is(ExternalFormat.NS2) )
-			NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval, fix_pause_times, use_id_map);
+			NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval, fix_pause_times, id_gen);
 		else
-			ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval, use_id_map);
+			ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval, id_gen);
 	}
 
 
@@ -86,5 +90,6 @@ public class ImportMovement extends ImportApp {
 		options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
 		options.addOption(null, fixPauseTimesOption, false, "fix missing pause times in NS2");
 		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
+		options.addOption(null, minIdOption, true, "ensure that all imported ids are greater than <arg> (default: 0)");
 	}
 }

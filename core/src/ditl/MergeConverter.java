@@ -41,8 +41,15 @@ public class MergeConverter<I> implements Converter {
 			if ( from.minTime() < minTime ) minTime = from.minTime();
 			if ( from.maxTime() > maxTime ) maxTime = from.maxTime();
 		}
+		IdMap.Writer id_map_writer = null;
 		Writer<I> writer = _to.getWriter();
 		for ( Trace<I> from : from_collection ){
+			IdMap id_map = from.idMap();
+			if ( id_map != null ){
+				if ( id_map_writer == null )
+					id_map_writer = new IdMap.Writer(0);
+				id_map_writer.merge(id_map);
+			}
 			Reader<I> reader = from.getReader();
 			reader.seek(minTime);
 			while ( reader.hasNext() ){
@@ -56,6 +63,8 @@ public class MergeConverter<I> implements Converter {
 		writer.setProperty(Trace.timeUnitKey, time_unit);
 		writer.setProperty(Trace.minTimeKey, minTime);
 		writer.setProperty(Trace.maxTimeKey, maxTime);
+		if ( id_map_writer != null )
+			id_map_writer.writeTraceInfo(writer);
 		writer.close();
 	}
 }

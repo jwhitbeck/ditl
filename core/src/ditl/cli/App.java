@@ -42,6 +42,7 @@ public abstract class App {
 	protected final static String forceOption = "force";
 	protected final static String typeOption = "type";
 	protected final static String stringIdsOption = "string-ids";
+	protected final static String minIdOption = "min-id";
 	
 	protected Options options = new Options();
 	protected String usageString;
