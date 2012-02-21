@@ -73,7 +73,7 @@ public class WindowedLinkConverter implements Converter, Generator, LinkTrace.Ha
 		
 		windowed_writer.flush();
 		windowed_writer.setProperty(WindowedLinkTrace.windowLengthKey, _window);
-		windowed_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		windowed_writer.setPropertiesFromTrace(_links);
 		windowed_writer.close();
 		link_reader.close();
 	}

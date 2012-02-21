@@ -45,7 +45,7 @@ public class CRAWDADContacts {
 			linkWriter.queue(end, new LinkEvent(id1,id2,LinkEvent.DOWN));
 		}
 		linkWriter.flush();
-		linkWriter.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
+		linkWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
 		linkWriter.close();
 		br.close();
 	}

@@ -22,7 +22,7 @@ import java.io.*;
 
 import org.apache.commons.cli.*;
 
-import ditl.*;
+import ditl.WritableStore;
 
 public abstract class WriteApp extends App {
 

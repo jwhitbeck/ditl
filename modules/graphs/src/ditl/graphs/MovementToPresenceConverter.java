@@ -46,8 +46,9 @@ public class MovementToPresenceConverter implements Converter, MovementTrace.Han
 		Runner runner = new Runner(_movement.maxUpdateInterval(), _movement.minTime(), _movement.maxTime());
 		runner.addGenerator(movement_reader);
 		runner.run();
-		presence_writer.setProperty(Trace.maxTimeKey, _movement.maxTime());
-		presence_writer.setProperty(Trace.ticsPerSecondKey, _movement.ticsPerSecond());
+		presence_writer.setPropertiesFromTrace(_movement);
+		presence_writer.close();
+		movement_reader.close();
 	}
 
 	@Override

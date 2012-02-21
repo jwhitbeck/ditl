@@ -24,7 +24,8 @@ import java.util.*;
 import org.apache.commons.cli.*;
 
 import ditl.*;
-import ditl.Store.*;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.WriteApp;
 import ditl.graphs.*;
@@ -74,8 +75,7 @@ public class ImportStaticMovement extends WriteApp {
 		}
 		
 		movementWriter.setInitState(presence.minTime(), initState);
-		movementWriter.setProperty(Trace.maxTimeKey, presence.maxTime());
-		movementWriter.setProperty(Trace.ticsPerSecondKey, presence.ticsPerSecond());
+		movementWriter.setPropertiesFromTrace(presence);
 		movementWriter.close();		
 	}
 }

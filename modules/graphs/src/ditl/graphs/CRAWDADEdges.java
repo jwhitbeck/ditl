@@ -45,7 +45,7 @@ public class CRAWDADEdges {
 			edgeWriter.queue(end, new EdgeEvent(id1,id2,EdgeEvent.DOWN));
 		}
 		edgeWriter.flush();
-		edgeWriter.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
+		edgeWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
 		edgeWriter.close();
 		br.close();
 	}

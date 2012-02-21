@@ -22,7 +22,8 @@ import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.Store.*;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ImportApp;
 import ditl.graphs.*;

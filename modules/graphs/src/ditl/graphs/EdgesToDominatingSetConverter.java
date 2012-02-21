@@ -68,8 +68,8 @@ public final class EdgesToDominatingSetConverter implements Converter,
 		runner.addGenerator(this);
 		runner.run();
 		
-		group_writer.setProperty(Trace.ticsPerSecondKey, _edges.ticsPerSecond());
 		group_writer.setProperty(GroupTrace.labelsKey, "dominating set");
+		group_writer.setPropertiesFromTrace(_edges);
 		group_writer.close();
 		edge_reader.close();
 		presence_reader.close();

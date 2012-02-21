@@ -66,7 +66,7 @@ public final class BufferLinksConverter implements Converter,
 		runner.run();
 		
 		buffer_writer.flush();
-		buffer_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		buffer_writer.setPropertiesFromTrace(_links);
 		buffer_writer.close();
 		links_reader.close();
 	}

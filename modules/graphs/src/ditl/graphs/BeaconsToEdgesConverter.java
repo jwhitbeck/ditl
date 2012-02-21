@@ -126,7 +126,7 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 				
 		edge_writer.flush(cur_time+(_tol+1)*_period);
 		
-		edge_writer.setProperty(Trace.ticsPerSecondKey, _beacons.ticsPerSecond());
+		edge_writer.setPropertiesFromTrace(_beacons);
 		
 		edge_writer.close();
 		beacon_reader.close();

@@ -53,9 +53,7 @@ public class StatefulFilterConverter<E,S> implements Converter {
 				if ( event_matcher.matches(item) )
 					writer.append(reader.time(), item);
 		}
-		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
-		writer.setProperty(Trace.minTimeKey, _from.minTime());
-		writer.setProperty(Trace.maxTimeKey, _from.maxTime());
+		writer.setPropertiesFromTrace(_from);
 		writer.close();
 		reader.close();
 	}

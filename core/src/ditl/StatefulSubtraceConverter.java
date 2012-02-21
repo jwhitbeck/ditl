@@ -45,9 +45,9 @@ public class StatefulSubtraceConverter<E,S> implements Converter {
 			for ( E item : events )
 				writer.append(reader.time(), item);
 		}
-		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
 		writer.setProperty(Trace.minTimeKey, _minTime);
 		writer.setProperty(Trace.maxTimeKey, _maxTime);
+		writer.setPropertiesFromTrace(_from);
 		reader.close();
 		writer.close();
 	}

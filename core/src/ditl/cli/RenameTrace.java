@@ -20,10 +20,9 @@ package ditl.cli;
 
 import java.io.IOException;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 
-import ditl.Store;
+import ditl.*;
 import ditl.WritableStore.AlreadyExistsException;
 
 public class RenameTrace extends WriteApp {
@@ -35,7 +34,7 @@ public class RenameTrace extends WriteApp {
 	public final static String CMD_ALIAS = null;
 	
 	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
+	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
 		super.parseArgs(cli, args);
 		orig_name = args[1];
 		dest_name = args[2];

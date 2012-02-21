@@ -99,8 +99,7 @@ public class StaticGroupLinkConverter implements Converter {
 			long time = link_reader.nextTime();
 			handleEvents(time, link_reader.next());
 		}
-		group_link_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
-		group_link_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		group_link_writer.setPropertiesFromTrace(_links);
 	}
 	
 	

@@ -35,7 +35,7 @@ public class PrintState extends ReadOnlyApp {
 	public final static String CMD_ALIAS = null;
 	
 	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
+	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
 		super.parseArgs(cli, args);
 		trace_name = args[1];
 		d_time = Double.parseDouble(args[2]);

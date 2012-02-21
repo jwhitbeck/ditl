@@ -18,13 +18,12 @@
  *******************************************************************************/
 package ditl.transfers.cli;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.commons.cli.*;
 
 import ditl.*;
-import ditl.Reader;
 import ditl.Store.NoSuchTraceException;
 import ditl.cli.ExportApp;
 import ditl.transfers.*;

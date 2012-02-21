@@ -179,14 +179,13 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 		movement_reader.stateBus().addListener(movementListener());
 		movement_reader.bus().addListener(movementEventListener());
 		
-		links_writer.setProperty(Trace.ticsPerSecondKey, _movement.ticsPerSecond());
-		links_writer.setProperty(Trace.maxTimeKey, _movement.maxTime());
 		Runner runner = new Runner(_movement.maxUpdateInterval(), _movement.minTime(), _movement.maxTime());
 		runner.addGenerator(movement_reader);
 		runner.add(this);
 		runner.run();
 		
 		links_writer.flush(_movement.maxTime());
+		links_writer.setPropertiesFromTrace(_movement);
 		links_writer.close();
 		movement_reader.close();
 	}

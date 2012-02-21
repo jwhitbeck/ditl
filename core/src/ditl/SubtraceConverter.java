@@ -44,9 +44,9 @@ public class SubtraceConverter<I> implements Converter {
 			for ( I item : events )
 				writer.append(reader.time(), item);
 		}
-		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
 		writer.setProperty(Trace.minTimeKey, _minTime);
 		writer.setProperty(Trace.maxTimeKey, _maxTime);
+		writer.setPropertiesFromTrace(_from);
 		reader.close();
 		writer.close();
 	}

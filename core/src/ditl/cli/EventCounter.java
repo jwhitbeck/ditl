@@ -45,7 +45,7 @@ public class EventCounter extends ReadOnlyApp {
 	}
 	
 	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
+	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
 		super.parseArgs(cli, args);
 		trace_name = args[1];
 		if ( cli.hasOption(maxTimeOption) )

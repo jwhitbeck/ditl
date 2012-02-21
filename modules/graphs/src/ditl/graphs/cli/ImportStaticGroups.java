@@ -24,7 +24,8 @@ import java.util.*;
 import org.apache.commons.cli.*;
 
 import ditl.*;
-import ditl.Store.*;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.WriteApp;
 import ditl.graphs.*;
@@ -77,8 +78,7 @@ public class ImportStaticGroups extends WriteApp {
 		}
 		
 		groupWriter.setInitState(presence.minTime(), initState);
-		groupWriter.setProperty(Trace.maxTimeKey, presence.maxTime());
-		groupWriter.setProperty(Trace.ticsPerSecondKey, presence.ticsPerSecond());
+		groupWriter.setPropertiesFromTrace(presence);
 		
 		if ( labels != null ){
 			StringBuffer buffer = new StringBuffer();

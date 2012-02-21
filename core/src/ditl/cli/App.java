@@ -23,7 +23,8 @@ import java.io.IOException;
 import org.apache.commons.cli.*;
 
 import ditl.*;
-import ditl.Store.*;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 
 public abstract class App {
@@ -105,23 +106,17 @@ public abstract class App {
 		System.exit(1);
 	}
 	
-	protected Long getTicsPerSecond(String timeUnit){
-		if ( timeUnit.equals("s") ){
-			return 1L;
-		} else if ( timeUnit.equals("ms") ){
-			return 1000L;
-		} else if ( timeUnit.equals("us") ){
-			return 1000000L;
-		} else if ( timeUnit.equals("ns") ){
-			return 1000000000L;
-		}
-		return null;
-	}
-	
 	protected Double getTimeMul(Long otps, Long dtps){
 		if ( otps != null && dtps != null ){
 			return dtps.doubleValue()/otps.doubleValue(); 
 		}
 		return null;
+	}
+	
+	protected long getTicsPerSecond(String unitString) throws ParseException{
+		Long tps = Units.getTicsPerSecond(unitString);
+		if ( tps == null )
+			throw new ParseException("Error parsing time unit '"+unitString+"'");
+		return tps;
 	}
 }

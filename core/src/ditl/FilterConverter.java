@@ -44,9 +44,7 @@ public class FilterConverter<I> implements Converter {
 				if ( _matcher.matches(item) )
 					writer.append(reader.time(), item);
 		}
-		writer.setProperty(Trace.ticsPerSecondKey, _from.ticsPerSecond());
-		writer.setProperty(Trace.minTimeKey, _from.minTime());
-		writer.setProperty(Trace.maxTimeKey, _from.maxTime());
+		writer.setPropertiesFromTrace(_from);
 		writer.close();
 		reader.close();
 	}

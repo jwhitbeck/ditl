@@ -42,7 +42,7 @@ public class ONEContacts {
 			else
 				linkWriter.append(time, new LinkEvent(id1, id2, LinkEvent.DOWN));
 		}
-		linkWriter.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
+		linkWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
 		linkWriter.close();
 		br.close();
 	}

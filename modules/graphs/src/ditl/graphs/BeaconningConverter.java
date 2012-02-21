@@ -134,8 +134,8 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 		runner.addGenerator(this);
 		runner.run();
 		
-		beacon_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
 		beacon_writer.setProperty(BeaconTrace.beaconningPeriod, _period);
+		beacon_writer.setPropertiesFromTrace(_links);
 		beacon_writer.close();
 		presence_reader.close();
 		link_reader.close();

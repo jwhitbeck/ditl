@@ -24,7 +24,8 @@ import java.util.*;
 import org.apache.commons.cli.*;
 
 import ditl.*;
-import ditl.Store.*;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 
 public class Merge extends WriteApp {

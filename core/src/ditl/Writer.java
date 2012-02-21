@@ -69,6 +69,12 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 	public void setProperty(String key, Object value){
 		_info.put(key, value);
 	}
+	
+	public void setPropertiesFromTrace(Trace<?> trace){
+		_info.setIfUnset(Trace.minTimeKey, trace.minTime());
+		_info.setIfUnset(Trace.maxTimeKey, trace.maxTime());
+		_info.setIfUnset(Trace.timeUnitKey, trace.timeUnit());
+	}
 
 	public void append(long time, I item) throws IOException {
 		updateTime(time);

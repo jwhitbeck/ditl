@@ -212,8 +212,7 @@ public final class PlausibleMobilityConverter implements Converter,
 		}
 		writer.flush();
 		
-		writer.setProperty(Trace.maxTimeKey, max_time);	
-		writer.setProperty(Trace.ticsPerSecondKey, tps);
+		writer.setPropertiesFromTrace(_presence);
 		writer.close();
 		link_reader.close();
 		presence_reader.close();

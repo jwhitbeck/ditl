@@ -57,8 +57,7 @@ public final class StrictLinksToPresenceConverter implements Converter, LinkTrac
 		}
 		presence_writer.flush();
 		
-		presence_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
-		presence_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		presence_writer.setPropertiesFromTrace(_links);
 		presence_writer.close();
 		links_reader.close();
 	}

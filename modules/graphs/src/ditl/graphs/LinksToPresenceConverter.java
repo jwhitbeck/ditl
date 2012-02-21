@@ -55,8 +55,7 @@ public final class LinksToPresenceConverter implements Converter, LinkTrace.Hand
 		runner.run();
 		
 		presence_writer.setInitState(_links.minTime(), ids);
-		presence_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
-		presence_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		presence_writer.setPropertiesFromTrace(_links);
 		presence_writer.close();
 		links_reader.close();
 	}

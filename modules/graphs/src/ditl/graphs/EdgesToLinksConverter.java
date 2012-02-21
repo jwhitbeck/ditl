@@ -89,7 +89,7 @@ public final class EdgesToLinksConverter implements Converter {
 		while ( edge_reader.hasNext() )
 			for ( EdgeEvent event : edge_reader.next() )
 				handleEdgeEvent(edge_reader.time(), event);
-		link_writer.setProperty(Trace.ticsPerSecondKey, _edges.ticsPerSecond());
+		link_writer.setPropertiesFromTrace(_edges);
 		edge_reader.close();
 		link_writer.close();
 	}

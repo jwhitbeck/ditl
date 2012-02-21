@@ -27,7 +27,8 @@ public abstract class Trace<E> {
 	
 	final public static String nameKey = "name";
 	final public static String typeKey = "type";
-	final public static String ticsPerSecondKey = "tics per second";
+	final public static String ticsPerSecondKey = "tics per second"; // deprecated. Will be remove in future versions
+	final public static String timeUnitKey = "time unit";
 	final public static String descriptionKey = "description";
 	final public static String minUpdateIntervalKey = "min update interval";
 	final public static String maxUpdateIntervalKey = "max update interval";
@@ -98,7 +99,19 @@ public abstract class Trace<E> {
 	}
 	
 	public long ticsPerSecond(){
-		return Long.parseLong(getValue(ticsPerSecondKey));
+		String time_unit = getValue(timeUnitKey);
+		if ( time_unit == null ){
+			return Long.parseLong(getValue(ticsPerSecondKey)); // support for legacy info format. Will be removed in future versions
+		}
+		return Units.getTicsPerSecond(time_unit);
+	}
+	
+	public String timeUnit(){
+		String time_unit = getValue(timeUnitKey);
+		if ( time_unit == null ){ // support for legacy info file format. Will be removed in future
+			time_unit = Units.toTimeUnit( ticsPerSecond());
+		}
+		return time_unit;
 	}
 	
 	public Reader<E> getReader(int priority, long offset) throws IOException {

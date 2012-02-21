@@ -33,13 +33,13 @@ public class StatefulMergeConverter<E,S> implements Converter {
 
 	@Override
 	public void convert() throws IOException {
-		long ticsPerSecond = 1L;
+		String time_unit = "s";
 		long maxTime = Trace.INFINITY;
 		long minTime = -Trace.INFINITY;
 		long snap_interval = 1L;
 		Set<S> initState = new HashSet<S>();
 		for ( StatefulTrace<E,S> from : from_collection ){
-			ticsPerSecond = from.ticsPerSecond();
+			time_unit = from.timeUnit();
 			snap_interval = from.snapshotInterval();
 			if ( from.minTime() > minTime ) minTime = from.minTime(); // stateful traces have a first init state. They are not defined prior to that state. 
 			if ( from.maxTime() < maxTime ) maxTime = from.maxTime();
@@ -58,7 +58,7 @@ public class StatefulMergeConverter<E,S> implements Converter {
 		}
 		writer.setInitState(minTime, initState);
 		writer.flush();
-		writer.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
+		writer.setProperty(Trace.timeUnitKey, time_unit);
 		writer.setProperty(Trace.minTimeKey, minTime);
 		writer.setProperty(Trace.maxTimeKey, maxTime);
 		writer.close();

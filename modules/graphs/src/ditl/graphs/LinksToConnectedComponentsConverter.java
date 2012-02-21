@@ -216,8 +216,7 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 			long time = link_reader.nextTime();
 			handleEvents(time, link_reader.next());
 		}
-		group_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
-		group_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		group_writer.setPropertiesFromTrace(_links);
 		group_writer.close();
 		link_reader.close();
 	}

@@ -33,11 +33,11 @@ public class MergeConverter<I> implements Converter {
 
 	@Override
 	public void convert() throws IOException {
-		long ticsPerSecond = 1L;
+		String time_unit = "s";
 		long maxTime = -Trace.INFINITY;
 		long minTime =  Trace.INFINITY;
 		for ( Trace<I> from : from_collection ){
-			ticsPerSecond = from.ticsPerSecond();
+			time_unit = from.timeUnit();
 			if ( from.minTime() < minTime ) minTime = from.minTime();
 			if ( from.maxTime() > maxTime ) maxTime = from.maxTime();
 		}
@@ -53,7 +53,7 @@ public class MergeConverter<I> implements Converter {
 			reader.close();
 		}
 		writer.flush();
-		writer.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
+		writer.setProperty(Trace.timeUnitKey, time_unit);
 		writer.setProperty(Trace.minTimeKey, minTime);
 		writer.setProperty(Trace.maxTimeKey, maxTime);
 		writer.close();

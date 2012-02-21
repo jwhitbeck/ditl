@@ -79,9 +79,9 @@ public class ONEMovement {
 			}
 			last_time = time;
 		}
-		last_time = (maxTime != null)? maxTime : last_time; 
+		last_time = (maxTime != null)? maxTime : last_time;
 		movementWriter.setProperty(Trace.maxTimeKey, last_time);
-		movementWriter.setProperty(Trace.ticsPerSecondKey, ticsPerSecond);
+		movementWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
 		movementWriter.close();
 	}
 	
