@@ -29,9 +29,9 @@ public class NS2Movement {
 	
 	public static void fromNS2( MovementTrace movement,
 				InputStream in, Long maxTime, double timeMul, long ticsPerSecond,
-				long offset, long snapInterval, final boolean fixPauseTimes, IdGenerator idGen) throws IOException {
+				long offset, final boolean fixPauseTimes, IdGenerator idGen) throws IOException {
 		
-		final StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter(snapInterval);
+		final StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter();
 		final Map<Integer,Movement> positions = new HashMap<Integer,Movement>();
 		BufferedReader br = new BufferedReader( new InputStreamReader(in) );
 		final Bus<MovementEvent> buffer = new Bus<MovementEvent>();

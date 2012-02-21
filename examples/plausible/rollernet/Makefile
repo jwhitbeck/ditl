@@ -37,12 +37,11 @@ $(TARGET): $(ORIG_DATA)
 	@echo " Importing rollernet trace"
 	@echo "   - Imported times are relative to first unix "
 	@echo "     timestamp in the trace (1156083900)"
-	@echo "   - Snapshots every 15 minutes"
 	@echo "   - Keep only iMote data (nodes 1-62)"
 	@echo ""
 	$(DITL) graphs import-links --links all_links \
 		--orig-time-unit s \
-		--snap-interval 900 --offset -1156083900 \
+		--offset -1156083900 \
 	$@ imote-traces-RollerNet/contacts.dat
 	$(DITL) filter $@ all_links links 1:62
 	$(DITL) rm $@ all_links

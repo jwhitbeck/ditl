@@ -37,7 +37,7 @@ public class StatefulSubtraceConverter<E,S> implements Converter {
 	@Override
 	public void convert() throws IOException {
 		StatefulReader<E,S> reader = _from.getReader();
-		StatefulWriter<E,S> writer = _to.getWriter(_from.snapshotInterval());
+		StatefulWriter<E,S> writer = _to.getWriter();
 		reader.seek(_minTime);
 		writer.setInitState(_minTime, reader.referenceState());
 		while ( reader.hasNext() && reader.nextTime() <= _maxTime){

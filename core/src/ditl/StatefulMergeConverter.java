@@ -36,16 +36,14 @@ public class StatefulMergeConverter<E,S> implements Converter {
 		String time_unit = "s";
 		long maxTime = Trace.INFINITY;
 		long minTime = -Trace.INFINITY;
-		long snap_interval = 1L;
 		Set<S> initState = new HashSet<S>();
 		for ( StatefulTrace<E,S> from : from_collection ){
 			time_unit = from.timeUnit();
-			snap_interval = from.snapshotInterval();
 			if ( from.minTime() > minTime ) minTime = from.minTime(); // stateful traces have a first init state. They are not defined prior to that state. 
 			if ( from.maxTime() < maxTime ) maxTime = from.maxTime();
 		}
 		IdMap.Writer id_map_writer = null;
-		StatefulWriter<E,S> writer = _to.getWriter(snap_interval);
+		StatefulWriter<E,S> writer = _to.getWriter();
 		for ( StatefulTrace<E,S> from : from_collection ){
 			IdMap id_map = from.idMap();
 			if ( id_map != null ){

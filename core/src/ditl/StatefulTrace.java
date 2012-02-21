@@ -41,8 +41,7 @@ public abstract class StatefulTrace<E, S> extends Trace<E> {
 	
 	public StatefulReader<E,S> getReader(int priority, long offset) throws IOException {
 		Reader<S> snap_iterator = new Reader<S>(_store,
-				_store.getStreamOpener(_store.snapshotsFile(_name)), 
-				Math.max(snapshotInterval(), maxUpdateInterval()),
+				_store.getStreamOpener(_store.snapshotsFile(_name)), stateMaxUpdateInterval(),
 				state_factory, Trace.defaultPriority, offset);
 		return new StatefulReader<E,S>(_store,
 				_store.getStreamOpener(_store.traceFile(_name)),
@@ -59,9 +58,8 @@ public abstract class StatefulTrace<E, S> extends Trace<E> {
 		return getReader(defaultPriority(), 0L);
 	}
 	
-	public StatefulWriter<E, S> getWriter(long snapInterval) throws IOException {
-		return new StatefulWriter<E,S>(_store, _name,
-				snapInterval, updater_factory.getNew(), _info);
+	public StatefulWriter<E, S> getWriter() throws IOException {
+		return new StatefulWriter<E,S>(_store, _name, updater_factory.getNew(), _info);
 	}
 	
 	public ItemFactory<S> stateFactory(){

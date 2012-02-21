@@ -125,7 +125,7 @@ public final class PlausibleMobilityConverter implements Converter,
 		long max_time = _presence.maxTime();
 		
 		StatefulReader<MovementEvent,Movement> known_reader = null;
-		writer = _movement.getWriter(_links.snapshotInterval());
+		writer = _movement.getWriter();
 		
 		// init event readers
 		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader();		

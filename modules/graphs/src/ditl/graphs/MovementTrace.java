@@ -112,8 +112,8 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 	}
 	
 	@Override
-	public StatefulWriter<MovementEvent,Movement> getWriter(long snapInterval) throws IOException{
-		return new MovementWriter(_store, _name, snapInterval, _info);
+	public StatefulWriter<MovementEvent,Movement> getWriter() throws IOException{
+		return new MovementWriter(_store, _name, _info);
 	}
 	
 	private static class MovementWriter extends StatefulWriter<MovementEvent,Movement> {
@@ -123,8 +123,8 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 		private double minY = Double.MAX_VALUE;
 		private double maxY = Double.MIN_VALUE;
 		
-		public MovementWriter(Store store, String name, long snapInterval, PersistentMap info) throws IOException {
-			super(store, name, snapInterval, new MovementTrace.Updater(), info);
+		public MovementWriter(Store store, String name, PersistentMap info) throws IOException {
+			super(store, name, new MovementTrace.Updater(), info);
 		}
 		
 		public void update(Point p){

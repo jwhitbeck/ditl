@@ -51,7 +51,7 @@ public class WindowedLinkConverter implements Converter, Generator, LinkTrace.Ha
 
 	@Override
 	public void convert() throws IOException {
-		windowed_writer = windowed_links.getWriter(_links.snapshotInterval());
+		windowed_writer = windowed_links.getWriter();
 		link_reader = _links.getReader(0,_window);
 		
 		link_reader.setBus(bus);

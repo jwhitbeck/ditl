@@ -34,7 +34,6 @@ public abstract class App {
 	protected final static String destTimeUnitOption = "dest-time-unit";
 	protected final static String maxTimeOption = "max-time";
 	protected final static String minTimeOption = "min-time";
-	protected final static String snapIntervalOption = "snap-interval";
 	protected final static String intervalOption = "interval";
 	protected final static String traceOption = "trace";
 	protected final static String outputOption = "output";

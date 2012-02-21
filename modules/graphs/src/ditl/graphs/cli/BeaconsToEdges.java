@@ -35,7 +35,6 @@ public class BeaconsToEdges extends ConvertApp {
 
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.EDGES);
 	
-	long snap_interval;
 	int tol;
 	double expansion;
 	
@@ -49,7 +48,6 @@ public class BeaconsToEdges extends ConvertApp {
 		graph_options.parse(cli);
 		tol = Integer.parseInt(cli.getOptionValue(toleranceOption,"0"));
 		expansion = Double.parseDouble(cli.getOptionValue(expandOption, "0.0"));
-		snap_interval = Long.parseLong(cli.getOptionValue(snapIntervalOption, "60")); // by default, snap every minute
 	}
 
 	@Override
@@ -59,16 +57,13 @@ public class BeaconsToEdges extends ConvertApp {
 		options.addOption(null, storeOutputOption, true, "Name of store to output new traces to");
 		options.addOption(null, toleranceOption, true, "Missed beacon tolerance (default 0)");
 		options.addOption(null, expandOption, true, "Expand contacts by this fraction (default 0.0)");
-		options.addOption(null, snapIntervalOption, true, "snapshot interval in seconds (default 60)");
 	}
 
 	@Override
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
 		EdgeTrace edges = (EdgeTrace)dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
 		BeaconTrace beacons = (BeaconTrace) orig_store.getTrace(graph_options.get(GraphOptions.BEACONS));		
-		snap_interval *= beacons.ticsPerSecond();
 		
-		new BeaconsToEdgesConverter(edges, beacons, tol, expansion, snap_interval)
-			.convert();
+		new BeaconsToEdgesConverter(edges, beacons, tol, expansion).convert();
 	}
 }

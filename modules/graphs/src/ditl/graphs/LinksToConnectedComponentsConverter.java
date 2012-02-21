@@ -205,7 +205,7 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 	@Override
 	public void convert() throws IOException {
 		link_reader = _links.getReader();
-		group_writer = _ccs.getWriter(_links.snapshotInterval());
+		group_writer = _ccs.getWriter();
 		long minTime = _links.minTime();
 		link_reader.seek(minTime);
 		Collection<Link> initLinks = link_reader.referenceState();

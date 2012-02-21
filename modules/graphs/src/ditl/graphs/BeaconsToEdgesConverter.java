@@ -37,19 +37,17 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 	private double _expansion;
 	private StatefulWriter<EdgeEvent, Edge> edge_writer;
 	private Reader<Edge> beacon_reader;
-	private long snap_interval;
 	
 	private EdgeTrace _edges;
 	private BeaconTrace _beacons;
 	
 	public BeaconsToEdgesConverter(EdgeTrace edges, BeaconTrace beacons,
-			int tol, double expansion, long snapInterval) {
+			int tol, double expansion) {
 		_edges = edges;
 		_beacons = beacons;
 		_period = beacons.beaconningPeriod();
 		_tol = tol;
 		_expansion = expansion;
-		snap_interval = snapInterval;
 	}
 	
 	public Listener<Edge> detectedListener(){
@@ -113,7 +111,7 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 
 	@Override
 	public void convert() throws IOException {
-		edge_writer = _edges.getWriter(snap_interval);
+		edge_writer = _edges.getWriter();
 		beacon_reader = _beacons.getReader();
 		
 		beacon_reader.bus().addListener(detectedListener());

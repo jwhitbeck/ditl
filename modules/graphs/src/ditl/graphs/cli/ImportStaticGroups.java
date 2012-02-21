@@ -72,7 +72,7 @@ public class ImportStaticGroups extends WriteApp {
 		Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
 		IdMap id_map = (use_id_map)? presence.idMap() : null;
 		GroupTrace groups = (GroupTrace) _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
-		StatefulWriter<GroupEvent,Group> groupWriter = groups.getWriter(presence.snapshotInterval()); 
+		StatefulWriter<GroupEvent,Group> groupWriter = groups.getWriter(); 
 		Set<Group> initState = new HashSet<Group>();
 		int i = 0;
 		for ( String g_spec : group_specs ){

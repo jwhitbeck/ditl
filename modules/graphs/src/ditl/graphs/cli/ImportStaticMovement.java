@@ -66,7 +66,7 @@ public class ImportStaticMovement extends WriteApp {
 		Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
 		IdMap id_map = presence.idMap();
 		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
-		StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter(presence.snapshotInterval());
+		StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter();
 		Set<Movement> initState = new HashSet<Movement>();
 		for ( String spec : positions_specs ){
 			String[] elems = spec.split(":");

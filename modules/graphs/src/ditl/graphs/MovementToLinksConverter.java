@@ -173,7 +173,7 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 	
 	@Override
 	public void convert() throws IOException {
-		links_writer = _links.getWriter(_movement.snapshotInterval());
+		links_writer = _links.getWriter();
 		movement_reader = _movement.getReader();
 		
 		movement_reader.stateBus().addListener(movementListener());

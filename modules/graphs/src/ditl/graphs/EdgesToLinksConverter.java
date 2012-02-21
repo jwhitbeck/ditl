@@ -82,7 +82,7 @@ public final class EdgesToLinksConverter implements Converter {
 	@Override
 	public void convert() throws IOException{
 		edge_reader = _edges.getReader();
-		link_writer = _links.getWriter(_edges.snapshotInterval());
+		link_writer = _links.getWriter();
 		long minTime = _edges.minTime();
 		edge_reader.seek(minTime);
 		setInitStateFromEdges(minTime,edge_reader.referenceState());

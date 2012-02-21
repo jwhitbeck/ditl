@@ -44,7 +44,7 @@ public final class LinksToPresenceConverter implements Converter, LinkTrace.Hand
 
 	@Override
 	public void convert() throws IOException {
-		StatefulWriter<PresenceEvent,Presence> presence_writer = _presence.getWriter(_links.snapshotInterval()); 
+		StatefulWriter<PresenceEvent,Presence> presence_writer = _presence.getWriter(); 
 		StatefulReader<LinkEvent,Link> links_reader = _links.getReader();
 		
 		links_reader.stateBus().addListener(linkListener());

@@ -54,7 +54,7 @@ public final class EdgesToDominatingSetConverter implements Converter,
 	public void convert() throws IOException{
 		StatefulReader<EdgeEvent,Edge> edge_reader = _edges.getReader();
 		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader();
-		group_writer = dominating_set.getWriter(_edges.snapshotInterval());
+		group_writer = dominating_set.getWriter();
 		update_bus.addListener(this);
 		
 		edge_reader.bus().addListener(this.edgeEventListener());

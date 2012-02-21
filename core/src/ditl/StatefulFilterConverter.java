@@ -40,7 +40,7 @@ public class StatefulFilterConverter<E,S> implements Converter {
 		Filter<S> state_filter = ((StatefulTrace.Filterable<E,S>)_from).stateFilter(_group);
 		
 		StatefulReader<E,S> reader = _from.getReader();
-		StatefulWriter<E,S> writer = _to.getWriter(_from.snapshotInterval());
+		StatefulWriter<E,S> writer = _to.getWriter();
 		
 		reader.seek(_from.minTime());
 		Set<S> initState = new HashSet<S>();

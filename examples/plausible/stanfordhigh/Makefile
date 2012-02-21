@@ -42,12 +42,11 @@ $(TARGET): $(ORIG_DATA) ImportStanford.java
 	@echo ""
 	@echo "#################################################"
 	@echo " Importing Penn school trace"
-	@echo "   - Snapshots every 15 minutes"
 	@echo "   - Keep the 9 hours between 7AM and 4PM"
 	@echo ""
 	javac $(JFLAGS) ImportStanford.java
 	java $(JFLAGS) ImportStanford $@ moteFiles/* 2>/dev/null
-	$(DITL) graphs beacons-to-edges --snap-interval 900 $@ 20
+	$(DITL) graphs beacons-to-edges $@ 20
 	$(DITL) rm $@ beacons
 	$(DITL) graphs edges-to-links $@
 	$(DITL) rm $@ edges

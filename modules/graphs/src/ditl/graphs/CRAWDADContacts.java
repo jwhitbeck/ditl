@@ -29,9 +29,9 @@ public class CRAWDADContacts {
 	
 	public static void fromCRAWDAD(LinkTrace links,
 			InputStream in, double timeMul, long ticsPerSecond,
-			long offset, long snapInterval, IdGenerator idGen) throws IOException{
+			long offset, IdGenerator idGen) throws IOException{
 		
-		StatefulWriter<LinkEvent,Link> linkWriter = links.getWriter(snapInterval);
+		StatefulWriter<LinkEvent,Link> linkWriter = links.getWriter();
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		

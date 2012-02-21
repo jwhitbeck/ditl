@@ -54,7 +54,7 @@ public final class BufferLinksConverter implements Converter,
 
 	@Override
 	public void convert() throws IOException {
-		buffer_writer = buffered_links.getWriter(_links.snapshotInterval()); 
+		buffer_writer = buffered_links.getWriter(); 
 		StatefulReader<LinkEvent,Link> links_reader = _links.getReader();
 		
 		links_reader.stateBus().addListener(linkListener());

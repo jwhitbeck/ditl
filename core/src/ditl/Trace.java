@@ -32,10 +32,12 @@ public abstract class Trace<E> {
 	final public static String descriptionKey = "description";
 	final public static String minUpdateIntervalKey = "min update interval";
 	final public static String maxUpdateIntervalKey = "max update interval";
+	final public static String stateMinUpdateIntervalKey = "snapshots min update interval";
+	final public static String stateMaxUpdateIntervalKey = "snapshots max update interval";
 	final public static String minTimeKey = "min time";
 	final public static String maxTimeKey = "max time";
 	final public static String defaultPriorityKey = "default priority";
-	final public static String snapshotIntervalKey = "snapshot interval";
+	final public static String snapshotIntervalKey = "snapshot interval"; // deprecated. Will be removed in future versions.
 	final public static String idMapKey = "id map";
 	
 	final public static int defaultPriority = 100;
@@ -92,7 +94,22 @@ public abstract class Trace<E> {
 		return Long.parseLong(getValue(minUpdateIntervalKey));
 	}
 	
-	public long snapshotInterval(){
+	public long stateMaxUpdateInterval(){
+		String str = getValue(stateMaxUpdateIntervalKey);
+		if ( str == null ) // backwards compatibility. Will be removed
+			return snapshotInterval();
+		return Long.parseLong(str);
+	}
+	
+	public long stateMinUpdateInterval(){
+		String str = getValue(stateMinUpdateIntervalKey);
+		if ( str == null ) // backwards compatibility. Will be removed
+			return snapshotInterval();
+		return Long.parseLong(str);
+	}
+	
+	@Deprecated
+	public long snapshotInterval(){ // deprecated. Will be removed in future versions
 		return Long.parseLong(getValue(snapshotIntervalKey));
 	}
 	

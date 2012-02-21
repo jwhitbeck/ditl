@@ -23,19 +23,22 @@ import java.util.*;
 
 public class StatefulWriter<E, S> extends Writer<E> {
 
+	private final static int n_event_trigger = 1000; // trigger a snapshot every 1000 events
+	
 	long last_snap;
-	long snap_interval;
+	long state_max_interval;
+	long state_min_interval;
+	int event_count = 0;
 	BufferedWriter snap_writer;
 	StateUpdater<E,S> _updater;
 	
-	public StatefulWriter(Store store, String name, long snapInterval, 
-			StateUpdater<E,S> updater, PersistentMap info) throws IOException {
+	public StatefulWriter(Store store, String name, StateUpdater<E,S> updater, PersistentMap info) throws IOException {
 		super(store, name, info);
-		snap_interval = snapInterval;
 		last_snap = -Trace.INFINITY;
 		_updater = updater;
 		snap_writer = new BufferedWriter( new OutputStreamWriter(_store.getOutputStream(_store.snapshotsFile(_name))));
-		setProperty(Trace.snapshotIntervalKey, snap_interval);
+		state_min_interval = Trace.INFINITY;
+		state_max_interval = -Trace.INFINITY;
 	}
 	
 	public Set<S> states(){
@@ -45,6 +48,7 @@ public class StatefulWriter<E, S> extends Writer<E> {
 	@Override
 	public void write(long time, E event) throws IOException {
 		super.write(time, event);
+		event_count++;
 		_updater.handleEvent(time, event);
 	}
 	
@@ -54,18 +58,31 @@ public class StatefulWriter<E, S> extends Writer<E> {
 		if ( last_snap == -Trace.INFINITY ){ // no snap has yet been made
 			last_snap = last_time;
 			write_snapshot (last_snap);
-		} else {
-			while ( time - last_snap >= snap_interval ){
-				last_snap += snap_interval;
-				write_snapshot (last_snap);
-			}
+		} else if ( event_count > n_event_trigger ){
+			write_snapshot(last_time);
+			long dt = last_time - last_snap;
+			if ( dt > state_max_interval ) state_max_interval = dt;
+			if ( dt < state_max_interval ) state_min_interval = dt;
+			last_snap = last_time;
+			event_count = 0;
 		}
 	}
 	
 	@Override
+	void setRemainingInfo(){
+		super.setRemainingInfo();
+		if ( state_max_interval < 0 ){ // single event trace
+			state_max_interval = Long.parseLong(_info.get(Trace.maxTimeKey)) - Long.parseLong(_info.get(Trace.minTimeKey));
+			state_min_interval = state_max_interval;
+		}
+		_info.setIfUnset(Trace.stateMaxUpdateIntervalKey, state_max_interval);
+		_info.setIfUnset(Trace.stateMinUpdateIntervalKey, state_min_interval);
+	}
+	
+	@Override
 	public void close() throws IOException {
-		super.close();
 		snap_writer.close();
+		super.close();
 	}
 	
 	public void setInitState(long time, Collection<S> states) throws IOException {

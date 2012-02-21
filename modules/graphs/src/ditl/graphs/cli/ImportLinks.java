@@ -35,7 +35,6 @@ public class ImportLinks extends ImportApp {
 	private long ticsPerSecond;
 	private Double timeMul;
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS);
-	private long interval;
 	private long offset;
 	private boolean use_id_map;
 	private int min_id;
@@ -55,7 +54,6 @@ public class ImportLinks extends ImportApp {
 		timeMul = getTimeMul(otps,ticsPerSecond);
 		if ( timeMul == null )
 			throw new HelpException();	
-		interval = Long.parseLong(cli.getOptionValue(snapIntervalOption, "60")) * ticsPerSecond; // by default, snap every minute
 		use_id_map = cli.hasOption(stringIdsOption);
 		min_id = Integer.parseInt(cli.getOptionValue(minIdOption, "0"));
 	}
@@ -67,7 +65,6 @@ public class ImportLinks extends ImportApp {
 		ext_fmt.setOptions(options);
 		options.addOption(null, origTimeUnitOption, true, "time unit of original trace [s, ms, us, ns] (default: s)");
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: ms)");
-		options.addOption(null, snapIntervalOption, true, "snapshot interval in seconds (default 60)");
 		options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
 		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
 		options.addOption(null, minIdOption, true, "ensure that all imported ids are greater than <arg> (default: 0)");
@@ -78,8 +75,8 @@ public class ImportLinks extends ImportApp {
 		LinkTrace links = (LinkTrace) _store.newTrace(graph_options.get(GraphOptions.LINKS), LinkTrace.type, force);
 		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
 		if ( ext_fmt.is(ExternalFormat.CRAWDAD) )
-			CRAWDADContacts.fromCRAWDAD(links, _in, timeMul, ticsPerSecond, offset, interval, id_gen);
+			CRAWDADContacts.fromCRAWDAD(links, _in, timeMul, ticsPerSecond, offset, id_gen);
 		else
-			ONEContacts.fromONE(links, _in, timeMul, ticsPerSecond, offset, interval, id_gen);
+			ONEContacts.fromONE(links, _in, timeMul, ticsPerSecond, offset, id_gen);
 	}
 }

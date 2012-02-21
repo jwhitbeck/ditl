@@ -51,8 +51,7 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 		max_interval = -Trace.INFINITY;
 	}
 	
-	public void close() throws IOException {
-		writer.close();
+	void setRemainingInfo(){
 		_info.setIfUnset(Trace.maxTimeKey, max_time);
 		_info.setIfUnset(Trace.minTimeKey, min_time);
 		if ( max_interval < 0 ){ // single event trace
@@ -62,6 +61,11 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 		_info.setIfUnset(Trace.maxUpdateIntervalKey, max_interval);
 		_info.setIfUnset(Trace.minUpdateIntervalKey, min_interval);
 		_info.setIfUnset(Trace.defaultPriorityKey, Trace.defaultPriority);
+	}
+	
+	public void close() throws IOException {
+		writer.close();
+		setRemainingInfo();
 		_info.save(info_out);
 		_store.notifyClose(_name);
 	}

@@ -30,11 +30,9 @@ $(TARGET): $(ORIG_DATA)
 	@echo ""
 	@echo "#################################################"
 	@echo " Importing PMTR trace"
-	@echo "   - Snapshots every hour"
 	@echo ""
 	$(DITL) graphs import-links \
 		--orig-time-unit s \
-		--snap-interval 3600 \
 		$@ pmtr.txt
 	$(DITL) graphs links-to-presence $@
 	@echo ""

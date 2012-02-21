@@ -177,7 +177,7 @@ public class Reader<I> implements Generator {
 	
 	private void fastSeek(long time, long interval) throws IOException {
 		long target_time = time - interval;
-		if ( prev_time > target_time ){
+		if ( prev_time > time ){
 			reset();
 		}
 		while ( true ){

@@ -41,7 +41,7 @@ public final class StrictLinksToPresenceConverter implements Converter, LinkTrac
 
 	@Override
 	public void convert() throws IOException {
-		presence_writer = _presence.getWriter(_links.snapshotInterval()); 
+		presence_writer = _presence.getWriter(); 
 		StatefulReader<LinkEvent,Link> links_reader = _links.getReader();
 		
 		links_reader.stateBus().addListener(linkListener());

@@ -29,9 +29,9 @@ public class CRAWDADEdges {
 	
 	public static void fromCRAWDAD(EdgeTrace edges,
 			InputStream in, double timeMul, long ticsPerSecond,
-			long offset, long snapInterval, IdGenerator idGen) throws IOException{
+			long offset, IdGenerator idGen) throws IOException{
 		
-		StatefulWriter<EdgeEvent,Edge> edgeWriter = edges.getWriter(snapInterval);
+		StatefulWriter<EdgeEvent,Edge> edgeWriter = edges.getWriter();
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		

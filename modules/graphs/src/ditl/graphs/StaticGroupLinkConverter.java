@@ -89,7 +89,7 @@ public class StaticGroupLinkConverter implements Converter {
 	
 	@Override
 	public void convert() throws IOException {
-		group_link_writer = g_links.getWriter(_links.snapshotInterval());
+		group_link_writer = g_links.getWriter();
 		link_reader = _links.getReader();
 		long minTime = _links.minTime();
 		link_reader.seek(minTime);

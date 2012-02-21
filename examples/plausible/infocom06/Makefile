@@ -35,12 +35,10 @@ $(TARGET): $(ORIG_DATA)
 	@echo ""
 	@echo "#################################################"
 	@echo " Importing infocom'06 trace"
-	@echo "   - Snapshots every 30 minutes"
 	@echo "   - Keep only iMote data (nodes 1-98)"
 	@echo ""
 	$(DITL) graphs import-edges \
 		--orig-time-unit s \
-		--snap-interval 1800 \
 		$@ Exp6/contacts.Exp6.dat
 	$(DITL) graphs edges-to-links --links all_links $@
 	$(DITL) rm $@ edges

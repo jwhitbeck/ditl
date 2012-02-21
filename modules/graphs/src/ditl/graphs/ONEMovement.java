@@ -29,9 +29,9 @@ public class ONEMovement {
 
 	public static void fromONE(MovementTrace movement,
 			InputStream in, Long maxTime, final double timeMul, long ticsPerSecond,
-			long offset, long snapInterval, IdGenerator idGen ) throws IOException {
+			long offset, IdGenerator idGen ) throws IOException {
 		
-		StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter(snapInterval);
+		StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter();
 		TreeMap<Long,List<Movement>> buffer = new TreeMap<Long,List<Movement>>();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in) );
 		String line;

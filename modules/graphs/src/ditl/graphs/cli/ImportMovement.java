@@ -36,7 +36,6 @@ public class ImportMovement extends ImportApp {
 	private long ticsPerSecond;
 	private Double timeMul;
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
-	private long interval;
 	private long offset;
 	private boolean fix_pause_times;
 	private boolean use_id_map;
@@ -58,8 +57,7 @@ public class ImportMovement extends ImportApp {
 		timeMul = getTimeMul(otps,ticsPerSecond);
 		if ( timeMul == null )
 			throw new HelpException();
-		offset = Long.parseLong(cli.getOptionValue(offsetOption,"0")) * ticsPerSecond;	
-		interval = Long.parseLong(cli.getOptionValue(snapIntervalOption, "60")) * ticsPerSecond; // by default, snap every minute
+		offset = Long.parseLong(cli.getOptionValue(offsetOption,"0")) * ticsPerSecond;
 		if ( cli.hasOption(maxTimeOption) )
 			maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption)) * ticsPerSecond;
 		fix_pause_times = cli.hasOption(fixPauseTimesOption);
@@ -72,9 +70,9 @@ public class ImportMovement extends ImportApp {
 		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
 		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
 		if ( ext_fmt.is(ExternalFormat.NS2) )
-			NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval, fix_pause_times, id_gen);
+			NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, fix_pause_times, id_gen);
 		else
-			ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, interval, id_gen);
+			ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, id_gen);
 	}
 
 
@@ -86,7 +84,6 @@ public class ImportMovement extends ImportApp {
 		options.addOption(null, maxTimeOption, true, "maximum movement time in seconds");
 		options.addOption(null, origTimeUnitOption, true, "time unit of original trace [s, ms, us, ns] (default: s)");
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: ms)");
-		options.addOption(null, snapIntervalOption, true, "snapshot interval in seconds (default 60)");
 		options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
 		options.addOption(null, fixPauseTimesOption, false, "fix missing pause times in NS2");
 		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
