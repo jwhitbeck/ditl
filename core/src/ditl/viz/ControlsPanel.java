@@ -153,7 +153,8 @@ public class ControlsPanel extends JPanel {
 		for ( ChangeListener listener : listeners )
 			timeSlider.removeChangeListener(listener);
 		int minT = (int)(min_time/(tics_per_second));
-		int maxT = (int)(max_time/(tics_per_second))+1;
+		int maxT = (int)(max_time/(tics_per_second));
+		if ( max_time % tics_per_second != 0 ) maxT += 1;
 		timeSlider.setMinimum(minT);
 		timeSlider.setMaximum(maxT);
 		int tickW = Math.max(((maxT-minT)/20),mod);
