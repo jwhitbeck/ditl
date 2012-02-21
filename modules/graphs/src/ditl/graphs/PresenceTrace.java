@@ -72,12 +72,15 @@ public class PresenceTrace extends StatefulTrace<PresenceEvent, Presence>
 	}
 
 	@Override
-	public Matcher<Presence> stateMatcher(Set<Integer> group) {
-		return new Presence.GroupMatcher(group);
+	public Filter<Presence> stateFilter(Set<Integer> group) {
+		return new Presence.GroupFilter(group);
 	}
 
 	@Override
-	public Matcher<PresenceEvent> eventMatcher(Set<Integer> group) {
-		return new PresenceEvent.GroupMatcher(group);
+	public Filter<PresenceEvent> eventFilter(Set<Integer> group) {
+		return new PresenceEvent.GroupFilter(group);
 	}
+
+	@Override
+	public void fillFilteredTraceInfo(Writer<PresenceEvent> writer) {}
 }

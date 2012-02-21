@@ -70,12 +70,15 @@ public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge>
 	}
 
 	@Override
-	public Matcher<Edge> stateMatcher(Set<Integer> group) {
-		return new Edge.InternalGroupMatcher(group);
+	public Filter<Edge> stateFilter(Set<Integer> group) {
+		return new Edge.InternalGroupFilter(group);
 	}
 
 	@Override
-	public Matcher<EdgeEvent> eventMatcher(Set<Integer> group) {
-		return new EdgeEvent.InternalGroupMatcher(group);
+	public Filter<EdgeEvent> eventFilter(Set<Integer> group) {
+		return new EdgeEvent.InternalGroupFilter(group);
 	}
+
+	@Override
+	public void fillFilteredTraceInfo(Writer<EdgeEvent> writer) {}
 }

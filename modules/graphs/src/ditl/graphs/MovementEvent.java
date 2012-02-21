@@ -105,10 +105,14 @@ public final class MovementEvent {
 		return "$ns_ at "+time*mul+ " \"$node_("+id+") setdest "+dest+" "+speed/mul+"\"\n";
 	}
 	
-	public static final class GroupMatcher implements Matcher<MovementEvent> {
+	public static final class GroupFilter implements Filter<MovementEvent> {
 		private Set<Integer> _group;
-		public GroupMatcher(Set<Integer> group){ _group = group;}
+		public GroupFilter(Set<Integer> group){ _group = group;}
 		@Override
-		public boolean matches(MovementEvent item) { return _group.contains(item.id);}
+		public MovementEvent filter(MovementEvent item) { 
+			if ( _group.contains(item.id) )
+				return item;
+			return null;
+		}
 	}
 }

@@ -185,11 +185,15 @@ public final class Movement {
 		return null;
 	}
 	
-	public static final class GroupMatcher implements Matcher<Movement> {
+	public static final class GroupFilter implements Filter<Movement> {
 		private Set<Integer> _group;
-		public GroupMatcher(Set<Integer> group){ _group = group;}
+		public GroupFilter(Set<Integer> group){ _group = group;}
 		@Override
-		public boolean matches(Movement item) { return _group.contains(item.id);}
+		public Movement filter(Movement item) { 
+			if (  _group.contains(item.id) )
+				return item;
+			return null;
+		}
 	}
 	
 	@Override

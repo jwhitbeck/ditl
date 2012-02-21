@@ -65,10 +65,14 @@ public final class Presence {
 		return "p "+id;
 	}
 	
-	public static final class GroupMatcher implements Matcher<Presence> {
+	public static final class GroupFilter implements Filter<Presence> {
 		private Set<Integer> _group;
-		public GroupMatcher(Set<Integer> group){ _group = group;}
+		public GroupFilter(Set<Integer> group){ _group = group;}
 		@Override
-		public boolean matches(Presence item) { return _group.contains(item.id);}
+		public Presence filter(Presence item) {
+			if ( _group.contains(item.id) )
+				return item;
+			return null;
+		}
 	}
 }

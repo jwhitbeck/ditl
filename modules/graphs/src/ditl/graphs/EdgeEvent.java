@@ -81,12 +81,14 @@ public final class EdgeEvent {
 		return _from+" "+_to+" "+(_up? "UP" : "DOWN");
 	}
 	
-	public static final class InternalGroupMatcher implements Matcher<EdgeEvent> {
+	public static final class InternalGroupFilter implements Filter<EdgeEvent> {
 		private Set<Integer> _group;
-		public InternalGroupMatcher(Set<Integer> group){ _group = group;}
+		public InternalGroupFilter(Set<Integer> group){ _group = group;}
 		@Override
-		public boolean matches(EdgeEvent item) {
-			return _group.contains(item._from) && _group.contains(item._to);
+		public EdgeEvent filter(EdgeEvent item) {
+			if ( _group.contains(item._from) && _group.contains(item._to) )
+				return item;
+			return null;
 		}
 	}
 

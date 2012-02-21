@@ -86,12 +86,14 @@ public final class LinkEvent {
 		return id1+" "+id2+" "+(_up? "UP" : "DOWN");
 	}
 	
-	public static final class InternalGroupMatcher implements Matcher<LinkEvent> {
+	public static final class InternalGroupFilter implements Filter<LinkEvent> {
 		private Set<Integer> _group;
-		public InternalGroupMatcher(Set<Integer> group){ _group = group;}
+		public InternalGroupFilter(Set<Integer> group){ _group = group;}
 		@Override
-		public boolean matches(LinkEvent item) {
-			return _group.contains(item.id1) && _group.contains(item.id2);
+		public LinkEvent filter(LinkEvent item) {
+			if ( _group.contains(item.id1) && _group.contains(item.id2) )
+				return item;
+			return null;
 		}
 	}
 

@@ -169,13 +169,16 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 	}
 
 	@Override
-	public Matcher<Movement> stateMatcher(Set<Integer> group) {
-		return new Movement.GroupMatcher(group);
+	public Filter<Movement> stateFilter(Set<Integer> group) {
+		return new Movement.GroupFilter(group);
 	}
 
 	@Override
-	public Matcher<MovementEvent> eventMatcher(Set<Integer> group) {
-		return new MovementEvent.GroupMatcher(group);
+	public Filter<MovementEvent> eventFilter(Set<Integer> group) {
+		return new MovementEvent.GroupFilter(group);
 	}
+
+	@Override
+	public void fillFilteredTraceInfo(Writer<MovementEvent> writer) {}
 	
 }

@@ -28,7 +28,7 @@ public abstract class StatefulTrace<E, S> extends Trace<E> {
 	protected StateUpdaterFactory<E,S> updater_factory; 
 	
 	public interface Filterable<E,S> extends Trace.Filterable<E> {
-		public Matcher<S> stateMatcher(Set<Integer> group);
+		public Filter<S> stateFilter(Set<Integer> group);
 	}
 	
 	public StatefulTrace(Store store, String name, PersistentMap info, ItemFactory<E> itemFactory, 

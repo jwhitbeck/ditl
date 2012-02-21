@@ -23,7 +23,8 @@ import java.util.*;
 
 import ditl.*;
 
-public class GroupTrace extends StatefulTrace<GroupEvent,Group> {
+public class GroupTrace extends StatefulTrace<GroupEvent,Group> 
+	implements StatefulTrace.Filterable<GroupEvent, Group> {
 
 	final public static String labelsKey = "labels";
 	final public static String delim = ",";
@@ -121,5 +122,20 @@ public class GroupTrace extends StatefulTrace<GroupEvent,Group> {
 				id++;
 			}
 		}
+	}
+
+	@Override
+	public Filter<GroupEvent> eventFilter(Set<Integer> group) {
+		return new GroupEvent.GroupFilter(group);
+	}
+
+	@Override
+	public Filter<Group> stateFilter(Set<Integer> group) {
+		return new Group.GroupFilter(group);
+	}
+
+	@Override
+	public void fillFilteredTraceInfo(Writer<GroupEvent> writer) {
+		writer.setProperty(labelsKey, getValue(labelsKey));
 	}
 }

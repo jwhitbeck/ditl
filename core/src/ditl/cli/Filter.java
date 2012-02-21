@@ -31,7 +31,7 @@ public class Filter extends ConvertApp {
 
 	private String orig_trace_name;
 	private String dest_trace_name;
-	private Set<Integer> group;
+	private String group_spec;
 	
 	public final static String PKG_NAME = null;
 	public final static String CMD_NAME = "filter";
@@ -45,11 +45,11 @@ public class Filter extends ConvertApp {
 			super.parseArgs(cli, args);
 			orig_trace_name = args[1];
 			dest_trace_name = args[2];
-			group = GroupSpecification.parse(args[3]);
+			group_spec = args[3];
 		} else {
 			orig_store_file = new File(args[0]);
 			dest_store_file = new File(args[1]);
-			group = GroupSpecification.parse(args[2]);
+			group_spec = args[2];
 			force = cli.hasOption(forceOption);
 		}
 	}
@@ -71,18 +71,15 @@ public class Filter extends ConvertApp {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void filter(Trace<?> dest, Trace<?> orig) throws IOException {
 		Converter filterer = null;
-		Matcher<?> state_matcher, event_matcher;
-		
+		Set<Integer> group = GroupSpecification.parse(group_spec, orig.idMap());
 		if ( orig instanceof Trace.Filterable ){
-			event_matcher = ((Trace.Filterable)orig).eventMatcher(group);
 			if ( orig.isStateful() ){
 				if ( orig instanceof StatefulTrace.Filterable ){
-					state_matcher = ((StatefulTrace.Filterable)orig).stateMatcher(group);
 					filterer = new StatefulFilterConverter((StatefulTrace<?,?>)dest, 
-							(StatefulTrace<?,?>)orig, event_matcher, state_matcher);
+							(StatefulTrace<?,?>)orig, group);
 				}
 			} else {
-				filterer = new FilterConverter(dest, orig, event_matcher);
+				filterer = new FilterConverter(dest, orig, group);
 			}
 		} 
 		if ( filterer == null ) {

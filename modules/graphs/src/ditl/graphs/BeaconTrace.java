@@ -28,18 +28,23 @@ public class BeaconTrace extends Trace<Edge> implements Trace.Filterable<Edge> {
 	public final static String type = "beacons";
 	public final static String defaultName = "beacons";
 	
-	public final static String beaconningPeriod = "beaconning period";
+	public final static String beaconningPeriodKey = "beaconning period";
 	
 	public BeaconTrace(Store store, String name, PersistentMap info) throws IOException {
 		super(store, name, info, new Edge.Factory());
 	}
 
 	@Override
-	public Matcher<Edge> eventMatcher(Set<Integer> group) {
-		return new Edge.InternalGroupMatcher(group);
+	public Filter<Edge> eventFilter(Set<Integer> group) {
+		return new Edge.InternalGroupFilter(group);
 	}
 	
 	public long beaconningPeriod(){
-		return Long.parseLong(getValue(beaconningPeriod));
+		return Long.parseLong(getValue(beaconningPeriodKey));
+	}
+
+	@Override
+	public void fillFilteredTraceInfo(Writer<Edge> writer) {
+		writer.setProperty( beaconningPeriodKey, getValue(beaconningPeriodKey));
 	}
 }

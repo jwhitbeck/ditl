@@ -49,7 +49,8 @@ public abstract class Trace<E> {
 	protected ItemFactory<E> event_factory;
 	
 	public interface Filterable<E> {
-		public Matcher<E> eventMatcher(Set<Integer> group); 
+		public Filter<E> eventFilter(Set<Integer> group);
+		public void fillFilteredTraceInfo(Writer<E> writer);
 	}
 	
 	public Trace(Store store, String name, PersistentMap info, ItemFactory<E> itemFactory) throws IOException {

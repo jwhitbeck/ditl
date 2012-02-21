@@ -22,7 +22,7 @@ import java.util.*;
 
 import ditl.*;
 
-public class Group implements Cloneable {
+public class Group {
 	
 	Integer _gid;
 	Set<Integer> _members;
@@ -85,5 +85,22 @@ public class Group implements Cloneable {
 	
 	public Set<Integer> members(){
 		return Collections.unmodifiableSet(_members);
+	}
+	
+	public final static class GroupFilter implements Filter<Group> {
+		private Set<Integer> _group;
+		public GroupFilter(Set<Integer> group){ _group = group; }
+		@Override
+		public Group filter(Group item) {
+			Group f_group = new Group(item._gid);
+			for ( Integer i : item._members ){
+				if ( _group.contains(i) )
+					f_group._members.add(i);
+			}
+			if ( f_group._members.isEmpty() )
+				return null;
+			return f_group;
+		}
+		
 	}
 }

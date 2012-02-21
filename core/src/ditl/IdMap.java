@@ -37,6 +37,18 @@ public class IdMap {
 		private Map<String,Integer> eid_map = new LinkedHashMap<String,Integer>();
 		private Integer next = 0;
 		
+		public static Writer filter( IdMap idMap, Set<Integer> group ){
+			Writer writer = new Writer();
+			Iterator<Map.Entry<Integer, String>> i = idMap.iid_map.entrySet().iterator();
+			while ( i.hasNext() ){
+				Map.Entry<Integer, String> e = i.next();
+				if ( group.contains ( e.getKey() ) )
+					writer.eid_map.put(e.getValue(), e.getKey());
+			}
+			return writer;
+		}
+		
+		
 		public void merge ( IdMap idMap ){
 			for ( Map.Entry<Integer, String> e : idMap.iid_map.entrySet() ){
 				Integer iid = e.getKey();
@@ -54,15 +66,6 @@ public class IdMap {
 				next++;
 			}
 			return iid;
-		}
-		
-		public void retainAll( Set<Integer> group ){
-			Iterator<Map.Entry<String, Integer>> i = eid_map.entrySet().iterator();
-			while ( i.hasNext() ){
-				Map.Entry<String, Integer> e = i.next();
-				if ( ! group.contains ( e.getValue() ) )
-					i.remove();
-			}
 		}
 		
 		@Override

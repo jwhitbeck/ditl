@@ -19,32 +19,42 @@
 package ditl;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 public class FilterConverter<I> implements Converter {
 
 	private Trace<I> _to;
 	private Trace<I> _from;
-	private Matcher<I> _matcher;
+	private Set<Integer> _group;
 	
-	public FilterConverter( Trace<I> to, Trace<I> from, Matcher<I> matcher ){
+	public FilterConverter( Trace<I> to, Trace<I> from, Set<Integer> group ){
 		_to = to;
 		_from = from;
-		_matcher = matcher;
+		_group = group;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void convert() throws IOException {
+		Filter<I> filter = ((Trace.Filterable<I>)_from).eventFilter(_group);
 		Reader<I> reader = _from.getReader();
 		Writer<I> writer = _to.getWriter();
 		reader.seek(_from.minTime());
 		while ( reader.hasNext() ){
 			List<I> events = reader.next();
-			for ( I item : events )
-				if ( _matcher.matches(item) )
+			for ( I item : events ){
+				I f_item = filter.filter(item);
+				if ( f_item != null )
 					writer.append(reader.time(), item);
+			}
+		}
+		IdMap id_map = _from.idMap();
+		if ( id_map != null ){
+			IdMap.Writer id_map_writer = IdMap.Writer.filter(id_map, _group);
+			writer.setProperty(Trace.idMapKey, id_map_writer.toString());
 		}
 		writer.setPropertiesFromTrace(_from);
+		((Trace.Filterable<I>)_from).fillFilteredTraceInfo(writer);
 		writer.close();
 		reader.close();
 	}

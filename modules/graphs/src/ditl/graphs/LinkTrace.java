@@ -70,12 +70,15 @@ public class LinkTrace extends StatefulTrace<LinkEvent, Link>
 	}
 
 	@Override
-	public Matcher<Link> stateMatcher(Set<Integer> group) {
-		return new Link.InternalGroupMatcher(group);
+	public Filter<Link> stateFilter(Set<Integer> group) {
+		return new Link.InternalGroupFilter(group);
 	}
 
 	@Override
-	public Matcher<LinkEvent> eventMatcher(Set<Integer> group) {
-		return new LinkEvent.InternalGroupMatcher(group);
+	public Filter<LinkEvent> eventFilter(Set<Integer> group) {
+		return new LinkEvent.InternalGroupFilter(group);
 	}
+
+	@Override
+	public void fillFilteredTraceInfo(Writer<LinkEvent> writer) {}
 }

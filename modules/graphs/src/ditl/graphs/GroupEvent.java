@@ -105,4 +105,23 @@ public class GroupEvent {
 		default: return DELETE_LABEL+" "+_gid;
 		}
 	}
+	
+	public final static class GroupFilter implements Filter<GroupEvent> {
+		private Set<Integer> _group;
+		public GroupFilter(Set<Integer> group){ _group = group; }
+		@Override
+		public GroupEvent filter(GroupEvent item) {
+			Set<Integer> f_members = new HashSet<Integer>();
+			if ( item._type == JOIN || item._type == LEAVE ){
+				for ( Integer i : item._members ){
+					if ( _group.contains(i) )
+						f_members.add(i);
+				}
+				if ( f_members.isEmpty() )
+					return null;
+				return new GroupEvent( item._gid, item._type, f_members);
+			} 
+			return item;
+		}
+	}
 }

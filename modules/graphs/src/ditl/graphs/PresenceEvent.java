@@ -67,11 +67,15 @@ public final class PresenceEvent {
 		return id+" "+(in? "IN" : "OUT");
 	}
 
-	public static final class GroupMatcher implements Matcher<PresenceEvent> {
+	public static final class GroupFilter implements Filter<PresenceEvent> {
 		private Set<Integer> _group;
-		public GroupMatcher(Set<Integer> group){ _group = group;}
+		public GroupFilter(Set<Integer> group){ _group = group;}
 		@Override
-		public boolean matches(PresenceEvent item) { return _group.contains(item.id);}
+		public PresenceEvent filter(PresenceEvent item) { 
+			if ( _group.contains(item.id) )
+				return item;
+			return null;
+		}
 	}
 
 }

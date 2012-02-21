@@ -25,35 +25,48 @@ public class StatefulFilterConverter<E,S> implements Converter {
 
 	private StatefulTrace<E,S> _to;
 	private StatefulTrace<E,S> _from;
-	private Matcher<E> event_matcher;
-	private Matcher<S> state_matcher;
+	private Set<Integer> _group;
 	
-	public StatefulFilterConverter( StatefulTrace<E,S> to, StatefulTrace<E,S> from, Matcher<E> eventMatcher, Matcher<S> stateMatcher ){
+	public StatefulFilterConverter( StatefulTrace<E,S> to, StatefulTrace<E,S> from, Set<Integer> group){
 		_to = to;
 		_from = from;
-		event_matcher = eventMatcher;
-		state_matcher = stateMatcher;
+		_group = group;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void convert() throws IOException {
+		Filter<E> event_filter = ((StatefulTrace.Filterable<E,S>)_from).eventFilter(_group);
+		Filter<S> state_filter = ((StatefulTrace.Filterable<E,S>)_from).stateFilter(_group);
+		
 		StatefulReader<E,S> reader = _from.getReader();
 		StatefulWriter<E,S> writer = _to.getWriter(_from.snapshotInterval());
 		
 		reader.seek(_from.minTime());
 		Set<S> initState = new HashSet<S>();
-		for ( S state : reader.referenceState() )
-			if ( state_matcher.matches(state) )
+		for ( S state : reader.referenceState() ){
+			S f_state = state_filter.filter(state);
+			if ( f_state != null )
 				initState.add(state);
+		}
 		writer.setInitState(_from.minTime(), initState);
 		
 		while ( reader.hasNext() ){
 			List<E> events = reader.next();
-			for ( E item : events )
-				if ( event_matcher.matches(item) )
+			for ( E item : events ){
+				E f_item = event_filter.filter(item);
+				if ( f_item != null )
 					writer.append(reader.time(), item);
+			}
 		}
+		IdMap id_map = _from.idMap();
+		if ( id_map != null ){
+			IdMap.Writer id_map_writer = IdMap.Writer.filter(id_map, _group);
+			writer.setProperty(Trace.idMapKey, id_map_writer.toString());
+		}
+		
 		writer.setPropertiesFromTrace(_from);
+		((StatefulTrace.Filterable<E,S>)_from).fillFilteredTraceInfo(writer);
 		writer.close();
 		reader.close();
 	}

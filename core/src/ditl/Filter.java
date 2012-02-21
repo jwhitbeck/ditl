@@ -16,74 +16,8 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs;
+package ditl;
 
-import java.util.Set;
-
-import ditl.*;
-
-public final class Link implements Couple {
-	
-	final Integer id1;
-	final Integer id2;
-	
-	public Link(Integer i1, Integer i2){
-		if ( i1 < i2 ){
-			id1 = i1;
-			id2 = i2;
-		} else {
-			id1 = i2;
-			id2 = i1;
-		}
-	}
-	
-	public Integer id1(){
-		return id1;
-	}
-	
-	public Integer id2(){
-		return id2;
-	}
-	
-	public static final class Factory implements ItemFactory<Link> {
-		@Override
-		public Link fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer id1 = Integer.parseInt(elems[0]);
-				Integer id2 = Integer.parseInt(elems[1]);
-				return new Link(id1,id2);	
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	public boolean hasVertex(Integer id){
-		return ( id.equals(id1) || id.equals(id2) );
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		Link ct = (Link)o;
-		return (ct.id1.equals(id1)) && (ct.id2.equals(id2));
-	}
-	
-	@Override
-	public String toString(){
-		return id1+" "+id2;
-	}
-	
-	public static final class InternalGroupFilter implements Filter<Link> {
-		private Set<Integer> _group;
-		public InternalGroupFilter(Set<Integer> group){ _group = group;}
-		@Override
-		public Link filter(Link item) {
-			if ( _group.contains(item.id1) && _group.contains(item.id2) )
-				return item;
-			return null;
-		}
-	}
-
+public interface Filter<I> {
+	public I filter(I item);
 }
