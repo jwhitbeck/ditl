@@ -26,7 +26,7 @@ public abstract class WritableStore extends Store {
 	private Map<String, Writer<?>> openWriters = new HashMap<String,Writer<?>>();
 	
 	@SuppressWarnings("serial")
-	public class AlreadyExistsException extends Exception {
+	public static class AlreadyExistsException extends Exception {
 		private String trace_name; 
 		public AlreadyExistsException(String traceName){ trace_name = traceName;}
 		@Override

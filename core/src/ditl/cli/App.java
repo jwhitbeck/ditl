@@ -52,7 +52,7 @@ public abstract class App {
 		throws ParseException, ArrayIndexOutOfBoundsException, HelpException;
 
 	@SuppressWarnings("serial")
-	public class HelpException extends Exception {}
+	public static class HelpException extends Exception {}
 	
 	protected abstract void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException;
 	

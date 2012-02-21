@@ -36,7 +36,7 @@ public abstract class Store {
 	private Set<Reader<?>> openReaders = new HashSet<Reader<?>>();
 	
 	@SuppressWarnings("serial")
-	public class NoSuchTraceException extends Exception {
+	public static class NoSuchTraceException extends Exception {
 		private String trace_name; 
 		public NoSuchTraceException(String traceName){ trace_name = traceName;}
 		@Override
@@ -46,7 +46,7 @@ public abstract class Store {
 	}
 	
 	@SuppressWarnings("serial")
-	public class LoadTraceException extends Exception {
+	public static class LoadTraceException extends Exception {
 		private String _name; 
 		public LoadTraceException(String name){ _name = name;}
 		@Override
