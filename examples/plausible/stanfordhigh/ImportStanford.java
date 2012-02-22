@@ -58,8 +58,8 @@ public class ImportStanford implements Converter {
 		    reader.close();
 		}
 		beacon_writer.flush();
-		beacon_writer.setProperty(Trace.timeUnit, "ms"); // tps = 1000
-		beacon_writer.setProperty(BeaconTrace.beaconningPeriod, granularity);
+		beacon_writer.setProperty(Trace.timeUnitKey, "ms"); // tps = 1000
+		beacon_writer.setProperty(BeaconTrace.beaconningPeriodKey, granularity);
 		beacon_writer.close();
     }
 
