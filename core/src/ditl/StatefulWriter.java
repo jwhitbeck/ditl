@@ -59,11 +59,11 @@ public class StatefulWriter<E, S> extends Writer<E> {
 			last_snap = last_time;
 			write_snapshot (last_snap);
 		} else if ( event_count > n_event_trigger ){
-			write_snapshot(last_time);
-			long dt = last_time - last_snap;
+			write_snapshot(time);
+			long dt = time - last_snap;
 			if ( dt > state_max_interval ) state_max_interval = dt;
 			if ( dt < state_max_interval ) state_min_interval = dt;
-			last_snap = last_time;
+			last_snap = time;
 			event_count = 0;
 		}
 	}
