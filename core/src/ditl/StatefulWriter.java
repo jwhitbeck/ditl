@@ -26,6 +26,7 @@ public class StatefulWriter<E, S> extends Writer<E> {
 	private final static int n_event_trigger = 1000; // trigger a snapshot every 1000 events
 	
 	long last_snap;
+	long next_snap_trigger = Trace.INFINITY;
 	long state_max_interval;
 	long state_min_interval;
 	int event_count = 0;
@@ -59,10 +60,13 @@ public class StatefulWriter<E, S> extends Writer<E> {
 			last_snap = last_time;
 			write_snapshot (last_snap);
 		} else if ( event_count > n_event_trigger ){
+			next_snap_trigger = time;
+		} else if ( time > next_snap_trigger ){
 			write_snapshot(time);
 			long dt = time - last_snap;
 			if ( dt > state_max_interval ) state_max_interval = dt;
-			if ( dt < state_max_interval ) state_min_interval = dt;
+			if ( dt < state_min_interval ) state_min_interval = dt;
+			next_snap_trigger = Trace.INFINITY;
 			last_snap = time;
 			event_count = 0;
 		}
