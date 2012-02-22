@@ -578,7 +578,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 				void peek() {
 					do {
 						super.peek();
-					} while ( next != null && id2 <= id1 );
+					} while ( next != null && id2.compareTo(id1) <= 0 );
 				}
 			};
 		}
@@ -589,7 +589,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 				void peek() {
 					do {
 						super.peek();
-					} while ( id2 != null && id2 <= id1 );
+					} while ( id2 != null && id2.compareTo(id1) <= 0 );
 				}
 			};
 		}
@@ -600,7 +600,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 				void peek(){
 					do {
 						super.peek();
-					} while ( next != null && id2 <= id1 );
+					} while ( next != null && id2.compareTo(id1) <= 0 );
 				}
 			};
 		}
