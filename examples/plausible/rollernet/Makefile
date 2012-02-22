@@ -52,7 +52,7 @@ $(TARGET): $(ORIG_DATA)
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
 	$(DITL) plausible links-to-windowed-links $@ 500
-	$(DITL) plausible infer --constraints "LeftOutlier,node@38:Horizontal,node@38,height@25:RightOutlier,node@27:Horizontal,node@27,height@25" $@ 700 50
+	$(DITL) plausible infer --constraints "LeftOutlier,node@38:Horizontal,node@38,height@25:RightOutlier,node@27:Horizontal,node@27,height@25" $@ 700 70
 	$(DITL) rm $@ windowed_links
 
 clean:
