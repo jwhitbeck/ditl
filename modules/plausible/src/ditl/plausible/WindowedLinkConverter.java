@@ -73,6 +73,8 @@ public class WindowedLinkConverter implements Converter, Generator, LinkTrace.Ha
 		
 		windowed_writer.flush();
 		windowed_writer.setProperty(WindowedLinkTrace.windowLengthKey, _window);
+		windowed_writer.setProperty(Trace.maxTimeKey, maxTime);
+		windowed_writer.setProperty(Trace.minTimeKey, minTime);
 		windowed_writer.setPropertiesFromTrace(_links);
 		windowed_writer.close();
 		link_reader.close();
@@ -144,7 +146,7 @@ public class WindowedLinkConverter implements Converter, Generator, LinkTrace.Ha
 			@Override
 			public void handle(long time, Collection<Link> links)
 					throws IOException {
-				Set<WindowedLink> init_state = new TreeSet<WindowedLink>();
+				Set<WindowedLink> init_state = new WindowedLinkTrace.WindowedLinkSet();
 				for ( Link l : links ){
 					LinkTimeline timeline = new LinkTimeline(l, windowed_writer);
 					long delta = (long)(rng.nextDouble()*_window);

@@ -73,14 +73,14 @@ public class WindowedLinkTrace extends StatefulTrace<WindowedLinkEvent,WindowedL
 		}
 	}
 	
-	private final static class WindowedLinkMap extends AdjacencyMap<WindowedLink,WindowedLink> {
+	public final static class WindowedLinkMap extends AdjacencyMap<WindowedLink,WindowedLink> {
 		@Override
 		protected WindowedLink newCouple(Integer id1, Integer id2) {
 			throw new UnsupportedOperationException();
 		}
 	}
 	
-	private final static class WindowedLinkSet extends AdjacencySet<WindowedLink> {
+	public final static class WindowedLinkSet extends AdjacencySet<WindowedLink> {
 		WindowedLinkSet(){
 			map = new WindowedLinkMap();
 		}
