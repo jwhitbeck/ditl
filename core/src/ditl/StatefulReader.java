@@ -26,13 +26,15 @@ public class StatefulReader<E, S> extends Reader<E> {
 	StateUpdater<E,S> _updater;
 	Reader<S> snapshots_iterator;
 	Bus<S> state_bus = new Bus<S>();
+	long last_snap_time;
 	
 	
 	StatefulReader(Store store, InputStreamOpener inputStreamOpener, long eventSeekInterval, ItemFactory<E> fact, 
-				Reader<S> snapshotsReader, StateUpdater<E,S> updater, int priority, long offset) throws IOException {
+				Reader<S> snapshotsReader, StateUpdater<E,S> updater, int priority, long offset, long lastSnapTime) throws IOException {
 		super(store, inputStreamOpener, eventSeekInterval, fact, priority, offset);
 		_updater = updater;
 		snapshots_iterator = snapshotsReader;
+		last_snap_time = lastSnapTime;
 	}
 	
 	public Set<S> referenceState(){
@@ -41,19 +43,20 @@ public class StatefulReader<E, S> extends Reader<E> {
 	
 	@Override
 	public void seek(long time) throws IOException {
-		snapshots_iterator.seek(time);
-		if ( time == snapshots_iterator.nextTime() ){ // we have hit exactly on a snapshot, use it
+		long seek_time = Math.min(time, last_snap_time-_offset);
+		snapshots_iterator.seek(seek_time);
+		if ( seek_time == snapshots_iterator.nextTime() ){ // we have hit exactly on a snapshot, use it
 			if ( snapshots_iterator.has_next_time )
 				_updater.setState( snapshots_iterator.next() );
-			super.seek(time);
+			super.seek(seek_time);
 		} else {
 			long last_snap_time = snapshots_iterator.previousTime(); 
 			_updater.setState( snapshots_iterator.previous() );
 			super.seek(last_snap_time);
-			while ( has_next_time && next_time < time+_offset ){
-				for ( E event : next() ){
-					_updater.handleEvent( cur_time, event); // cur_time is updated by call to next()
-				}
+		}
+		while ( has_next_time && next_time < time+_offset ){
+			for ( E event : next() ){
+				_updater.handleEvent( cur_time, event); // cur_time is updated by call to next()
 			}
 		}
 		state_bus.queue(time, _updater.states());

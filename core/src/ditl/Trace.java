@@ -34,6 +34,7 @@ public abstract class Trace<E> {
 	final public static String maxUpdateIntervalKey = "max update interval";
 	final public static String stateMinUpdateIntervalKey = "snapshots min update interval";
 	final public static String stateMaxUpdateIntervalKey = "snapshots max update interval";
+	final public static String lastSnapTimeKey = "last snapshot time";
 	final public static String minTimeKey = "min time";
 	final public static String maxTimeKey = "max time";
 	final public static String defaultPriorityKey = "default priority";
@@ -92,6 +93,14 @@ public abstract class Trace<E> {
 	
 	public long minUpdateInterval(){
 		return Long.parseLong(getValue(minUpdateIntervalKey));
+	}
+	
+	public long lastSnapTime(){
+		String str = getValue(lastSnapTimeKey);
+		if ( str == null ){ // backwards compatibility. Will be removed
+			return Trace.INFINITY;
+		}
+		return Long.parseLong(str);
 	}
 	
 	public long stateMaxUpdateInterval(){

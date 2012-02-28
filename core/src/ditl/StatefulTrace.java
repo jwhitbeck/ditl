@@ -47,7 +47,7 @@ public abstract class StatefulTrace<E, S> extends Trace<E> {
 				_store.getStreamOpener(_store.traceFile(_name)),
 				maxUpdateInterval(), event_factory,
 				snap_iterator, updater_factory.getNew(), 
-				priority, offset );
+				priority, offset, lastSnapTime() );
 	}
 	
 	public StatefulReader<E,S> getReader(int priority) throws IOException {

@@ -81,6 +81,7 @@ public class StatefulWriter<E, S> extends Writer<E> {
 		}
 		_info.setIfUnset(Trace.stateMaxUpdateIntervalKey, state_max_interval);
 		_info.setIfUnset(Trace.stateMinUpdateIntervalKey, state_min_interval);
+		_info.setIfUnset(Trace.lastSnapTimeKey, last_snap);
 	}
 	
 	@Override
