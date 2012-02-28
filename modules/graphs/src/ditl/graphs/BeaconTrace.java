@@ -44,7 +44,7 @@ public class BeaconTrace extends Trace<Edge> implements Trace.Filterable<Edge> {
 	}
 
 	@Override
-	public void fillFilteredTraceInfo(Writer<Edge> writer) {
+	public void copyOverTraceInfo(Writer<Edge> writer) {
 		writer.setProperty( beaconningPeriodKey, getValue(beaconningPeriodKey));
 	}
 }

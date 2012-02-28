@@ -51,9 +51,12 @@ public abstract class Trace<E> {
 	
 	protected ItemFactory<E> event_factory;
 	
-	public interface Filterable<E> {
+	public interface Copyable<E> {
+		public void copyOverTraceInfo(Writer<E> writer);
+	}
+	
+	public interface Filterable<E> extends Copyable<E> {
 		public Filter<E> eventFilter(Set<Integer> group);
-		public void fillFilteredTraceInfo(Writer<E> writer);
 	}
 	
 	public Trace(Store store, String name, PersistentMap info, ItemFactory<E> itemFactory) throws IOException {

@@ -179,6 +179,6 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 	}
 
 	@Override
-	public void fillFilteredTraceInfo(Writer<MovementEvent> writer) {}
+	public void copyOverTraceInfo(Writer<MovementEvent> writer) {}
 	
 }

@@ -80,5 +80,5 @@ public class LinkTrace extends StatefulTrace<LinkEvent, Link>
 	}
 
 	@Override
-	public void fillFilteredTraceInfo(Writer<LinkEvent> writer) {}
+	public void copyOverTraceInfo(Writer<LinkEvent> writer) {}
 }

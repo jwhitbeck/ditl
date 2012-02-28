@@ -82,5 +82,5 @@ public class PresenceTrace extends StatefulTrace<PresenceEvent, Presence>
 	}
 
 	@Override
-	public void fillFilteredTraceInfo(Writer<PresenceEvent> writer) {}
+	public void copyOverTraceInfo(Writer<PresenceEvent> writer) {}
 }

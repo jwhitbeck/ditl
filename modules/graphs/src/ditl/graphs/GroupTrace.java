@@ -135,7 +135,9 @@ public class GroupTrace extends StatefulTrace<GroupEvent,Group>
 	}
 
 	@Override
-	public void fillFilteredTraceInfo(Writer<GroupEvent> writer) {
-		writer.setProperty(labelsKey, getValue(labelsKey));
+	public void copyOverTraceInfo(Writer<GroupEvent> writer) {
+		String labels = getValue(labelsKey);
+		if ( labels != null )
+			writer.setProperty(labelsKey, labels);
 	}
 }

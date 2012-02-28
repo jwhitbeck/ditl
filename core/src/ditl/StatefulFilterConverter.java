@@ -66,7 +66,7 @@ public class StatefulFilterConverter<E,S> implements Converter {
 		}
 		
 		writer.setPropertiesFromTrace(_from);
-		((StatefulTrace.Filterable<E,S>)_from).fillFilteredTraceInfo(writer);
+		((StatefulTrace.Filterable<E,S>)_from).copyOverTraceInfo(writer);
 		writer.close();
 		reader.close();
 	}

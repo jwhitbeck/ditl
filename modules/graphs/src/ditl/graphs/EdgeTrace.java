@@ -80,5 +80,5 @@ public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge>
 	}
 
 	@Override
-	public void fillFilteredTraceInfo(Writer<EdgeEvent> writer) {}
+	public void copyOverTraceInfo(Writer<EdgeEvent> writer) {}
 }

@@ -54,7 +54,7 @@ public class FilterConverter<I> implements Converter {
 			writer.setProperty(Trace.idMapKey, id_map_writer.toString());
 		}
 		writer.setPropertiesFromTrace(_from);
-		((Trace.Filterable<I>)_from).fillFilteredTraceInfo(writer);
+		((Trace.Filterable<I>)_from).copyOverTraceInfo(writer);
 		writer.close();
 		reader.close();
 	}

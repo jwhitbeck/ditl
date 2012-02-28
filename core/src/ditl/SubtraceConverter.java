@@ -34,6 +34,7 @@ public class SubtraceConverter<I> implements Converter {
 		_maxTime = maxTime;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void convert() throws IOException {
 		Reader<I> reader = _from.getReader();
@@ -47,6 +48,8 @@ public class SubtraceConverter<I> implements Converter {
 		writer.setProperty(Trace.minTimeKey, _minTime);
 		writer.setProperty(Trace.maxTimeKey, _maxTime);
 		writer.setPropertiesFromTrace(_from);
+		if ( _from instanceof Trace.Copyable<?> )
+			((Trace.Copyable<I>)_from).copyOverTraceInfo(writer);
 		reader.close();
 		writer.close();
 	}

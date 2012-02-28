@@ -34,6 +34,7 @@ public class StatefulSubtraceConverter<E,S> implements Converter {
 		_maxTime = maxTime;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void convert() throws IOException {
 		StatefulReader<E,S> reader = _from.getReader();
@@ -48,6 +49,8 @@ public class StatefulSubtraceConverter<E,S> implements Converter {
 		writer.setProperty(Trace.minTimeKey, _minTime);
 		writer.setProperty(Trace.maxTimeKey, _maxTime);
 		writer.setPropertiesFromTrace(_from);
+		if ( _from instanceof Trace.Copyable<?> )
+			((Trace.Copyable<E>)_from).copyOverTraceInfo(writer);
 		reader.close();
 		writer.close();
 	}
