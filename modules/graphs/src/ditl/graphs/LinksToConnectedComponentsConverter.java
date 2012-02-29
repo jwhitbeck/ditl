@@ -147,15 +147,20 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 	}
 
 	public void handleEvents(long time, Collection<LinkEvent> events) throws IOException {
+		Deque<LinkEvent> down_events = new LinkedList<LinkEvent>();
 		for ( LinkEvent lev : events ){
 			Link l = lev.link();
 			if ( lev.isUp() ){
 				adjacency.add(l);
 				addLink(time, l);
 			} else {
-				adjacency.remove(l);
-				removeLink(time, l);
+				down_events.addLast(lev);
 			}
+		}
+		while ( ! down_events.isEmpty() ){
+			Link dl = down_events.poll().link();
+			adjacency.remove(dl);
+			removeLink(time, dl);
 		}
 	}
 	
