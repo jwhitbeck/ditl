@@ -146,21 +146,6 @@ public abstract class SceneRunner extends Component {
 		return sliderListener;
 	}
 	
-	/*public ActionListener timeEntryListener(){
-		return new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e){
-				JTextField timeEntry = (JTextField)e.getSource();
-				String s = (String)timeEntry.getText();
-				s = s.substring(0, s.length()-2);
-				long time = Double.parseDouble(s)*tics_per_second*
-				long time = Long.parseLong(timeEntry.getText())*tics_per_second;
-				pause();
-				seek( time );
-			}
-		};
-	}*/
-	
 	public void seek(long time){
 		try {
 			runner.seek(time);
