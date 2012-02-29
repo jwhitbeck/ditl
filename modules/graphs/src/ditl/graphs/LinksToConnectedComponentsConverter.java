@@ -136,8 +136,8 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 	}
 	
 	private void removeLink(long time, Link l) throws IOException {
-		boolean singleton1 = (adjacency.getNext(l.id1) == null);
-		boolean singleton2 = (adjacency.getNext(l.id2) == null);
+		boolean singleton1 = (adjacency.getNext(l.id1).isEmpty());
+		boolean singleton2 = (adjacency.getNext(l.id2).isEmpty());
 		if ( singleton1 ) // id1 has become a singleton
 			removeSingleton(time, l.id1);
 		if ( singleton2 ) // id2 has become a singleton
@@ -173,7 +173,7 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 			Integer i = toVisit.pop();
 			if ( ! visited.contains(i) ){
 				Set<Integer> neighbs = adjacency.getNext(i); 
-				if ( neighbs != null ){
+				if ( ! neighbs.isEmpty() ){
 					Group g = new Group(counter++);
 					initCCs.add(g);
 					visited.add(i);

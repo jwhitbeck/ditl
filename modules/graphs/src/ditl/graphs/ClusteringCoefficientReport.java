@@ -52,7 +52,7 @@ public final class ClusteringCoefficientReport extends StateTimeReport
 		Integer i2 = link.id2;
 		Set<Integer> n1 = adjacency.getNext(i1);
 		Set<Integer> n2 = adjacency.getNext(i2);
-		if ( n1 != null && n2 != null ){
+		if ( ! n1.isEmpty() && ! n2.isEmpty() ){
 			for ( Integer k : n1 )
 				if ( n2.contains(k) )
 					updateCoeff(k);
@@ -63,7 +63,7 @@ public final class ClusteringCoefficientReport extends StateTimeReport
 	
 	private void updateCoeff(Integer i){
 		Set<Integer> neighbs = adjacency.getNext(i);
-		if ( neighbs == null ){
+		if ( neighbs.isEmpty() ){
 			coeffs.put(i,0.0);
 		} else {
 			int k = neighbs.size();

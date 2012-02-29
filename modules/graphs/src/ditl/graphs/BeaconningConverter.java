@@ -56,13 +56,10 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 			@Override
 			public void handle(long time, Collection<Integer> events) throws IOException {
 				for ( Integer i : events ){
-					Set<Integer> neighbs = _adjacency.getNext(i);
-					if ( neighbs != null ){
-						for ( Integer n : _adjacency.getNext(i) ){
-							double q = rng.nextDouble();
-							if ( q < 1.0-_p )
-								beacon_writer.append(time, new Edge(i, n));
-						}
+					for ( Integer n : _adjacency.getNext(i) ){
+						double q = rng.nextDouble();
+						if ( q < 1.0-_p )
+							beacon_writer.append(time, new Edge(i, n));
 					}
 					next_scans.queue(time+_period, i);
 				}

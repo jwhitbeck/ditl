@@ -154,15 +154,15 @@ public final class EdgesToDominatingSetConverter implements Converter,
 		
 		DSCalculator() {
 			for ( Integer id : present ){
-				if ( reverse_matrix.getNext(id) == null ){ // no incoming edges, must be chosen
+				if ( reverse_matrix.getNext(id).isEmpty() ){ // no incoming edges, must be chosen
 					new_ds.add(id);
 					covered.add(id);
 					Set<Integer> dests = matrix.getNext(id);
-					if ( dests != null )
+					if ( ! dests.isEmpty() )
 						covered.addAll(dests);
 				} else { // prepare entry in the remainder map 
 					Set<Integer> dests = matrix.getNext(id);
-					if ( dests != null ){ // nodes with incoming but no outgoing edges should never be in the dominating set
+					if ( ! dests.isEmpty() ){ // nodes with incoming but no outgoing edges should never be in the dominating set
 						Set<Integer> r_dests = new HashSet<Integer>(dests);
 						r_dests.removeAll(covered);
 						remainders.put(id, r_dests);
