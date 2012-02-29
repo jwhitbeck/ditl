@@ -11,6 +11,7 @@ public class ImportStanford implements Converter {
     Map<Integer,Integer> mote_offsets = new HashMap<Integer,Integer>();
     Map<Integer,File> mote_files;
     Random rng = new Random();
+    boolean use_rand;
     long tps = 1000;
     int granularity = 20; // seconds
     
@@ -25,11 +26,12 @@ public class ImportStanford implements Converter {
     //Writer<Edge> beacon_writer;
     BeaconTrace _beacons;
 
-    ImportStanford(BeaconTrace beacons, Map<Integer,File> moteFiles){
+    ImportStanford(BeaconTrace beacons, Map<Integer,File> moteFiles, boolean randomize){
     	_beacons = beacons;
+    	use_rand = randomize;
     	mote_files = moteFiles;
     	for ( Integer id : moteFiles.keySet() )
-    		mote_offsets.put(id, rng.nextInt(granularity));
+    		mote_offsets.put(id, (use_rand)? 0 : rng.nextInt(granularity));
     }
 
     long getBeaconTime(Integer from, Integer global_time){
@@ -75,9 +77,11 @@ public class ImportStanford implements Converter {
     			moteFiles.put(id,f);
     		}
     	}
-    	BeaconTrace beacons = (BeaconTrace)store.newTrace(BeaconTrace.defaultName, BeaconTrace.type, true);
-		new ImportStanford(beacons, moteFiles).convert();
-	
+    	BeaconTrace beacons = (BeaconTrace)store.newTrace("rand_beacons", BeaconTrace.type, true);
+		new ImportStanford(beacons, moteFiles, true).convert();
+		BeaconTrace beacons2 = (BeaconTrace)store.newTrace(BeaconTrace.defaultName, BeaconTrace.type, true);
+		new ImportStanford(beacons2, moteFiles, false).convert();
+		
 		store.close();
     }
 }

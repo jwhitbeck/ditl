@@ -46,10 +46,16 @@ $(TARGET): $(ORIG_DATA) ImportStanford.java
 	@echo ""
 	javac $(JFLAGS) ImportStanford.java
 	java $(JFLAGS) ImportStanford $@ moteFiles/* 2>/dev/null
-	$(DITL) graphs beacons-to-edges $@ 20
-	$(DITL) rm $@ beacons
+	$(DITL) graphs beacons-to-edges --beacons rand_beacons $@ 20
+	$(DITL) rm $@ rand_beacons
 	$(DITL) graphs edges-to-links $@
 	$(DITL) rm $@ edges
+	$(DITL) graphs beacons-to-edges --beacons beacons $@ 20
+	$(DITL) rm $@ beacons
+	$(DITL) graphs edges-to-links --links tmp_links $@
+	$(DITL) rm $@ edges
+	$(DITL) graphs buffer-links --links tmp_links --buffered-links sync_links $@ 0 20
+	$(DITL) rm $@ tmp_links 
 	$(DITL) graphs links-to-presence $@
 	make groups
 	$(DITL) graphs import-groups --labels student,staff,teacher,other $@ $$(cat groups)
