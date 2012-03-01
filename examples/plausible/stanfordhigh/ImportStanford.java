@@ -31,7 +31,7 @@ public class ImportStanford implements Converter {
     	use_rand = randomize;
     	mote_files = moteFiles;
     	for ( Integer id : moteFiles.keySet() )
-    		mote_offsets.put(id, (use_rand)? 0 : rng.nextInt(granularity));
+    		mote_offsets.put(id, (use_rand)? rng.nextInt(granularity) : 0);
     }
 
     long getBeaconTime(Integer from, Integer global_time){
