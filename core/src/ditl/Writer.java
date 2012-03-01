@@ -30,7 +30,6 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 	long min_interval;
 	long last_time;
 	PersistentMap _info;
-	OutputStream info_out;
 	WritableStore _store;
 	String _name;
 	
@@ -40,7 +39,6 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 		if ( _store.isAlreadyWriting(name) ) throw new IOException();
 		_info = info;
 		_name = name;
-		info_out = _store.getOutputStream(_store.infoFile(_name));
 		_store.notifyOpen(_name, this);
 		writer = new BufferedWriter(new OutputStreamWriter(_store.getOutputStream(_store.traceFile(_name))));
 		last_time = -Trace.INFINITY;
@@ -66,7 +64,7 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
 	public void close() throws IOException {
 		writer.close();
 		setRemainingInfo();
-		_info.save(info_out);
+		_info.save(_store.getOutputStream(_store.infoFile(_name)));
 		_store.notifyClose(_name);
 	}
 	
