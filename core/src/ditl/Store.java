@@ -34,6 +34,7 @@ public abstract class Store {
 	final static Map<String,Class<?>> type_class_map = new HashMap<String,Class<?>>();
 	
 	private Set<Reader<?>> openReaders = new HashSet<Reader<?>>();
+	private boolean closing = false;
 	
 	@SuppressWarnings("serial")
 	public static class NoSuchTraceException extends Exception {
@@ -146,7 +147,8 @@ public abstract class Store {
 	}
 	
 	void notifyClose(Reader<?> reader){
-		openReaders.remove(reader);
+		if ( ! closing )
+			openReaders.remove(reader);
 	}
 	
 	void notifyOpen(Reader<?> reader){
@@ -154,11 +156,11 @@ public abstract class Store {
 	}
 	
 	public void close() throws IOException {
-		for ( Iterator<Reader<?>> i = openReaders.iterator(); i.hasNext(); ){
-			Reader<?> reader = i.next();
-			i.remove();
+		closing = true;
+		for ( Reader<?> reader : openReaders )
 			reader.close();
-		}
+		openReaders.clear();
+		closing = false;
 	}
 	
 	public void loadTrace(String name) throws IOException, LoadTraceException {
