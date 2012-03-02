@@ -26,7 +26,7 @@ import ditl.*;
 
 
 public final class BufferLinksConverter implements Converter, 
-	LinkTrace.Handler, Incrementable {
+	LinkTrace.Handler, Listener<LinkEvent> {
 	
 	private LinkTrace buffered_links;
 	private LinkTrace _links;
@@ -34,11 +34,11 @@ public final class BufferLinksConverter implements Converter,
 	private long after_b_time;
 	private boolean _randomize;
 	private Random rng = new Random();
-	private long cur_time;
 	private StatefulWriter<LinkEvent,Link> buffer_writer;
 	private Set<Link> init_state = new AdjacencySet.Links();
 	private Map<Link,Integer> up_count = new AdjacencyMap.Links<Integer>();
-	private boolean flushed = false;
+	private Bus<LinkEvent> event_bus = new Bus<LinkEvent>();
+	private boolean init_state_set = false;
 	private long min_time;
 	
 	public BufferLinksConverter(LinkTrace bufferedLinks, LinkTrace links, 
@@ -59,13 +59,14 @@ public final class BufferLinksConverter implements Converter,
 		
 		links_reader.stateBus().addListener(linkListener());
 		links_reader.bus().addListener(linkEventListener());
+		event_bus.addListener(this);
 		
 		Runner runner = new Runner(_links.maxUpdateInterval(), _links.minTime(), _links.maxTime());
 		runner.addGenerator(links_reader);
-		runner.add(this);
 		runner.run();
 		
-		buffer_writer.flush();
+		event_bus.flush();
+		
 		buffer_writer.setPropertiesFromTrace(_links);
 		buffer_writer.close();
 		links_reader.close();
@@ -75,34 +76,15 @@ public final class BufferLinksConverter implements Converter,
 	public Listener<LinkEvent> linkEventListener() {
 		return new Listener<LinkEvent>(){
 			@Override
-			public void handle(long time, Collection<LinkEvent> events) {
+			public void handle(long time, Collection<LinkEvent> events) throws IOException {
 				for ( LinkEvent event : events ){
-					final Link l = event.link();
 					if ( event.isUp() ){
-						long b = begin(time);
-						if ( b <= min_time ) {
-							init_state.add(l);
-							incrLinkCount(l);
-						} else {
-							if ( incrLinkCount(l) == 1 ){
-								if ( buffer_writer.removeFromQueueAfterTime(b, new Matcher<LinkEvent>(){
-									@Override
-									public boolean matches(LinkEvent item) {
-										if ( item.link().equals(l) ) // this will necessarily be a down event
-											return true;
-										return false;
-									}
-								}) == false ) { // we have not removed a down event
-									buffer_writer.queue(b, event);
-								}
-							}
-						}
+						event_bus.queue(begin(time), event);
 					} else {
-						if ( decrLinkCount(l) == 0 ){
-							buffer_writer.queue(end(time), event);
-						}
+						event_bus.queue(end(time), event);
 					}
 				}
+				event_bus.flush(time-before_b_time);
 			}
 		};
 	}
@@ -149,26 +131,40 @@ public final class BufferLinksConverter implements Converter,
 	private int decrLinkCount(Link l){
 		Integer i = up_count.remove(l);
 		if ( i > 1 ){
-			up_count.put(l, i+1);
-			return i+1;
+			up_count.put(l, i-1);
+			return i-1;
 		}
 		return 0;
 	}
 
 	@Override
-	public void incr(long dt) throws IOException {
-		if ( cur_time > min_time+before_b_time ){
-			if ( ! flushed ){
-				buffer_writer.setInitState(min_time, init_state);
-				flushed = true;
+	public void handle(long time, Collection<LinkEvent> events) throws IOException {
+		Deque<LinkEvent> down_links = new LinkedList<LinkEvent>();
+		for ( LinkEvent lev : events ){
+			Link l = lev.link();
+			if ( time < min_time ){
+				init_state.add(l);
+				incrLinkCount(l);
+			} else {
+				if ( ! init_state_set ){
+					buffer_writer.setInitState(min_time, init_state);
+					init_state_set = true;
+				}
+				if ( lev.isUp() ){
+					if ( incrLinkCount(l) == 1 ){ // link just came up
+						buffer_writer.append(time, lev);
+					}
+				} else {
+					down_links.addLast(lev);
+				}
 			}
-			buffer_writer.flush(cur_time-before_b_time);
 		}
-		cur_time += dt;
-	}
-
-	@Override
-	public void seek(long time) throws IOException {
-		cur_time = time;
+		if ( time >= min_time ){
+			while ( ! down_links.isEmpty() ){
+				LinkEvent dlev = down_links.poll();
+				if ( decrLinkCount(dlev.link()) == 0 )
+					buffer_writer.append(time, dlev);
+			}
+		}
 	}
 }
