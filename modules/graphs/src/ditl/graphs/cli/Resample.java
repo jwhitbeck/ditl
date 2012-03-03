@@ -31,10 +31,13 @@ import ditl.graphs.*;
 public class Resample extends ConvertApp {
 	
 	final static String missProbabilityOption = "miss-probability";
+	final static String randomizeOption = "randomize";
 
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.PRESENCE, GraphOptions.LINKS);
-	long period;
-	double p;
+	private long period;
+	private double p;
+	private boolean randomize;
+	
 	
 	public final static String PKG_NAME = "graphs";
 	public final static String CMD_NAME = "resample";
@@ -46,13 +49,15 @@ public class Resample extends ConvertApp {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
 		period = Long.parseLong(args[1]);
-		p = Double.parseDouble(cli.getOptionValue(missProbabilityOption,"0.0"));	
+		p = Double.parseDouble(cli.getOptionValue(missProbabilityOption,"0.0"));
+		randomize = cli.hasOption(randomizeOption);
 	}
 
 	@Override
 	protected void initOptions() {
 		super.initOptions();
 		options.addOption(null, missProbabilityOption, true, "Missed beacon probability (default 0.0)");
+		options.addOption(null, randomizeOption, false, "Randomize beaconning starting times");
 	}
 
 	@Override
@@ -61,7 +66,7 @@ public class Resample extends ConvertApp {
 		PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
 		BeaconTrace beacons = (BeaconTrace) dest_store.newTrace(graph_options.get(GraphOptions.BEACONS), BeaconTrace.type, force);
 		period *= links.ticsPerSecond();
-		new BeaconningConverter(beacons, presence, links, period, p, true).convert();
+		new BeaconningConverter(beacons, presence, links, period, p, randomize).convert();
 	}
 
 	@Override
