@@ -32,7 +32,7 @@ public class ONEContacts {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		while ( (line=br.readLine()) != null ){
-			String[] elems = line.split(" ");
+			String[] elems = line.split("[ \t]+");
 			long time = (long)(Double.parseDouble(elems[0])*timeMul)+offset;
 			Integer id1 = idGen.getInternalId(elems[2]);
 			Integer id2 = idGen.getInternalId(elems[3]);

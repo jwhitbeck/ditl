@@ -37,7 +37,7 @@ public class ONEMovement {
 		String line;
 		reader.readLine(); // burn first line
 		while ( (line = reader.readLine()) != null ){
-			String[] elems = line.split(" ");
+			String[] elems = line.split("[ \t]+");
 			long t = (long)(Double.parseDouble(elems[0])*timeMul)+offset;
 			Integer id = idGen.getInternalId(elems[1]);
 			double x = Double.parseDouble(elems[2]);
