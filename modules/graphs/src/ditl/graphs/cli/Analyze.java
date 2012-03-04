@@ -41,6 +41,7 @@ public class Analyze extends ExportApp {
 	final static String interAnyContactsOption = "inter-any-contacts";
 	final static String clusteringOption = "clustering";
 	final static String groupSizeOption = "group-size";
+	final static String reachabilityOption = "reachability";
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.GROUPS, GraphOptions.EDGES);
 	private ReportFactory<?> factory;
@@ -68,6 +69,7 @@ public class Analyze extends ExportApp {
 		reportGroup.addOption(new Option(null, interAnyContactsOption, false, "inter-any-contact time distribution") );
 		reportGroup.addOption(new Option(null, clusteringOption, false, "clustering coefficient distribution over time") );
 		reportGroup.addOption(new Option(null, groupSizeOption, false, "distribution of group sizes over time") );
+		reportGroup.addOption(new Option(null, reachabilityOption, false, "proportion of bi-directional and directional links in the reachability graph") );
 		reportGroup.setRequired(true);
 		options.addOptionGroup(reportGroup);
 		options.addOption(null, maxTimeOption, true, "Ignore event after <arg> seconds");
@@ -104,6 +106,8 @@ public class Analyze extends ExportApp {
 			factory = new ClusteringCoefficientReport.Factory(true);
 		} else if ( cli.hasOption(groupSizeOption) ){
 			factory = new GroupSizeReport.Factory();
+		} else if ( cli.hasOption(reachabilityOption) ){
+			factory = new ReachabilityReport.Factory();
 		}
 		
 		if ( cli.hasOption(minTimeOption) )

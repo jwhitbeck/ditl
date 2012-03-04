@@ -36,6 +36,7 @@ public class GraphPlayer extends SimplePlayer {
 	protected GraphRunner runner;
 	protected LinksSelectorPanel linksSelector;
 	protected TimeUnitPanel timeUnitPanel;
+	protected ReachabilitySelectorPanel reachabilitySelector; 
 	protected GroupsPanel groups;
 	protected MovementTrace movement;
 	
@@ -49,6 +50,7 @@ public class GraphPlayer extends SimplePlayer {
 		linksSelector = new LinksSelectorPanel(runner, scene);
 		groups = new GroupsPanel(runner, scene);
 		timeUnitPanel = new TimeUnitPanel(controls);
+		reachabilitySelector = new ReachabilitySelectorPanel(runner, scene);
 		
 		scene.setPreferredSize(new Dimension(700,500));
 		runner.addMovementHandler(scene);
@@ -64,6 +66,7 @@ public class GraphPlayer extends SimplePlayer {
 		widgets.add(new ShowIdsPanel(scene));
 		widgets.add(new ToggleAntialiasingPanel(scene));
 		widgets.add(linksSelector); 
+		widgets.add(reachabilitySelector);
 		widgets.add(groups);
 		
 		init(scene,runner, widgets);
@@ -84,8 +87,13 @@ public class GraphPlayer extends SimplePlayer {
 			linksSelector.setStore(_store);
 			linksSelector.load(_store.listTraces(LinkTrace.type));
 		}
+
+		if ( reachabilitySelector != null ){
+			reachabilitySelector.setStore(_store);
+			reachabilitySelector.load(_store.listTraces(ReachabilityTrace.type));
+		}
 	}
-	
+			
 	protected void setMovementTrace(MovementTrace movement) {
 		try {
 			scene.updateSize(movement.minX(),movement.minY(),movement.maxX(),movement.maxY());
