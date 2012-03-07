@@ -23,7 +23,7 @@ import java.util.*;
 
 public class StatefulWriter<E, S> extends Writer<E> {
 
-	private final static int n_event_trigger = 1000; // trigger a snapshot every 1000 events
+	private final static int n_event_trigger = 10000; // trigger a snapshot every 10,000 events
 	
 	long last_snap;
 	long next_snap_trigger = Trace.INFINITY;
@@ -59,8 +59,6 @@ public class StatefulWriter<E, S> extends Writer<E> {
 		if ( last_snap == -Trace.INFINITY ){ // no snap has yet been made
 			last_snap = last_time;
 			write_snapshot (last_snap);
-		} else if ( event_count > n_event_trigger ){
-			next_snap_trigger = time;
 		} else if ( time > next_snap_trigger ){
 			write_snapshot(time);
 			long dt = time - last_snap;
@@ -69,6 +67,8 @@ public class StatefulWriter<E, S> extends Writer<E> {
 			next_snap_trigger = Trace.INFINITY;
 			last_snap = time;
 			event_count = 0;
+		} else if ( event_count > n_event_trigger ){
+			next_snap_trigger = time;
 		}
 	}
 	
