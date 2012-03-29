@@ -141,10 +141,14 @@ A pre-built jar archive file is available for download:
 CLI Interface
 -------------
 
-The _ditl.jar_ archive is an executable jar file. To see the built-in
-help, just type:
+The _ditl.jar_ archive is an executable jar file. When calling it from
+the command-line, defining a shell (assuming bash) alias is useful:
 
-    $ java -jar ditl.jar --help
+    $ alias ditl="java -jar /path/to/ditl.jar"
+
+To see the built-in help, just type:
+
+    $ ditl --help
 
 Most commands are of the form MODULE COMMAND [OPTIONS] ARG1 [ARG2..],
 where the first argument is usually the location of the trace store
@@ -152,21 +156,18 @@ the command will be operating on. For example, in order to import a
 NS2 movement file (e.g., movement.ns2) as a trace named "movement"
 into the store "store.jar", one would use:
 
-    $ java -jar ditl.jar graphs import-movement --movement movement --format ns2 store.jar movement.ns2
-
-or use the short names for the module and command:
-
-    $ java -jar ditl.jar gr im --movement movement --format ns2 store.jar movement.ns2
+    $ ditl graphs import-movement --movement movement --format ns2 store.jar movement.ns2
 
 In fact, since "movement" and "ns2" are the default name and format,
 respectively, when importing movement into a store, the above can be
 further simplified to:
 
-    $ java -jar ditl.jar gr im store.jar movement.ns2
+    $ ditl graphs im store.jar movement.ns2
 
 
-There are many CLI usage examples in the Makefiles for the plausible
-mobility examples (under examples/plausible).
+There are many available CLI commands. The Makefiles for the plausible
+mobility examples (under examples/plausible) present many different
+calls to the ditl cli interface.
 
 
 Player
@@ -185,7 +186,7 @@ could download a sample dataset from the plausible mobility project
 and run it locally:
 
     $ wget http://plausible.lip6.fr/rollernet.jar
-    $ java -jar ditl.jar graphs play rollernet.jar
+    $ ditl graphs play rollernet.jar
 
 License
 ------- 
