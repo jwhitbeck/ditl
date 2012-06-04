@@ -24,10 +24,7 @@ myself and others and haven't been modified for a while so they can be
 considered quite stable. The _transfers_ module is currently serving
 as the basis for an opportunistic network simulator, but will probably
 see some changes and improvement as development of the simulator
-continues. There are also two other modules (not yet committed to
-github): a _traffic_ module for analyzing highway induction loop data,
-and an extension of the _graphs_ module to handle so-called
-_reachability graphs_.
+continues.
 
 DITL is built around the following design choices:
 
@@ -187,6 +184,7 @@ and run it locally:
 
     $ wget http://plausible.lip6.fr/rollernet.jar
     $ ditl graphs play rollernet.jar
+
 
 License
 ------- 
