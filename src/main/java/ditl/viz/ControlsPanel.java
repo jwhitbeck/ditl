@@ -29,8 +29,8 @@ import javax.swing.event.ChangeListener;
 @SuppressWarnings("serial")
 public class ControlsPanel extends JPanel { 
 	
-	final ImageIcon playIcon = getIcon("icons/Play24.gif");
-	final ImageIcon pauseIcon = getIcon("icons/Pause24.gif");
+	final ImageIcon playIcon = getIcon("/icons/Play24.gif");
+	final ImageIcon pauseIcon = getIcon("/icons/Pause24.gif");
 	
 	protected JButton playButton;
 	protected JButton stopButton;
@@ -49,8 +49,8 @@ public class ControlsPanel extends JPanel {
 		/* init components */
 		
 		playButton = new JButton(playIcon);		
-		incrButton = new JButton(getIcon("icons/StepForward24.gif"));
-		stopButton = new JButton(getIcon("icons/Stop24.gif"));
+		incrButton = new JButton(getIcon("/icons/StepForward24.gif"));
+		stopButton = new JButton(getIcon("/icons/Stop24.gif"));
 			
 		timeSlider = new JSlider();
 		timeSlider.setPaintTicks(true);

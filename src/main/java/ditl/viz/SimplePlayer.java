@@ -40,7 +40,7 @@ public abstract class SimplePlayer extends JFrame {
 		
 		runner.addTimeChangeListener(scene);
 		
-		openButton = new JButton(new ImageIcon(SimplePlayer.class.getResource("icons/Open24.gif")));
+		openButton = new JButton(new ImageIcon(SimplePlayer.class.getResource("/icons/Open24.gif")));
 		openButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {

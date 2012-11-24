@@ -121,8 +121,10 @@ buses. It supports seeking and incrementing.
 Building
 --------
 
-This project assumes a recent JDK (&ge;1.6). At the project root just run:
-    $ ant
+This project assumes a recent JDK (&ge;1.6) and uses maven. At the
+project root just run:
+
+    $ mvn install
 
 This will build a single jar archive _ditl.jar_ containing both the
 core and module classes.

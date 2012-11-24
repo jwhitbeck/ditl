@@ -1,5 +1,5 @@
-build/
-bin/
-dist/
 .classpath
 .project
+.settings/
+target/
+dependency-reduced-pom.xml
