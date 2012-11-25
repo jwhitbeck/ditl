@@ -75,11 +75,5 @@ public class StatefulReader<E, S> extends Reader<E> {
 	public Bus<?>[] busses(){
 		return new Bus<?>[]{_bus, state_bus};
 	}
-	
-	@Override
-	public void close() throws IOException {
-		snapshots_iterator.close();
-		super.close();	
-	}
 
 }
