@@ -16,74 +16,49 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs;
+package ditl.graphs.cli;
 
-import java.util.Set;
+import java.io.IOException;
 
-import ditl.*;
+import org.apache.commons.cli.*;
 
-public final class Link implements Couple {
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.ConvertApp;
+import ditl.graphs.*;
+
+public class ArcsToEdges extends ConvertApp {
+
+	private final static String intersectOption = "intersect";
 	
-	final Integer id1;
-	final Integer id2;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.ARCS);
+	private boolean union;
 	
-	public Link(Integer i1, Integer i2){
-		if ( i1 < i2 ){
-			id1 = i1;
-			id2 = i2;
-		} else {
-			id1 = i2;
-			id2 = i1;
-		}
-	}
-	
-	public Integer id1(){
-		return id1;
-	}
-	
-	public Integer id2(){
-		return id2;
-	}
-	
-	public static final class Factory implements ItemFactory<Link> {
-		@Override
-		public Link fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer id1 = Integer.parseInt(elems[0]);
-				Integer id2 = Integer.parseInt(elems[1]);
-				return new Link(id1,id2);	
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	public boolean hasVertex(Integer id){
-		return ( id.equals(id1) || id.equals(id2) );
-	}
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "arcs-to-edges";
+	public final static String CMD_ALIAS = "a2e";
 	
 	@Override
-	public boolean equals(Object o){
-		Link ct = (Link)o;
-		return (ct.id1.equals(id1)) && (ct.id2.equals(id2));
-	}
-	
-	@Override
-	public String toString(){
-		return id1+" "+id2;
-	}
-	
-	public static final class InternalGroupFilter implements Filter<Link> {
-		private Set<Integer> _group;
-		public InternalGroupFilter(Set<Integer> group){ _group = group;}
-		@Override
-		public Link filter(Link item) {
-			if ( _group.contains(item.id1) && _group.contains(item.id2) )
-				return item;
-			return null;
-		}
+	protected void initOptions() {
+		super.initOptions();
+		graph_options.setOptions(options);
+		options.addOption(null, storeOutputOption, true, "write new traces to this store");
+		options.addOption(null, intersectOption, false, "intersect arcs (default: union)");
 	}
 
+	@Override
+	protected void parseArgs(CommandLine cli, String[] args)
+			throws ParseException, ArrayIndexOutOfBoundsException,
+			HelpException {
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
+		union = cli.hasOption(intersectOption);
+	}
+
+	@Override
+	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+		ArcTrace arcs = (ArcTrace) orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
+		EdgeTrace edges = (EdgeTrace) dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
+		new ArcsToEdgesConverter(edges, arcs, union).convert();
+	}
 }

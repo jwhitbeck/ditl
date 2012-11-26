@@ -55,7 +55,7 @@ public final class BeaconsToArcsConverter implements Incrementable, Converter {
 			@Override
 			public void handle(long time, Collection<Arc> events) {
 				for ( Arc a : events ){
-					if ( ! lastArcs.containsKey(a) ){ // link comes up
+					if ( ! lastArcs.containsKey(a) ){ // edge comes up
 						long start_time = time - (long)(_expansion*rand()); 
 						arc_writer.queue(start_time, new ArcEvent(a,ArcEvent.UP));
 					}

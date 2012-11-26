@@ -34,7 +34,7 @@ public class GraphPlayer extends SimplePlayer {
 	
 	protected GraphScene scene;
 	protected GraphRunner runner;
-	protected LinksSelectorPanel linksSelector;
+	protected EdgeSelectorPanel edgesSelector;
 	protected TimeUnitPanel timeUnitPanel;
 	protected ReachabilitySelectorPanel reachabilitySelector; 
 	protected GroupsPanel groups;
@@ -47,14 +47,14 @@ public class GraphPlayer extends SimplePlayer {
 	protected void build(){
 		scene = new GraphScene();
 		runner = new GraphRunner();
-		linksSelector = new LinksSelectorPanel(runner, scene);
+		edgesSelector = new EdgeSelectorPanel(runner, scene);
 		groups = new GroupsPanel(runner, scene);
 		timeUnitPanel = new TimeUnitPanel(controls);
 		reachabilitySelector = new ReachabilitySelectorPanel(runner, scene);
 		
 		scene.setPreferredSize(new Dimension(700,500));
 		runner.addMovementHandler(scene);
-		runner.addLinkHandler(scene);
+		runner.addEdgesHandler(scene);
 		runner.addArcHandler(scene);
 		runner.addGroupHandler(scene);
 		scene.setGroupColorMap(groups.colorMap());
@@ -65,7 +65,7 @@ public class GraphPlayer extends SimplePlayer {
 		widgets.add(new FPSPanel(runner));
 		widgets.add(new ShowIdsPanel(scene));
 		widgets.add(new ToggleAntialiasingPanel(scene));
-		widgets.add(linksSelector); 
+		widgets.add(edgesSelector); 
 		widgets.add(reachabilitySelector);
 		widgets.add(groups);
 		
@@ -83,9 +83,9 @@ public class GraphPlayer extends SimplePlayer {
 			groups.load(_store.listTraces(GroupTrace.type));
 		}
 		
-		if ( linksSelector != null ){
-			linksSelector.setStore(_store);
-			linksSelector.load(_store.listTraces(LinkTrace.type));
+		if ( edgesSelector != null ){
+			edgesSelector.setStore(_store);
+			edgesSelector.load(_store.listTraces(EdgeTrace.type));
 		}
 
 		if ( reachabilitySelector != null ){

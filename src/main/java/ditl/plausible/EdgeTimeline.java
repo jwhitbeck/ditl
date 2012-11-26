@@ -24,7 +24,7 @@ import java.util.*;
 import ditl.*;
 import ditl.graphs.*;
 
-class LinkTimeline {
+class EdgeTimeline {
 	
 	long prev_up = -Trace.INFINITY;
 	long prev_down = -Trace.INFINITY;
@@ -33,33 +33,33 @@ class LinkTimeline {
 	
 	private long prev_up_tmp, prev_down_tmp, next_up_tmp, next_down_tmp;
 	
-	private final Link _link; 
+	private final Edge _edge; 
 	
-	private TreeMap<Long,List<LinkEvent>> buffer = new TreeMap<Long,List<LinkEvent>>();
-	private StatefulWriter<WindowedLinkEvent,WindowedLink> window_writer;
+	private TreeMap<Long,List<EdgeEvent>> buffer = new TreeMap<Long,List<EdgeEvent>>();
+	private StatefulWriter<WindowedEdgeEvent,WindowedEdge> window_writer;
 	
-	public LinkTimeline(Link link, StatefulWriter<WindowedLinkEvent,WindowedLink> windowWriter){
-		_link = link;
+	public EdgeTimeline(Edge edge, StatefulWriter<WindowedEdgeEvent,WindowedEdge> windowWriter){
+		_edge = edge;
 		window_writer = windowWriter;
-		//window_writer.append(time, new WindowedLinkEvent(_link, WindowedLinkEvent.UP));
+		//window_writer.append(time, new WindowedEdgesEvent(_edge, WindowedEdgesEvent.UP));
 	}
 	
 	private void write_events_if_changed(long time) throws IOException {
 		if ( prev_up_tmp != prev_up ){
 			prev_up = prev_up_tmp;
-			window_writer.queue(time, new WindowedLinkEvent(_link, WindowedLinkEvent.PREV_UP, prev_up));
+			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.PREV_UP, prev_up));
 		}
 		if ( prev_down_tmp != prev_down ){
 			prev_down = prev_down_tmp;
-			window_writer.queue(time, new WindowedLinkEvent(_link, WindowedLinkEvent.PREV_DOWN, prev_down));
+			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.PREV_DOWN, prev_down));
 		}
 		if ( next_up_tmp != next_up ){
 			next_up = next_up_tmp;
-			window_writer.queue(time, new WindowedLinkEvent(_link, WindowedLinkEvent.NEXT_UP, next_up));
+			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.NEXT_UP, next_up));
 		}
 		if ( next_down_tmp != next_down ){
 			next_down = next_down_tmp;
-			window_writer.queue(time, new WindowedLinkEvent(_link, WindowedLinkEvent.NEXT_DOWN, next_down));
+			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.NEXT_DOWN, next_down));
 		}
 	}
 	
@@ -70,10 +70,10 @@ class LinkTimeline {
 		next_up_tmp = Trace.INFINITY;
 		next_down_tmp = Trace.INFINITY;
 		
-		for ( Map.Entry<Long, List<LinkEvent>> e : buffer.entrySet() ){
+		for ( Map.Entry<Long, List<EdgeEvent>> e : buffer.entrySet() ){
 			long t = e.getKey();
-			for ( LinkEvent lev : e.getValue() )
-			if ( lev.isUp() ){
+			for ( EdgeEvent eev : e.getValue() )
+			if ( eev.isUp() ){
 				if ( t <= time && t > prev_up_tmp ){
 					prev_up_tmp = t;
 				}
@@ -95,23 +95,23 @@ class LinkTimeline {
 			update(time);
 	}
 	
-	public void queue(long time, LinkEvent linkEvent){
+	public void queue(long time, EdgeEvent edgeEvent){
 		if ( ! buffer.containsKey(time) )
-			buffer.put(time, new LinkedList<LinkEvent>());
-		buffer.get(time).add(linkEvent);
+			buffer.put(time, new LinkedList<EdgeEvent>());
+		buffer.get(time).add(edgeEvent);
 	}
 	
-	public void append(long time, long window, LinkEvent linkEvent) throws IOException{
-		queue(time, linkEvent);
-		if ( linkEvent.isUp() ){
+	public void append(long time, long window, EdgeEvent edgeEvent) throws IOException{
+		queue(time, edgeEvent);
+		if ( edgeEvent.isUp() ){
 			if (next_up == Trace.INFINITY ){
 				next_up = time;
-				window_writer.queue(time-window, new WindowedLinkEvent(_link, WindowedLinkEvent.NEXT_UP, next_up));
+				window_writer.queue(time-window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.NEXT_UP, next_up));
 			}
 		} else {
 			if ( next_down == Trace.INFINITY ){
 				next_down = time;
-				window_writer.queue(time-window, new WindowedLinkEvent(_link, WindowedLinkEvent.NEXT_DOWN, next_down));
+				window_writer.queue(time-window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.NEXT_DOWN, next_down));
 			}
 		}
 	}
@@ -122,11 +122,11 @@ class LinkTimeline {
 	}
 	
 	public void expire(long time) throws IOException{
-		window_writer.queue(time, new WindowedLinkEvent(_link,WindowedLinkEvent.DOWN));
+		window_writer.queue(time, new WindowedEdgeEvent(_edge,WindowedEdgeEvent.DOWN));
 	}
 	
-	public WindowedLink windowedLink(){
-		WindowedLink wl = new WindowedLink(_link);
+	public WindowedEdge windowedEdges(){
+		WindowedEdge wl = new WindowedEdge(_edge);
 		wl.prev_up = prev_up;
 		wl.prev_down = prev_down;
 		wl.next_up = next_up;

@@ -54,12 +54,12 @@ public class ArcElement implements SceneElement {
 	}
 	
 	public void bringArcUp(Arc a){ // from n1 to n2
-		if ( node1.id().equals(a.from()) ){ // RIGHT LINK
+		if ( node1.id().equals(a.from()) ){ // RIGHT EDGE
 			switch ( state ){
 			case DOWN: state=RIGHT; break;
 			case LEFT: state=SYM; break;
 			}
-		} else { // LEFT LINK
+		} else { // LEFT EDGE
 			switch ( state ){
 			case DOWN: state=LEFT; break;
 			case RIGHT: state=SYM; break;
@@ -68,12 +68,12 @@ public class ArcElement implements SceneElement {
 	}
 	
 	public void bringArcDown(Arc a){ // from n1 to n2
-		if ( node1.id().equals(a.from()) ){ // RIGHT LINK
+		if ( node1.id().equals(a.from()) ){ // RIGHT EDGE
 			switch ( state ){
 			case SYM: state=LEFT; break;
 			case RIGHT: state=DOWN; break;
 			}
-		} else { // LEFT LINK
+		} else { // LEFT EDGE
 			switch ( state ){
 			case SYM: state=RIGHT; break;
 			case LEFT: state=DOWN; break;

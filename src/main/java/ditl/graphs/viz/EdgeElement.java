@@ -18,13 +18,25 @@
  *******************************************************************************/
 package ditl.graphs.viz;
 
-import java.io.IOException;
+import java.awt.*;
 
-import ditl.graphs.LinkTrace;
+import ditl.viz.SceneElement;
 
 
 
-public interface LinkRunner {
-	public void setLinkTrace(LinkTrace links) throws IOException;
-	public void addLinkHandler(LinkTrace.Handler handler);
+public class EdgeElement implements SceneElement {
+
+	private NodeElement node1;
+	private NodeElement node2;
+	
+	public EdgeElement(NodeElement n1, NodeElement n2){
+		node1 = n1;
+		node2 = n2;
+	}
+	
+	@Override
+	public void paint(Graphics2D g2) {
+		g2.drawLine(node1.sX, node1.sY, node2.sX, node2.sY);
+	}
+
 }

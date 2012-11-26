@@ -25,7 +25,7 @@ import ditl.*;
 
 
 
-public final class NumberContactsReport extends Report implements LinkTrace.Handler {
+public final class NumberContactsReport extends Report implements EdgeTrace.Handler {
 
 	private Map<Integer,Integer> contactsCount = new HashMap<Integer,Integer>();
 	
@@ -43,11 +43,11 @@ public final class NumberContactsReport extends Report implements LinkTrace.Hand
 	}
 
 	@Override
-	public Listener<LinkEvent> linkEventListener() {
-		return new Listener<LinkEvent>() {
+	public Listener<EdgeEvent> edgeEventListener() {
+		return new Listener<EdgeEvent>() {
 			@Override
-			public void handle(long time, Collection<LinkEvent> events) {
-				for ( LinkEvent cev : events ){
+			public void handle(long time, Collection<EdgeEvent> events) {
+				for ( EdgeEvent cev : events ){
 					if ( cev.isUp() ){
 						incr(cev.id1());
 						incr(cev.id2());
@@ -64,13 +64,13 @@ public final class NumberContactsReport extends Report implements LinkTrace.Hand
 	}
 
 	@Override
-	public Listener<Link> linkListener() {
-		return new StatefulListener<Link>(){
+	public Listener<Edge> edgeListener() {
+		return new StatefulListener<Edge>(){
 			@Override
-			public void handle(long time, Collection<Link> events) {
-				for ( Link l : events ){
-					incr(l.id1());
-					incr(l.id2());
+			public void handle(long time, Collection<Edge> events) {
+				for ( Edge e : events ){
+					incr(e.id1());
+					incr(e.id2());
 				}
 			}
 

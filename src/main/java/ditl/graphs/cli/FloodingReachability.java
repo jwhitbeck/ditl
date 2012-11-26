@@ -33,7 +33,7 @@ public class FloodingReachability extends ConvertApp {
 	
 	private double tau;
 	private long delay;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS,GraphOptions.PRESENCE);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES,GraphOptions.PRESENCE);
 	private Long min_time;
 	
 	public final static String PKG_NAME = "graphs";
@@ -65,17 +65,17 @@ public class FloodingReachability extends ConvertApp {
 
 	@Override
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-		LinkTrace links = (LinkTrace)orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
+		EdgeTrace edges = (EdgeTrace)orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
 		PresenceTrace presence = (PresenceTrace)orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
 		if ( min_time == null )
 			min_time = presence.minTime();
 		else
-			min_time *= links.ticsPerSecond();
-		long _tau = (long)(tau * links.ticsPerSecond());
-		delay *= links.ticsPerSecond();
-		String name = links.name()+"_t"+_tau+"_pd"+delay;
+			min_time *= edges.ticsPerSecond();
+		long _tau = (long)(tau * edges.ticsPerSecond());
+		delay *= edges.ticsPerSecond();
+		String name = edges.name()+"_t"+_tau+"_pd"+delay;
 		ReachabilityTrace reachability = (ReachabilityTrace)dest_store.newTrace(name, ReachabilityTrace.type, force);
-		new FloodingReachableConverter(reachability, presence, links, _tau, delay, min_time).convert();
+		new FloodingReachableConverter(reachability, presence, edges, _tau, delay, min_time).convert();
 		
 	}
 }

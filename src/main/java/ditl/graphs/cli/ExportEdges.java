@@ -22,52 +22,47 @@ import java.io.IOException;
 
 import org.apache.commons.cli.*;
 
-import ditl.Store.*;
-import ditl.WritableStore.AlreadyExistsException;
-import ditl.cli.ConvertApp;
+import ditl.Store.NoSuchTraceException;
+import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
-public class MovementToLinks extends ConvertApp {
+public class ExportEdges extends ExportApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.MOVEMENT);
-	private double range;
-	private Long max_interval = null;
-	
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
+	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.CRAWDAD, ExternalFormat.ONE);
+	private Long dtps;
+
 	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "movement-to-links";
-	public final static String CMD_ALIAS = "m2l";
-
-
-	@Override
-	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		MovementTrace movement = (MovementTrace) orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
-		LinkTrace links = (LinkTrace) dest_store.newTrace(graph_options.get(GraphOptions.LINKS), LinkTrace.type, force);
-		if ( max_interval == null )
-			max_interval = movement.maxTime()-movement.minTime();
-		else
-			max_interval *= movement.ticsPerSecond();
-		new MovementToLinksConverter(links, movement, range, max_interval).convert();
-	}
+	public final static String CMD_NAME = "export-edges";
+	public final static String CMD_ALIAS = "xe";
 	
 	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		range = Double.parseDouble(args[1]);
-		if ( cli.hasOption(intervalOption) )
-			max_interval = Long.parseLong(cli.getOptionValue(intervalOption));
-	}
-
-	@Override
-	protected String getUsageString() {
-		return "[OPTIONS] STORE RANGE";
-	}
-	
-	@Override
-	protected void initOptions(){
+	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
-		options.addOption(null, intervalOption, true, "interval beyond which not to look for new meetings (useful if positions are updated every seconds)");
+		ext_fmt.setOptions(options);
+		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: s)");
 	}
 
+	@Override
+	protected void parseArgs(CommandLine cli, String[] args)
+			throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
+		ext_fmt.parse(cli);
+		dtps = getTicsPerSecond( cli.getOptionValue(destTimeUnitOption,"s"));
+		if ( dtps == null )
+			throw new HelpException();
+	}
+
+	@Override
+	protected void run() throws IOException, NoSuchTraceException {
+		EdgeTrace edges = (EdgeTrace) _store.getTrace(graph_options.get(GraphOptions.EDGES));
+		long otps = edges.ticsPerSecond();
+		double timeMul = getTimeMul(otps,dtps);
+		if ( ext_fmt.is(ExternalFormat.CRAWDAD) )
+			CRAWDADContacts.toCRAWDAD(edges, _out, timeMul);
+		else
+			ONEContacts.toONE(edges, _out, timeMul);
+	}
 }

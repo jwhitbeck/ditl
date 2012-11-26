@@ -26,10 +26,10 @@ import ditl.*;
 
 
 
-public final class ContactTimesReport extends Report implements LinkTrace.Handler {
+public final class ContactTimesReport extends Report implements EdgeTrace.Handler {
 
 	private boolean _contacts;
-	private Map<Link,Long> activeContacts = new AdjacencyMap.Links<Long>();
+	private Map<Edge,Long> activeContacts = new AdjacencyMap.Edges<Long>();
 	
 	public ContactTimesReport(OutputStream out, boolean contacts) throws IOException {
 		super(out);
@@ -47,19 +47,19 @@ public final class ContactTimesReport extends Report implements LinkTrace.Handle
 	}
 	
 	@Override
-	public Listener<LinkEvent> linkEventListener(){
-		return new Listener<LinkEvent>() {
+	public Listener<EdgeEvent> edgeEventListener(){
+		return new Listener<EdgeEvent>() {
 			@Override
-			public void handle(long time, Collection<LinkEvent> events) throws IOException {
-				for ( LinkEvent event : events ){
-					Link l = event.link();
+			public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+				for ( EdgeEvent event : events ){
+					Edge e = event.edge();
 					if( event.isUp() == _contacts ){
-						activeContacts.put(l, time);
+						activeContacts.put(e, time);
 					} else {
-						Long b = activeContacts.get(l);
+						Long b = activeContacts.get(e);
 						if ( b != null ){
-							activeContacts.remove(l);
-							append(l+" "+b+" "+time+" "+(time-b));
+							activeContacts.remove(e);
+							append(e+" "+b+" "+time+" "+(time-b));
 						}
 					}
 				}
@@ -68,13 +68,13 @@ public final class ContactTimesReport extends Report implements LinkTrace.Handle
 	}
 
 	@Override
-	public Listener<Link> linkListener() {
-		return new StatefulListener<Link>(){
+	public Listener<Edge> edgeListener() {
+		return new StatefulListener<Edge>(){
 			@Override
-			public void handle(long time, Collection<Link> events) {
+			public void handle(long time, Collection<Edge> events) {
 				if ( _contacts )
-					for ( Link l : events )
-						activeContacts.put(l, time);
+					for ( Edge e : events )
+						activeContacts.put(e, time);
 			}
 
 			@Override

@@ -29,10 +29,10 @@ import ditl.viz.SceneRunner;
 
 @SuppressWarnings("serial")
 public class GraphRunner extends SceneRunner 
-	implements ArcRunner, LinkRunner, MovementRunner, GroupRunner {
+	implements ArcRunner, EdgeRunner, MovementRunner, GroupRunner {
 	
-	protected Bus<Link> linkBus = new Bus<Link>();
-	protected Bus<LinkEvent> linkEventBus = new Bus<LinkEvent>();
+	protected Bus<Edge> edgeBus = new Bus<Edge>();
+	protected Bus<EdgeEvent> edgeEventBus = new Bus<EdgeEvent>();
 	protected Bus<Arc> arcBus = new Bus<Arc>();
 	protected Bus<ArcEvent> arcEventBus = new Bus<ArcEvent>();
 	protected Bus<Movement> movementBus = new Bus<Movement>();
@@ -40,7 +40,7 @@ public class GraphRunner extends SceneRunner
 	protected Bus<Group> groupBus = new Bus<Group>();
 	protected Bus<GroupEvent> groupEventBus = new Bus<GroupEvent>();
 	protected StatefulReader<MovementEvent,Movement> movement_reader;
-	protected StatefulReader<LinkEvent,Link> links_reader;
+	protected StatefulReader<EdgeEvent,Edge> edge_reader;
 	protected StatefulReader<ArcEvent,Arc> arcs_reader;
 	protected StatefulReader<GroupEvent,Group> groups_reader;
 	
@@ -60,27 +60,27 @@ public class GraphRunner extends SceneRunner
 	}
 
 	@Override
-	public void setLinkTrace(LinkTrace links) throws IOException {
-		linkEventBus.reset();
-		linkBus.reset();
-		if ( links_reader != null ){
-			runner.removeGenerator(links_reader);
-			links_reader.close();
+	public void setEdgesTrace(EdgeTrace edges) throws IOException {
+		edgeEventBus.reset();
+		edgeBus.reset();
+		if ( edge_reader != null ){
+			runner.removeGenerator(edge_reader);
+			edge_reader.close();
 		}
-		if ( links != null ){
-			links_reader = links.getReader();
-			links_reader.setBus(linkEventBus);
-			links_reader.setStateBus(linkBus);
-			links_reader.seek(runner.time());
-			linkBus.flush();
-			runner.addGenerator(links_reader);
+		if ( edges != null ){
+			edge_reader = edges.getReader();
+			edge_reader.setBus(edgeEventBus);
+			edge_reader.setStateBus(edgeBus);
+			edge_reader.seek(runner.time());
+			edgeBus.flush();
+			runner.addGenerator(edge_reader);
 		}
 	}
 	
 	@Override
-	public void addLinkHandler(LinkTrace.Handler handler) {
-		linkBus.addListener(handler.linkListener());
-		linkEventBus.addListener(handler.linkEventListener());
+	public void addEdgesHandler(EdgeTrace.Handler handler) {
+		edgeBus.addListener(handler.edgeListener());
+		edgeEventBus.addListener(handler.edgeEventListener());
 	}
 	
 	@Override

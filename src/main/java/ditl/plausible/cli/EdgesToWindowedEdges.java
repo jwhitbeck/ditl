@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs.cli;
+package ditl.plausible.cli;
 
 import java.io.IOException;
 
@@ -25,53 +25,50 @@ import org.apache.commons.cli.*;
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ConvertApp;
-import ditl.graphs.*;
+import ditl.graphs.EdgeTrace;
+import ditl.graphs.cli.GraphOptions;
+import ditl.plausible.*;
 
-
-public class Resample extends ConvertApp {
+public class EdgesToWindowedEdges extends ConvertApp {
 	
-	final static String missProbabilityOption = "miss-probability";
-	final static String randomizeOption = "randomize";
-
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.PRESENCE, GraphOptions.EDGES);
-	private long period;
-	private double p;
-	private boolean randomize;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
+	private String windowedEdgesOption = "windowed-edges";
+	private String windowed_edges_name;
+	private long window;
 	
+	public final static String PKG_NAME = "plausible";
+	public final static String CMD_NAME = "edges-to-windowed-edges";
+	public final static String CMD_ALIAS = "e2we";
 	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "resample";
-	public final static String CMD_ALIAS = "s";
-
-	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		period = Long.parseLong(args[1]);
-		p = Double.parseDouble(cli.getOptionValue(missProbabilityOption,"0.0"));
-		randomize = cli.hasOption(randomizeOption);
-	}
-
 	@Override
 	protected void initOptions() {
 		super.initOptions();
-		options.addOption(null, missProbabilityOption, true, "Missed beacon probability (default 0.0)");
-		options.addOption(null, randomizeOption, false, "Randomize beaconning starting times");
+		graph_options.setOptions(options);
+		options.addOption(null, windowedEdgesOption, true, "name of windowed edge trace (default: "+WindowedEdgeTrace.defaultName+")");
+	}
+
+	@Override
+	protected void parseArgs(CommandLine cli, String[] args)
+			throws ParseException, ArrayIndexOutOfBoundsException,
+			HelpException {
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
+		windowed_edges_name = cli.getOptionValue(windowedEdgesOption, WindowedEdgeTrace.defaultName);
+		window = Long.parseLong(args[1]);
 	}
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-		PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
-		BeaconTrace beacons = (BeaconTrace) dest_store.newTrace(graph_options.get(GraphOptions.BEACONS), BeaconTrace.type, force);
-		period *= edges.ticsPerSecond();
-		new BeaconningConverter(beacons, presence, edges, period, p, randomize).convert();
+		WindowedEdgeTrace windowed_edges = (WindowedEdgeTrace) dest_store.newTrace(windowed_edges_name, WindowedEdgeTrace.type, force);
+		window *= edges.ticsPerSecond();
+		new WindowedEdgeConverter(windowed_edges, edges, window).convert();
 	}
-
+	
 	@Override
-	protected String getUsageString() {
-		return "[OPTIONS] STORE BEACONNING_PERIOD";
+	protected String getUsageString(){
+		return "[OPTIONS] STORE WINDOW";
 	}
+	
 
 }

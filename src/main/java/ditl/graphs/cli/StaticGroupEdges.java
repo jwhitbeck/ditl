@@ -16,59 +16,53 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.plausible.cli;
+package ditl.graphs.cli;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ConvertApp;
-import ditl.graphs.LinkTrace;
-import ditl.graphs.cli.GraphOptions;
-import ditl.plausible.*;
+import ditl.graphs.*;
 
-public class LinksToWindowedLinks extends ConvertApp {
+public class StaticGroupEdges extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS);
-	private String windowedLinksOption = "windowed-links";
-	private String windowed_links_name;
-	private long window;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.GROUPS, GraphOptions.EDGES);
+	private String groupEdgesName;
 	
-	public final static String PKG_NAME = "plausible";
-	public final static String CMD_NAME = "links-to-windowed-links";
-	public final static String CMD_ALIAS = "l2wl";
-	
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "group-edges";
+	public final static String CMD_ALIAS = "ge";
+
+
 	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		options.addOption(null, windowedLinksOption, true, "name of windowed link trace (default: "+WindowedLinkTrace.defaultName+")");
+	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
+		EdgeTrace edges = (EdgeTrace)orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+		GroupTrace groups = (GroupTrace)orig_store.getTrace(graph_options.get(GraphOptions.GROUPS));
+		Set<Group> static_groups = groups.staticGroups();
+		EdgeTrace group_edges = (EdgeTrace)dest_store.newTrace(groupEdgesName, EdgeTrace.type, force);
+		new StaticGroupEdgeConverter(group_edges, edges, static_groups).convert();
 	}
-
+	
 	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException,
-			HelpException {
+	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
-		windowed_links_name = cli.getOptionValue(windowedLinksOption, WindowedLinkTrace.defaultName);
-		window = Long.parseLong(args[1]);
+		groupEdgesName = args[1];
 	}
 
 	@Override
-	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
-		WindowedLinkTrace windowed_links = (WindowedLinkTrace) dest_store.newTrace(windowed_links_name, WindowedLinkTrace.type, force);
-		window *= links.ticsPerSecond();
-		new WindowedLinkConverter(windowed_links, links, window).convert();
+	protected String getUsageString() {
+		return "[OPTIONS] STORE GROUP_EDGES_NAME";
 	}
 	
 	@Override
-	protected String getUsageString(){
-		return "[OPTIONS] STORE WINDOW";
+	protected void initOptions(){
+		super.initOptions();
+		graph_options.setOptions(options);
 	}
-	
 
 }

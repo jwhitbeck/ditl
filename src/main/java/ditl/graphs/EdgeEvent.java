@@ -18,67 +18,83 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Set;
 
 import ditl.*;
 
-public class LinkTrace extends StatefulTrace<LinkEvent, Link> 
-	implements StatefulTrace.Filterable<LinkEvent, Link>{
+public final class EdgeEvent {
 	
-	public final static String type = "links";
-	public final static String defaultName = "links";
+	public final static boolean UP = true;
+	public final static boolean DOWN = false;
 	
-	public final static class Updater implements StateUpdater<LinkEvent,Link> {
-		private Set<Link> links = new AdjacencySet.Links();
-		
-		@Override
-		public void setState(Collection<Link> contactsState ) {
-			links.clear();
-			for ( Link l : contactsState )
-				links.add(l);
+	final Integer id1;
+	final Integer id2;
+	final boolean _up;
+	
+	public EdgeEvent(Integer i1, Integer i2, boolean up){
+		if ( i1 < i2 ){
+			id1 = i1;
+			id2 = i2;
+		} else {
+			id1 = i2;
+			id2 = i1;
 		}
-
+		_up = up;
+	}
+	
+	public EdgeEvent(Edge edge, boolean up){
+		id1 = edge.id1;
+		id2 = edge.id2;
+		_up = up;
+	}
+	
+	public Integer id1(){
+		return id1;
+	}
+	
+	public Integer id2(){
+		return id2;
+	}
+	
+	public boolean isUp(){
+		return _up;
+	}
+	
+	public Edge edge(){
+		return new Edge(id1,id2);
+	}
+	
+	public static final class Factory implements ItemFactory<EdgeEvent>{
 		@Override
-		public Set<Link> states() {
-			return links;
-		}
-
-		@Override
-		public void handleEvent(long time, LinkEvent event) {
-			if ( event.isUp() ){
-				links.add( event.link() );
-			} else {
-				links.remove( event.link() );
+		public EdgeEvent fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id1 = Integer.parseInt(elems[0]);
+				Integer id2 = Integer.parseInt(elems[1]);
+				boolean up = elems[2].equals("UP");
+				return new EdgeEvent(id1,id2,up);
+				
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
 		}
 	}
 	
-	public interface Handler {
-		public Listener<Link> linkListener();
-		public Listener<LinkEvent> linkEventListener();
-	}
-
-	public LinkTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new LinkEvent.Factory(), new Link.Factory(), 
-				new StateUpdaterFactory<LinkEvent,Link>(){
-					@Override
-					public StateUpdater<LinkEvent, Link> getNew() {
-						return new LinkTrace.Updater();
-					}
-		});
-	}
-
 	@Override
-	public Filter<Link> stateFilter(Set<Integer> group) {
-		return new Link.InternalGroupFilter(group);
+	public String toString(){
+		return id1+" "+id2+" "+(_up? "UP" : "DOWN");
+	}
+	
+	public static final class InternalGroupFilter implements Filter<EdgeEvent> {
+		private Set<Integer> _group;
+		public InternalGroupFilter(Set<Integer> group){ _group = group;}
+		@Override
+		public EdgeEvent filter(EdgeEvent item) {
+			if ( _group.contains(item.id1) && _group.contains(item.id2) )
+				return item;
+			return null;
+		}
 	}
 
-	@Override
-	public Filter<LinkEvent> eventFilter(Set<Integer> group) {
-		return new LinkEvent.InternalGroupFilter(group);
-	}
-
-	@Override
-	public void copyOverTraceInfo(Writer<LinkEvent> writer) {}
 }

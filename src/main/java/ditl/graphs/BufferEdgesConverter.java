@@ -25,59 +25,59 @@ import ditl.*;
 
 
 
-public final class BufferLinksConverter implements Converter, 
-	LinkTrace.Handler, Listener<LinkEvent> {
+public final class BufferEdgesConverter implements Converter, 
+	EdgeTrace.Handler, Listener<EdgeEvent> {
 	
-	private LinkTrace buffered_links;
-	private LinkTrace _links;
+	private EdgeTrace buffered_edges;
+	private EdgeTrace _edges;
 	private long before_b_time;
 	private long after_b_time;
 	private boolean _randomize;
 	private Random rng = new Random();
-	private StatefulWriter<LinkEvent,Link> buffer_writer;
-	private Set<Link> init_state = new AdjacencySet.Links();
-	private Map<Link,Integer> up_count = new AdjacencyMap.Links<Integer>();
-	private Bus<LinkEvent> event_bus = new Bus<LinkEvent>();
+	private StatefulWriter<EdgeEvent,Edge> buffer_writer;
+	private Set<Edge> init_state = new AdjacencySet.Edges();
+	private Map<Edge,Integer> up_count = new AdjacencyMap.Edges<Integer>();
+	private Bus<EdgeEvent> event_bus = new Bus<EdgeEvent>();
 	private boolean init_state_set = false;
 	private long min_time;
 	
-	public BufferLinksConverter(LinkTrace bufferedLinks, LinkTrace links, 
+	public BufferEdgesConverter(EdgeTrace bufferedEdges, EdgeTrace edges, 
 			long beforeBufferTime, long afterBufferTime, boolean randomize){
-		buffered_links = bufferedLinks;
-		_links = links;
+		buffered_edges = bufferedEdges;
+		_edges = edges;
 		before_b_time = beforeBufferTime;
 		after_b_time = afterBufferTime;
 		_randomize = randomize;
-		min_time = _links.minTime();
+		min_time = _edges.minTime();
 	}
 
 
 	@Override
 	public void convert() throws IOException {
-		buffer_writer = buffered_links.getWriter(); 
-		StatefulReader<LinkEvent,Link> links_reader = _links.getReader();
+		buffer_writer = buffered_edges.getWriter(); 
+		StatefulReader<EdgeEvent,Edge> edge_reader = _edges.getReader();
 		
-		links_reader.stateBus().addListener(linkListener());
-		links_reader.bus().addListener(linkEventListener());
+		edge_reader.stateBus().addListener(edgeListener());
+		edge_reader.bus().addListener(edgeEventListener());
 		event_bus.addListener(this);
 		
-		Runner runner = new Runner(_links.maxUpdateInterval(), _links.minTime(), _links.maxTime());
-		runner.addGenerator(links_reader);
+		Runner runner = new Runner(_edges.maxUpdateInterval(), _edges.minTime(), _edges.maxTime());
+		runner.addGenerator(edge_reader);
 		runner.run();
 		
 		event_bus.flush();
 		
-		buffer_writer.setPropertiesFromTrace(_links);
+		buffer_writer.setPropertiesFromTrace(_edges);
 		buffer_writer.close();
-		links_reader.close();
+		edge_reader.close();
 	}
 
 	@Override
-	public Listener<LinkEvent> linkEventListener() {
-		return new Listener<LinkEvent>(){
+	public Listener<EdgeEvent> edgeEventListener() {
+		return new Listener<EdgeEvent>(){
 			@Override
-			public void handle(long time, Collection<LinkEvent> events) throws IOException {
-				for ( LinkEvent event : events ){
+			public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+				for ( EdgeEvent event : events ){
 					if ( event.isUp() ){
 						event_bus.queue(begin(time), event);
 					} else {
@@ -90,13 +90,13 @@ public final class BufferLinksConverter implements Converter,
 	}
 
 	@Override
-	public Listener<Link> linkListener() {
-		return new Listener<Link>(){
+	public Listener<Edge> edgeListener() {
+		return new Listener<Edge>(){
 			@Override
-			public void handle(long time, Collection<Link> events) {
-				for ( Link l : events ){
-					init_state.add(l);
-					incrLinkCount(l);
+			public void handle(long time, Collection<Edge> events) {
+				for ( Edge e : events ){
+					init_state.add(e);
+					incrEdgeCount(e);
 				}
 			}
 		};
@@ -118,52 +118,52 @@ public final class BufferLinksConverter implements Converter,
 		return time + after_b_time;
 	}
 	
-	private int incrLinkCount(Link l){
-		Integer i = up_count.get(l);
+	private int incrEdgeCount(Edge e){
+		Integer i = up_count.get(e);
 		if ( i==null ){
-			up_count.put(l, 1);
+			up_count.put(e, 1);
 			return 1;
 		}
-		up_count.put(l, i+1);
+		up_count.put(e, i+1);
 		return i+1;
 	}
 	
-	private int decrLinkCount(Link l){
-		Integer i = up_count.remove(l);
+	private int decrEdgeCount(Edge e){
+		Integer i = up_count.remove(e);
 		if ( i > 1 ){
-			up_count.put(l, i-1);
+			up_count.put(e, i-1);
 			return i-1;
 		}
 		return 0;
 	}
 
 	@Override
-	public void handle(long time, Collection<LinkEvent> events) throws IOException {
-		Deque<LinkEvent> down_links = new LinkedList<LinkEvent>();
-		for ( LinkEvent lev : events ){
-			Link l = lev.link();
+	public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+		Deque<EdgeEvent> down_edges = new LinkedList<EdgeEvent>();
+		for ( EdgeEvent eev : events ){
+			Edge e = eev.edge();
 			if ( time < min_time ){
-				init_state.add(l);
-				incrLinkCount(l);
+				init_state.add(e);
+				incrEdgeCount(e);
 			} else {
 				if ( ! init_state_set ){
 					buffer_writer.setInitState(min_time, init_state);
 					init_state_set = true;
 				}
-				if ( lev.isUp() ){
-					if ( incrLinkCount(l) == 1 ){ // link just came up
-						buffer_writer.append(time, lev);
+				if ( eev.isUp() ){
+					if ( incrEdgeCount(e) == 1 ){ // edge just came up
+						buffer_writer.append(time, eev);
 					}
 				} else {
-					down_links.addLast(lev);
+					down_edges.addLast(eev);
 				}
 			}
 		}
 		if ( time >= min_time ){
-			while ( ! down_links.isEmpty() ){
-				LinkEvent dlev = down_links.poll();
-				if ( decrLinkCount(dlev.link()) == 0 )
-					buffer_writer.append(time, dlev);
+			while ( ! down_edges.isEmpty() ){
+				EdgeEvent deev = down_edges.poll();
+				if ( decrEdgeCount(deev.edge()) == 0 )
+					buffer_writer.append(time, deev);
 			}
 		}
 	}

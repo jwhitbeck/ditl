@@ -27,38 +27,47 @@ import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-public class ArcsToLinks extends ConvertApp {
-
-	private final static String intersectOption = "intersect";
+public class MovementToEdges extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.ARCS);
-	private boolean union;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.MOVEMENT);
+	private double range;
+	private Long max_interval = null;
 	
 	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "arcs-to-links";
-	public final static String CMD_ALIAS = "a2l";
-	
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		options.addOption(null, storeOutputOption, true, "write new traces to this store");
-		options.addOption(null, intersectOption, false, "intersect arcs (default: union)");
-	}
+	public final static String CMD_NAME = "movement-to-edges";
+	public final static String CMD_ALIAS = "m2e";
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException,
-			HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		union = cli.hasOption(intersectOption);
-	}
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		ArcTrace arcs = (ArcTrace) orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
-		LinkTrace links = (LinkTrace) dest_store.newTrace(graph_options.get(GraphOptions.LINKS), LinkTrace.type, force);
-		new ArcsToLinksConverter(links, arcs, union).convert();
+		MovementTrace movement = (MovementTrace) orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
+		EdgeTrace edges = (EdgeTrace) dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
+		if ( max_interval == null )
+			max_interval = movement.maxTime()-movement.minTime();
+		else
+			max_interval *= movement.ticsPerSecond();
+		new MovementToEdgesConverter(edges, movement, range, max_interval).convert();
 	}
+	
+	@Override
+	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
+		range = Double.parseDouble(args[1]);
+		if ( cli.hasOption(intervalOption) )
+			max_interval = Long.parseLong(cli.getOptionValue(intervalOption));
+	}
+
+	@Override
+	protected String getUsageString() {
+		return "[OPTIONS] STORE RANGE";
+	}
+	
+	@Override
+	protected void initOptions(){
+		super.initOptions();
+		graph_options.setOptions(options);
+		options.addOption(null, intervalOption, true, "interval beyond which not to look for new meetings (useful if positions are updated every seconds)");
+	}
+
 }

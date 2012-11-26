@@ -26,10 +26,10 @@ import ditl.*;
 
 
 
-public final class AnyContactTimesReport extends Report implements LinkTrace.Handler {
+public final class AnyContactTimesReport extends Report implements EdgeTrace.Handler {
 
 	private boolean _contacts;
-	private Map<Integer,Integer> link_count = new HashMap<Integer,Integer>();
+	private Map<Integer,Integer> edge_count = new HashMap<Integer,Integer>();
 	private Map<Integer,Long> active_nodes = new HashMap<Integer,Long>();
 	
 	public AnyContactTimesReport(OutputStream out, boolean contacts) throws IOException {
@@ -48,18 +48,18 @@ public final class AnyContactTimesReport extends Report implements LinkTrace.Han
 	}
 	
 	@Override
-	public Listener<LinkEvent> linkEventListener(){
-		return new Listener<LinkEvent>() {
+	public Listener<EdgeEvent> edgeEventListener(){
+		return new Listener<EdgeEvent>() {
 			@Override
-			public void handle(long time, Collection<LinkEvent> events) throws IOException {
-				for ( LinkEvent event : events ){
-					Link l = event.link();
+			public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+				for ( EdgeEvent event : events ){
+					Edge e = event.edge();
 					if( event.isUp() ){
-						incr(time, l.id1, 1);
-						incr(time, l.id2, 1);
+						incr(time, e.id1, 1);
+						incr(time, e.id2, 1);
 					} else {
-						incr(time, l.id1, -1);
-						incr(time, l.id2, -1);
+						incr(time, e.id1, -1);
+						incr(time, e.id2, -1);
 					}
 				}
 			}
@@ -67,28 +67,28 @@ public final class AnyContactTimesReport extends Report implements LinkTrace.Han
 	}
 
 	@Override
-	public Listener<Link> linkListener() {
-		return new StatefulListener<Link>(){
+	public Listener<Edge> edgeListener() {
+		return new StatefulListener<Edge>(){
 			@Override
-			public void handle(long time, Collection<Link> events) throws IOException {
+			public void handle(long time, Collection<Edge> events) throws IOException {
 				if ( _contacts )
-					for ( Link l : events ){
-						incr(time, l.id1, 1);
-						incr(time, l.id2, 1);
+					for ( Edge e : events ){
+						incr(time, e.id1, 1);
+						incr(time, e.id2, 1);
 					}
 			}
 
 			@Override
 			public void reset() {
 				active_nodes.clear();
-				link_count.clear();
+				edge_count.clear();
 			}
 		};
 	}
 	
 	private void incr(long time, Integer id, int diff) throws IOException {
-		if ( ! link_count.containsKey(id) ){
-			link_count.put(id, diff);
+		if ( ! edge_count.containsKey(id) ){
+			edge_count.put(id, diff);
 			if ( _contacts ) {
 				active_nodes.put(id, time);
 			} else {
@@ -98,10 +98,10 @@ public final class AnyContactTimesReport extends Report implements LinkTrace.Han
 			}
 			
 		} else {
-			Integer c = link_count.get(id);
+			Integer c = edge_count.get(id);
 			c += diff;
 			if ( c.equals(0) ){
-				link_count.remove(id);
+				edge_count.remove(id);
 				if ( _contacts ){
 					Long t = active_nodes.remove(id);
 					append(id+" "+t+" "+time+" "+(time-t));
@@ -109,7 +109,7 @@ public final class AnyContactTimesReport extends Report implements LinkTrace.Han
 					active_nodes.put(id, time);
 				}
 			} else {
-				link_count.put(id, c);
+				edge_count.put(id, c);
 			}
 		}
 	}

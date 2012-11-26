@@ -27,28 +27,28 @@ import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-public class BufferLinks extends ConvertApp {
+public class BufferEdges extends ConvertApp {
 
 	final static String randomizeOption = "randomize"; 
 	private boolean randomize;
-	final static String bufferedLinksOption = "buffered-links"; 
-	final static String defaultBufferedLinksName = "buffered_links";
-	private String bufferedLinksName;
+	final static String bufferedEdgesOption = "buffered-edges"; 
+	final static String defaultBufferedEdgesName = "buffered_edges";
+	private String bufferedEdgesName;
 	private long before_buffer_time;
 	private long after_buffer_time;
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
 	
 	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "buffer-links";
-	public final static String CMD_ALIAS = "bl";
+	public final static String CMD_NAME = "buffer-edges";
+	public final static String CMD_ALIAS = "be";
 	
 	@Override
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
 		options.addOption(null, randomizeOption, false, "Randomize buffer time uniformly between 0 and BUFFER_TIME." );
-		options.addOption(null, bufferedLinksOption, true, "Name of buffered links trace (default: "+defaultBufferedLinksName+")" );
+		options.addOption(null, bufferedEdgesOption, true, "Name of buffered edges trace (default: "+defaultBufferedEdgesName+")" );
 	}
 
 	@Override
@@ -63,16 +63,16 @@ public class BufferLinks extends ConvertApp {
 		else
 			after_buffer_time = Long.parseLong(args[2]);
 		randomize = cli.hasOption(randomizeOption);
-		bufferedLinksName = cli.getOptionValue(bufferedLinksOption, defaultBufferedLinksName);
+		bufferedEdgesName = cli.getOptionValue(bufferedEdgesOption, defaultBufferedEdgesName);
 	}
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
-		LinkTrace buffered_links = (LinkTrace) dest_store.newTrace(bufferedLinksName, LinkTrace.type, force);
-		before_buffer_time *= links.ticsPerSecond();
-		after_buffer_time *= links.ticsPerSecond();
-		new BufferLinksConverter(buffered_links, links, before_buffer_time, after_buffer_time, randomize).convert();
+		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+		EdgeTrace buffered_edges = (EdgeTrace) dest_store.newTrace(bufferedEdgesName, EdgeTrace.type, force);
+		before_buffer_time *= edges.ticsPerSecond();
+		after_buffer_time *= edges.ticsPerSecond();
+		new BufferEdgesConverter(buffered_edges, edges, before_buffer_time, after_buffer_time, randomize).convert();
 	}
 	
 	@Override

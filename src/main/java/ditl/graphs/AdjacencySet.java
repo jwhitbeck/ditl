@@ -110,19 +110,19 @@ public abstract class AdjacencySet<C extends Couple> implements Set<C> {
 		return map.values().toArray(a);
 	}
 
-	public final static class Links extends AdjacencySet<Link>
-		implements LinkTrace.Handler {
+	public final static class Edges extends AdjacencySet<Edge>
+		implements EdgeTrace.Handler {
 		
-		public Links(){
-			map = new AdjacencyMap.Links<Link>();
+		public Edges(){
+			map = new AdjacencyMap.Edges<Edge>();
 		}
 		
 		@Override
-		public Listener<Link> linkListener(){
-			return new StatefulListener<Link>() {
+		public Listener<Edge> edgeListener(){
+			return new StatefulListener<Edge>() {
 				@Override
-				public void handle(long time, Collection<Link> events) {
-					for ( Link ct : events )
+				public void handle(long time, Collection<Edge> events) {
+					for ( Edge ct : events )
 						add(ct);
 				}
 				@Override
@@ -133,15 +133,15 @@ public abstract class AdjacencySet<C extends Couple> implements Set<C> {
 		}
 		
 		@Override
-		public Listener<LinkEvent> linkEventListener(){
-			return new Listener<LinkEvent>() {
+		public Listener<EdgeEvent> edgeEventListener(){
+			return new Listener<EdgeEvent>() {
 				@Override
-				public void handle(long time, Collection<LinkEvent> events) {
-					for ( LinkEvent cev : events ){
+				public void handle(long time, Collection<EdgeEvent> events) {
+					for ( EdgeEvent cev : events ){
 						if ( cev.isUp() )
-							add(cev.link());
+							add(cev.edge());
 						else
-							remove(cev.link());
+							remove(cev.edge());
 					}
 				}
 			};

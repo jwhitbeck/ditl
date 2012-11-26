@@ -19,9 +19,9 @@
 package ditl.plausible;
 
 import ditl.ItemFactory;
-import ditl.graphs.Link;
+import ditl.graphs.Edge;
 
-public final class WindowedLinkEvent {
+public final class WindowedEdgeEvent {
 	
 	public final static int UP = 0;
 	public final static int DOWN = 1;
@@ -38,18 +38,18 @@ public final class WindowedLinkEvent {
 	private final static String next_down = "NEXTDOWN";
 	
 	final int _type;
-	final Link _link;
+	final Edge _edge;
 	final long _value; 
 	
-	public WindowedLinkEvent(Link link, int type){
+	public WindowedEdgeEvent(Edge edge, int type){
 		_type = type;
-		_link = link;
+		_edge = edge;
 		_value = 0;
 	}
 	
-	public WindowedLinkEvent(Link link, int type, long value){
+	public WindowedEdgeEvent(Edge edge, int type, long value){
 		_type = type;
-		_link = link;
+		_edge = edge;
 		_value = value;
 	}
 	
@@ -57,46 +57,46 @@ public final class WindowedLinkEvent {
 		return _type;
 	}
 	
-	public Link link(){
-		return _link;
+	public Edge edge(){
+		return _edge;
 	}
 	
 	@Override
 	public String toString(){
 		switch(_type){
-		case UP        : return _link+" "+_up;
-		case DOWN      : return _link+" "+_down;
-		case PREV_UP   : return _link+" "+prev_up+" "+_value;
-		case PREV_DOWN : return _link+" "+prev_down+" "+_value;
-		case NEXT_UP   : return _link+" "+next_up+" "+_value;
-		default        : return _link+" "+next_down+" "+_value;
+		case UP        : return _edge+" "+_up;
+		case DOWN      : return _edge+" "+_down;
+		case PREV_UP   : return _edge+" "+prev_up+" "+_value;
+		case PREV_DOWN : return _edge+" "+prev_down+" "+_value;
+		case NEXT_UP   : return _edge+" "+next_up+" "+_value;
+		default        : return _edge+" "+next_down+" "+_value;
 		}
 	}
 	
-	public static final class Factory implements ItemFactory<WindowedLinkEvent> {
+	public static final class Factory implements ItemFactory<WindowedEdgeEvent> {
 		@Override
-		public WindowedLinkEvent fromString(String s) {
+		public WindowedEdgeEvent fromString(String s) {
 			String[] elems = s.trim().split(" ");
 			try {
 				Integer id1 = Integer.parseInt(elems[0]);
 				Integer id2 = Integer.parseInt(elems[1]);
-				Link l = new Link(id1,id2);
-				WindowedLinkEvent wle = null;
+				Edge e = new Edge(id1,id2);
+				WindowedEdgeEvent wle = null;
 				String type_str = elems[2];
 				if ( type_str.equals(_up) )
-					wle = new WindowedLinkEvent(l, WindowedLinkEvent.UP);
+					wle = new WindowedEdgeEvent(e, WindowedEdgeEvent.UP);
 				else if ( type_str.equals(_down) )
-					wle = new WindowedLinkEvent(l, WindowedLinkEvent.DOWN);
+					wle = new WindowedEdgeEvent(e, WindowedEdgeEvent.DOWN);
 				else {
 					long value = Long.parseLong(elems[3]);
 					if ( type_str.equals(prev_up) )
-						wle = new WindowedLinkEvent(l, WindowedLinkEvent.PREV_UP, value);
+						wle = new WindowedEdgeEvent(e, WindowedEdgeEvent.PREV_UP, value);
 					else if ( type_str.equals(prev_down) )
-						wle = new WindowedLinkEvent(l, WindowedLinkEvent.PREV_DOWN, value);
+						wle = new WindowedEdgeEvent(e, WindowedEdgeEvent.PREV_DOWN, value);
 					else if ( type_str.equals(next_up) )
-						wle = new WindowedLinkEvent(l, WindowedLinkEvent.NEXT_UP, value);
+						wle = new WindowedEdgeEvent(e, WindowedEdgeEvent.NEXT_UP, value);
 					else if ( type_str.equals(next_down) )
-						wle = new WindowedLinkEvent(l, WindowedLinkEvent.NEXT_DOWN, value);
+						wle = new WindowedEdgeEvent(e, WindowedEdgeEvent.NEXT_DOWN, value);
 				}
 				return wle;
 				

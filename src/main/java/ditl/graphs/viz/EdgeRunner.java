@@ -16,44 +16,15 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs.cli;
+package ditl.graphs.viz;
 
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import ditl.graphs.EdgeTrace;
 
-import ditl.Store.*;
-import ditl.WritableStore.AlreadyExistsException;
-import ditl.cli.ConvertApp;
-import ditl.graphs.*;
 
-public class LinksToCCs extends ConvertApp {
 
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.GROUPS);
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "links-to-ccs";
-	public final static String CMD_ALIAS = "l2c";
-	
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-	}
-
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException,
-			HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-	}
-
-	@Override
-	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
-		GroupTrace ccs = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
-		new LinksToConnectedComponentsConverter(ccs, links).convert();
-	}
-
+public interface EdgeRunner {
+	public void setEdgesTrace(EdgeTrace edges) throws IOException;
+	public void addEdgesHandler(EdgeTrace.Handler handler);
 }

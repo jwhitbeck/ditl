@@ -43,7 +43,7 @@ public class Analyze extends ExportApp {
 	final static String groupSizeOption = "group-size";
 	final static String reachabilityOption = "reachability";
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.GROUPS, GraphOptions.ARCS);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.EDGES, GraphOptions.GROUPS, GraphOptions.ARCS);
 	private ReportFactory<?> factory;
 	private Long min_time;
 	private Long max_time;
@@ -69,7 +69,7 @@ public class Analyze extends ExportApp {
 		reportGroup.addOption(new Option(null, interAnyContactsOption, false, "inter-any-contact time distribution") );
 		reportGroup.addOption(new Option(null, clusteringOption, false, "clustering coefficient distribution over time") );
 		reportGroup.addOption(new Option(null, groupSizeOption, false, "distribution of group sizes over time") );
-		reportGroup.addOption(new Option(null, reachabilityOption, false, "proportion of bi-directional and directional links in the reachability graph") );
+		reportGroup.addOption(new Option(null, reachabilityOption, false, "proportion of bi-directional and directional edges in the reachability graph") );
 		reportGroup.setRequired(true);
 		options.addOptionGroup(reportGroup);
 		options.addOption(null, maxTimeOption, true, "Ignore event after <arg> seconds");
@@ -142,20 +142,20 @@ public class Analyze extends ExportApp {
 			tps = presence.ticsPerSecond();
 		}		
 		
-		if ( report instanceof LinkTrace.Handler ){
-			LinkTrace links = (LinkTrace)_store.getTrace(graph_options.get(GraphOptions.LINKS));			
-			StatefulReader<LinkEvent,Link> linksReader = links.getReader();
+		if ( report instanceof EdgeTrace.Handler ){
+			EdgeTrace edges = (EdgeTrace)_store.getTrace(graph_options.get(GraphOptions.EDGES));			
+			StatefulReader<EdgeEvent,Edge> edgesReader = edges.getReader();
 
-			LinkTrace.Handler lh = (LinkTrace.Handler)report;
-			linksReader.stateBus().addListener(lh.linkListener());
-			linksReader.bus().addListener(lh.linkEventListener());
+			EdgeTrace.Handler lh = (EdgeTrace.Handler)report;
+			edgesReader.stateBus().addListener(lh.edgeListener());
+			edgesReader.bus().addListener(lh.edgeEventListener());
 			
-			readers.add(linksReader);
+			readers.add(edgesReader);
 			
-			if ( minTime == null || links.minTime() > minTime ) minTime = links.minTime();
-			if ( maxTime == null || links.maxTime() < maxTime ) maxTime = links.maxTime();
-			incrTime = links.maxUpdateInterval();
-			tps = links.ticsPerSecond();
+			if ( minTime == null || edges.minTime() > minTime ) minTime = edges.minTime();
+			if ( maxTime == null || edges.maxTime() < maxTime ) maxTime = edges.maxTime();
+			incrTime = edges.maxUpdateInterval();
+			tps = edges.ticsPerSecond();
 		}
 		
 		if ( report instanceof ArcTrace.Handler ){

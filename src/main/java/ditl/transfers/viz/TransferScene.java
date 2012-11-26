@@ -29,8 +29,8 @@ import ditl.transfers.*;
 @SuppressWarnings("serial")
 public class TransferScene extends GraphScene implements TransferTrace.Handler {
 
-	private Map<Link,LinkElement> active_transfers = new AdjacencyMap.Links<LinkElement>();
-	private Map<Link,Integer> transfer_count = new AdjacencyMap.Links<Integer>();
+	private Map<Edge,EdgeElement> active_transfers = new AdjacencyMap.Edges<EdgeElement>();
+	private Map<Edge,Integer> transfer_count = new AdjacencyMap.Edges<Integer>();
 	private boolean show_transfers = true;
 
 	@Override
@@ -39,11 +39,11 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 			@Override
 			public void handle(long time, Collection<TransferEvent> events) {
 				for ( TransferEvent tev : events ){
-					Link l = tev.arc().link();
+					Edge e = tev.arc().edge();
 					if ( tev.type() == TransferEvent.START ){
-						incrTransfer(l);
+						incrTransfer(e);
 					} else {
-						decrTransfer(l);
+						decrTransfer(e);
 					}
 				}
 			}
@@ -56,8 +56,8 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 			@Override
 			public void handle(long time, Collection<Transfer> events) {
 				for ( Transfer transfer : events ){
-					Link l = transfer.arc().link();
-					incrTransfer(l);
+					Edge e = transfer.arc().edge();
+					incrTransfer(e);
 				}
 			}
 
@@ -73,8 +73,8 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 	public void paint2D(Graphics2D g2){
 		g2.setColor(Color.RED);
 		g2.setStroke(new BasicStroke(2));
-		for ( LinkElement link : active_transfers.values() )
-			link.paint(g2);
+		for ( EdgeElement edge : active_transfers.values() )
+			edge.paint(g2);
 		super.paint2D(g2);
 	}
 	
@@ -105,25 +105,25 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 		node.setFillColor(Color.BLUE);
 	}
 	
-	private void incrTransfer(Link l){
-		if ( ! transfer_count.containsKey(l) ){
-			transfer_count.put(l, 1);
-			NodeElement n1 = nodes.get(l.id1());
-			NodeElement n2 = nodes.get(l.id2());
-			active_transfers.put(l, new LinkElement(n1,n2));
+	private void incrTransfer(Edge e){
+		if ( ! transfer_count.containsKey(e) ){
+			transfer_count.put(e, 1);
+			NodeElement n1 = nodes.get(e.id1());
+			NodeElement n2 = nodes.get(e.id2());
+			active_transfers.put(e, new EdgeElement(n1,n2));
 		} else {
-			int c = transfer_count.get(l);
-			transfer_count.put(l, c+1);
+			int c = transfer_count.get(e);
+			transfer_count.put(e, c+1);
 		}
 	}
 	
-	private void decrTransfer(Link l){
-		int c = transfer_count.get(l);
+	private void decrTransfer(Edge e){
+		int c = transfer_count.get(e);
 		if ( c > 1 ){
-			transfer_count.put(l, c-1);
+			transfer_count.put(e, c-1);
 		} else {
-			active_transfers.remove(l);
-			transfer_count.remove(l);
+			active_transfers.remove(e);
+			transfer_count.remove(e);
 		}
 	}
 }

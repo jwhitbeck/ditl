@@ -21,29 +21,29 @@ package ditl.plausible;
 import ditl.*;
 import ditl.graphs.*;
 
-public final class WindowedLink implements Couple {
+public final class WindowedEdge implements Couple {
 	
 	long prev_up = -Trace.INFINITY;
 	long prev_down = -Trace.INFINITY;
 	long next_up = Trace.INFINITY;
 	long next_down = Trace.INFINITY;
 	
-	final Link _link;
+	final Edge _edge;
 	
-	public WindowedLink(Link link){
-		_link = link;
+	public WindowedEdge(Edge edge){
+		_edge = edge;
 	}
 	
-	public Link link(){
-		return _link;
+	public Edge edge(){
+		return _edge;
 	}
 	
 	public Integer id1(){ 
-		return _link.id1();
+		return _edge.id1();
 	}
 	
 	public Integer id2(){ 
-		return _link.id2();
+		return _edge.id2();
 	}
 	
 	public long minUpTime(long t){
@@ -56,23 +56,23 @@ public final class WindowedLink implements Couple {
 	
 	@Override
 	public boolean equals(Object o){
-		WindowedLink wl = (WindowedLink)o;
-		return wl._link.equals(_link);
+		WindowedEdge wl = (WindowedEdge)o;
+		return wl._edge.equals(_edge);
 	}
 	
 	@Override
 	public String toString(){
-		return _link+" "+prev_up+" "+prev_down+" "+next_up+" "+next_down;
+		return _edge+" "+prev_up+" "+prev_down+" "+next_up+" "+next_down;
 	}
 	
-	public static final class Factory implements ItemFactory<WindowedLink> {
+	public static final class Factory implements ItemFactory<WindowedEdge> {
 		@Override
-		public WindowedLink fromString(String s) {
+		public WindowedEdge fromString(String s) {
 			String[] elems = s.trim().split(" ");
 			try {
 				Integer id1 = Integer.parseInt(elems[0]);
 				Integer id2 = Integer.parseInt(elems[1]);
-				WindowedLink wl = new WindowedLink(new Link(id1,id2));
+				WindowedEdge wl = new WindowedEdge(new Edge(id1,id2));
 				wl.prev_up = Long.parseLong(elems[2]);
 				wl.prev_down = Long.parseLong(elems[3]);
 				wl.next_up = Long.parseLong(elems[4]);
@@ -86,12 +86,12 @@ public final class WindowedLink implements Couple {
 		}
 	}
 	
-	public void handleEvent(WindowedLinkEvent wle){
+	public void handleEvent(WindowedEdgeEvent wle){
 		switch( wle._type ){
-		case WindowedLinkEvent.PREV_UP: prev_up = wle._value; break;
-		case WindowedLinkEvent.PREV_DOWN: prev_down = wle._value; break;
-		case WindowedLinkEvent.NEXT_UP: next_up = wle._value; break;
-		case WindowedLinkEvent.NEXT_DOWN: next_down = wle._value; break;
+		case WindowedEdgeEvent.PREV_UP: prev_up = wle._value; break;
+		case WindowedEdgeEvent.PREV_DOWN: prev_down = wle._value; break;
+		case WindowedEdgeEvent.NEXT_UP: next_up = wle._value; break;
+		case WindowedEdgeEvent.NEXT_DOWN: next_down = wle._value; break;
 		}
 	}
 }

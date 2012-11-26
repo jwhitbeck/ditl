@@ -550,10 +550,10 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 	}
 
 
-	public final static class Links<T> extends AdjacencyMap<Link,T> {
+	public final static class Edges<T> extends AdjacencyMap<Edge,T> {
 		@Override
-		protected Link newCouple(Integer id1, Integer id2) {
-			return new Link(id1,id2);
+		protected Edge newCouple(Integer id1, Integer id2) {
+			return new Edge(id1,id2);
 		}
 		@Override
 		T put(Integer id1, Integer id2, T obj){
@@ -583,7 +583,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 			};
 		}
 		@Override
-		Iterator<Link> keysIterator() {
+		Iterator<Edge> keysIterator() {
 			return new KeysIterator(){
 				@Override
 				void peek() {
@@ -594,7 +594,7 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 			};
 		}
 		@Override
-		Iterator<Map.Entry<Link, T>> entriesIterator() {
+		Iterator<Map.Entry<Edge, T>> entriesIterator() {
 			return new EntriesIterator() {
 				@Override
 				void peek(){

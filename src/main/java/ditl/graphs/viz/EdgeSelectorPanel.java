@@ -25,23 +25,23 @@ import java.util.Collection;
 import javax.swing.*;
 
 import ditl.*;
-import ditl.graphs.LinkTrace;
+import ditl.graphs.EdgeTrace;
 import ditl.viz.Scene;
 
 
 
 @SuppressWarnings("serial")
-public class LinksSelectorPanel extends JPanel implements ActionListener, ItemListener {
+public class EdgeSelectorPanel extends JPanel implements ActionListener, ItemListener {
 	
 	protected Store _store;
-	protected JComboBox linksChooser;
-	protected LinkRunner runner;
+	protected JComboBox edgesChooser;
+	protected EdgeRunner runner;
 	protected JCheckBox enabledBox;
 	protected Scene scene;
-	protected LinkTrace cur_links = null;
+	protected EdgeTrace cur_edges = null;
 	
-	public LinksSelectorPanel(LinkRunner linkRunner, Scene sc){
-		runner = linkRunner;
+	public EdgeSelectorPanel(EdgeRunner edgeRunner, Scene sc){
+		runner = edgeRunner;
 		scene = sc;
 		setBorder(BorderFactory.createTitledBorder("Contacts"));
 		
@@ -63,9 +63,9 @@ public class LinksSelectorPanel extends JPanel implements ActionListener, ItemLi
 		c.gridy = 1; c.gridx=0;
 		c.gridwidth = 2;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		linksChooser = new JComboBox();
-		gridbag.setConstraints(linksChooser, c);
-		add(linksChooser);
+		edgesChooser = new JComboBox();
+		gridbag.setConstraints(edgesChooser, c);
+		add(edgesChooser);
 		
 		setLayout(gridbag);
 		setVisible(false);
@@ -76,16 +76,16 @@ public class LinksSelectorPanel extends JPanel implements ActionListener, ItemLi
 	}
 	
 	public void load(Collection<Trace<?>> traces) {
-		linksChooser.removeActionListener(this);
-		linksChooser.removeAllItems();
+		edgesChooser.removeActionListener(this);
+		edgesChooser.removeAllItems();
 		enabledBox.removeItemListener(this);
 		if ( ! traces.isEmpty() ){
 			for ( Trace<?> trace : traces ){
-				linksChooser.addItem(trace.name());
+				edgesChooser.addItem(trace.name());
 			}
 			enabledBox.setSelected(true);
-			linksChooser.addActionListener(this);
-			linksChooser.setSelectedIndex(0);
+			edgesChooser.addActionListener(this);
+			edgesChooser.setSelectedIndex(0);
 			enabledBox.addItemListener(this);
 			setVisible(true);
 		} else {
@@ -95,26 +95,26 @@ public class LinksSelectorPanel extends JPanel implements ActionListener, ItemLi
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-        updateLinkTrace();
+        updateEdgesTrace();
 	}
 
 	@Override
 	public void itemStateChanged(ItemEvent arg0) {
-		linksChooser.setEnabled(enabledBox.isSelected());
-		updateLinkTrace();
+		edgesChooser.setEnabled(enabledBox.isSelected());
+		updateEdgesTrace();
 	}
 	
-	private void updateLinkTrace() {
+	private void updateEdgesTrace() {
 		String name = "null";
 		try {
-			cur_links = null;
+			cur_edges = null;
 			if ( enabledBox.isSelected() ){
-				name = (String)linksChooser.getSelectedItem();
-				cur_links = (LinkTrace)_store.getTrace(name);
+				name = (String)edgesChooser.getSelectedItem();
+				cur_edges = (EdgeTrace)_store.getTrace(name);
 			}
-			runner.setLinkTrace(cur_links);
+			runner.setEdgesTrace(cur_edges);
         } catch (Exception ioe){
-        	JOptionPane.showMessageDialog(this, "Failed to load links file '"+name+"'", "Warning", JOptionPane.ERROR_MESSAGE);
+        	JOptionPane.showMessageDialog(this, "Failed to load edges file '"+name+"'", "Warning", JOptionPane.ERROR_MESSAGE);
         }
         scene.repaint();
 	}

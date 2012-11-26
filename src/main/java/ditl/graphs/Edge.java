@@ -18,67 +18,72 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.Set;
 
 import ditl.*;
 
-
-
-public final class LinksToPresenceConverter implements Converter, LinkTrace.Handler{
+public final class Edge implements Couple {
 	
-	private PresenceTrace _presence;
-	private LinkTrace _links;
+	final Integer id1;
+	final Integer id2;
 	
-	private Set<Presence> ids = new HashSet<Presence>();
+	public Edge(Integer i1, Integer i2){
+		if ( i1 < i2 ){
+			id1 = i1;
+			id2 = i2;
+		} else {
+			id1 = i2;
+			id2 = i1;
+		}
+	}
 	
-	public LinksToPresenceConverter(PresenceTrace presence, LinkTrace links){
-		_presence = presence;
-		_links = links;
+	public Integer id1(){
+		return id1;
 	}
-
-	private void addLink(Link l){
-		ids.add(new Presence(l.id1()));
-		ids.add(new Presence(l.id2()));
+	
+	public Integer id2(){
+		return id2;
 	}
-
-	@Override
-	public void convert() throws IOException {
-		StatefulWriter<PresenceEvent,Presence> presence_writer = _presence.getWriter(); 
-		StatefulReader<LinkEvent,Link> links_reader = _links.getReader();
-		
-		links_reader.stateBus().addListener(linkListener());
-		links_reader.bus().addListener(linkEventListener());
-
-		Runner runner = new Runner(_links.maxUpdateInterval(), _links.minTime(), _links.maxTime());
-		runner.addGenerator(links_reader);
-		runner.run();
-		
-		presence_writer.setInitState(_links.minTime(), ids);
-		presence_writer.setPropertiesFromTrace(_links);
-		presence_writer.close();
-		links_reader.close();
-	}
-
-	@Override
-	public Listener<LinkEvent> linkEventListener() {
-		return new Listener<LinkEvent>(){
-			@Override
-			public void handle(long time, Collection<LinkEvent> events) {
-				for ( LinkEvent event : events )
-					addLink(event.link());
+	
+	public static final class Factory implements ItemFactory<Edge> {
+		@Override
+		public Edge fromString(String s) {
+			String[] elems = s.trim().split(" ");
+			try {
+				Integer id1 = Integer.parseInt(elems[0]);
+				Integer id2 = Integer.parseInt(elems[1]);
+				return new Edge(id1,id2);	
+			} catch ( Exception e ){
+				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
+				return null;
 			}
-		};
+		}
+	}
+	
+	public boolean hasVertex(Integer id){
+		return ( id.equals(id1) || id.equals(id2) );
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		Edge ct = (Edge)o;
+		return (ct.id1.equals(id1)) && (ct.id2.equals(id2));
+	}
+	
+	@Override
+	public String toString(){
+		return id1+" "+id2;
+	}
+	
+	public static final class InternalGroupFilter implements Filter<Edge> {
+		private Set<Integer> _group;
+		public InternalGroupFilter(Set<Integer> group){ _group = group;}
+		@Override
+		public Edge filter(Edge item) {
+			if ( _group.contains(item.id1) && _group.contains(item.id2) )
+				return item;
+			return null;
+		}
 	}
 
-	@Override
-	public Listener<Link> linkListener() {
-		return new Listener<Link>(){
-			@Override
-			public void handle(long time, Collection<Link> events){
-				for ( Link l : events)
-					addLink(l);
-			}
-		};
-	}
 }

@@ -51,7 +51,7 @@ public class UpperReachability extends ConvertApp {
 		super.parseArgs(cli, args);
 		long tau = Long.parseLong(args[1]);
 		long delay = Long.parseLong(args[2]);
-		String lower_prefix = cli.hasOption(lowerPrefixOption)? cli.getOptionValue(lowerPrefixOption) : LinkTrace.defaultName;
+		String lower_prefix = cli.hasOption(lowerPrefixOption)? cli.getOptionValue(lowerPrefixOption) : EdgeTrace.defaultName;
 		lower_name = ReachabilityTrace.defaultName(lower_prefix, tau, delay);
 		String upper_prefix = cli.hasOption(upperPrefixOption)? cli.getOptionValue(upperPrefixOption) : lower_prefix+"_upper";
 		upper_name = ReachabilityTrace.defaultName(upper_prefix, tau, delay);
@@ -61,7 +61,7 @@ public class UpperReachability extends ConvertApp {
 	@Override
 	protected void initOptions() {
 		super.initOptions();
-		options.addOption(null, lowerPrefixOption, true, "Prefix for lower reachability traces (default: name of the 'links' trace)");
+		options.addOption(null, lowerPrefixOption, true, "Prefix for lower reachability traces (default: name of the 'edges' trace)");
 		options.addOption(null, upperPrefixOption, true, "Prefix for upper reachability traces (default: prefix+'_upper')");
 	}
 

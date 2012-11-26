@@ -26,7 +26,7 @@ import ditl.*;
 
 
 public final class TimeToFirstContactReport extends Report 
-	implements LinkTrace.Handler, PresenceTrace.Handler {
+	implements EdgeTrace.Handler, PresenceTrace.Handler {
 
 
 	private Map<Integer,Long> entry_times = new HashMap<Integer,Long>();
@@ -44,11 +44,11 @@ public final class TimeToFirstContactReport extends Report
 	}
 	
 	@Override
-	public Listener<LinkEvent> linkEventListener(){
-		return new Listener<LinkEvent>() {
+	public Listener<EdgeEvent> edgeEventListener(){
+		return new Listener<EdgeEvent>() {
 			@Override
-			public void handle(long time, Collection<LinkEvent> events) throws IOException {
-				for ( LinkEvent event : events ){
+			public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+				for ( EdgeEvent event : events ){
 					if ( event.isUp() ){
 						handleNode(time, event.id1);
 						handleNode(time, event.id2);
@@ -67,13 +67,13 @@ public final class TimeToFirstContactReport extends Report
 	}
 
 	@Override
-	public Listener<Link> linkListener() {
-		return new StatefulListener<Link>(){
+	public Listener<Edge> edgeListener() {
+		return new StatefulListener<Edge>(){
 			@Override
-			public void handle(long time, Collection<Link> events) throws IOException {
-				for ( Link l : events ){
-					done.add(l.id1());
-					done.add(l.id2());
+			public void handle(long time, Collection<Edge> events) throws IOException {
+				for ( Edge e : events ){
+					done.add(e.id1());
+					done.add(e.id2());
 					append( 0 ); append( 0 );
 				}
 			}

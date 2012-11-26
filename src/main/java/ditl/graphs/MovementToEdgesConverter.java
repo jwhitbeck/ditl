@@ -25,21 +25,21 @@ import ditl.*;
 
 
 
-public class MovementToLinksConverter implements Incrementable, MovementTrace.Handler, Converter {
+public class MovementToEdgesConverter implements Incrementable, MovementTrace.Handler, Converter {
 
 	private double r2;
 	private long max_interval;
 	private Map<Integer,Movement> invalid_movements = new HashMap<Integer,Movement>();
 	private Map<Integer,Movement> valid_movements = new HashMap<Integer,Movement>();
-	private StatefulWriter<LinkEvent,Link> links_writer;
+	private StatefulWriter<EdgeEvent,Edge> edge_writer;
 	private StatefulReader<MovementEvent,Movement> movement_reader;
 	private MovementTrace _movement;
-	private LinkTrace _links;
+	private EdgeTrace _edges;
 	private long cur_time;
 	
-	public MovementToLinksConverter(LinkTrace links, MovementTrace movement,
+	public MovementToEdgesConverter(EdgeTrace edges, MovementTrace movement,
 			double range, long maxInterval) {
-		_links = links;
+		_edges = edges;
 		_movement = movement;
 		r2 = range*range;
 		max_interval = maxInterval;
@@ -64,7 +64,7 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 	}
 	
 	private void setInitialState(long time) throws IOException{
-		Set<Link> initLinks = new AdjacencySet.Links();
+		Set<Edge> initEdges = new AdjacencySet.Edges();
 		Iterator<Movement> i = invalid_movements.values().iterator();
 		while ( i.hasNext() ){
 			Movement im = i.next();
@@ -72,18 +72,18 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 				long[] meetings = im.meetingTimes(vm, r2);
 				if ( meetings != null ){
 					long begin = meetings[0], end = meetings[1];
-					Link l = new Link(im.id(), vm.id());
+					Edge e = new Edge(im.id(), vm.id());
 					if ( begin < time ){
 						if ( time <= end ){
-							initLinks.add(l); // link is already up
-							if ( end-time < max_interval ) // link goes down before max_interval
-								links_writer.queue(end, new LinkEvent(l, LinkEvent.DOWN) );
+							initEdges.add(e); // edge is already up
+							if ( end-time < max_interval ) // edge goes down before max_interval
+								edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.DOWN) );
 						}
 					} else { // begin >= time
 						if ( begin-time < max_interval ){
-							links_writer.queue(begin, new LinkEvent(l, LinkEvent.UP));
+							edge_writer.queue(begin, new EdgeEvent(e, EdgeEvent.UP));
 							if ( end-time < max_interval ){
-								links_writer.queue(end, new LinkEvent(l, LinkEvent.DOWN));
+								edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.DOWN));
 							}
 						}
 					}
@@ -92,7 +92,7 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 			i.remove();
 			valid_movements.put(im.id(), im);
 		}
-		links_writer.setInitState(time, initLinks);
+		edge_writer.setInitState(time, initEdges);
 	}
 	
 	@Override
@@ -125,7 +125,7 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 						}
 					}
 				}
-				links_writer.flush(time);
+				edge_writer.flush(time);
 				updateNextMeetings(time);
 			}
 		};
@@ -139,11 +139,11 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 				long[] meetings = m.meetingTimes(vm, r2);
 				if ( meetings != null ){
 					long begin = meetings[0], end = meetings[1];
-					Link l = new Link(m.id(), vm.id());
+					Edge e = new Edge(m.id(), vm.id());
 					if ( begin >= time && begin-time < max_interval )
-						links_writer.queue(begin, new LinkEvent(l, LinkEvent.UP));
-					if ( end >= time && end-time < max_interval ) // link goes down before max_interval
-						links_writer.queue(end, new LinkEvent(l, LinkEvent.DOWN) );
+						edge_writer.queue(begin, new EdgeEvent(e, EdgeEvent.UP));
+					if ( end >= time && end-time < max_interval ) // edge goes down before max_interval
+						edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.DOWN) );
 				}
 			}
 			valid_movements.put(m.id(), m);
@@ -152,17 +152,17 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 	}
 	
 	private void invalidNodeMeetings(final long time, final Integer i){
-		links_writer.removeFromQueueAfterTime(time, new Matcher<LinkEvent>(){
+		edge_writer.removeFromQueueAfterTime(time, new Matcher<EdgeEvent>(){
 			@Override
-			public boolean matches(LinkEvent item) {
-				return item.link().hasVertex(i);
+			public boolean matches(EdgeEvent item) {
+				return item.edge().hasVertex(i);
 			}
 		});
 	}
 
 	@Override
 	public void incr(long dt) throws IOException {
-		links_writer.flush(cur_time);
+		edge_writer.flush(cur_time);
 		cur_time += dt;
 	}
 
@@ -173,7 +173,7 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 	
 	@Override
 	public void convert() throws IOException {
-		links_writer = _links.getWriter();
+		edge_writer = _edges.getWriter();
 		movement_reader = _movement.getReader();
 		
 		movement_reader.stateBus().addListener(movementListener());
@@ -184,9 +184,9 @@ public class MovementToLinksConverter implements Incrementable, MovementTrace.Ha
 		runner.add(this);
 		runner.run();
 		
-		links_writer.flush(_movement.maxTime());
-		links_writer.setPropertiesFromTrace(_movement);
-		links_writer.close();
+		edge_writer.flush(_movement.maxTime());
+		edge_writer.setPropertiesFromTrace(_movement);
+		edge_writer.close();
 		movement_reader.close();
 	}
 }

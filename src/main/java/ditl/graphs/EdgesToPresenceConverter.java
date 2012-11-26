@@ -16,53 +16,69 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs.cli;
+package ditl.graphs;
 
 import java.io.IOException;
+import java.util.*;
 
-import org.apache.commons.cli.*;
+import ditl.*;
 
-import ditl.Store.NoSuchTraceException;
-import ditl.cli.ExportApp;
-import ditl.graphs.*;
 
-public class ExportLinks extends ExportApp {
+
+public final class EdgesToPresenceConverter implements Converter, EdgeTrace.Handler{
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS);
-	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.CRAWDAD, ExternalFormat.ONE);
-	private Long dtps;
-
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "export-links";
-	public final static String CMD_ALIAS = "xl";
+	private PresenceTrace _presence;
+	private EdgeTrace _edges;
 	
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		ext_fmt.setOptions(options);
-		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: s)");
+	private Set<Presence> ids = new HashSet<Presence>();
+	
+	public EdgesToPresenceConverter(PresenceTrace presence, EdgeTrace edges){
+		_presence = presence;
+		_edges = edges;
+	}
+
+	private void addEdge(Edge e){
+		ids.add(new Presence(e.id1()));
+		ids.add(new Presence(e.id2()));
 	}
 
 	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		ext_fmt.parse(cli);
-		dtps = getTicsPerSecond( cli.getOptionValue(destTimeUnitOption,"s"));
-		if ( dtps == null )
-			throw new HelpException();
+	public void convert() throws IOException {
+		StatefulWriter<PresenceEvent,Presence> presence_writer = _presence.getWriter(); 
+		StatefulReader<EdgeEvent,Edge> edge_reader = _edges.getReader();
+		
+		edge_reader.stateBus().addListener(edgeListener());
+		edge_reader.bus().addListener(edgeEventListener());
+
+		Runner runner = new Runner(_edges.maxUpdateInterval(), _edges.minTime(), _edges.maxTime());
+		runner.addGenerator(edge_reader);
+		runner.run();
+		
+		presence_writer.setInitState(_edges.minTime(), ids);
+		presence_writer.setPropertiesFromTrace(_edges);
+		presence_writer.close();
+		edge_reader.close();
 	}
 
 	@Override
-	protected void run() throws IOException, NoSuchTraceException {
-		LinkTrace links = (LinkTrace) _store.getTrace(graph_options.get(GraphOptions.LINKS));
-		long otps = links.ticsPerSecond();
-		double timeMul = getTimeMul(otps,dtps);
-		if ( ext_fmt.is(ExternalFormat.CRAWDAD) )
-			CRAWDADContacts.toCRAWDAD(links, _out, timeMul);
-		else
-			ONEContacts.toONE(links, _out, timeMul);
+	public Listener<EdgeEvent> edgeEventListener() {
+		return new Listener<EdgeEvent>(){
+			@Override
+			public void handle(long time, Collection<EdgeEvent> events) {
+				for ( EdgeEvent event : events )
+					addEdge(event.edge());
+			}
+		};
+	}
+
+	@Override
+	public Listener<Edge> edgeListener() {
+		return new Listener<Edge>(){
+			@Override
+			public void handle(long time, Collection<Edge> events){
+				for ( Edge e : events)
+					addEdge(e);
+			}
+		};
 	}
 }

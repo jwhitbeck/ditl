@@ -40,14 +40,14 @@ public class TransferPlayer extends GraphPlayer {
 	protected void build(){
 		scene = new TransferScene();
 		runner = new RoutingRunner();
-		linksSelector = new LinksSelectorPanel(runner, scene);
+		edgesSelector = new EdgeSelectorPanel(runner, scene);
 		transferSelector = new TransferSelectorPanel((RoutingRunner)runner,scene);
 		timeUnitPanel = new TimeUnitPanel(controls);
 		messageSelector = new MessageSelectorPanel((RoutingRunner)runner,(TransferScene)scene);
 		
 		scene.setPreferredSize(new Dimension(700,500));
 		runner.addMovementHandler(scene);
-		runner.addLinkHandler(scene);
+		runner.addEdgesHandler(scene);
 		runner.addArcHandler(scene);
 		((RoutingRunner)runner).addTransferHandler((TransferScene)scene);
 		
@@ -57,7 +57,7 @@ public class TransferPlayer extends GraphPlayer {
 		widgets.add(new FPSPanel(runner));
 		widgets.add(new ShowIdsPanel(scene));
 		widgets.add(new ToggleAntialiasingPanel(scene));
-		widgets.add(linksSelector); 
+		widgets.add(edgesSelector); 
 		widgets.add(transferSelector);
 		widgets.add(messageSelector);
 		

@@ -29,19 +29,19 @@ import ditl.cli.ImportApp;
 import ditl.graphs.*;
 
 
-public class ImportLinks extends ImportApp {
+public class ImportEdges extends ImportApp {
 
 	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.CRAWDAD, ExternalFormat.ONE);
 	private long ticsPerSecond;
 	private Double timeMul;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
 	private long offset;
 	private boolean use_id_map;
 	private int min_id;
 	
 	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "import-links";
-	public final static String CMD_ALIAS = "il";
+	public final static String CMD_NAME = "import-edges";
+	public final static String CMD_ALIAS = "ie";
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
@@ -72,11 +72,11 @@ public class ImportLinks extends ImportApp {
 	
 	@Override
 	public void run() throws IOException, AlreadyExistsException, LoadTraceException {
-		LinkTrace links = (LinkTrace) _store.newTrace(graph_options.get(GraphOptions.LINKS), LinkTrace.type, force);
+		EdgeTrace edges = (EdgeTrace) _store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
 		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
 		if ( ext_fmt.is(ExternalFormat.CRAWDAD) )
-			CRAWDADContacts.fromCRAWDAD(links, _in, timeMul, ticsPerSecond, offset, id_gen);
+			CRAWDADContacts.fromCRAWDAD(edges, _in, timeMul, ticsPerSecond, offset, id_gen);
 		else
-			ONEContacts.fromONE(links, _in, timeMul, ticsPerSecond, offset, id_gen);
+			ONEContacts.fromONE(edges, _in, timeMul, ticsPerSecond, offset, id_gen);
 	}
 }

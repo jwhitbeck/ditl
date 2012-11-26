@@ -27,16 +27,16 @@ import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-public class LinksToPresence extends ConvertApp {
+public class EdgesToPresence extends ConvertApp {
 
 	final static String strictOption = "strict"; 
 	private boolean strict; 
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.PRESENCE);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.PRESENCE);
 	
 	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "links-to-presence";
-	public final static String CMD_ALIAS = "l2p";
+	public final static String CMD_NAME = "edges-to-presence";
+	public final static String CMD_ALIAS = "e2p";
 	
 	@Override
 	protected void initOptions() {
@@ -56,11 +56,11 @@ public class LinksToPresence extends ConvertApp {
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
+		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
 		PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.type, force);
 		if ( strict )
-			new StrictLinksToPresenceConverter(presence, links).convert();
+			new StrictEdgesToPresenceConverter(presence, edges).convert();
 		else
-			new LinksToPresenceConverter(presence, links).convert();
+			new EdgesToPresenceConverter(presence, edges).convert();
 	}
 }

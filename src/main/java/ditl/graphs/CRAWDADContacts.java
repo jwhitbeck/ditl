@@ -27,11 +27,11 @@ import ditl.*;
 
 public class CRAWDADContacts {
 	
-	public static void fromCRAWDAD(LinkTrace links,
+	public static void fromCRAWDAD(EdgeTrace edges,
 			InputStream in, double timeMul, long ticsPerSecond,
 			long offset, IdGenerator idGen) throws IOException{
 		
-		StatefulWriter<LinkEvent,Link> linkWriter = links.getWriter();
+		StatefulWriter<EdgeEvent,Edge> edgeWriter = edges.getWriter();
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		
@@ -41,40 +41,40 @@ public class CRAWDADContacts {
 			Integer id2 = idGen.getInternalId(elems[1]);
 			long begin = (long)(Long.parseLong(elems[2])*timeMul)+offset;
 			long end = (long)(Long.parseLong(elems[3])*timeMul)+offset;
-			linkWriter.queue(begin, new LinkEvent(id1,id2,LinkEvent.UP));
-			linkWriter.queue(end, new LinkEvent(id1,id2,LinkEvent.DOWN));
+			edgeWriter.queue(begin, new EdgeEvent(id1,id2,EdgeEvent.UP));
+			edgeWriter.queue(end, new EdgeEvent(id1,id2,EdgeEvent.DOWN));
 		}
-		linkWriter.flush();
-		linkWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
-		idGen.writeTraceInfo(linkWriter);
-		linkWriter.close();
+		edgeWriter.flush();
+		edgeWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
+		idGen.writeTraceInfo(edgeWriter);
+		edgeWriter.close();
 		br.close();
 	}
 	
-	public static void toCRAWDAD(LinkTrace links, 
+	public static void toCRAWDAD(EdgeTrace edges, 
 			OutputStream out, double timeMul) throws IOException {
 	
-		StatefulReader<LinkEvent,Link> linkReader = links.getReader();
+		StatefulReader<EdgeEvent,Edge> edgeReader = edges.getReader();
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-		Map<Link,Long> activeContacts = new AdjacencyMap.Links<Long>();
+		Map<Edge,Long> activeContacts = new AdjacencyMap.Edges<Long>();
 		
-		linkReader.seek(links.minTime());
-		for ( Link l : linkReader.referenceState() )
-			activeContacts.put(l, links.minTime());
-		while ( linkReader.hasNext() ){
-			for ( LinkEvent lev : linkReader.next() ){
-				Link l = lev.link();
-				if ( lev.isUp() ){
-					activeContacts.put(l, linkReader.time());
+		edgeReader.seek(edges.minTime());
+		for ( Edge e : edgeReader.referenceState() )
+			activeContacts.put(e, edges.minTime());
+		while ( edgeReader.hasNext() ){
+			for ( EdgeEvent eev : edgeReader.next() ){
+				Edge e = eev.edge();
+				if ( eev.isUp() ){
+					activeContacts.put(e, edgeReader.time());
 				} else {
-					double b = activeContacts.get(l)*timeMul;
-					double e = linkReader.time()*timeMul;
-					activeContacts.remove(l);
-					bw.write(l.id1()+"\t"+l.id2()+"\t"+b+"\t"+e+"\n");
+					double beg = activeContacts.get(e)*timeMul;
+					double end = edgeReader.time()*timeMul;
+					activeContacts.remove(e);
+					bw.write(e.id1()+"\t"+e.id2()+"\t"+beg+"\t"+end+"\n");
 				}
 			}
 		}
-		linkReader.close();
+		edgeReader.close();
 		bw.close();
 	}
 	

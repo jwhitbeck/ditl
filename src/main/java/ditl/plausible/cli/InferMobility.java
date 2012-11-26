@@ -16,9 +16,9 @@ import ditl.plausible.forces.*;
 
 public class InferMobility extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.MOVEMENT);
-	private String windowedLinksOption = "windowed-links";
-	private String windowed_links_name;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.EDGES, GraphOptions.MOVEMENT);
+	private String windowedEdgesOption = "windowed-edges";
+	private String windowed_edges_name;
 	private String knownMovementOption = "known-movement";
 	private String known_movement_name;
 	private String constraintsOption = "constraints";
@@ -69,7 +69,7 @@ public class InferMobility extends ConvertApp {
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
-		options.addOption(null, windowedLinksOption, true, "name of windowed link trace (default: "+WindowedLinkTrace.defaultName+")");
+		options.addOption(null, windowedEdgesOption, true, "name of windowed edge trace (default: "+WindowedEdgeTrace.defaultName+")");
 		options.addOption(null, constraintsOption, true, "list of constraints (default: empty)");
 		options.addOption(null, vmaxOption, true, "max node speed (default: "+AnticipatedForce.defaultVmax+")");
 		options.addOption(null, kOption, true, "the Hooke parameter (default: "+AnticipatedForce.defaultK+")");
@@ -97,7 +97,7 @@ public class InferMobility extends ConvertApp {
 			HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
-		windowed_links_name = cli.getOptionValue(windowedLinksOption, WindowedLinkTrace.defaultName);
+		windowed_edges_name = cli.getOptionValue(windowedEdgesOption, WindowedEdgeTrace.defaultName);
 		width = Double.parseDouble(args[1]);
 		height = Double.parseDouble(args[2]);
 		vmax = Double.parseDouble(cli.getOptionValue(vmaxOption, String.valueOf(AnticipatedForce.defaultVmax)));
@@ -127,8 +127,8 @@ public class InferMobility extends ConvertApp {
 			AlreadyExistsException, LoadTraceException {
 		
 		PresenceTrace presence = (PresenceTrace)orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
-		LinkTrace links = (LinkTrace)orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
-		WindowedLinkTrace windowed_links = (WindowedLinkTrace)orig_store.getTrace(windowed_links_name);
+		EdgeTrace edges = (EdgeTrace)orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+		WindowedEdgeTrace windowed_edges = (WindowedEdgeTrace)orig_store.getTrace(windowed_edges_name);
 		MovementTrace known_movement = null;
 		if ( known_movement_name != null ) 
 			known_movement = (MovementTrace)orig_store.getTrace(known_movement_name);
@@ -139,7 +139,7 @@ public class InferMobility extends ConvertApp {
 		warm_time *= tps;
 		
 		PlausibleMobilityConverter plausible = new PlausibleMobilityConverter(
-				movement, presence, links, windowed_links, known_movement, 
+				movement, presence, edges, windowed_edges, known_movement, 
 				width, height, tube_width, static_thresh,
 				n_steps, update_interval, warm_time, overlap);
 		

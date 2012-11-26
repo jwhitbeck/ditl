@@ -67,8 +67,8 @@ public final class Arc implements Couple {
 		return new Arc(_to,_from);
 	}
 	
-	public Link link(){
-		return new Link(_from,_to);
+	public Edge edge(){
+		return new Edge(_from,_to);
 	}
 	
 	@Override

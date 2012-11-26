@@ -25,10 +25,10 @@ import ditl.*;
 
 public class ONEContacts {
 	
-	public static void fromONE(LinkTrace links, 
+	public static void fromONE(EdgeTrace edges, 
 			InputStream in, double timeMul, long ticsPerSecond,
 			long offset, IdGenerator idGen ) throws IOException {
-		StatefulWriter<LinkEvent,Link> linkWriter = links.getWriter();
+		StatefulWriter<EdgeEvent,Edge> edgeWriter = edges.getWriter();
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		while ( (line=br.readLine()) != null ){
@@ -38,29 +38,29 @@ public class ONEContacts {
 			Integer id2 = idGen.getInternalId(elems[3]);
 			String action = elems[4].toUpperCase();
 			if ( action.equals("UP") )
-				linkWriter.append(time, new LinkEvent(id1, id2, LinkEvent.UP));
+				edgeWriter.append(time, new EdgeEvent(id1, id2, EdgeEvent.UP));
 			else
-				linkWriter.append(time, new LinkEvent(id1, id2, LinkEvent.DOWN));
+				edgeWriter.append(time, new EdgeEvent(id1, id2, EdgeEvent.DOWN));
 		}
-		linkWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
-		linkWriter.close();
+		edgeWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
+		edgeWriter.close();
 		br.close();
 	}
 	
-	public static void toONE(LinkTrace links,
+	public static void toONE(EdgeTrace edges,
 			OutputStream out, double timeMul) throws IOException {
 		
-		StatefulReader<LinkEvent,Link> linkReader = links.getReader();
+		StatefulReader<EdgeEvent,Edge> edgeReader = edges.getReader();
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
 		
-		linkReader.seek(links.minTime());
-		for ( Link link : linkReader.referenceState() )
-			bw.write(links.maxTime()*timeMul+" CONN "+link+" UP\n");
-		while ( linkReader.hasNext() )
-			for ( LinkEvent ev : linkReader.next() )
-				bw.write(linkReader.time()*timeMul+" CONN "+ev+"\n");
+		edgeReader.seek(edges.minTime());
+		for ( Edge edge : edgeReader.referenceState() )
+			bw.write(edges.maxTime()*timeMul+" CONN "+edge+" UP\n");
+		while ( edgeReader.hasNext() )
+			for ( EdgeEvent ev : edgeReader.next() )
+				bw.write(edgeReader.time()*timeMul+" CONN "+ev+"\n");
 			
 		bw.close();
-		linkReader.close();
+		edgeReader.close();
 	}
 }

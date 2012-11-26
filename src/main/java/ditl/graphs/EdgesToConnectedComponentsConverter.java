@@ -25,19 +25,19 @@ import ditl.*;
 
 
 
-public final class LinksToConnectedComponentsConverter implements Converter {
+public final class EdgesToConnectedComponentsConverter implements Converter {
 
-	private AdjacencySet.Links adjacency = new AdjacencySet.Links();
+	private AdjacencySet.Edges adjacency = new AdjacencySet.Edges();
 	private Map<Integer,Group> cc_map = new HashMap<Integer, Group>();
 	private StatefulWriter<GroupEvent,Group> group_writer;
-	private StatefulReader<LinkEvent,Link> link_reader;
+	private StatefulReader<EdgeEvent,Edge> edge_reader;
 	private int counter = 0;
 	private GroupTrace _ccs;
-	private LinkTrace _links;
+	private EdgeTrace _edges;
 	
-	public LinksToConnectedComponentsConverter( GroupTrace ccs, LinkTrace links){ 
+	public EdgesToConnectedComponentsConverter( GroupTrace ccs, EdgeTrace edges){ 
 		_ccs = ccs;
-		_links = links;
+		_edges = edges;
 	}
 	
 	private void merge(long time, Group cc1, Group cc2) throws IOException {
@@ -90,32 +90,32 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 		group_writer.append(time, new GroupEvent(gid, GroupEvent.DELETE) );
 	}
 	
-	private void addLink(long time, Link l) throws IOException {
+	private void addEdge(long time, Edge e) throws IOException {
 		Group cc, occ;
-		if ( ! cc_map.containsKey(l.id1) ){ 
-			if ( ! cc_map.containsKey(l.id2) ){ // new isolated link
+		if ( ! cc_map.containsKey(e.id1) ){ 
+			if ( ! cc_map.containsKey(e.id2) ){ // new isolated edge
 				cc = newCC(time);
-				cc._members.add(l.id1);
-				cc._members.add(l.id2);
-				cc_map.put(l.id1, cc);
-				cc_map.put(l.id2, cc);
+				cc._members.add(e.id1);
+				cc._members.add(e.id2);
+				cc_map.put(e.id1, cc);
+				cc_map.put(e.id2, cc);
 				group_writer.append(time, 
-						new GroupEvent(cc.gid(), GroupEvent.JOIN, new Integer[]{l.id1,l.id2}));
+						new GroupEvent(cc.gid(), GroupEvent.JOIN, new Integer[]{e.id1,e.id2}));
 			} else { // add id1 to id2's cc
-				cc = cc_map.get(l.id2);
-				cc._members.add(l.id1);
-				cc_map.put(l.id1, cc);
-				group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.JOIN, Collections.singleton(l.id1)));
+				cc = cc_map.get(e.id2);
+				cc._members.add(e.id1);
+				cc_map.put(e.id1, cc);
+				group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.JOIN, Collections.singleton(e.id1)));
 			}
 		} else {
-			if ( ! cc_map.containsKey(l.id2) ){ // add id2 to id1's cc
-				cc = cc_map.get(l.id1);
-				cc._members.add(l.id2);
-				cc_map.put(l.id2, cc);
-				group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.JOIN, Collections.singleton(l.id2)));
+			if ( ! cc_map.containsKey(e.id2) ){ // add id2 to id1's cc
+				cc = cc_map.get(e.id1);
+				cc._members.add(e.id2);
+				cc_map.put(e.id2, cc);
+				group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.JOIN, Collections.singleton(e.id2)));
 			} else {
-				cc = cc_map.get(l.id1);
-				occ = cc_map.get(l.id2);
+				cc = cc_map.get(e.id1);
+				occ = cc_map.get(e.id2);
 				if ( cc != occ ){ // id1 and id2 belong to different ccs => merge
 					if ( cc.size() > occ.size() )
 						merge(time, cc, occ);
@@ -135,32 +135,32 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 			delCC(time, cc.gid());
 	}
 	
-	private void removeLink(long time, Link l) throws IOException {
-		boolean singleton1 = (adjacency.getNext(l.id1).isEmpty());
-		boolean singleton2 = (adjacency.getNext(l.id2).isEmpty());
+	private void removeEdge(long time, Edge e) throws IOException {
+		boolean singleton1 = (adjacency.getNext(e.id1).isEmpty());
+		boolean singleton2 = (adjacency.getNext(e.id2).isEmpty());
 		if ( singleton1 ) // id1 has become a singleton
-			removeSingleton(time, l.id1);
+			removeSingleton(time, e.id1);
 		if ( singleton2 ) // id2 has become a singleton
-			removeSingleton(time, l.id2);
+			removeSingleton(time, e.id2);
 		if ( ! singleton1 && ! singleton2 )
-			checkSplit( time, l.id1, cc_map.get(l.id1) );
+			checkSplit( time, e.id1, cc_map.get(e.id1) );
 	}
 
-	public void handleEvents(long time, Collection<LinkEvent> events) throws IOException {
-		Deque<LinkEvent> down_events = new LinkedList<LinkEvent>();
-		for ( LinkEvent lev : events ){
-			Link l = lev.link();
-			if ( lev.isUp() ){
-				adjacency.add(l);
-				addLink(time, l);
+	public void handleEvents(long time, Collection<EdgeEvent> events) throws IOException {
+		Deque<EdgeEvent> down_events = new LinkedList<EdgeEvent>();
+		for ( EdgeEvent eev : events ){
+			Edge e = eev.edge();
+			if ( eev.isUp() ){
+				adjacency.add(e);
+				addEdge(time, e);
 			} else {
-				down_events.addLast(lev);
+				down_events.addLast(eev);
 			}
 		}
 		while ( ! down_events.isEmpty() ){
-			Link dl = down_events.poll().link();
+			Edge dl = down_events.poll().edge();
 			adjacency.remove(dl);
-			removeLink(time, dl);
+			removeEdge(time, dl);
 		}
 	}
 	
@@ -209,21 +209,21 @@ public final class LinksToConnectedComponentsConverter implements Converter {
 
 	@Override
 	public void convert() throws IOException {
-		link_reader = _links.getReader();
+		edge_reader = _edges.getReader();
 		group_writer = _ccs.getWriter();
-		long minTime = _links.minTime();
-		link_reader.seek(minTime);
-		Collection<Link> initLinks = link_reader.referenceState();
-		for ( Link l : initLinks )
-			adjacency.add(l);
+		long minTime = _edges.minTime();
+		edge_reader.seek(minTime);
+		Collection<Edge> initEdges = edge_reader.referenceState();
+		for ( Edge e : initEdges )
+			adjacency.add(e);
 		setInitState(minTime);
-		while ( link_reader.hasNext() ){
-			long time = link_reader.nextTime();
-			handleEvents(time, link_reader.next());
+		while ( edge_reader.hasNext() ){
+			long time = edge_reader.nextTime();
+			handleEvents(time, edge_reader.next());
 		}
-		group_writer.setPropertiesFromTrace(_links);
+		group_writer.setPropertiesFromTrace(_edges);
 		group_writer.close();
-		link_reader.close();
+		edge_reader.close();
 	}
 
 }

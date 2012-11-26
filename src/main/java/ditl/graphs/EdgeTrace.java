@@ -16,53 +16,69 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs.cli;
+package ditl.graphs;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.*;
 
-import org.apache.commons.cli.*;
+import ditl.*;
 
-import ditl.Store.*;
-import ditl.WritableStore.AlreadyExistsException;
-import ditl.cli.ConvertApp;
-import ditl.graphs.*;
-
-public class StaticGroupLinks extends ConvertApp {
+public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge> 
+	implements StatefulTrace.Filterable<EdgeEvent, Edge>{
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.GROUPS, GraphOptions.LINKS);
-	private String groupLinksName;
+	public final static String type = "edges";
+	public final static String defaultName = "edges";
 	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "group-links";
-	public final static String CMD_ALIAS = "gl";
+	public final static class Updater implements StateUpdater<EdgeEvent,Edge> {
+		private Set<Edge> edges = new AdjacencySet.Edges();
+		
+		@Override
+		public void setState(Collection<Edge> contactsState ) {
+			edges.clear();
+			for ( Edge e : contactsState )
+				edges.add(e);
+		}
 
+		@Override
+		public Set<Edge> states() {
+			return edges;
+		}
 
-	@Override
-	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-		LinkTrace links = (LinkTrace)orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
-		GroupTrace groups = (GroupTrace)orig_store.getTrace(graph_options.get(GraphOptions.GROUPS));
-		Set<Group> static_groups = groups.staticGroups();
-		LinkTrace group_links = (LinkTrace)dest_store.newTrace(groupLinksName, LinkTrace.type, force);
-		new StaticGroupLinkConverter(group_links, links, static_groups).convert();
+		@Override
+		public void handleEvent(long time, EdgeEvent event) {
+			if ( event.isUp() ){
+				edges.add( event.edge() );
+			} else {
+				edges.remove( event.edge() );
+			}
+		}
 	}
 	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		groupLinksName = args[1];
+	public interface Handler {
+		public Listener<Edge> edgeListener();
+		public Listener<EdgeEvent> edgeEventListener();
+	}
+
+	public EdgeTrace(Store store, String name, PersistentMap info) throws IOException {
+		super(store, name, info, new EdgeEvent.Factory(), new Edge.Factory(), 
+				new StateUpdaterFactory<EdgeEvent,Edge>(){
+					@Override
+					public StateUpdater<EdgeEvent, Edge> getNew() {
+						return new EdgeTrace.Updater();
+					}
+		});
 	}
 
 	@Override
-	protected String getUsageString() {
-		return "[OPTIONS] STORE GROUP_LINKS_NAME";
-	}
-	
-	@Override
-	protected void initOptions(){
-		super.initOptions();
-		graph_options.setOptions(options);
+	public Filter<Edge> stateFilter(Set<Integer> group) {
+		return new Edge.InternalGroupFilter(group);
 	}
 
+	@Override
+	public Filter<EdgeEvent> eventFilter(Set<Integer> group) {
+		return new EdgeEvent.InternalGroupFilter(group);
+	}
+
+	@Override
+	public void copyOverTraceInfo(Writer<EdgeEvent> writer) {}
 }

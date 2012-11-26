@@ -25,7 +25,7 @@ import ditl.*;
 
 
 
-public final class NodeDegreeReport	extends StateTimeReport implements LinkTrace.Handler, PresenceTrace.Handler {
+public final class NodeDegreeReport	extends StateTimeReport implements EdgeTrace.Handler, PresenceTrace.Handler {
 
 	private Map<Integer,Integer> degrees = new HashMap<Integer,Integer>();
 	
@@ -59,11 +59,11 @@ public final class NodeDegreeReport	extends StateTimeReport implements LinkTrace
 	}
 	
 	@Override
-	public Listener<LinkEvent> linkEventListener(){
-		return new Listener<LinkEvent>() {
+	public Listener<EdgeEvent> edgeEventListener(){
+		return new Listener<EdgeEvent>() {
 			@Override
-			public void handle(long time, Collection<LinkEvent> events) throws IOException {
-				for ( LinkEvent ce : events ){
+			public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+				for ( EdgeEvent ce : events ){
 					if ( ce.isUp() ){
 						incrDegree(ce.id1(), 1);
 						incrDegree(ce.id2(), 1);
@@ -93,11 +93,11 @@ public final class NodeDegreeReport	extends StateTimeReport implements LinkTrace
 	}
 	
 	@Override
-	public Listener<Link> linkListener(){
-		return new Listener<Link>(){
+	public Listener<Edge> edgeListener(){
+		return new Listener<Edge>(){
 			@Override
-			public void handle(long time, Collection<Link> events) throws IOException {
-				for ( Link c : events ){
+			public void handle(long time, Collection<Edge> events) throws IOException {
+				for ( Edge c : events ){
 					incrDegree(c.id1(),1);
 					incrDegree(c.id2(),1);
 				}

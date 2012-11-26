@@ -95,16 +95,16 @@ public class TransferSelectorPanel extends JPanel implements ActionListener, Ite
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-        updateLinkTrace();
+        updateEdgesTrace();
 	}
 
 	@Override
 	public void itemStateChanged(ItemEvent arg0) {
 		transferChooser.setEnabled(enabledBox.isSelected());
-		updateLinkTrace();
+		updateEdgesTrace();
 	}
 	
-	private void updateLinkTrace() {
+	private void updateEdgesTrace() {
 		String name = "null";
 		try {
 			cur_transfers = null;

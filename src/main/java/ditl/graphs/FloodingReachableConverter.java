@@ -25,7 +25,7 @@ import ditl.*;
 
 
 public class FloodingReachableConverter implements 
-	LinkTrace.Handler, PresenceTrace.Handler, Generator, Converter {
+	EdgeTrace.Handler, PresenceTrace.Handler, Generator, Converter {
 
 	private long _tau;
 	private long _delay;
@@ -36,10 +36,10 @@ public class FloodingReachableConverter implements
 	private Set<Arc> state = new TreeSet<Arc>();
 	private Set<Integer> present = new HashSet<Integer>();
 	private AdjacencySet.Arcs rev_matrix = new AdjacencySet.Arcs();
-	private AdjacencySet.Links matrix = new AdjacencySet.Links();
+	private AdjacencySet.Edges matrix = new AdjacencySet.Edges();
 	private boolean started = false;
 	
-	private LinkTrace _links;
+	private EdgeTrace _edges;
 	private PresenceTrace _presence;
 	private ReachabilityTrace _reachability;
 	
@@ -47,9 +47,9 @@ public class FloodingReachableConverter implements
 	private Bus<Infection> infection_bus = new Bus<Infection>();
 	
 	public FloodingReachableConverter(ReachabilityTrace reachability, PresenceTrace presence,
-			LinkTrace links, long tau, long period, long minTime) {
+			EdgeTrace edges, long tau, long period, long minTime) {
 		min_time = minTime;
-		_links = links;
+		_edges = edges;
 		_presence = presence;
 		_reachability = reachability;
 		_tau = tau;
@@ -59,18 +59,18 @@ public class FloodingReachableConverter implements
 	}
 
 	@Override
-	public Listener<LinkEvent> linkEventListener() {
-		return new Listener<LinkEvent>() {
+	public Listener<EdgeEvent> edgeEventListener() {
+		return new Listener<EdgeEvent>() {
 			@Override
-			public void handle(long time, Collection<LinkEvent> events) throws IOException {
-				for ( LinkEvent lev : events ){
-					Link l = lev.link();
-					if ( lev.isUp() ){
-						matrix.add(l);
-						Set<Integer> already_inf_1 = rev_matrix.getNext(l.id1());
-						Set<Integer> already_inf_2 = rev_matrix.getNext(l.id2());
+			public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+				for ( EdgeEvent eev : events ){
+					Edge e = eev.edge();
+					if ( eev.isUp() ){
+						matrix.add(e);
+						Set<Integer> already_inf_1 = rev_matrix.getNext(e.id1());
+						Set<Integer> already_inf_2 = rev_matrix.getNext(e.id2());
 						if ( already_inf_1 != null ){
-							Arc a = new Arc(l.id1(), l.id2());
+							Arc a = new Arc(e.id1(), e.id2());
 							for ( Integer orig : already_inf_1 ){
 								if ( already_inf_2 == null || ! already_inf_2.contains(orig) ){
 									infection_bus.queue(time+_tau, new Infection(orig, a));
@@ -78,7 +78,7 @@ public class FloodingReachableConverter implements
 							}
 						}
 						if ( already_inf_2 != null ){
-							Arc a = new Arc(l.id2(), l.id1() );
+							Arc a = new Arc(e.id2(), e.id1() );
 							for ( Integer orig : already_inf_2 ){
 								if ( already_inf_1 == null || ! already_inf_1.contains(orig) ){
 									infection_bus.queue(time+_tau, new Infection(orig, a));
@@ -86,8 +86,8 @@ public class FloodingReachableConverter implements
 							}
 						} 	
 					} else {
-						matrix.remove(l);
-						infection_bus.removeFromQueueAfterTime(time, new LinkMatcher(l));
+						matrix.remove(e);
+						infection_bus.removeFromQueueAfterTime(time, new EdgeMatcher(e));
 					}
 				}
 			}
@@ -96,12 +96,12 @@ public class FloodingReachableConverter implements
 	
 
 	@Override
-	public Listener<Link> linkListener() {
-		return new Listener<Link>(){
+	public Listener<Edge> edgeListener() {
+		return new Listener<Edge>(){
 			@Override
-			public void handle(long time, Collection<Link> events) {
-				for ( Link l : events ){
-					matrix.add(l);
+			public void handle(long time, Collection<Edge> events) {
+				for ( Edge e : events ){
+					matrix.add(e);
 				}
 			}
 		};
@@ -119,32 +119,32 @@ public class FloodingReachableConverter implements
 	
 	@Override
 	public void convert() throws IOException {
-		StatefulReader<LinkEvent,Link> link_reader = _links.getReader();
+		StatefulReader<EdgeEvent,Edge> edge_reader = _edges.getReader();
 		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader();
 		
 		arc_writer = _reachability.getWriter();
 		
 		arc_writer.setProperty(ReachabilityTrace.delayKey, _delay);
-		arc_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		arc_writer.setProperty(Trace.ticsPerSecondKey, _edges.ticsPerSecond());
 		arc_writer.setProperty(ReachabilityTrace.tauKey, _tau);
-		arc_writer.setProperty(Trace.minTimeKey, _links.minTime());
-		arc_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
+		arc_writer.setProperty(Trace.minTimeKey, _edges.minTime());
+		arc_writer.setProperty(Trace.maxTimeKey, _edges.maxTime());
 		
-		link_reader.stateBus().addListener(linkListener());
-		link_reader.bus().addListener(linkEventListener());
+		edge_reader.stateBus().addListener(edgeListener());
+		edge_reader.bus().addListener(edgeEventListener());
 		
 		presence_reader.stateBus().addListener(presenceListener());
 		presence_reader.bus().addListener(presenceEventListener());
 		
-		Runner runner = new Runner(_tau, _links.minTime(), _links.maxTime());
+		Runner runner = new Runner(_tau, _edges.minTime(), _edges.maxTime());
 		runner.addGenerator(presence_reader);
-		runner.addGenerator(link_reader);
+		runner.addGenerator(edge_reader);
 		runner.addGenerator(this);
 		runner.run();
 		
 		arc_writer.flush();
 		arc_writer.close();
-		link_reader.close();
+		edge_reader.close();
 		presence_reader.close();
 	}
 
@@ -174,7 +174,7 @@ public class FloodingReachableConverter implements
 			if ( started ){
 				// first handle previous time period
 				long t = time - _delay;
-				if ( t == _links.minTime() ){ // this should be the initial state  
+				if ( t == _edges.minTime() ){ // this should be the initial state  
 					arc_writer.setInitState(min_time, state);
 				} else {
 					Set<Arc> cur_state = arc_writer.states();
@@ -195,8 +195,8 @@ public class FloodingReachableConverter implements
 				infection_bus.reset();
 			} else {
 				started = true;
-				if ( min_time > _links.minTime() ) // starting after min_time => empty initial state
-					arc_writer.setInitState(_links.minTime(), Collections.<Arc>emptySet());
+				if ( min_time > _edges.minTime() ) // starting after min_time => empty initial state
+					arc_writer.setInitState(_edges.minTime(), Collections.<Arc>emptySet());
 			}
 			
 			for ( Integer i : present ){
@@ -234,12 +234,12 @@ public class FloodingReachableConverter implements
 		}
 	}
 	
-	private final class LinkMatcher implements Matcher<Infection> {
-		Link _link;
-		LinkMatcher(Link link){ _link = link; }
+	private final class EdgeMatcher implements Matcher<Infection> {
+		Edge _edge;
+		EdgeMatcher(Edge edge){ _edge = edge; }
 		@Override
 		public boolean matches(Infection item) {
-			return item._arc.link().equals(_link);
+			return item._arc.edge().equals(_edge);
 		}
 	}
 	

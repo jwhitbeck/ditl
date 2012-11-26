@@ -30,8 +30,8 @@ public final class PlausibleMobilityConverter implements Converter,
 	private StatefulWriter<MovementEvent,Movement> writer;
 	
 	private MovementTrace known_movement;
-	private LinkTrace _links;
-	private WindowedLinkTrace windowed_links;
+	private EdgeTrace _edges;
+	private WindowedEdgeTrace windowed_edges;
 	private PresenceTrace _presence;
 	private MovementTrace _movement;
 	
@@ -68,15 +68,15 @@ public final class PlausibleMobilityConverter implements Converter,
 	private double _s; 
 	
 	public PlausibleMobilityConverter(MovementTrace movement,
-			PresenceTrace presence, LinkTrace links,
-			WindowedLinkTrace windowedLinks, MovementTrace knownMovement,
+			PresenceTrace presence, EdgeTrace edges,
+			WindowedEdgeTrace windowedEdges, MovementTrace knownMovement,
 			double width, double height, double e, double s, 
 			int nSteps, long updateInterval, long warmTime, boolean overlap){
 		
 		_movement = movement;
 		_presence = presence;
-		_links = links;
-		windowed_links = windowedLinks;
+		_edges = edges;
+		windowed_edges = windowedEdges;
 		known_movement = knownMovement;
 		_height = height;
 		_width = width;
@@ -129,8 +129,8 @@ public final class PlausibleMobilityConverter implements Converter,
 		
 		// init event readers
 		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader();		
-		StatefulReader<LinkEvent,Link> link_reader = _links.getReader();
-		StatefulReader<WindowedLinkEvent,WindowedLink> window_reader = windowed_links.getReader();
+		StatefulReader<EdgeEvent,Edge> edge_reader = _edges.getReader();
+		StatefulReader<WindowedEdgeEvent,WindowedEdge> window_reader = windowed_edges.getReader();
 		
 		if ( known_movement != null ){
 			known_reader = known_movement.getReader();
@@ -148,18 +148,18 @@ public final class PlausibleMobilityConverter implements Converter,
 		}
 		
 		for ( Force force : global_forces ){
-			if ( force instanceof LinkTrace.Handler ){
-				LinkTrace.Handler lhf = (LinkTrace.Handler)force;
-				link_reader.stateBus().addListener(lhf.linkListener());
-				link_reader.bus().addListener(lhf.linkEventListener());
+			if ( force instanceof EdgeTrace.Handler ){
+				EdgeTrace.Handler lhf = (EdgeTrace.Handler)force;
+				edge_reader.stateBus().addListener(lhf.edgeListener());
+				edge_reader.bus().addListener(lhf.edgeEventListener());
 			}
 		}
 		
 		for ( Force force : global_forces ){
-			if ( force instanceof WindowedLinkTrace.Handler ){
-				WindowedLinkTrace.Handler wlhf = (WindowedLinkTrace.Handler)force;
-				window_reader.stateBus().addListener(wlhf.windowedLinkListener());
-				window_reader.bus().addListener(wlhf.windowedLinkEventListener());
+			if ( force instanceof WindowedEdgeTrace.Handler ){
+				WindowedEdgeTrace.Handler wlhf = (WindowedEdgeTrace.Handler)force;
+				window_reader.stateBus().addListener(wlhf.windowedEdgesListener());
+				window_reader.bus().addListener(wlhf.windowedEdgesEventListener());
 			}
 		}
 		
@@ -170,7 +170,7 @@ public final class PlausibleMobilityConverter implements Converter,
 		
 		Runner runner = new Runner(incr_interval, min_time, max_time);
 		runner.addGenerator(presence_reader);
-		runner.addGenerator(link_reader);
+		runner.addGenerator(edge_reader);
 		runner.addGenerator(window_reader);
 		if ( known_reader != null )
 			runner.addGenerator(known_reader);
@@ -214,7 +214,7 @@ public final class PlausibleMobilityConverter implements Converter,
 		
 		writer.setPropertiesFromTrace(_presence);
 		writer.close();
-		link_reader.close();
+		edge_reader.close();
 		presence_reader.close();
 		window_reader.close();
 		if ( known_reader != null )

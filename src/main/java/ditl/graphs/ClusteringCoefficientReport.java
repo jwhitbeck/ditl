@@ -26,9 +26,9 @@ import ditl.*;
 
 
 public final class ClusteringCoefficientReport extends StateTimeReport 
-	implements PresenceTrace.Handler, LinkTrace.Handler {
+	implements PresenceTrace.Handler, EdgeTrace.Handler {
 	
-	private AdjacencySet.Links adjacency = new AdjacencySet.Links();
+	private AdjacencySet.Edges adjacency = new AdjacencySet.Edges();
 	private Map<Integer,Double> coeffs = new HashMap<Integer,Double>();
 	private boolean remove_leaves;
 	
@@ -47,9 +47,9 @@ public final class ClusteringCoefficientReport extends StateTimeReport
 		}
 	}
 	
-	private void updateSurroundingCoeffs(Link link){
-		Integer i1 = link.id1;
-		Integer i2 = link.id2;
+	private void updateSurroundingCoeffs(Edge edge){
+		Integer i1 = edge.id1;
+		Integer i2 = edge.id2;
 		Set<Integer> n1 = adjacency.getNext(i1);
 		Set<Integer> n2 = adjacency.getNext(i2);
 		if ( ! n1.isEmpty() && ! n2.isEmpty() ){
@@ -71,16 +71,16 @@ public final class ClusteringCoefficientReport extends StateTimeReport
 				coeffs.put(i,0.0);
 			} else {
 				Set<Integer> buff = new HashSet<Integer>();
-				int n_links = 0;
+				int n_edges = 0;
 				for ( Integer j : neighbs ){
 					Set<Integer> j_neighbs = adjacency.getNext(j);
 					for ( Integer l : buff ){
 						if ( j_neighbs.contains(l) )
-							n_links ++;
+							n_edges ++;
 					}
 					buff.add(j);
 				}
-				double coeff = 2*(double)n_links/(double)(k*(k-1));
+				double coeff = 2*(double)n_edges/(double)(k*(k-1));
 				coeffs.put(i, coeff);
 			}
 		}
@@ -130,35 +130,35 @@ public final class ClusteringCoefficientReport extends StateTimeReport
 	}
 
 	@Override
-	public Listener<LinkEvent> linkEventListener() {
-		return new Listener<LinkEvent>(){
-			Listener<LinkEvent> adj_listener = adjacency.linkEventListener();
+	public Listener<EdgeEvent> edgeEventListener() {
+		return new Listener<EdgeEvent>(){
+			Listener<EdgeEvent> adj_listener = adjacency.edgeEventListener();
 			@Override
-			public void handle(long time, Collection<LinkEvent> events)
+			public void handle(long time, Collection<EdgeEvent> events)
 					throws IOException {
 				adj_listener.handle(time, events);
-				for ( LinkEvent lev : events )
-					updateSurroundingCoeffs(lev.link());
+				for ( EdgeEvent eev : events )
+					updateSurroundingCoeffs(eev.edge());
 				update(time);
 			}
 		};
 	}
 
 	@Override
-	public Listener<Link> linkListener() {
-		return new StatefulListener<Link>(){
-			StatefulListener<Link> adj_listener = (StatefulListener<Link>) (adjacency.linkListener());
+	public Listener<Edge> edgeListener() {
+		return new StatefulListener<Edge>(){
+			StatefulListener<Edge> adj_listener = (StatefulListener<Edge>) (adjacency.edgeListener());
 			@Override
 			public void reset() {
 				adj_listener.reset();
 			}
 
 			@Override
-			public void handle(long time, Collection<Link> events)
+			public void handle(long time, Collection<Edge> events)
 					throws IOException {
 				adj_listener.handle(time, events);
-				for ( Link l : events )
-					updateSurroundingCoeffs(l);
+				for ( Edge e : events )
+					updateSurroundingCoeffs(e);
 				update(time);
 			}
 			

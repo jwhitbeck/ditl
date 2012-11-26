@@ -49,10 +49,10 @@ public class Reachability extends ConvertApp {
 	private long delay;
 	private long eta;
 	private Long every;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.GROUPS);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.GROUPS);
 	private String timeFileName;
 	private BufferedWriter time_writer;
-	private String linksName;
+	private String edgesName;
 	private String ccsName;
 	private String prefix;
 	private Long min_delay;
@@ -82,7 +82,7 @@ public class Reachability extends ConvertApp {
 		u_eta = Double.parseDouble(args[1]);
 		u_tau = Double.parseDouble(args[2]);
 		u_delay = Double.parseDouble(args[3]);
-		linksName = graph_options.get(GraphOptions.LINKS);
+		edgesName = graph_options.get(GraphOptions.EDGES);
 		ccsName = graph_options.get(GraphOptions.GROUPS);
 		if ( cli.hasOption(everyOption) )
 			every = Long.parseLong(cli.getOptionValue(everyOption));
@@ -146,7 +146,7 @@ public class Reachability extends ConvertApp {
 		options.addOption(null, noPruneLastOption, false, "Do not prune siblings from the last calculated reachability family");
 		options.addOption(null, minDelayOption, true, "Skip straight to calculating reachability traces greater than <arg>");
 		options.addOption(null, verboseOption, false, "Be verbose");
-		options.addOption(null, prefixOption, true, "Prefix for reachability traces (default: name of the 'links' trace)");
+		options.addOption(null, prefixOption, true, "Prefix for reachability traces (default: name of the 'edges' trace)");
 		options.addOption(null, timeFileOption, true, "Write calculation times in milliseconds to file <arg>");
 	}
 
@@ -179,8 +179,8 @@ public class Reachability extends ConvertApp {
 			tps = orig_store.getTrace(ccsName).ticsPerSecond();
 			if ( prefix == null ) prefix = ccsName;
 		} else {
-			tps = orig_store.getTrace(linksName).ticsPerSecond();
-			if ( prefix == null ) prefix = linksName;
+			tps = orig_store.getTrace(edgesName).ticsPerSecond();
+			if ( prefix == null ) prefix = edgesName;
 		}
 		
 		eta = (long)(u_eta*tps);
@@ -234,7 +234,7 @@ public class Reachability extends ConvertApp {
 			if ( tau == 0 ){
 				tmp = fromConnectedComponents();
 			} else {
-				tmp = fromLinks();
+				tmp = fromEdges();
 			}
 			exponentiate(tmp, getMaxExponent(q));
 		}
@@ -303,9 +303,9 @@ public class Reachability extends ConvertApp {
 	}
 	
 	
-	private ReachabilityFamily fromLinks() throws AlreadyExistsException, LoadTraceException, NoSuchTraceException, IOException{
-		LinkTrace links = (LinkTrace)orig_store.getTrace(linksName);
-		log("Initializing reachability family "+tau/tps+" from link trace '"+links.name()+"'");
+	private ReachabilityFamily fromEdges() throws AlreadyExistsException, LoadTraceException, NoSuchTraceException, IOException{
+		EdgeTrace edges = (EdgeTrace)orig_store.getTrace(edgesName);
+		log("Initializing reachability family "+tau/tps+" from edge trace '"+edges.name()+"'");
 		ReachabilityFamily rf = getFamily(tau);
 		boolean has_new = false;
 		for ( Long d : rf.delays() ){
@@ -316,7 +316,7 @@ public class Reachability extends ConvertApp {
 			} else {
 				log("Calculating reachability trace "+d/tps);
 				armTimer();
-				new LinksToReachableConverter(rf.newMember(d), links, eta, tau, d).convert();
+				new EdgesToReachableConverter(rf.newMember(d), edges, eta, tau, d).convert();
 				stopTimer(d);
 				has_new = true;
 			}

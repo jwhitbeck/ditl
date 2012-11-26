@@ -23,18 +23,18 @@ import java.util.*;
 
 import ditl.*;
 
-public class StaticGroupLinkConverter implements Converter {
+public class StaticGroupEdgeConverter implements Converter {
 
 	private Map<Integer, Integer> group_map;
-	private Map<Link,Set<Link>> group_links = new AdjacencyMap.Links<Set<Link>>();
-	private StatefulWriter<LinkEvent,Link> group_link_writer;
-	private StatefulReader<LinkEvent,Link> link_reader;
-	private LinkTrace g_links;
-	private LinkTrace _links;
+	private Map<Edge,Set<Edge>> group_edges = new AdjacencyMap.Edges<Set<Edge>>();
+	private StatefulWriter<EdgeEvent,Edge> group_edge_writer;
+	private StatefulReader<EdgeEvent,Edge> edge_reader;
+	private EdgeTrace g_edges;
+	private EdgeTrace _edges;
 	
-	public StaticGroupLinkConverter(LinkTrace groupLinks, LinkTrace links, Set<Group> groups){
-		g_links = groupLinks;
-		_links = links;
+	public StaticGroupEdgeConverter(EdgeTrace groupEdges, EdgeTrace edges, Set<Group> groups){
+		g_edges = groupEdges;
+		_edges = edges;
 		group_map = new HashMap<Integer,Integer>();
 		for ( Group g : groups ){
 			Integer gid = g.gid();
@@ -43,44 +43,44 @@ public class StaticGroupLinkConverter implements Converter {
 		}
 	}
 	
-	private Link groupLink(Link l){
-		Integer gid1 = group_map.get(l.id1());
-		Integer gid2 = group_map.get(l.id2());
+	private Edge groupEdges(Edge e){
+		Integer gid1 = group_map.get(e.id1());
+		Integer gid2 = group_map.get(e.id2());
 		if ( gid2.equals(gid1) )
 			return null;
-		return new Link( gid1, gid2);
+		return new Edge( gid1, gid2);
 	}
 	
-	private void setInitState(long minTime, Collection<Link> links) throws IOException {
-		for ( Link l : links ){
-			Link gl = groupLink(l);
+	private void setInitState(long minTime, Collection<Edge> edges) throws IOException {
+		for ( Edge e : edges ){
+			Edge gl = groupEdges(e);
 			if ( gl != null ){
-				if ( ! group_links.containsKey(gl) )
-					group_links.put(gl, new AdjacencySet.Links() );
-				group_links.get(gl).add(l);
+				if ( ! group_edges.containsKey(gl) )
+					group_edges.put(gl, new AdjacencySet.Edges() );
+				group_edges.get(gl).add(e);
 			}
 		}
-		group_link_writer.setInitState(minTime, group_links.keySet());
+		group_edge_writer.setInitState(minTime, group_edges.keySet());
 	}
 	
-	private void handleEvents(long time, Collection<LinkEvent> events) throws IOException {
-		for ( LinkEvent lev : events ){
-			Link l = lev.link();
-			Link gl = groupLink(l);
+	private void handleEvents(long time, Collection<EdgeEvent> events) throws IOException {
+		for ( EdgeEvent eev : events ){
+			Edge e = eev.edge();
+			Edge gl = groupEdges(e);
 			if ( gl != null ){
-				Set<Link> g_link = group_links.get(gl);
-				if ( lev.isUp() ){
-					if ( g_link == null ){
-						g_link = new AdjacencySet.Links();
-						group_links.put(gl, g_link);
-						group_link_writer.append(time, new LinkEvent(gl, LinkEvent.UP));
+				Set<Edge> g_edge = group_edges.get(gl);
+				if ( eev.isUp() ){
+					if ( g_edge == null ){
+						g_edge = new AdjacencySet.Edges();
+						group_edges.put(gl, g_edge);
+						group_edge_writer.append(time, new EdgeEvent(gl, EdgeEvent.UP));
 					}
-					group_links.get(gl).add(l);
+					group_edges.get(gl).add(e);
 				} else {
-					g_link.remove(l);
-					if ( g_link.isEmpty() ){
-						group_link_writer.append(time, new LinkEvent(gl, LinkEvent.DOWN));
-						group_links.remove(gl);
+					g_edge.remove(e);
+					if ( g_edge.isEmpty() ){
+						group_edge_writer.append(time, new EdgeEvent(gl, EdgeEvent.DOWN));
+						group_edges.remove(gl);
 					}
 				}
 			}
@@ -89,17 +89,17 @@ public class StaticGroupLinkConverter implements Converter {
 	
 	@Override
 	public void convert() throws IOException {
-		group_link_writer = g_links.getWriter();
-		link_reader = _links.getReader();
-		long minTime = _links.minTime();
-		link_reader.seek(minTime);
-		Collection<Link> initLinks = link_reader.referenceState();
-		setInitState(minTime, initLinks);
-		while ( link_reader.hasNext() ){
-			long time = link_reader.nextTime();
-			handleEvents(time, link_reader.next());
+		group_edge_writer = g_edges.getWriter();
+		edge_reader = _edges.getReader();
+		long minTime = _edges.minTime();
+		edge_reader.seek(minTime);
+		Collection<Edge> initEdges = edge_reader.referenceState();
+		setInitState(minTime, initEdges);
+		while ( edge_reader.hasNext() ){
+			long time = edge_reader.nextTime();
+			handleEvents(time, edge_reader.next());
 		}
-		group_link_writer.setPropertiesFromTrace(_links);
+		group_edge_writer.setPropertiesFromTrace(_edges);
 	}
 	
 	

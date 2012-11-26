@@ -16,27 +16,44 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs.viz;
+package ditl.graphs.cli;
 
-import java.awt.*;
+import java.io.IOException;
 
-import ditl.viz.SceneElement;
+import org.apache.commons.cli.*;
 
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.ConvertApp;
+import ditl.graphs.*;
 
+public class EdgesToCCs extends ConvertApp {
 
-public class LinkElement implements SceneElement {
-
-	private NodeElement node1;
-	private NodeElement node2;
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.GROUPS);
 	
-	public LinkElement(NodeElement n1, NodeElement n2){
-		node1 = n1;
-		node2 = n2;
-	}
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "edges-to-ccs";
+	public final static String CMD_ALIAS = "e2c";
 	
 	@Override
-	public void paint(Graphics2D g2) {
-		g2.drawLine(node1.sX, node1.sY, node2.sX, node2.sY);
+	protected void initOptions() {
+		super.initOptions();
+		graph_options.setOptions(options);
+	}
+
+	@Override
+	protected void parseArgs(CommandLine cli, String[] args)
+			throws ParseException, ArrayIndexOutOfBoundsException,
+			HelpException {
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
+	}
+
+	@Override
+	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+		GroupTrace ccs = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
+		new EdgesToConnectedComponentsConverter(ccs, edges).convert();
 	}
 
 }

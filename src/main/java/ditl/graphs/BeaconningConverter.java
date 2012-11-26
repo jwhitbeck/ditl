@@ -29,7 +29,7 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 
 	protected boolean _randomize;
 	private double _p;
-	private AdjacencySet.Links _adjacency = new AdjacencySet.Links();
+	private AdjacencySet.Edges _adjacency = new AdjacencySet.Edges();
 	private long _period;
 	private Random rng = new Random();
 	private Bus<Integer> next_scans = new Bus<Integer>();
@@ -37,16 +37,16 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 	
 	private BeaconTrace _beacons;
 	private PresenceTrace _presence;
-	private LinkTrace _links;
+	private EdgeTrace _edges;
 	
 	
 	public BeaconningConverter( BeaconTrace beacons, PresenceTrace presence, 
-			LinkTrace links, long period, double p, boolean randomize) {
+			EdgeTrace edges, long period, double p, boolean randomize) {
 		_randomize = randomize;
 		_p = p;
 		_period = period;
 		_beacons = beacons;
-		_links = links;
+		_edges = edges;
 		_presence = presence;
 		next_scans.addListener(nextScansListener());
 	}
@@ -116,26 +116,26 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 	@Override
 	public void convert() throws IOException {
 		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader();
-		StatefulReader<LinkEvent,Link> link_reader = _links.getReader();
+		StatefulReader<EdgeEvent,Edge> edge_reader = _edges.getReader();
 		beacon_writer = _beacons.getWriter();
 		
 		presence_reader.bus().addListener(presenceEventListener());
 		presence_reader.stateBus().addListener(presenceListener());
 		
-		link_reader.stateBus().addListener(_adjacency.linkListener());
-		link_reader.bus().addListener(_adjacency.linkEventListener());
+		edge_reader.stateBus().addListener(_adjacency.edgeListener());
+		edge_reader.bus().addListener(_adjacency.edgeEventListener());
 		
-		Runner runner = new Runner(_links.maxUpdateInterval(), _presence.minTime(), _presence.maxTime());
+		Runner runner = new Runner(_edges.maxUpdateInterval(), _presence.minTime(), _presence.maxTime());
 		runner.addGenerator(presence_reader);
-		runner.addGenerator(link_reader);
+		runner.addGenerator(edge_reader);
 		runner.addGenerator(this);
 		runner.run();
 		
 		beacon_writer.setProperty(BeaconTrace.beaconningPeriodKey, _period);
-		beacon_writer.setPropertiesFromTrace(_links);
+		beacon_writer.setPropertiesFromTrace(_edges);
 		beacon_writer.close();
 		presence_reader.close();
-		link_reader.close();
+		edge_reader.close();
 	}
 
 	@Override

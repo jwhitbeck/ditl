@@ -25,7 +25,7 @@ import ditl.graphs.*;
 import ditl.plausible.*;
 
 public class AnticipatedForce implements Force, Interaction, 
-	LinkTrace.Handler, WindowedLinkTrace.Handler {
+	EdgeTrace.Handler, WindowedEdgeTrace.Handler {
 	
 	final static public double defaultK = 50.0; // the hooke parameter
 	final static public double defaultAlpha = 2.0; // coulomb exponent
@@ -49,8 +49,8 @@ public class AnticipatedForce implements Force, Interaction,
 	
 	private Collection<Node> _nodes;
 	
-	private Map<Link,WindowedLink> window_map = new AdjacencyMap.Links<WindowedLink>();
-	private Set<Link> active_links = new AdjacencySet.Links();
+	private Map<Edge,WindowedEdge> window_map = new AdjacencyMap.Edges<WindowedEdge>();
+	private Set<Edge> active_edges = new AdjacencySet.Edges();
 	
 	public AnticipatedForce(double K, double alpha, double vmax, double range, 
 			double epsilon, double tau, double cutoff, double lambda, long tps){
@@ -92,10 +92,10 @@ public class AnticipatedForce implements Force, Interaction,
 			double d = Math.sqrt(d2);
 			Integer id = node.id();
 			Integer oid = other_node.id();
-			Link l = new Link(id, oid);
+			Edge e = new Edge(id, oid);
 			double dt = 0;
-			if ( active_links.contains(l) ){ // currently connected
-				dt = (double)window_map.get(l).minUpTime(time) / (double)_tps;
+			if ( active_edges.contains(e) ){ // currently connected
+				dt = (double)window_map.get(e).minUpTime(time) / (double)_tps;
 			}
 			double F = _G / Math.pow( _epsilon + (d + _vmax*dt)/_range, _alpha );
 			f.x += F * dx/d;
@@ -110,14 +110,14 @@ public class AnticipatedForce implements Force, Interaction,
 		double dy = r.y-or.y;
 		Integer id = node.id();
 		Integer oid = other_node.id();
-		Link l = new Link(id,oid);
-		if ( active_links.contains(l) ){ // are connected
+		Edge e = new Edge(id,oid);
+		if ( active_edges.contains(e) ){ // are connected
 			double d = Math.sqrt( dx*dx + dy*dy );
 			double F = _K*(d-_lambda);
 			f.x = -F * dx/d;
 			f.y = -F * dy/d;
-		} else if ( window_map.containsKey(l) ){ // a window link exists between them
-			double dt = (double)window_map.get(new Link(id,oid)).minDownTime(time) / (double)_tps;
+		} else if ( window_map.containsKey(e) ){ // a window edge exists between them
+			double dt = (double)window_map.get(new Edge(id,oid)).minDownTime(time) / (double)_tps;
 			double d = Math.sqrt( dx*dx + dy*dy );
 			double F = _K*(d-_lambda)*Math.exp(-_vmax*dt/_tau);
 			f.x += -F * dx/d;
@@ -131,53 +131,53 @@ public class AnticipatedForce implements Force, Interaction,
 	}
 
 	@Override
-	public Listener<LinkEvent> linkEventListener() {
-		return new Listener<LinkEvent>(){
+	public Listener<EdgeEvent> edgeEventListener() {
+		return new Listener<EdgeEvent>(){
 			@Override
-			public void handle(long time, Collection<LinkEvent> events){
-				for ( LinkEvent lev : events ){
-					if ( lev.isUp() )
-						active_links.add(lev.link());
+			public void handle(long time, Collection<EdgeEvent> events){
+				for ( EdgeEvent eev : events ){
+					if ( eev.isUp() )
+						active_edges.add(eev.edge());
 					else
-						active_links.remove(lev.link());
+						active_edges.remove(eev.edge());
 				}
 			}
 		};
 	}
 
 	@Override
-	public Listener<Link> linkListener() {
-		return new StatefulListener<Link>(){
+	public Listener<Edge> edgeListener() {
+		return new StatefulListener<Edge>(){
 			@Override
 			public void reset() {
-				active_links.clear();
+				active_edges.clear();
 			}
 
 			@Override
-			public void handle(long time, Collection<Link> events){
-				for ( Link l : events )
-					active_links.add(l);
+			public void handle(long time, Collection<Edge> events){
+				for ( Edge e : events )
+					active_edges.add(e);
 			}
 			
 		};
 	}
 
 	@Override
-	public Listener<WindowedLinkEvent> windowedLinkEventListener() {
-		return new Listener<WindowedLinkEvent>(){
+	public Listener<WindowedEdgeEvent> windowedEdgesEventListener() {
+		return new Listener<WindowedEdgeEvent>(){
 			@Override
-			public void handle(long time, Collection<WindowedLinkEvent> events) {
-				for ( WindowedLinkEvent wle : events ){
-					Link l = wle.link();
+			public void handle(long time, Collection<WindowedEdgeEvent> events) {
+				for ( WindowedEdgeEvent wle : events ){
+					Edge e = wle.edge();
 					switch( wle.type() ){
-					case WindowedLinkEvent.UP:
-						window_map.put(l, new WindowedLink(l));
+					case WindowedEdgeEvent.UP:
+						window_map.put(e, new WindowedEdge(e));
 						break;
-					case WindowedLinkEvent.DOWN:
-						window_map.remove(l);
+					case WindowedEdgeEvent.DOWN:
+						window_map.remove(e);
 						break;
 					default:
-						window_map.get(l).handleEvent(wle);
+						window_map.get(e).handleEvent(wle);
 					}
 				}
 			}
@@ -185,19 +185,19 @@ public class AnticipatedForce implements Force, Interaction,
 	}
 
 	@Override
-	public Listener<WindowedLink> windowedLinkListener() {
-		return new StatefulListener<WindowedLink>(){
+	public Listener<WindowedEdge> windowedEdgesListener() {
+		return new StatefulListener<WindowedEdge>(){
 			@Override
 			public void reset() {
 				window_map.clear();
 			}
 
 			@Override
-			public void handle(long time, Collection<WindowedLink> events){
-				Link l;
-				for ( WindowedLink wl : events ){
-					l = wl.link();
-					window_map.put(l, wl);
+			public void handle(long time, Collection<WindowedEdge> events){
+				Edge e;
+				for ( WindowedEdge wl : events ){
+					e = wl.edge();
+					window_map.put(e, wl);
 				}
 			}
 			
