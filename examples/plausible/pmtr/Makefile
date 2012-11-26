@@ -31,17 +31,17 @@ $(TARGET): $(ORIG_DATA)
 	@echo "#################################################"
 	@echo " Importing PMTR trace"
 	@echo ""
-	$(DITL) graphs import-links \
+	$(DITL) graphs import-edges \
 		--orig-time-unit s \
 		$@ pmtr.txt
-	$(DITL) graphs links-to-presence $@
+	$(DITL) graphs edges-to-presence $@
 	@echo ""
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
-	$(DITL) plausible links-to-windowed-links $@ 1800
+	$(DITL) plausible edges-to-windowed-edges $@ 1800
 	$(DITL) plausible infer --update-interval 5 $@ 500 500
-	$(DITL) rm $@ windowed_links
+	$(DITL) rm $@ windowed_edges
 
 
 clean:

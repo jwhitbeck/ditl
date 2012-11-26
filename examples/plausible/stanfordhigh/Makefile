@@ -46,26 +46,26 @@ $(TARGET): $(ORIG_DATA) ImportStanford.java
 	@echo ""
 	javac $(JFLAGS) ImportStanford.java
 	java $(JFLAGS) ImportStanford $@ moteFiles/* 2>/dev/null
-	$(DITL) graphs beacons-to-edges --beacons rand_beacons $@
+	$(DITL) graphs beacons-to-arcs --beacons rand_beacons $@
 	$(DITL) rm $@ rand_beacons
-	$(DITL) graphs edges-to-links $@
-	$(DITL) rm $@ edges
-	$(DITL) graphs beacons-to-edges --beacons beacons $@
+	$(DITL) graphs arcs-to-edges $@
+	$(DITL) rm $@ arcs
+	$(DITL) graphs beacons-to-arcs --beacons beacons $@
 	$(DITL) rm $@ beacons
-	$(DITL) graphs edges-to-links --links tmp_links $@
-	$(DITL) rm $@ edges
-	$(DITL) graphs buffer-links --links tmp_links --buffered-links sync_links $@ 0 20
-	$(DITL) rm $@ tmp_links 
-	$(DITL) graphs links-to-presence $@
+	$(DITL) graphs arcs-to-edges --edges tmp_edges $@
+	$(DITL) rm $@ arcs
+	$(DITL) graphs buffer-edges --edges tmp_edges --buffered-edges sync_edges $@ 0 20
+	$(DITL) rm $@ tmp_edges 
+	$(DITL) graphs edges-to-presence $@
 	make groups
 	$(DITL) graphs import-groups --labels student,staff,teacher,other $@ $$(cat groups)
 	@echo ""
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
-	$(DITL) plausible links-to-windowed-links $@ 1000
+	$(DITL) plausible edges-to-windowed-edges $@ 1000
 	$(DITL) plausible infer --n-steps 10 --tau 200 $@ 1000 1000
-	$(DITL) rm $@ windowed_links
+	$(DITL) rm $@ windowed_edges
 
 
 clean:
