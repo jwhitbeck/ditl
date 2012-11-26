@@ -27,21 +27,21 @@ import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-public class EdgesToDominatingSet extends ConvertApp {
+public class ArcsToDominatingSet extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.GROUPS, GraphOptions.EDGES, GraphOptions.PRESENCE);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.GROUPS, GraphOptions.ARCS, GraphOptions.PRESENCE);
 	
 	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "edges-to-dominating-set";
-	public final static String CMD_ALIAS = "e2ds";
+	public final static String CMD_NAME = "arcs-to-dominating-set";
+	public final static String CMD_ALIAS = "a2ds";
 
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
-		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+		ArcTrace arcs = (ArcTrace) orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
 		GroupTrace ds = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
-		new EdgesToDominatingSetConverter(ds, edges, presence).convert();
+		new ArcsToDominatingSetConverter(ds, arcs, presence).convert();
 	}
 	
 	@Override

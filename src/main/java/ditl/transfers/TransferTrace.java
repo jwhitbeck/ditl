@@ -30,7 +30,7 @@ public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
 	public final static String defaultName = "transfers";
 	
 	public final static class Updater implements StateUpdater<TransferEvent,Transfer>{
-		private Map<Edge,Transfer> transfer_map = new AdjacencyMap.Edges<Transfer>();
+		private Map<Arc,Transfer> transfer_map = new AdjacencyMap.Arcs<Transfer>();
 		private Set<Transfer> transfers = new HashSet<Transfer>();
 		
 		@Override
@@ -39,14 +39,14 @@ public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
 			switch ( event.type() ){
 			case TransferEvent.START: 
 				transfer = new Transfer(event);
-				transfer_map.put(event.edge(), transfer);
+				transfer_map.put(event.arc(), transfer);
 				transfers.add(transfer);
 				break;
 			default:
-				Edge e = event.edge();
-				transfer = transfer_map.get(e);
+				Arc a = event.arc();
+				transfer = transfer_map.get(a);
 				transfers.remove(transfer);
-				transfer_map.remove(e);
+				transfer_map.remove(a);
 			}
 		}
 
@@ -55,7 +55,7 @@ public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
 			transfer_map.clear();
 			transfers.clear();
 			for ( Transfer transfer : state ){
-				transfer_map.put(transfer.edge(), transfer);
+				transfer_map.put(transfer.arc(), transfer);
 				transfers.add(transfer);
 			}
 		}

@@ -43,7 +43,7 @@ public class Analyze extends ExportApp {
 	final static String groupSizeOption = "group-size";
 	final static String reachabilityOption = "reachability";
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.GROUPS, GraphOptions.EDGES);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.LINKS, GraphOptions.GROUPS, GraphOptions.ARCS);
 	private ReportFactory<?> factory;
 	private Long min_time;
 	private Long max_time;
@@ -158,20 +158,20 @@ public class Analyze extends ExportApp {
 			tps = links.ticsPerSecond();
 		}
 		
-		if ( report instanceof EdgeTrace.Handler ){
-			EdgeTrace edges = (EdgeTrace)_store.getTrace(graph_options.get(GraphOptions.EDGES));		
-			StatefulReader<EdgeEvent,Edge> edgeReader = edges.getReader();
+		if ( report instanceof ArcTrace.Handler ){
+			ArcTrace arcs = (ArcTrace)_store.getTrace(graph_options.get(GraphOptions.ARCS));		
+			StatefulReader<ArcEvent,Arc> arcReader = arcs.getReader();
 
-			EdgeTrace.Handler eh = (EdgeTrace.Handler)report;
-			edgeReader.stateBus().addListener(eh.edgeListener());
-			edgeReader.bus().addListener(eh.edgeEventListener());
+			ArcTrace.Handler eh = (ArcTrace.Handler)report;
+			arcReader.stateBus().addListener(eh.arcListener());
+			arcReader.bus().addListener(eh.arcEventListener());
 			
-			readers.add(edgeReader);
+			readers.add(arcReader);
 			
-			if ( minTime == null || edges.minTime() > minTime ) minTime = edges.minTime();
-			if ( maxTime == null || edges.maxTime() < maxTime ) maxTime = edges.maxTime();
-			incrTime = edges.maxUpdateInterval();
-			tps = edges.ticsPerSecond();
+			if ( minTime == null || arcs.minTime() > minTime ) minTime = arcs.minTime();
+			if ( maxTime == null || arcs.maxTime() < maxTime ) maxTime = arcs.maxTime();
+			incrTime = arcs.maxUpdateInterval();
+			tps = arcs.ticsPerSecond();
 		}
 		
 		if ( report instanceof GroupTrace.Handler ){

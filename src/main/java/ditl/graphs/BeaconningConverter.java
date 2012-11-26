@@ -33,7 +33,7 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 	private long _period;
 	private Random rng = new Random();
 	private Bus<Integer> next_scans = new Bus<Integer>();
-	private Writer<Edge> beacon_writer;
+	private Writer<Arc> beacon_writer;
 	
 	private BeaconTrace _beacons;
 	private PresenceTrace _presence;
@@ -59,7 +59,7 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
 					for ( Integer n : _adjacency.getNext(i) ){
 						double q = rng.nextDouble();
 						if ( q < 1.0-_p )
-							beacon_writer.append(time, new Edge(i, n));
+							beacon_writer.append(time, new Arc(i, n));
 					}
 					next_scans.queue(time+_period, i);
 				}

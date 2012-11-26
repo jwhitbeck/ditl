@@ -16,69 +16,49 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs;
+package ditl.graphs.cli;
 
 import java.io.IOException;
-import java.util.*;
 
-import ditl.*;
+import org.apache.commons.cli.*;
 
-public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge> 
-	implements StatefulTrace.Filterable<EdgeEvent, Edge>{
+import ditl.Store.*;
+import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.ConvertApp;
+import ditl.graphs.*;
+
+public class ArcsToLinks extends ConvertApp {
+
+	private final static String intersectOption = "intersect";
 	
-	public final static String type = "edges";
-	public final static String defaultName = "edges";
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.ARCS);
+	private boolean union;
 	
-	public final static class Updater implements StateUpdater<EdgeEvent, Edge> {
-
-		private Set<Edge> edges = new AdjacencySet.Edges(); 
-		
-		@Override
-		public void setState(Collection<Edge> edgesState ) {
-			edges.clear();
-			for ( Edge e : edgesState )
-				edges.add(e);
-		}
-
-		@Override
-		public Set<Edge> states() {
-			return edges;
-		}
-
-		@Override
-		public void handleEvent(long time, EdgeEvent event) {
-			if ( event.isUp() )
-				edges.add(event.edge());
-			else
-				edges.remove(event.edge());
-		}
-	}
+	public final static String PKG_NAME = "graphs";
+	public final static String CMD_NAME = "arcs-to-links";
+	public final static String CMD_ALIAS = "a2l";
 	
-	public interface Handler {
-		public Listener<Edge> edgeListener();
-		public Listener<EdgeEvent> edgeEventListener();
-	}
-
-	public EdgeTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new EdgeEvent.Factory(), new Edge.Factory(), 
-				new StateUpdaterFactory<EdgeEvent,Edge>(){
-					@Override
-					public StateUpdater<EdgeEvent, Edge> getNew() {
-						return new EdgeTrace.Updater();
-					}
-		});
+	@Override
+	protected void initOptions() {
+		super.initOptions();
+		graph_options.setOptions(options);
+		options.addOption(null, storeOutputOption, true, "write new traces to this store");
+		options.addOption(null, intersectOption, false, "intersect arcs (default: union)");
 	}
 
 	@Override
-	public Filter<Edge> stateFilter(Set<Integer> group) {
-		return new Edge.InternalGroupFilter(group);
+	protected void parseArgs(CommandLine cli, String[] args)
+			throws ParseException, ArrayIndexOutOfBoundsException,
+			HelpException {
+		super.parseArgs(cli, args);
+		graph_options.parse(cli);
+		union = cli.hasOption(intersectOption);
 	}
 
 	@Override
-	public Filter<EdgeEvent> eventFilter(Set<Integer> group) {
-		return new EdgeEvent.InternalGroupFilter(group);
+	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+		ArcTrace arcs = (ArcTrace) orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
+		LinkTrace links = (LinkTrace) dest_store.newTrace(graph_options.get(GraphOptions.LINKS), LinkTrace.type, force);
+		new ArcsToLinksConverter(links, arcs, union).convert();
 	}
-
-	@Override
-	public void copyOverTraceInfo(Writer<EdgeEvent> writer) {}
 }

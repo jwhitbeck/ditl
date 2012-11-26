@@ -28,19 +28,19 @@ import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
 
-public class BeaconsToEdges extends ConvertApp {
+public class BeaconsToArcs extends ConvertApp {
 	
 	final static String toleranceOption = "tolerance";
 	final static String expandOption = "expand";
 
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.EDGES);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.ARCS);
 	
 	int tol;
 	double expansion;
 	
 	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "beacons-to-edges";
-	public final static String CMD_ALIAS = "b2e";
+	public final static String CMD_NAME = "beacons-to-arcs";
+	public final static String CMD_ALIAS = "b2a";
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
@@ -61,9 +61,9 @@ public class BeaconsToEdges extends ConvertApp {
 
 	@Override
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-		EdgeTrace edges = (EdgeTrace)dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
+		ArcTrace arcs = (ArcTrace)dest_store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.type, force);
 		BeaconTrace beacons = (BeaconTrace) orig_store.getTrace(graph_options.get(GraphOptions.BEACONS));		
 		
-		new BeaconsToEdgesConverter(edges, beacons, tol, expansion).convert();
+		new BeaconsToArcsConverter(arcs, beacons, tol, expansion).convert();
 	}
 }

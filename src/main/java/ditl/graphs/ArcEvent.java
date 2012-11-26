@@ -22,7 +22,7 @@ import java.util.Set;
 
 import ditl.*;
 
-public final class EdgeEvent {
+public final class ArcEvent {
 	
 	public final static boolean UP = true;
 	public final static boolean DOWN = false;
@@ -31,15 +31,15 @@ public final class EdgeEvent {
 	final Integer _from;
 	final boolean _up;
 	
-	public EdgeEvent(Integer from, Integer to, boolean up){
+	public ArcEvent(Integer from, Integer to, boolean up){
 		_from = from;
 		_to = to;
 		_up = up;
 	}
 	
-	public EdgeEvent(Edge e, boolean up){
-		_from = e._from;
-		_to = e._to;
+	public ArcEvent(Arc a, boolean up){
+		_from = a._from;
+		_to = a._to;
 		_up = up;
 	}
 	
@@ -55,19 +55,19 @@ public final class EdgeEvent {
 		return _up;
 	}
 	
-	public Edge edge(){
-		return new Edge(_from,_to);
+	public Arc arc(){
+		return new Arc(_from,_to);
 	}
 	
-	public static final class Factory implements ItemFactory<EdgeEvent> {
+	public static final class Factory implements ItemFactory<ArcEvent> {
 		@Override
-		public EdgeEvent fromString(String s) {
+		public ArcEvent fromString(String s) {
 			String[] elems = s.trim().split(" ");
 			try {
 				Integer from = Integer.parseInt(elems[0]);
 				Integer to = Integer.parseInt(elems[1]);
 				boolean up = elems[2].equals("UP");
-				return new EdgeEvent(from,to,up);
+				return new ArcEvent(from,to,up);
 				
 			} catch ( Exception e ){
 				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
@@ -81,11 +81,11 @@ public final class EdgeEvent {
 		return _from+" "+_to+" "+(_up? "UP" : "DOWN");
 	}
 	
-	public static final class InternalGroupFilter implements Filter<EdgeEvent> {
+	public static final class InternalGroupFilter implements Filter<ArcEvent> {
 		private Set<Integer> _group;
 		public InternalGroupFilter(Set<Integer> group){ _group = group;}
 		@Override
-		public EdgeEvent filter(EdgeEvent item) {
+		public ArcEvent filter(ArcEvent item) {
 			if ( _group.contains(item._from) && _group.contains(item._to) )
 				return item;
 			return null;

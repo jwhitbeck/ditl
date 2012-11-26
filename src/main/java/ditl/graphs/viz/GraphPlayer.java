@@ -55,7 +55,7 @@ public class GraphPlayer extends SimplePlayer {
 		scene.setPreferredSize(new Dimension(700,500));
 		runner.addMovementHandler(scene);
 		runner.addLinkHandler(scene);
-		runner.addEdgeHandler(scene);
+		runner.addArcHandler(scene);
 		runner.addGroupHandler(scene);
 		scene.setGroupColorMap(groups.colorMap());
 		

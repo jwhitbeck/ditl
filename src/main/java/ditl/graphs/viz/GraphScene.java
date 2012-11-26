@@ -29,11 +29,11 @@ import ditl.viz.Scene;
 
 @SuppressWarnings("serial")
 public class GraphScene extends Scene implements 
-	MovementTrace.Handler, LinkTrace.Handler, EdgeTrace.Handler, GroupTrace.Handler {
+	MovementTrace.Handler, LinkTrace.Handler, ArcTrace.Handler, GroupTrace.Handler {
 
 	protected Map<Integer,NodeElement> nodes = new HashMap<Integer,NodeElement>();
 	private Map<Link,LinkElement> links = new AdjacencyMap.Links<LinkElement>();
-	private Map<Link,EdgeElement> edges = new AdjacencyMap.Links<EdgeElement>();
+	private Map<Link,ArcElement> arcs = new AdjacencyMap.Links<ArcElement>();
 	private boolean showIds = false;
 	private Map<Integer,Color> group_color_map = null;
 	private IdMap id_map = null;
@@ -140,28 +140,28 @@ public class GraphScene extends Scene implements
 	}
 	
 	@Override
-	public Listener<EdgeEvent> edgeEventListener(){
-		return new Listener<EdgeEvent>() {
+	public Listener<ArcEvent> arcEventListener(){
+		return new Listener<ArcEvent>() {
 			@Override
-			public void handle(long time, Collection<EdgeEvent> events) {
-				for ( EdgeEvent eev : events ){
-					Edge e = eev.edge();
-					Link l = e.link();
-					EdgeElement ee;
-					if ( eev.isUp() ){
-						if ( ! edges.containsKey(l) ){
-							NodeElement n1 = nodes.get(eev.from());
-							NodeElement n2 = nodes.get(eev.to());
-							ee = new EdgeElement(n1,n2);
-							edges.put(l, ee);
+			public void handle(long time, Collection<ArcEvent> events) {
+				for ( ArcEvent aev : events ){
+					Arc a = aev.arc();
+					Link l = a.link();
+					ArcElement ae;
+					if ( aev.isUp() ){
+						if ( ! arcs.containsKey(l) ){
+							NodeElement n1 = nodes.get(aev.from());
+							NodeElement n2 = nodes.get(aev.to());
+							ae = new ArcElement(n1,n2);
+							arcs.put(l, ae);
 						}
-						ee = edges.get(l);
-						ee.bringEdgeUp(e);
+						ae = arcs.get(l);
+						ae.bringArcUp(a);
 					} else {
-						ee = edges.get(l);
-						ee.bringEdgeDown(e);
-						if ( ee.state == EdgeElement.DOWN ){
-							edges.remove(l);
+						ae = arcs.get(l);
+						ae.bringArcDown(a);
+						if ( ae.state == ArcElement.DOWN ){
+							arcs.remove(l);
 						}
 					}
 				}
@@ -170,26 +170,26 @@ public class GraphScene extends Scene implements
 	}
 	
 	@Override
-	public Listener<Edge> edgeListener(){
-		return new StatefulListener<Edge>(){
+	public Listener<Arc> arcListener(){
+		return new StatefulListener<Arc>(){
 			@Override
-			public void handle(long time, Collection<Edge> events){
-				for ( Edge e : events ){
-					Link l = e.link();
-					EdgeElement ee;
-					if ( ! edges.containsKey(l) ){
-						NodeElement n1 = nodes.get(e.from());
-						NodeElement n2 = nodes.get(e.to());
-						ee = new EdgeElement(n1,n2);
-						edges.put(l, ee);
+			public void handle(long time, Collection<Arc> events){
+				for ( Arc a : events ){
+					Link l = a.link();
+					ArcElement ae;
+					if ( ! arcs.containsKey(l) ){
+						NodeElement n1 = nodes.get(a.from());
+						NodeElement n2 = nodes.get(a.to());
+						ae = new ArcElement(n1,n2);
+						arcs.put(l, ae);
 					}
-					edges.get(l).bringEdgeUp(e);
+					arcs.get(l).bringArcUp(a);
 				}
 			}
 
 			@Override
 			public void reset() {
-				edges.clear();
+				arcs.clear();
 			}
 		};
 	}
@@ -208,8 +208,8 @@ public class GraphScene extends Scene implements
 	@Override
 	public void paint2D(Graphics2D g2){
 		g2.setStroke(new BasicStroke(2));
-		for ( EdgeElement edge : edges.values() )
-			edge.paint(g2);
+		for ( ArcElement arc : arcs.values() )
+			arc.paint(g2);
 		g2.setStroke(new BasicStroke());
 		g2.setColor(Color.BLACK);
 		for ( LinkElement link : links.values() )

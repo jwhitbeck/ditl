@@ -25,48 +25,48 @@ import ditl.*;
 
 
 
-public final class EdgesToLinksConverter implements Converter {
+public final class ArcsToLinksConverter implements Converter {
 
 	public final static boolean UNION = true;
 	public final static boolean INTERSECTION = false;
 	
 	private boolean _union; 
-	private Set<Edge> edges = new AdjacencySet.Edges();
+	private Set<Arc> arcs = new AdjacencySet.Arcs();
 	private StatefulWriter<LinkEvent,Link> link_writer;
-	private StatefulReader<EdgeEvent,Edge> edge_reader;
+	private StatefulReader<ArcEvent,Arc> arc_reader;
 	private LinkTrace _links;
-	private EdgeTrace _edges;
+	private ArcTrace _arcs;
 	
-	public EdgesToLinksConverter(LinkTrace links, EdgeTrace edges, boolean union){
-		_edges = edges;
+	public ArcsToLinksConverter(LinkTrace links, ArcTrace arcs, boolean union){
+		_arcs = arcs;
 		_links = links;
 		_union = union;
 	}
 	
 
-	private void setInitStateFromEdges(long time, Set<Edge> states) throws IOException {
+	private void setInitStateFromArcs(long time, Set<Arc> states) throws IOException {
 		Set<Link> contacts = new AdjacencySet.Links();
-		for ( Edge edge : states ){
-			edges.add(edge);
+		for ( Arc arc : states ){
+			arcs.add(arc);
 			if ( _union ){
-				contacts.add(edge.link());
-			} else if ( edges.contains(edge.reverse())) {
-				contacts.add(edge.link());
+				contacts.add(arc.link());
+			} else if ( arcs.contains(arc.reverse())) {
+				contacts.add(arc.link());
 			}
 		}
 		link_writer.setInitState(time, contacts);
 	}
 	
-	private void handleEdgeEvent(long time, EdgeEvent event ) throws IOException {
-		Edge e = event.edge();
-		Link l = e.link();
-		if ( _union && ! edges.contains(e.reverse()) ) {
+	private void handleArcEvent(long time, ArcEvent event ) throws IOException {
+		Arc a = event.arc();
+		Link l = a.link();
+		if ( _union && ! arcs.contains(a.reverse()) ) {
 			if ( event.isUp() ){
 				link_writer.append(time, new LinkEvent(l,LinkEvent.UP) );
 			} else {
 				link_writer.append(time, new LinkEvent(l,LinkEvent.DOWN) );
 			}
-		} else if ( ! _union && edges.contains( e.reverse() )){ // intersect and reverse if present
+		} else if ( ! _union && arcs.contains( a.reverse() )){ // intersect and reverse if present
 			if ( event.isUp() ){
 				link_writer.append(time, new LinkEvent(l,LinkEvent.UP) );
 			} else {
@@ -74,23 +74,23 @@ public final class EdgesToLinksConverter implements Converter {
 			}
 		}
 		if ( event.isUp() )
-			edges.add(e);
+			arcs.add(a);
 		else
-			edges.remove(e);
+			arcs.remove(a);
 	}
 	
 	@Override
 	public void convert() throws IOException{
-		edge_reader = _edges.getReader();
+		arc_reader = _arcs.getReader();
 		link_writer = _links.getWriter();
-		long minTime = _edges.minTime();
-		edge_reader.seek(minTime);
-		setInitStateFromEdges(minTime,edge_reader.referenceState());
-		while ( edge_reader.hasNext() )
-			for ( EdgeEvent event : edge_reader.next() )
-				handleEdgeEvent(edge_reader.time(), event);
-		link_writer.setPropertiesFromTrace(_edges);
-		edge_reader.close();
+		long minTime = _arcs.minTime();
+		arc_reader.seek(minTime);
+		setInitStateFromArcs(minTime,arc_reader.referenceState());
+		while ( arc_reader.hasNext() )
+			for ( ArcEvent event : arc_reader.next() )
+				handleArcEvent(arc_reader.time(), event);
+		link_writer.setPropertiesFromTrace(_arcs);
+		arc_reader.close();
 		link_writer.close();
 	}
 }

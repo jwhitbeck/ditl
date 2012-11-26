@@ -27,14 +27,14 @@ import ditl.*;
 
 public final class AddingReachableConverter implements Converter, Generator, Listener<Object> {
 	
-	private AdjacencyMap<Edge,EdgeInfo> edge_infos = new AdjacencyMap.Edges<EdgeInfo>();
-	private AdjacencySet<Edge> to_bring_down = new AdjacencySet.Edges();
-	private AdjacencySet<Edge> to_bring_up = new AdjacencySet.Edges();
+	private AdjacencyMap<Arc,ArcInfo> arc_infos = new AdjacencyMap.Arcs<ArcInfo>();
+	private AdjacencySet<Arc> to_bring_down = new AdjacencySet.Arcs();
+	private AdjacencySet<Arc> to_bring_up = new AdjacencySet.Arcs();
 	
 	private Bus<Object> update_bus = new Bus<Object>();
 	private Composer[] composers;
 	
-	private StatefulWriter<EdgeEvent,Edge> writer;
+	private StatefulWriter<ArcEvent,Arc> writer;
 	private ReachabilityFamily _family1, _family2;
 	private ReachabilityTrace added_trace;
 	private long _delay;
@@ -108,63 +108,63 @@ public final class AddingReachableConverter implements Converter, Generator, Lis
 
 	
 	private final class Waypoints {
-		AdjacencySet.Edges delta_edges = new AdjacencySet.Edges();
-		AdjacencySet.Edges mu_edges = new AdjacencySet.Edges();
+		AdjacencySet.Arcs delta_arcs = new AdjacencySet.Arcs();
+		AdjacencySet.Arcs mu_arcs = new AdjacencySet.Arcs();
 		
-		void addDeltaEdge(Edge de){
-			delta_edges.add(de.reverse());
-			for ( Integer to : mu_edges.getNext(de.to()) ){
+		void addDeltaArc(Arc de){
+			delta_arcs.add(de.reverse());
+			for ( Integer to : mu_arcs.getNext(de.to()) ){
 				if ( ! to.equals(de.from()) ) //prevent loops on self
-					increment( new Edge( de.from(), to) );
+					increment( new Arc( de.from(), to) );
 			}
 		}
 		
-		void addShiftedMuEdge(Edge me){
-			mu_edges.add(me);
-			for ( Integer from : delta_edges.getNext(me.from()) ){
+		void addShiftedMuArc(Arc me){
+			mu_arcs.add(me);
+			for ( Integer from : delta_arcs.getNext(me.from()) ){
 				if ( ! from.equals(me.to()) ) //prevent loops on self
-					increment( new Edge( from, me.to()) );
+					increment( new Arc( from, me.to()) );
 			}
 		}
 		
-		void removeDeltaEdge(Edge de){
-			delta_edges.remove(de.reverse());
-			for ( Integer to : mu_edges.getNext(de.to()) ){
+		void removeDeltaArc(Arc de){
+			delta_arcs.remove(de.reverse());
+			for ( Integer to : mu_arcs.getNext(de.to()) ){
 				if ( ! to.equals(de.from()) ) //prevent loops on self
-					decrement( new Edge( de.from(), to) );
+					decrement( new Arc( de.from(), to) );
 			}
 		}
 		
-		void removeShiftedMuEdge(Edge me){
-			mu_edges.remove(me);
-			for ( Integer from : delta_edges.getNext(me.from()) ){
+		void removeShiftedMuArc(Arc me){
+			mu_arcs.remove(me);
+			for ( Integer from : delta_arcs.getNext(me.from()) ){
 				if ( ! from.equals(me.to()) ) //prevent loops on self
-					decrement( new Edge( from, me.to()) );
+					decrement( new Arc( from, me.to()) );
 			}
 		}
 		
 	};
 	
-	private final class EdgeInfo {
-		Edge _edge;
+	private final class ArcInfo {
+		Arc _arc;
 		int score=0;
 		
-		EdgeInfo(Edge edge){ 
-			_edge = edge; 
+		ArcInfo(Arc arc){ 
+			_arc = arc; 
 			score = 1; // increment at creation
-			to_bring_up.add(_edge); // bring up at next incr
-			edge_infos.put(_edge, this);
+			to_bring_up.add(_arc); // bring up at next incr
+			arc_infos.put(_arc, this);
 		}
 		
 		void decrement(){
 			score--;
 			if ( score == 0 )
-				to_bring_down.add(_edge);
+				to_bring_down.add(_arc);
 		}
 		
 		void increment(){
-			if ( score == 0 ){ // incrementing an edge that has been marked for deletion
-				to_bring_down.remove(_edge);
+			if ( score == 0 ){ // incrementing an arc that has been marked for deletion
+				to_bring_down.remove(_arc);
 			}
 			score++;
 		}
@@ -195,13 +195,13 @@ public final class AddingReachableConverter implements Converter, Generator, Lis
 				writer.setInitState(min_time, to_bring_up);
 				init_state_set = true;
 			} else {
-				for ( Edge e : to_bring_up )
-					writer.append(time, new EdgeEvent(e,EdgeEvent.UP));
+				for ( Arc a : to_bring_up )
+					writer.append(time, new ArcEvent(a,ArcEvent.UP));
 			}
 			to_bring_up.clear();
-			for ( Edge e : to_bring_down ){
-				edge_infos.remove(e);
-				writer.append(time, new EdgeEvent(e,EdgeEvent.DOWN));
+			for ( Arc a : to_bring_down ){
+				arc_infos.remove(a);
+				writer.append(time, new ArcEvent(a,ArcEvent.DOWN));
 			}
 			to_bring_down.clear();
 		}
@@ -224,31 +224,31 @@ public final class AddingReachableConverter implements Converter, Generator, Lis
 		scheduleUpdate(time+eta);
 	}
 	
-	EdgeInfo increment(Edge e){
-		EdgeInfo ei = edge_infos.get(e);
-		if ( ei == null )
-			ei = new EdgeInfo(e);
+	ArcInfo increment(Arc a){
+		ArcInfo ai = arc_infos.get(a);
+		if ( ai == null )
+			ai = new ArcInfo(a);
 		else
-			ei.increment();
-		return ei;
+			ai.increment();
+		return ai;
 	}
 	
-	EdgeInfo decrement(Edge e){
-		EdgeInfo ei = edge_infos.get(e);
-		ei.decrement();
-		return ei;
+	ArcInfo decrement(Arc a){
+		ArcInfo ai = arc_infos.get(a);
+		ai.decrement();
+		return ai;
 	}
 	
 	
 	private final class Composer implements Generator {
 		ReachabilityTrace delta_trace, mu_trace;
-		StatefulReader<EdgeEvent,Edge> delta_reader;
-		StatefulReader<EdgeEvent,Edge> mu_reader;
-		Deque<Edge> mu_down_events = new LinkedList<Edge>();
-		Deque<Edge> shifted_mu_down_events = new LinkedList<Edge>();
-		Deque<Edge> mu_up_events = new LinkedList<Edge>();
-		Deque<Edge> delta_down_events = new LinkedList<Edge>();
-		Deque<Edge> delta_up_events = new LinkedList<Edge>();
+		StatefulReader<ArcEvent,Arc> delta_reader;
+		StatefulReader<ArcEvent,Arc> mu_reader;
+		Deque<Arc> mu_down_events = new LinkedList<Arc>();
+		Deque<Arc> shifted_mu_down_events = new LinkedList<Arc>();
+		Deque<Arc> mu_up_events = new LinkedList<Arc>();
+		Deque<Arc> delta_down_events = new LinkedList<Arc>();
+		Deque<Arc> delta_up_events = new LinkedList<Arc>();
 		Waypoints waypoints = new Waypoints();
 		
 		Composer (ReachabilityTrace deltaTrace, ReachabilityTrace muTrace) throws IOException{
@@ -271,52 +271,52 @@ public final class AddingReachableConverter implements Converter, Generator, Lis
 		}
 		
 		void processDeltaUpEvents(){
-			for ( Edge e : delta_up_events ){
-				EdgeInfo ei = edge_infos.get(e);
-				if ( ei == null ){
-					ei = new EdgeInfo(e);
+			for ( Arc a : delta_up_events ){
+				ArcInfo ai = arc_infos.get(a);
+				if ( ai == null ){
+					ai = new ArcInfo(a);
 				} else {
-					ei.increment();
+					ai.increment();
 				}
 			}
 		}
 		
 		void processDeltaUpJourneyEvents(){
 			while ( ! delta_up_events.isEmpty() ){
-				Edge de = delta_up_events.poll();
-				waypoints.addDeltaEdge(de);
+				Arc de = delta_up_events.poll();
+				waypoints.addDeltaArc(de);
 			}
 		}
 		
 		void processDeltaDownEvents(){
 			while ( ! delta_down_events.isEmpty() ){
-				Edge de = delta_down_events.poll();
+				Arc de = delta_down_events.poll();
 				decrement(de);
-				waypoints.removeDeltaEdge(de);
+				waypoints.removeDeltaArc(de);
 			}
 		}
 		
 		
 		void processMuUpEvents(){
 			while ( ! mu_up_events.isEmpty() ){
-				Edge me = mu_up_events.poll();
+				Arc me = mu_up_events.poll();
 				increment(me);
-				waypoints.addShiftedMuEdge(me);
+				waypoints.addShiftedMuArc(me);
 			}
 		}
 		
 		void processMuDownJourneyEvents(){
 			while ( ! mu_down_events.isEmpty() ){
-				Edge me = mu_down_events.poll();
+				Arc me = mu_down_events.poll();
 				shifted_mu_down_events.addLast(me);
-				waypoints.removeShiftedMuEdge(me); 
+				waypoints.removeShiftedMuArc(me); 
 			}
 		}
 		
 		void processShiftedMuDownEvents(){
 			while ( ! shifted_mu_down_events.isEmpty() ){
-				Edge e = shifted_mu_down_events.poll();
-				decrement(e);
+				Arc a = shifted_mu_down_events.poll();
+				decrement(a);
 			}
 		}
 
@@ -327,49 +327,49 @@ public final class AddingReachableConverter implements Converter, Generator, Lis
 		
 		
 		
-		final class DeltaListener implements Listener<Edge>{
+		final class DeltaListener implements Listener<Arc>{
 			@Override
-			public void handle(long time, Collection<Edge> events){
-				for ( Edge e : events ){
-					increment(e);
-					waypoints.addDeltaEdge(e);
+			public void handle(long time, Collection<Arc> events){
+				for ( Arc a : events ){
+					increment(a);
+					waypoints.addDeltaArc(a);
 				}
 				scheduleUpdate(time+eta);
 			}
 		}
 		
-		final class DeltaEventListener implements Listener<EdgeEvent>  {
+		final class DeltaEventListener implements Listener<ArcEvent>  {
 			@Override
-			public void handle(long time, Collection<EdgeEvent> events){
-				for ( EdgeEvent eev : events ){
-					if ( eev.isUp() )
-						delta_up_events.addLast(eev.edge());
+			public void handle(long time, Collection<ArcEvent> events){
+				for ( ArcEvent aev : events ){
+					if ( aev.isUp() )
+						delta_up_events.addLast(aev.arc());
 					else
-						delta_down_events.addLast(eev.edge());
+						delta_down_events.addLast(aev.arc());
 				}
 				scheduleUpdate(time);
 			}
 		}
 		
-		final class MuListener implements Listener<Edge> {
+		final class MuListener implements Listener<Arc> {
 			@Override
-			public void handle(long time, Collection<Edge> events) {
-				for ( Edge e : events ){
-					increment(e);
-					waypoints.addShiftedMuEdge(e);
+			public void handle(long time, Collection<Arc> events) {
+				for ( Arc a : events ){
+					increment(a);
+					waypoints.addShiftedMuArc(a);
 				}
 				scheduleUpdate(time+eta);
 			}
 		}
 		
-		final class MuEventListener implements Listener<EdgeEvent> {
+		final class MuEventListener implements Listener<ArcEvent> {
 			@Override
-			public void handle(long time, Collection<EdgeEvent> events) {
-				for ( EdgeEvent eev : events ){
-					if ( eev.isUp() )
-						mu_up_events.addLast(eev.edge());
+			public void handle(long time, Collection<ArcEvent> events) {
+				for ( ArcEvent aev : events ){
+					if ( aev.isUp() )
+						mu_up_events.addLast(aev.arc());
 					else
-						mu_down_events.addLast(eev.edge());
+						mu_down_events.addLast(aev.arc());
 				}
 				scheduleUpdate(time);
 			}

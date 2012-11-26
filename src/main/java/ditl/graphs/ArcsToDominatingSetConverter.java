@@ -25,25 +25,25 @@ import ditl.*;
 
 
 
-public final class EdgesToDominatingSetConverter implements Converter,
-	EdgeTrace.Handler, PresenceTrace.Handler, Generator, Listener<Object> {
+public final class ArcsToDominatingSetConverter implements Converter,
+	ArcTrace.Handler, PresenceTrace.Handler, Generator, Listener<Object> {
 	 
 	private StatefulWriter<GroupEvent,Group> group_writer;
 	private GroupTrace dominating_set;
-	private EdgeTrace _edges;
+	private ArcTrace _arcs;
 	private PresenceTrace _presence;
 	
 	private Set<Integer> ds_nodes = null;
 	private Set<Integer> present = new HashSet<Integer>();
-	private AdjacencySet.Edges matrix = new AdjacencySet.Edges();
-	private AdjacencySet.Edges reverse_matrix = new AdjacencySet.Edges();
+	private AdjacencySet.Arcs matrix = new AdjacencySet.Arcs();
+	private AdjacencySet.Arcs reverse_matrix = new AdjacencySet.Arcs();
 	private Bus<Object> update_bus = new Bus<Object>();
 	private long min_time;
 	private Integer gid = 0;
 	
-	public EdgesToDominatingSetConverter(GroupTrace dominatingSet, 
-			EdgeTrace edges, PresenceTrace presence){
-		_edges = edges;
+	public ArcsToDominatingSetConverter(GroupTrace dominatingSet, 
+			ArcTrace arcs, PresenceTrace presence){
+		_arcs = arcs;
 		_presence = presence;
 		dominating_set = dominatingSet;
 		min_time = _presence.minTime();
@@ -52,44 +52,44 @@ public final class EdgesToDominatingSetConverter implements Converter,
 		
 	@Override
 	public void convert() throws IOException{
-		StatefulReader<EdgeEvent,Edge> edge_reader = _edges.getReader();
+		StatefulReader<ArcEvent,Arc> arc_reader = _arcs.getReader();
 		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader();
 		group_writer = dominating_set.getWriter();
 		update_bus.addListener(this);
 		
-		edge_reader.bus().addListener(this.edgeEventListener());
-		edge_reader.stateBus().addListener(this.edgeListener());
+		arc_reader.bus().addListener(this.arcEventListener());
+		arc_reader.stateBus().addListener(this.arcListener());
 		presence_reader.bus().addListener(this.presenceEventListener());
 		presence_reader.stateBus().addListener(this.presenceListener());
 		
-		Runner runner = new Runner(_edges.maxUpdateInterval(), _presence.minTime(), _presence.maxTime());
-		runner.addGenerator(edge_reader);
+		Runner runner = new Runner(_arcs.maxUpdateInterval(), _presence.minTime(), _presence.maxTime());
+		runner.addGenerator(arc_reader);
 		runner.addGenerator(presence_reader);
 		runner.addGenerator(this);
 		runner.run();
 		
 		group_writer.setProperty(GroupTrace.labelsKey, "dominating set");
-		group_writer.setPropertiesFromTrace(_edges);
+		group_writer.setPropertiesFromTrace(_arcs);
 		group_writer.close();
-		edge_reader.close();
+		arc_reader.close();
 		presence_reader.close();
 	}
 
 
 
 	@Override
-	public Listener<EdgeEvent> edgeEventListener() {
-		return new Listener<EdgeEvent>(){
+	public Listener<ArcEvent> arcEventListener() {
+		return new Listener<ArcEvent>(){
 			@Override
-			public void handle(long time, Collection<EdgeEvent> events){
-				for ( EdgeEvent eev : events ){
-					Edge e = eev.edge();
-					if ( eev.isUp() ){
-						matrix.add(e);
-						reverse_matrix.add(e.reverse());
+			public void handle(long time, Collection<ArcEvent> events){
+				for ( ArcEvent aev : events ){
+					Arc a = aev.arc();
+					if ( aev.isUp() ){
+						matrix.add(a);
+						reverse_matrix.add(a.reverse());
 					} else {
-						matrix.remove(e);
-						reverse_matrix.remove(e.reverse());
+						matrix.remove(a);
+						reverse_matrix.remove(a.reverse());
 					}
 				}
 				scheduleUpdate(time);
@@ -100,13 +100,13 @@ public final class EdgesToDominatingSetConverter implements Converter,
 
 
 	@Override
-	public Listener<Edge> edgeListener() {
-		return new Listener<Edge>(){
+	public Listener<Arc> arcListener() {
+		return new Listener<Arc>(){
 			@Override
-			public void handle(long time, Collection<Edge> events) {
-				for ( Edge e : events ){
-					matrix.add(e);
-					reverse_matrix.add(e.reverse());
+			public void handle(long time, Collection<Arc> events) {
+				for ( Arc a : events ){
+					matrix.add(a);
+					reverse_matrix.add(a.reverse());
 				}
 				scheduleUpdate(time);
 			}
@@ -154,7 +154,7 @@ public final class EdgesToDominatingSetConverter implements Converter,
 		
 		DSCalculator() {
 			for ( Integer id : present ){
-				if ( reverse_matrix.getNext(id).isEmpty() ){ // no incoming edges, must be chosen
+				if ( reverse_matrix.getNext(id).isEmpty() ){ // no incoming arcs, must be chosen
 					new_ds.add(id);
 					covered.add(id);
 					Set<Integer> dests = matrix.getNext(id);
@@ -162,7 +162,7 @@ public final class EdgesToDominatingSetConverter implements Converter,
 						covered.addAll(dests);
 				} else { // prepare entry in the remainder map 
 					Set<Integer> dests = matrix.getNext(id);
-					if ( ! dests.isEmpty() ){ // nodes with incoming but no outgoing edges should never be in the dominating set
+					if ( ! dests.isEmpty() ){ // nodes with incoming but no outgoing arcs should never be in the dominating set
 						Set<Integer> r_dests = new HashSet<Integer>(dests);
 						r_dests.removeAll(covered);
 						remainders.put(id, r_dests);
@@ -180,7 +180,7 @@ public final class EdgesToDominatingSetConverter implements Converter,
 		}
 		
 		boolean allCovered(){
-			return covered.size() >= present.size(); // covered may be greater than the number of present nodes (e.g., edges in reachability traces)
+			return covered.size() >= present.size(); // covered may be greater than the number of present nodes (e.g., arcs in reachability traces)
 		}
 		
 		void pick(Integer node){

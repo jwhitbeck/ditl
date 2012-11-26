@@ -21,12 +21,12 @@ package ditl.graphs.viz;
 import java.awt.*;
 import java.awt.geom.Path2D;
 
-import ditl.graphs.Edge;
+import ditl.graphs.Arc;
 import ditl.viz.SceneElement;
 
 
 
-public class EdgeElement implements SceneElement {
+public class ArcElement implements SceneElement {
 
 	public final static int DOWN = 0;
 	public final static int LEFT = 1;
@@ -43,7 +43,7 @@ public class EdgeElement implements SceneElement {
 	protected float barb = 10;
 	protected float offset = 5;
 	
-	public EdgeElement(NodeElement n1, NodeElement n2){
+	public ArcElement(NodeElement n1, NodeElement n2){
 		if ( n1.id() < n2.id() ){
 			node1 = n1;
 			node2 = n2;
@@ -53,8 +53,8 @@ public class EdgeElement implements SceneElement {
 		}
 	}
 	
-	public void bringEdgeUp(Edge e){ // from n1 to n2
-		if ( node1.id().equals(e.from()) ){ // RIGHT LINK
+	public void bringArcUp(Arc a){ // from n1 to n2
+		if ( node1.id().equals(a.from()) ){ // RIGHT LINK
 			switch ( state ){
 			case DOWN: state=RIGHT; break;
 			case LEFT: state=SYM; break;
@@ -67,8 +67,8 @@ public class EdgeElement implements SceneElement {
 		}
 	}
 	
-	public void bringEdgeDown(Edge e){ // from n1 to n2
-		if ( node1.id().equals(e.from()) ){ // RIGHT LINK
+	public void bringArcDown(Arc a){ // from n1 to n2
+		if ( node1.id().equals(a.from()) ){ // RIGHT LINK
 			switch ( state ){
 			case SYM: state=LEFT; break;
 			case RIGHT: state=DOWN; break;

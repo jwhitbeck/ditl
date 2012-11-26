@@ -148,20 +148,20 @@ public abstract class AdjacencySet<C extends Couple> implements Set<C> {
 		}
 	}
 
-	public final static class Edges extends AdjacencySet<Edge>
-		implements EdgeTrace.Handler {
+	public final static class Arcs extends AdjacencySet<Arc>
+		implements ArcTrace.Handler {
 		
-		public Edges(){
-			map = new AdjacencyMap.Edges<Edge>();
+		public Arcs(){
+			map = new AdjacencyMap.Arcs<Arc>();
 		}
 		
 		@Override
-		public Listener<Edge> edgeListener() {
-			return new StatefulListener<Edge>() {
+		public Listener<Arc> arcListener() {
+			return new StatefulListener<Arc>() {
 				@Override
-				public void handle(long time, Collection<Edge> events){
-					for ( Edge e : events )
-						add(e);
+				public void handle(long time, Collection<Arc> events){
+					for ( Arc a : events )
+						add(a);
 				}
 				
 				@Override
@@ -172,15 +172,15 @@ public abstract class AdjacencySet<C extends Couple> implements Set<C> {
 		}
 	
 		@Override
-		public Listener<EdgeEvent> edgeEventListener() {
-			return new Listener<EdgeEvent>(){
+		public Listener<ArcEvent> arcEventListener() {
+			return new Listener<ArcEvent>(){
 				@Override
-				public void handle(long time, Collection<EdgeEvent> events) {
-					for ( EdgeEvent eev : events ){
-						if ( eev.isUp() )
-							add(eev.edge());
+				public void handle(long time, Collection<ArcEvent> events) {
+					for ( ArcEvent aev : events ){
+						if ( aev.isUp() )
+							add(aev.arc());
 						else 
-							remove(eev.edge());
+							remove(aev.arc());
 					}
 				}
 			};

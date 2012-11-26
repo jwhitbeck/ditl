@@ -16,49 +16,69 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs.cli;
+package ditl.graphs;
 
 import java.io.IOException;
+import java.util.*;
 
-import org.apache.commons.cli.*;
+import ditl.*;
 
-import ditl.Store.*;
-import ditl.WritableStore.AlreadyExistsException;
-import ditl.cli.ConvertApp;
-import ditl.graphs.*;
-
-public class EdgesToLinks extends ConvertApp {
-
-	private final static String intersectOption = "intersect";
+public class ArcTrace extends StatefulTrace<ArcEvent, Arc> 
+	implements StatefulTrace.Filterable<ArcEvent, Arc>{
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS, GraphOptions.EDGES);
-	private boolean union;
+	public final static String type = "arcs";
+	public final static String defaultName = "arcs";
 	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "edges-to-links";
-	public final static String CMD_ALIAS = "e2l";
+	public final static class Updater implements StateUpdater<ArcEvent, Arc> {
+
+		private Set<Arc> arcs = new AdjacencySet.Arcs(); 
+		
+		@Override
+		public void setState(Collection<Arc> arcsState ) {
+			arcs.clear();
+			for ( Arc a : arcsState )
+				arcs.add(a);
+		}
+
+		@Override
+		public Set<Arc> states() {
+			return arcs;
+		}
+
+		@Override
+		public void handleEvent(long time, ArcEvent event) {
+			if ( event.isUp() )
+				arcs.add(event.arc());
+			else
+				arcs.remove(event.arc());
+		}
+	}
 	
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		options.addOption(null, storeOutputOption, true, "write new traces to this store");
-		options.addOption(null, intersectOption, false, "intersect edges (default: union)");
+	public interface Handler {
+		public Listener<Arc> arcListener();
+		public Listener<ArcEvent> arcEventListener();
+	}
+
+	public ArcTrace(Store store, String name, PersistentMap info) throws IOException {
+		super(store, name, info, new ArcEvent.Factory(), new Arc.Factory(), 
+				new StateUpdaterFactory<ArcEvent,Arc>(){
+					@Override
+					public StateUpdater<ArcEvent, Arc> getNew() {
+						return new ArcTrace.Updater();
+					}
+		});
 	}
 
 	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException,
-			HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		union = cli.hasOption(intersectOption);
+	public Filter<Arc> stateFilter(Set<Integer> group) {
+		return new Arc.InternalGroupFilter(group);
 	}
 
 	@Override
-	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-		LinkTrace links = (LinkTrace) dest_store.newTrace(graph_options.get(GraphOptions.LINKS), LinkTrace.type, force);
-		new EdgesToLinksConverter(links, edges, union).convert();
+	public Filter<ArcEvent> eventFilter(Set<Integer> group) {
+		return new ArcEvent.InternalGroupFilter(group);
 	}
+
+	@Override
+	public void copyOverTraceInfo(Writer<ArcEvent> writer) {}
 }

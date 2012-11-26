@@ -31,11 +31,11 @@ public class FloodingReachableConverter implements
 	private long _delay;
 	private long min_time;
 	
-	private StatefulWriter<EdgeEvent,Edge> edge_writer;
+	private StatefulWriter<ArcEvent,Arc> arc_writer;
 	
-	private Set<Edge> state = new TreeSet<Edge>();
+	private Set<Arc> state = new TreeSet<Arc>();
 	private Set<Integer> present = new HashSet<Integer>();
-	private AdjacencySet.Edges rev_matrix = new AdjacencySet.Edges();
+	private AdjacencySet.Arcs rev_matrix = new AdjacencySet.Arcs();
 	private AdjacencySet.Links matrix = new AdjacencySet.Links();
 	private boolean started = false;
 	
@@ -70,18 +70,18 @@ public class FloodingReachableConverter implements
 						Set<Integer> already_inf_1 = rev_matrix.getNext(l.id1());
 						Set<Integer> already_inf_2 = rev_matrix.getNext(l.id2());
 						if ( already_inf_1 != null ){
-							Edge e = new Edge(l.id1(), l.id2());
+							Arc a = new Arc(l.id1(), l.id2());
 							for ( Integer orig : already_inf_1 ){
 								if ( already_inf_2 == null || ! already_inf_2.contains(orig) ){
-									infection_bus.queue(time+_tau, new Infection(orig, e));
+									infection_bus.queue(time+_tau, new Infection(orig, a));
 								}
 							}
 						}
 						if ( already_inf_2 != null ){
-							Edge e = new Edge(l.id2(), l.id1() );
+							Arc a = new Arc(l.id2(), l.id1() );
 							for ( Integer orig : already_inf_2 ){
 								if ( already_inf_1 == null || ! already_inf_1.contains(orig) ){
-									infection_bus.queue(time+_tau, new Infection(orig, e));
+									infection_bus.queue(time+_tau, new Infection(orig, a));
 								}
 							}
 						} 	
@@ -122,13 +122,13 @@ public class FloodingReachableConverter implements
 		StatefulReader<LinkEvent,Link> link_reader = _links.getReader();
 		StatefulReader<PresenceEvent,Presence> presence_reader = _presence.getReader();
 		
-		edge_writer = _reachability.getWriter();
+		arc_writer = _reachability.getWriter();
 		
-		edge_writer.setProperty(ReachabilityTrace.delayKey, _delay);
-		edge_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
-		edge_writer.setProperty(ReachabilityTrace.tauKey, _tau);
-		edge_writer.setProperty(Trace.minTimeKey, _links.minTime());
-		edge_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
+		arc_writer.setProperty(ReachabilityTrace.delayKey, _delay);
+		arc_writer.setProperty(Trace.ticsPerSecondKey, _links.ticsPerSecond());
+		arc_writer.setProperty(ReachabilityTrace.tauKey, _tau);
+		arc_writer.setProperty(Trace.minTimeKey, _links.minTime());
+		arc_writer.setProperty(Trace.maxTimeKey, _links.maxTime());
 		
 		link_reader.stateBus().addListener(linkListener());
 		link_reader.bus().addListener(linkEventListener());
@@ -142,8 +142,8 @@ public class FloodingReachableConverter implements
 		runner.addGenerator(this);
 		runner.run();
 		
-		edge_writer.flush();
-		edge_writer.close();
+		arc_writer.flush();
+		arc_writer.close();
 		link_reader.close();
 		presence_reader.close();
 	}
@@ -160,12 +160,12 @@ public class FloodingReachableConverter implements
 	
 	private final static class Infection {
 		Integer _orig;
-		Edge _edge;
-		Infection(Integer orig, Edge edge){ _orig = orig; _edge = edge; }
-		Edge edge(){ return new Edge(_orig,_edge.to()); }
-		Integer rcpt(){ return _edge.to(); }
+		Arc _arc;
+		Infection(Integer orig, Arc arc){ _orig = orig; _arc = arc; }
+		Arc arc(){ return new Arc(_orig,_arc.to()); }
+		Integer rcpt(){ return _arc.to(); }
 		@Override
-		public String toString(){ return edge().toString(); }
+		public String toString(){ return arc().toString(); }
 	}
 	
 	private final class UpdateListener implements Listener<Object> {
@@ -175,18 +175,18 @@ public class FloodingReachableConverter implements
 				// first handle previous time period
 				long t = time - _delay;
 				if ( t == _links.minTime() ){ // this should be the initial state  
-					edge_writer.setInitState(min_time, state);
+					arc_writer.setInitState(min_time, state);
 				} else {
-					Set<Edge> cur_state = edge_writer.states();
-					for ( Edge e : state ){
-						if ( ! cur_state.contains(e) )
-							edge_writer.queue(t, new EdgeEvent(e, EdgeEvent.UP));
+					Set<Arc> cur_state = arc_writer.states();
+					for ( Arc a : state ){
+						if ( ! cur_state.contains(a) )
+							arc_writer.queue(t, new ArcEvent(a, ArcEvent.UP));
 					}
-					for ( Edge e : cur_state ){
-						if ( ! state.contains(e) )
-							edge_writer.queue(t, new EdgeEvent(e, EdgeEvent.DOWN));
+					for ( Arc a : cur_state ){
+						if ( ! state.contains(a) )
+							arc_writer.queue(t, new ArcEvent(a, ArcEvent.DOWN));
 					}
-					edge_writer.flush();
+					arc_writer.flush();
 				}
 			
 				// then clear state and start new epidemic
@@ -196,11 +196,11 @@ public class FloodingReachableConverter implements
 			} else {
 				started = true;
 				if ( min_time > _links.minTime() ) // starting after min_time => empty initial state
-					edge_writer.setInitState(_links.minTime(), Collections.<Edge>emptySet());
+					arc_writer.setInitState(_links.minTime(), Collections.<Arc>emptySet());
 			}
 			
 			for ( Integer i : present ){
-				rev_matrix.add(new Edge(i,i));
+				rev_matrix.add(new Arc(i,i));
 				broadcast(time, i, i);
 			}
 			
@@ -212,9 +212,9 @@ public class FloodingReachableConverter implements
 		@Override
 		public void handle(long time, Collection<Infection> events) throws IOException {
 			for ( Infection infection : events ){
-				Edge e = infection.edge();
-				state.add(e);
-				rev_matrix.add(e.reverse());
+				Arc a = infection.arc();
+				state.add(a);
+				rev_matrix.add(a.reverse());
 				infection_bus.removeFromQueueAfterTime(time, new TransferMatcher(infection.rcpt(), infection._orig));
 				broadcast(time, infection.rcpt(), infection._orig);
 			}
@@ -225,9 +225,9 @@ public class FloodingReachableConverter implements
 		Set<Integer> neighbs = matrix.getNext(id);
 		if ( neighbs != null ){
 			for ( Integer i : neighbs ){
-				Edge e = new Edge(orig,i);
-				if ( ! state.contains(e) ){
-					Infection inf = new Infection( orig, new Edge(id,i) );
+				Arc a = new Arc(orig,i);
+				if ( ! state.contains(a) ){
+					Infection inf = new Infection( orig, new Arc(id,i) );
 					infection_bus.queue(time+_tau, inf);
 				}
 			}
@@ -239,7 +239,7 @@ public class FloodingReachableConverter implements
 		LinkMatcher(Link link){ _link = link; }
 		@Override
 		public boolean matches(Infection item) {
-			return item._edge.link().equals(_link);
+			return item._arc.link().equals(_link);
 		}
 	}
 	
@@ -248,7 +248,7 @@ public class FloodingReachableConverter implements
 		NodeMatcher(Integer id){ _id = id; }
 		@Override
 		public boolean matches(Infection item) {
-			return item._edge.from().equals(_id) || item._edge.to().equals(_id); 
+			return item._arc.from().equals(_id) || item._arc.to().equals(_id); 
 		}
 	}
 	
@@ -258,7 +258,7 @@ public class FloodingReachableConverter implements
 		TransferMatcher(Integer id, Integer orig){ _id = id; _orig = orig; }
 		@Override
 		public boolean matches(Infection item) {
-			return _orig.equals(item._orig) && item._edge.to().equals(_id); 
+			return _orig.equals(item._orig) && item._arc.to().equals(_id); 
 		}
 	}
 
@@ -282,7 +282,7 @@ public class FloodingReachableConverter implements
 					Integer id = pev.id();
 					if ( pev.isIn() ){
 						present.add(id);
-						rev_matrix.add(new Edge(id,id));
+						rev_matrix.add(new Arc(id,id));
 						broadcast(time, id, id);
 					} else {
 						present.remove(id);

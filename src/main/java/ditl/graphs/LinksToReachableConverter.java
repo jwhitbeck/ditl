@@ -31,12 +31,12 @@ public class LinksToReachableConverter implements LinkTrace.Handler, Generator, 
 	private long _eta;
 	private long min_time;
 	private long cur_time;
-	private StatefulWriter<EdgeEvent,Edge> edge_writer;
-	private Set<Edge> init_state = new AdjacencySet.Edges();
+	private StatefulWriter<ArcEvent,Arc> arc_writer;
+	private Set<Arc> init_state = new AdjacencySet.Arcs();
 	private LinkTrace _links;
 	private ReachabilityTrace _reachability;
 	private Bus<Link> link_bus = new Bus<Link>();
-	private Bus<EdgeEvent> outbus = new Bus<EdgeEvent>();
+	private Bus<ArcEvent> outbus = new Bus<ArcEvent>();
 	private Set<Link> cur_links = new AdjacencySet.Links();
 	
 	public LinksToReachableConverter(ReachabilityTrace reachability, LinkTrace links, long eta, long tau, long delay) {
@@ -78,8 +78,8 @@ public class LinksToReachableConverter implements LinkTrace.Handler, Generator, 
 	}
 	
 	private void fire(long time, Link l, boolean up) {
-		outbus.queue(time, new EdgeEvent(l.id1(),l.id2(),up));
-		outbus.queue(time, new EdgeEvent(l.id2(),l.id1(),up));
+		outbus.queue(time, new ArcEvent(l.id1(),l.id2(),up));
+		outbus.queue(time, new ArcEvent(l.id2(),l.id1(),up));
 	}
 
 	@Override
@@ -108,12 +108,12 @@ public class LinksToReachableConverter implements LinkTrace.Handler, Generator, 
 	@Override
 	public void convert() throws IOException {
 		StatefulReader<LinkEvent,Link> link_reader = _links.getReader();
-		edge_writer = _reachability.getWriter();
+		arc_writer = _reachability.getWriter();
 	
-		edge_writer.setProperty(ReachabilityTrace.delayKey, _delay);
-		edge_writer.setProperty(ReachabilityTrace.tauKey, _tau);
-		edge_writer.setProperty(ReachabilityTrace.etaKey, _eta);
-		edge_writer.setPropertiesFromTrace(_links);
+		arc_writer.setProperty(ReachabilityTrace.delayKey, _delay);
+		arc_writer.setProperty(ReachabilityTrace.tauKey, _tau);
+		arc_writer.setProperty(ReachabilityTrace.etaKey, _eta);
+		arc_writer.setPropertiesFromTrace(_links);
 		
 		min_time = _links.minTime();
 		
@@ -128,9 +128,9 @@ public class LinksToReachableConverter implements LinkTrace.Handler, Generator, 
 			link_bus.flush(_links.maxTime());
 			outbus.flush(_links.maxTime());
 		} else {
-			edge_writer.setInitState(min_time, Collections.<Edge>emptySet());
+			arc_writer.setInitState(min_time, Collections.<Arc>emptySet());
 		}
-		edge_writer.close();
+		arc_writer.close();
 		link_reader.close();
 	}
 
@@ -154,29 +154,29 @@ public class LinksToReachableConverter implements LinkTrace.Handler, Generator, 
 		}
 	}
 	
-	private final class Outputer implements Listener<EdgeEvent> {
+	private final class Outputer implements Listener<ArcEvent> {
 		@Override
-		public void handle(long time, Collection<EdgeEvent> events)
+		public void handle(long time, Collection<ArcEvent> events)
 				throws IOException {
 			if ( init_state != null && time >= min_time ){
-				edge_writer.setInitState(min_time, init_state);
+				arc_writer.setInitState(min_time, init_state);
 				init_state = null;
 			}
-			Deque<EdgeEvent> down_events = new LinkedList<EdgeEvent>();
-			for ( EdgeEvent eev : events ){
+			Deque<ArcEvent> down_events = new LinkedList<ArcEvent>();
+			for ( ArcEvent aev : events ){
 				if ( init_state != null ){
-					if ( eev.isUp() )
-						init_state.add(eev.edge());
+					if ( aev.isUp() )
+						init_state.add(aev.arc());
 				} else {
-					if ( eev.isUp() ){
-						edge_writer.append(time, eev);
+					if ( aev.isUp() ){
+						arc_writer.append(time, aev);
 					} else {
-						down_events.addLast(eev);
+						down_events.addLast(aev);
 					}
 				}
 			}
 			while ( ! down_events.isEmpty() )
-				edge_writer.append(time, down_events.poll());
+				arc_writer.append(time, down_events.poll());
 		}
 	}
 }

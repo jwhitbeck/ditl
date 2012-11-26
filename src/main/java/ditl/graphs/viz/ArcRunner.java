@@ -16,81 +16,15 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs;
+package ditl.graphs.viz;
 
-import java.util.Set;
+import java.io.IOException;
 
-import ditl.*;
+import ditl.graphs.ArcTrace;
 
-public final class Edge implements Couple {
-	
-	final Integer _from;
-	final Integer _to;
-	
-	public Edge(Integer from, Integer to){
-		_from = from;
-		_to = to;
-	}
-	
-	public Integer id1(){
-		return _from;
-	}
-	
-	public Integer id2(){
-		return _to;
-	}
-	
-	public Integer from(){
-		return _from;
-	}
-	
-	public Integer to(){
-		return _to;
-	}
-	
-	public final static class Factory implements ItemFactory<Edge> {
-		@Override
-		public Edge fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer from = Integer.parseInt(elems[0]);
-				Integer to = Integer.parseInt(elems[1]);
-				return new Edge(from,to);
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	public Edge reverse(){
-		return new Edge(_to,_from);
-	}
-	
-	public Link link(){
-		return new Link(_from,_to);
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		Edge l = (Edge)o;
-		return (l._from.equals(_from)) && (l._to.equals(_to));
-	}
-	
-	@Override
-	public String toString(){
-		return _from+" "+_to;
-	}
-	
-	public static final class InternalGroupFilter implements Filter<Edge> {
-		private Set<Integer> _group;
-		public InternalGroupFilter(Set<Integer> group){ _group = group;}
-		@Override
-		public Edge filter(Edge item) {
-			if ( _group.contains(item._from) && _group.contains(item._to) )
-				return item;
-			return null;
-		}
-	}
 
+
+public interface ArcRunner {
+	public void setArcTrace(ArcTrace arcs) throws IOException;
+	public void addArcHandler(ArcTrace.Handler handler);
 }

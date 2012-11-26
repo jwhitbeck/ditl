@@ -26,7 +26,7 @@ public class GraphOptions {
 
 	public final static int PRESENCE = 0;
 	public final static int LINKS = 1;
-	public final static int EDGES = 2;
+	public final static int ARCS = 2;
 	public final static int MOVEMENT = 3;
 	public final static int GROUPS = 4;
 	public final static int BEACONS = 5;
@@ -34,7 +34,7 @@ public class GraphOptions {
 	private final static String[] _options = {
 		"presence",
 		"links",
-		"edges",
+		"arcs",
 		"movement",
 		"groups",
 		"beacons",
@@ -43,7 +43,7 @@ public class GraphOptions {
 	private final static String[] _defaults = {
 		PresenceTrace.defaultName,
 		LinkTrace.defaultName,
-		EdgeTrace.defaultName,
+		ArcTrace.defaultName,
 		MovementTrace.defaultName,
 		GroupTrace.defaultName,
 		BeaconTrace.defaultName,
@@ -52,7 +52,7 @@ public class GraphOptions {
 	private final static String[] _help = {
 		"name of presence trace (default: "+PresenceTrace.defaultName+")",
 		"name of link trace (default: "+LinkTrace.defaultName+")",
-		"name of edge trace (default: "+EdgeTrace.defaultName+")",
+		"name of arc trace (default: "+ArcTrace.defaultName+")",
 		"name of movement trace (default: "+MovementTrace.defaultName+")",
 		"name of group trace (default: "+GroupTrace.defaultName+")",
 		"name of beacon trace (default: "+BeaconTrace.defaultName+")",

@@ -25,9 +25,9 @@ import ditl.*;
 
 
 
-public final class ReachabilityReport extends StateTimeReport implements EdgeTrace.Handler, PresenceTrace.Handler {
+public final class ReachabilityReport extends StateTimeReport implements ArcTrace.Handler, PresenceTrace.Handler {
 
-	private Set<Edge> edges = new AdjacencySet.Edges();
+	private Set<Arc> arcs = new AdjacencySet.Arcs();
 	private int n_bidir;
 	private int n_dir;
 	private int samp_n_bidir;
@@ -94,39 +94,39 @@ public final class ReachabilityReport extends StateTimeReport implements EdgeTra
 	}
 
 	@Override
-	public Listener<EdgeEvent> edgeEventListener() {
-		return new Listener<EdgeEvent>(){
+	public Listener<ArcEvent> arcEventListener() {
+		return new Listener<ArcEvent>(){
 			@Override
-			public void handle(long time, Collection<EdgeEvent> events)
+			public void handle(long time, Collection<ArcEvent> events)
 					throws IOException {
 				int old_n_dir = n_dir;
 				int old_n_bidir = n_bidir;
 				int old_samp_n_bidir = samp_n_bidir;
 				int old_samp_n_dir = samp_n_dir;
 				boolean first_down = true; // we assume that all reachability events are ordered UP first DOWN second
-				for ( EdgeEvent eev : events ){
-					Edge e = eev.edge();
-					if ( eev.isUp() ){
-						if ( edges.contains(e.reverse()) ){
+				for ( ArcEvent aev : events ){
+					Arc a = aev.arc();
+					if ( aev.isUp() ){
+						if ( arcs.contains(a.reverse()) ){
 							n_bidir += 1;
 							n_dir -= 1;
 						} else {
 							n_dir += 1;
 						}
-						edges.add(e);
+						arcs.add(a);
 					} else {
 						if ( first_down ){
 							samp_n_bidir = n_bidir;
 							samp_n_dir = n_dir;
 							first_down = false;
 						}
-						if ( edges.contains(e.reverse()) ){
+						if ( arcs.contains(a.reverse()) ){
 							n_bidir -= 1;
 							n_dir += 1;
 						} else {
 							n_dir -= 1;
 						}
-						edges.remove(e);
+						arcs.remove(a);
 					}
 				}
 				if ( first_down ){
@@ -142,19 +142,19 @@ public final class ReachabilityReport extends StateTimeReport implements EdgeTra
 	}
 
 	@Override
-	public Listener<Edge> edgeListener() {
-		return new StatefulListener<Edge>(){
+	public Listener<Arc> arcListener() {
+		return new StatefulListener<Arc>(){
 			@Override
-			public void handle(long time, Collection<Edge> events)
+			public void handle(long time, Collection<Arc> events)
 					throws IOException {
-				for ( Edge e : events ){
-					if ( edges.contains(e.reverse()) ){
+				for ( Arc a : events ){
+					if ( arcs.contains(a.reverse()) ){
 						n_bidir += 1;
 						n_dir -= 1;
 					} else {
 						n_dir += 1;
 					}
-					edges.add(e);
+					arcs.add(a);
 				}
 				samp_n_dir = n_dir;
 				samp_n_bidir = n_bidir;
@@ -163,7 +163,7 @@ public final class ReachabilityReport extends StateTimeReport implements EdgeTra
 
 			@Override
 			public void reset() {
-				edges.clear();
+				arcs.clear();
 				n_bidir = 0;
 				n_dir = 0;
 				samp_n_bidir = 0;

@@ -39,7 +39,7 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 			@Override
 			public void handle(long time, Collection<TransferEvent> events) {
 				for ( TransferEvent tev : events ){
-					Link l = tev.edge().link();
+					Link l = tev.arc().link();
 					if ( tev.type() == TransferEvent.START ){
 						incrTransfer(l);
 					} else {
@@ -56,7 +56,7 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 			@Override
 			public void handle(long time, Collection<Transfer> events) {
 				for ( Transfer transfer : events ){
-					Link l = transfer.edge().link();
+					Link l = transfer.arc().link();
 					incrTransfer(l);
 				}
 			}

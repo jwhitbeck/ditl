@@ -23,7 +23,7 @@ import java.util.Set;
 
 import ditl.*;
 
-public class BeaconTrace extends Trace<Edge> implements Trace.Filterable<Edge> {
+public class BeaconTrace extends Trace<Arc> implements Trace.Filterable<Arc> {
 	
 	public final static String type = "beacons";
 	public final static String defaultName = "beacons";
@@ -31,12 +31,12 @@ public class BeaconTrace extends Trace<Edge> implements Trace.Filterable<Edge> {
 	public final static String beaconningPeriodKey = "beaconning period";
 	
 	public BeaconTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new Edge.Factory());
+		super(store, name, info, new Arc.Factory());
 	}
 
 	@Override
-	public Filter<Edge> eventFilter(Set<Integer> group) {
-		return new Edge.InternalGroupFilter(group);
+	public Filter<Arc> eventFilter(Set<Integer> group) {
+		return new Arc.InternalGroupFilter(group);
 	}
 	
 	public long beaconningPeriod(){
@@ -44,7 +44,7 @@ public class BeaconTrace extends Trace<Edge> implements Trace.Filterable<Edge> {
 	}
 
 	@Override
-	public void copyOverTraceInfo(Writer<Edge> writer) {
+	public void copyOverTraceInfo(Writer<Arc> writer) {
 		writer.setProperty( beaconningPeriodKey, getValue(beaconningPeriodKey));
 	}
 }

@@ -26,69 +26,69 @@ import ditl.*;
 
 
 
-public final class BeaconsToEdgesConverter implements Incrementable, Converter {
+public final class BeaconsToArcsConverter implements Incrementable, Converter {
 
 	private long _period;
 	private int _tol = 0;
 	private long cur_time;
-	private TreeMap<Long,Set<Edge>> edgesBuffer = new TreeMap<Long,Set<Edge>>();
-	private Map<Edge,Long> lastEdges = new AdjacencyMap.Edges<Long>();
+	private TreeMap<Long,Set<Arc>> arcsBuffer = new TreeMap<Long,Set<Arc>>();
+	private Map<Arc,Long> lastArcs = new AdjacencyMap.Arcs<Long>();
 	private Random rng = new Random();
 	private double _expansion;
-	private StatefulWriter<EdgeEvent, Edge> edge_writer;
-	private Reader<Edge> beacon_reader;
+	private StatefulWriter<ArcEvent, Arc> arc_writer;
+	private Reader<Arc> beacon_reader;
 	
-	private EdgeTrace _edges;
+	private ArcTrace _arcs;
 	private BeaconTrace _beacons;
 	
-	public BeaconsToEdgesConverter(EdgeTrace edges, BeaconTrace beacons,
+	public BeaconsToArcsConverter(ArcTrace arcs, BeaconTrace beacons,
 			int tol, double expansion) {
-		_edges = edges;
+		_arcs = arcs;
 		_beacons = beacons;
 		_period = beacons.beaconningPeriod();
 		_tol = tol;
 		_expansion = expansion;
 	}
 	
-	public Listener<Edge> detectedListener(){
-		return new Listener<Edge>() {
+	public Listener<Arc> detectedListener(){
+		return new Listener<Arc>() {
 			@Override
-			public void handle(long time, Collection<Edge> events) {
-				for ( Edge e : events ){
-					if ( ! lastEdges.containsKey(e) ){ // link comes up
+			public void handle(long time, Collection<Arc> events) {
+				for ( Arc a : events ){
+					if ( ! lastArcs.containsKey(a) ){ // link comes up
 						long start_time = time - (long)(_expansion*rand()); 
-						edge_writer.queue(start_time, new EdgeEvent(e,EdgeEvent.UP));
+						arc_writer.queue(start_time, new ArcEvent(a,ArcEvent.UP));
 					}
-					appendLastEdge(time,e);
+					appendLastArc(time,a);
 				}
 			}
 		};
 	}
 	
-	private void appendLastEdge(long time, Edge edge){
-		if ( lastEdges.containsKey(edge) ){ // remove from beaconBuffer
-			Long prevTime = lastEdges.get(edge);
-			Set<Edge> edges = edgesBuffer.get(prevTime);
-			edges.remove(edge);
-			if ( edges.isEmpty() )
-				edgesBuffer.remove(prevTime);
+	private void appendLastArc(long time, Arc arc){
+		if ( lastArcs.containsKey(arc) ){ // remove from beaconBuffer
+			Long prevTime = lastArcs.get(arc);
+			Set<Arc> arcs = arcsBuffer.get(prevTime);
+			arcs.remove(arc);
+			if ( arcs.isEmpty() )
+				arcsBuffer.remove(prevTime);
 		}
-		if ( ! edgesBuffer.containsKey(time) )
-			edgesBuffer.put(time, new AdjacencySet.Edges() );
-		edgesBuffer.get(time).add(edge);
-		lastEdges.put(edge, time);
+		if ( ! arcsBuffer.containsKey(time) )
+			arcsBuffer.put(time, new AdjacencySet.Arcs() );
+		arcsBuffer.get(time).add(arc);
+		lastArcs.put(arc, time);
 	}
 	
 	
 	private void expireBeacons(){
-		while ( ! edgesBuffer.isEmpty() && 
-				edgesBuffer.firstKey() <= cur_time - (_tol+1)*_period ){
-			Map.Entry<Long, Set<Edge>> e = edgesBuffer.pollFirstEntry();
+		while ( ! arcsBuffer.isEmpty() && 
+				arcsBuffer.firstKey() <= cur_time - (_tol+1)*_period ){
+			Map.Entry<Long, Set<Arc>> e = arcsBuffer.pollFirstEntry();
 			long time = e.getKey();
-			for ( Edge edge : e.getValue() ){
+			for ( Arc arc : e.getValue() ){
 				long end_time = time + (long)(_expansion*rand());
-				edge_writer.queue(end_time, new EdgeEvent(edge,EdgeEvent.DOWN));
-				lastEdges.remove(edge);
+				arc_writer.queue(end_time, new ArcEvent(arc,ArcEvent.DOWN));
+				lastArcs.remove(arc);
 			}
 		}
 	}
@@ -100,7 +100,7 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 	@Override
 	public void incr(long dt) throws IOException {
 		expireBeacons();
-		edge_writer.flush(cur_time-(_tol+1)*_period);
+		arc_writer.flush(cur_time-(_tol+1)*_period);
 		cur_time += dt;
 	}
 
@@ -111,7 +111,7 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 
 	@Override
 	public void convert() throws IOException {
-		edge_writer = _edges.getWriter();
+		arc_writer = _arcs.getWriter();
 		beacon_reader = _beacons.getReader();
 		
 		beacon_reader.bus().addListener(detectedListener());
@@ -122,11 +122,11 @@ public final class BeaconsToEdgesConverter implements Incrementable, Converter {
 		
 		runner.run();
 				
-		edge_writer.flush(cur_time+(_tol+1)*_period);
+		arc_writer.flush(cur_time+(_tol+1)*_period);
 		
-		edge_writer.setPropertiesFromTrace(_beacons);
+		arc_writer.setPropertiesFromTrace(_beacons);
 		
-		edge_writer.close();
+		arc_writer.close();
 		beacon_reader.close();
 	}
 }

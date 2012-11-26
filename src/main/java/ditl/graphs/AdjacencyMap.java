@@ -542,10 +542,10 @@ public abstract class AdjacencyMap<C extends Couple,T> implements Map<C,T> {
 	}
 
 	
-	public final static class Edges<T> extends AdjacencyMap<Edge,T> {
+	public final static class Arcs<T> extends AdjacencyMap<Arc,T> {
 		@Override
-		protected Edge newCouple(Integer id1, Integer id2) {
-			return new Edge(id1,id2);
+		protected Arc newCouple(Integer id1, Integer id2) {
+			return new Arc(id1,id2);
 		}
 	}
 

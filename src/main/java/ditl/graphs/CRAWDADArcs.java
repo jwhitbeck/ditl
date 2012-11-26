@@ -25,13 +25,13 @@ import ditl.*;
 
 
 
-public class CRAWDADEdges {
+public class CRAWDADArcs {
 	
-	public static void fromCRAWDAD(EdgeTrace edges,
+	public static void fromCRAWDAD(ArcTrace arcs,
 			InputStream in, double timeMul, long ticsPerSecond,
 			long offset, IdGenerator idGen) throws IOException{
 		
-		StatefulWriter<EdgeEvent,Edge> edgeWriter = edges.getWriter();
+		StatefulWriter<ArcEvent,Arc> arcWriter = arcs.getWriter();
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		
@@ -41,42 +41,42 @@ public class CRAWDADEdges {
 			Integer id2 = idGen.getInternalId(elems[1]);
 			long begin = (long)(Long.parseLong(elems[2])*timeMul)+offset;
 			long end = (long)(Long.parseLong(elems[3])*timeMul)+offset;
-			edgeWriter.queue(begin, new EdgeEvent(id1,id2,EdgeEvent.UP));
-			edgeWriter.queue(end, new EdgeEvent(id1,id2,EdgeEvent.DOWN));
+			arcWriter.queue(begin, new ArcEvent(id1,id2,ArcEvent.UP));
+			arcWriter.queue(end, new ArcEvent(id1,id2,ArcEvent.DOWN));
 		}
-		edgeWriter.flush();
-		edgeWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
-		idGen.writeTraceInfo(edgeWriter);
-		edgeWriter.close();
+		arcWriter.flush();
+		arcWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
+		idGen.writeTraceInfo(arcWriter);
+		arcWriter.close();
 		br.close();
 	}
 	
-	public static void toCRAWDAD(EdgeTrace edges, 
+	public static void toCRAWDAD(ArcTrace arcs, 
 			OutputStream out, double timeMul) throws IOException {
 	
-		StatefulReader<EdgeEvent,Edge> edgeReader = edges.getReader();
+		StatefulReader<ArcEvent,Arc> arcReader = arcs.getReader();
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-		Map<Edge,Long> activeEdges = new AdjacencyMap.Edges<Long>();
+		Map<Arc,Long> activeArcs = new AdjacencyMap.Arcs<Long>();
 		
-		edgeReader.seek(edges.minTime());
-		for ( Edge e : edgeReader.referenceState() )
-			activeEdges.put(e, edges.minTime());
-		while ( edgeReader.hasNext() ){
-			for ( EdgeEvent eev : edgeReader.next() ){
-				Edge e = eev.edge();
-				if ( eev.isUp() ){
-					activeEdges.put(e, edgeReader.time());
+		arcReader.seek(arcs.minTime());
+		for ( Arc a : arcReader.referenceState() )
+			activeArcs.put(a, arcs.minTime());
+		while ( arcReader.hasNext() ){
+			for ( ArcEvent aev : arcReader.next() ){
+				Arc a = aev.arc();
+				if ( aev.isUp() ){
+					activeArcs.put(a, arcReader.time());
 				} else {
-					double beg = activeEdges.get(e)*timeMul;
-					double end = edgeReader.time()*timeMul;
-					activeEdges.remove(e);
-					bw.write(e.from()+"\t"+e.to()+"\t"+beg+"\t"+end+"\n");
+					double beg = activeArcs.get(a)*timeMul;
+					double end = arcReader.time()*timeMul;
+					activeArcs.remove(a);
+					bw.write(a.from()+"\t"+a.to()+"\t"+beg+"\t"+end+"\n");
 				}
 			}
 		}
 		
 		bw.close();
-		edgeReader.close();
+		arcReader.close();
 	}
 	
 }

@@ -44,12 +44,12 @@ public class ReachabilitySelectorPanel extends JPanel
 	protected JComboBox tauChooser;
 	protected JComboBox delayChooser;
 	protected SortedMap<Long,Item> taus = new TreeMap<Long,Item>();
-	protected EdgeRunner runner;
+	protected ArcRunner runner;
 	protected Scene scene;
 	protected ReachabilityTrace cur_trace = null;
 	protected DecimalFormat df = new DecimalFormat("#.##");
 	
-	public ReachabilitySelectorPanel(EdgeRunner traceRunner, Scene sc){
+	public ReachabilitySelectorPanel(ArcRunner traceRunner, Scene sc){
 		runner = traceRunner;
 		scene = sc;
 		setBorder(BorderFactory.createTitledBorder("Reachability"));
@@ -171,7 +171,7 @@ public class ReachabilitySelectorPanel extends JPanel
 			if ( enabledBox.isSelected() ){
 				cur_trace = ((Item)delayChooser.getSelectedItem()).trace;
 			}
-			runner.setEdgeTrace(cur_trace);
+			runner.setArcTrace(cur_trace);
 		} catch (Exception ioe){
 			JOptionPane.showMessageDialog(this, "Failed to load reachability file '"+name+"'", "Warning", JOptionPane.ERROR_MESSAGE);
 		}

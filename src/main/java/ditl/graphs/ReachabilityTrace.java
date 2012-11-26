@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import ditl.*;
 
-public class ReachabilityTrace extends EdgeTrace {
+public class ReachabilityTrace extends ArcTrace {
 
 	final public static String tauKey = "tau";
 	final public static String etaKey = "eta";
@@ -52,7 +52,7 @@ public class ReachabilityTrace extends EdgeTrace {
 	}
 	
 	@Override
-	public void copyOverTraceInfo(Writer<EdgeEvent> writer) {
+	public void copyOverTraceInfo(Writer<ArcEvent> writer) {
 		writer.setProperty(tauKey, tau());
 		writer.setProperty(etaKey, eta());
 		writer.setProperty(delayKey, delay());

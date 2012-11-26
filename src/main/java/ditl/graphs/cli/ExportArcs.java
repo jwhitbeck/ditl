@@ -26,14 +26,14 @@ import ditl.Store.NoSuchTraceException;
 import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
-public class ExportEdges extends ExportApp {
+public class ExportArcs extends ExportApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.ARCS);
 	private Long dtps;
 
 	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "export-edges";
-	public final static String CMD_ALIAS = "xe";
+	public final static String CMD_NAME = "export-arcs";
+	public final static String CMD_ALIAS = "xa";
 	
 	@Override
 	protected void initOptions() {
@@ -54,9 +54,9 @@ public class ExportEdges extends ExportApp {
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException {
-		EdgeTrace edges = (EdgeTrace) _store.getTrace(graph_options.get(GraphOptions.EDGES));
-		long otps = edges.ticsPerSecond();
+		ArcTrace arcs = (ArcTrace) _store.getTrace(graph_options.get(GraphOptions.ARCS));
+		long otps = arcs.ticsPerSecond();
 		double timeMul = getTimeMul(otps,dtps);
-		CRAWDADEdges.toCRAWDAD(edges, _out, timeMul);
+		CRAWDADArcs.toCRAWDAD(arcs, _out, timeMul);
 	}
 }

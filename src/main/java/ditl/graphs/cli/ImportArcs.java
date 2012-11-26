@@ -30,18 +30,18 @@ import ditl.cli.ImportApp;
 import ditl.graphs.*;
 
 
-public class ImportEdges extends ImportApp {
+public class ImportArcs extends ImportApp {
 	
 	private long ticsPerSecond;
 	private Double timeMul;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
+	private GraphOptions graph_options = new GraphOptions(GraphOptions.ARCS);
 	private long offset;
 	private boolean use_id_map;
 	private int min_id;
 	
 	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "import-edges";
-	public final static String CMD_ALIAS = "ie";
+	public final static String CMD_NAME = "import-arcs";
+	public final static String CMD_ALIAS = "ia";
 
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
@@ -70,8 +70,8 @@ public class ImportEdges extends ImportApp {
 	
 	@Override
 	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		EdgeTrace edges = (EdgeTrace) _store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
+		ArcTrace arcs = (ArcTrace) _store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.type, force);
 		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
-		CRAWDADEdges.fromCRAWDAD(edges, _in, timeMul, ticsPerSecond, offset, id_gen);
+		CRAWDADArcs.fromCRAWDAD(arcs, _in, timeMul, ticsPerSecond, offset, id_gen);
 	}
 }

@@ -19,7 +19,7 @@
 package ditl.transfers;
 
 import ditl.ItemFactory;
-import ditl.graphs.Edge;
+import ditl.graphs.Arc;
 
 public class Transfer {
 
@@ -41,8 +41,8 @@ public class Transfer {
 		}
 	}
 	
-	public Edge edge(){
-		return new Edge(_from,_to);
+	public Arc arc(){
+		return new Arc(_from,_to);
 	}
 	
 	public Integer from(){

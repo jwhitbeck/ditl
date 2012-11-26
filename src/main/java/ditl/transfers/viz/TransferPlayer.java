@@ -48,7 +48,7 @@ public class TransferPlayer extends GraphPlayer {
 		scene.setPreferredSize(new Dimension(700,500));
 		runner.addMovementHandler(scene);
 		runner.addLinkHandler(scene);
-		runner.addEdgeHandler(scene);
+		runner.addArcHandler(scene);
 		((RoutingRunner)runner).addTransferHandler((TransferScene)scene);
 		
 		List<JPanel> widgets = new LinkedList<JPanel>();
