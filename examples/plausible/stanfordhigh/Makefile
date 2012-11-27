@@ -1,4 +1,10 @@
-DITL_LIB:=../../../dist/ditl.jar
+DITL_DIR:=../../../
+DITL_VERSION:=$(shell sed -n -r 's/.*<version>([^<]+)<\/version>.*/\1/p' $(DITL_DIR)/pom.xml | head -1)
+DITL_LIB:=$(HOME)/.m2/repository/ditl/ditl/$(DITL_VERSION)/ditl-$(DITL_VERSION).jar
+
+$(DITL_LIB):
+	cd $(DITL_DIR) && mvn install
+
 
 ORIG_DATA:=moteFiles.zip roles.zip
 MOTES_URL:=http://www.salathegroup.com/data/school_2010/moteFiles.zip
@@ -32,7 +38,7 @@ groups: roles.zip
 	echo $$(grep teacher roles/roles.txt | cut -f1) | tr ' ' , >> $@
 	echo $$(grep other roles/roles.txt | cut -f1) | tr ' ' , >> $@
 
-$(TARGET): $(ORIG_DATA) ImportStanford.java
+$(TARGET): $(ORIG_DATA) $(DITL_LIB) ImportStanford.java
 	@echo ""
 	@echo "#################################################"
 	@echo " Decrompressing data"
