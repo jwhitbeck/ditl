@@ -108,21 +108,12 @@ public abstract class Trace<E> {
 	
 	public long stateMaxUpdateInterval(){
 		String str = getValue(stateMaxUpdateIntervalKey);
-		if ( str == null ) // backwards compatibility. Will be removed
-			return snapshotInterval();
 		return Long.parseLong(str);
 	}
 	
 	public long stateMinUpdateInterval(){
 		String str = getValue(stateMinUpdateIntervalKey);
-		if ( str == null ) // backwards compatibility. Will be removed
-			return snapshotInterval();
 		return Long.parseLong(str);
-	}
-	
-	@Deprecated
-	public long snapshotInterval(){ // deprecated. Will be removed in future versions
-		return Long.parseLong(getValue(snapshotIntervalKey));
 	}
 	
 	public int defaultPriority(){
