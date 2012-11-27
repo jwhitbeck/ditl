@@ -24,17 +24,14 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
+@Command(pkg="graphs", cmd="arcs-to-dominating-set", alias="a2ds")
 public class ArcsToDominatingSet extends ConvertApp {
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.GROUPS, GraphOptions.ARCS, GraphOptions.PRESENCE);
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "arcs-to-dominating-set";
-	public final static String CMD_ALIAS = "a2ds";
-
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {

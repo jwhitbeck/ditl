@@ -25,11 +25,13 @@ import org.apache.commons.cli.*;
 import ditl.*;
 import ditl.Store.LoadTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ImportApp;
 import ditl.graphs.*;
 
 import static ditl.graphs.cli.ExternalFormat.*;
 
+@Command(pkg="graphs", cmd="import-edges", alias="ie")
 public class ImportEdges extends ImportApp {
 
 	private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(CRAWDAD, ONE);
@@ -40,11 +42,7 @@ public class ImportEdges extends ImportApp {
 	private long offset;
 	private boolean use_id_map;
 	private int min_id;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "import-edges";
-	public final static String CMD_ALIAS = "ie";
-	
+
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
 		super.parseArgs(cli, args);

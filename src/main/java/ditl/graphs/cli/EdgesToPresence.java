@@ -24,19 +24,17 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
+@Command(pkg="graphs", cmd="edges-to-presence", alias="e2p")
 public class EdgesToPresence extends ConvertApp {
 
 	final static String strictOption = "strict"; 
 	private boolean strict; 
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.PRESENCE);
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "edges-to-presence";
-	public final static String CMD_ALIAS = "e2p";
 	
 	@Override
 	protected void initOptions() {

@@ -24,19 +24,17 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
+@Command(pkg="graphs", cmd="arcs-to-edges", alias="a2e")
 public class ArcsToEdges extends ConvertApp {
 
 	private final static String intersectOption = "intersect";
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.ARCS);
 	private boolean union;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "arcs-to-edges";
-	public final static String CMD_ALIAS = "a2e";
 	
 	@Override
 	protected void initOptions() {

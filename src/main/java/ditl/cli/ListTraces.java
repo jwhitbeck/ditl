@@ -25,16 +25,13 @@ import org.apache.commons.cli.*;
 
 import ditl.Trace;
 
+@Command(cmd="ls")
 public class ListTraces extends ReadOnlyApp {
 
 	private final static String detailsOption = "all"; 
 	private boolean show_descr;
 	private String type;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "ls";
-	public final static String CMD_ALIAS = null;
-	
+		
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
 		super.parseArgs(cli, args);

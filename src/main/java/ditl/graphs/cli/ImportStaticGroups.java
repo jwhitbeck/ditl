@@ -27,10 +27,11 @@ import ditl.*;
 import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.WriteApp;
 import ditl.graphs.*;
 
-
+@Command(pkg="graphs", cmd="import-groups", alias="ig")
 public class ImportStaticGroups extends WriteApp {
 
 	private static String labelsOption = "labels";
@@ -39,10 +40,6 @@ public class ImportStaticGroups extends WriteApp {
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.GROUPS);
 	private String[] group_specs;
 	String[] labels;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "import-groups";
-	public final static String CMD_ALIAS = "ig";
 	
 	@Override
 	protected String getUsageString(){

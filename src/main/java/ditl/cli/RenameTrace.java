@@ -25,14 +25,11 @@ import org.apache.commons.cli.*;
 import ditl.*;
 import ditl.WritableStore.AlreadyExistsException;
 
+@Command(cmd="mv")
 public class RenameTrace extends WriteApp {
 
 	private String orig_name, dest_name;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "mv";
-	public final static String CMD_ALIAS = null;
-	
+
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
 		super.parseArgs(cli, args);

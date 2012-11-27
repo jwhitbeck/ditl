@@ -25,15 +25,12 @@ import org.apache.commons.cli.*;
 import ditl.*;
 import ditl.Store.NoSuchTraceException;
 
+@Command(cmd="ps")
 public class PrintState extends ReadOnlyApp {
 	
 	private double d_time;
 	private String trace_name;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "ps";
-	public final static String CMD_ALIAS = null;
-	
+
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
 		super.parseArgs(cli, args);

@@ -28,7 +28,7 @@ import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 
 public abstract class App {
-	
+
 	protected final static String 
 		offsetOption = "offset",
 		origTimeUnitOption = "orig-time-unit",

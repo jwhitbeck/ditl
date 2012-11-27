@@ -25,16 +25,13 @@ import org.apache.commons.cli.*;
 
 import ditl.*;
 
+@Command(cmd="rm")
 public class DeleteTraces extends App {
 
 	protected String[] traceNames;
 	protected File store_file;
 	protected WritableStore _store;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "rm";
-	public final static String CMD_ALIAS = null;
-		
+
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
 		store_file = new File(args[0]);

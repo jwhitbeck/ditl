@@ -24,11 +24,11 @@ import org.apache.commons.cli.*;
 import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-
-
+@Command(pkg="graphs", cmd="upper-reachability", alias="ur")
 public class UpperReachability extends ConvertApp {
 	
 	final static String lowerPrefixOption = "lower-prefix";
@@ -36,11 +36,7 @@ public class UpperReachability extends ConvertApp {
 	
 	private String lower_name;
 	private String upper_name;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "upper-reachability";
-	public final static String CMD_ALIAS = "ur";
-	
+
 	@Override
 	protected String getUsageString(){
 		return "[OPTIONS] STORE TAU MAXDELAY";

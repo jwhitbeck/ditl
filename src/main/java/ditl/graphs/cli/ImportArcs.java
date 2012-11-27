@@ -26,10 +26,11 @@ import ditl.*;
 import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ImportApp;
 import ditl.graphs.*;
 
-
+@Command(pkg="graphs", cmd="import-arcs", alias="ia")
 public class ImportArcs extends ImportApp {
 	
 	private long ticsPerSecond;
@@ -38,10 +39,6 @@ public class ImportArcs extends ImportApp {
 	private long offset;
 	private boolean use_id_map;
 	private int min_id;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "import-arcs";
-	public final static String CMD_ALIAS = "ia";
 
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {

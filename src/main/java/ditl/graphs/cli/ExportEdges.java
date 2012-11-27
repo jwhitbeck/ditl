@@ -23,21 +23,19 @@ import java.io.IOException;
 import org.apache.commons.cli.*;
 
 import ditl.Store.NoSuchTraceException;
+import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
 import static ditl.graphs.cli.ExternalFormat.*;
 
+@Command(pkg="graphs", cmd="export-edges", alias="xe")
 public class ExportEdges extends ExportApp {
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
 	private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(CRAWDAD, ONE);
 	private ExternalFormat ext_fmt;
 	private Long dtps;
-
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "export-edges";
-	public final static String CMD_ALIAS = "xe";
 	
 	@Override
 	protected void initOptions() {

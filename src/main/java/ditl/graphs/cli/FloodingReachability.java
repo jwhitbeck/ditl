@@ -24,21 +24,17 @@ import org.apache.commons.cli.*;
 import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-
-
+@Command(pkg="graphs", cmd="flooding-reachability", alias="fr")
 public class FloodingReachability extends ConvertApp {
 	
 	private double tau;
 	private long delay;
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES,GraphOptions.PRESENCE);
 	private Long min_time;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "flooding-reachability";
-	public final static String CMD_ALIAS = "fr";
 	
 	@Override
 	protected String getUsageString(){

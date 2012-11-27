@@ -23,17 +23,15 @@ import java.io.IOException;
 import org.apache.commons.cli.*;
 
 import ditl.Store.NoSuchTraceException;
+import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
+@Command(pkg="graphs", cmd="export-arcs", alias="xa")
 public class ExportArcs extends ExportApp {
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.ARCS);
 	private Long dtps;
-
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "export-arcs";
-	public final static String CMD_ALIAS = "xa";
 	
 	@Override
 	protected void initOptions() {

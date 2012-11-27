@@ -16,50 +16,20 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.graphs.cli;
+package ditl.cli;
 
-import java.io.IOException;
-import java.util.Set;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.apache.commons.cli.*;
-
-import ditl.Store.*;
-import ditl.WritableStore.AlreadyExistsException;
-import ditl.cli.Command;
-import ditl.cli.ConvertApp;
-import ditl.graphs.*;
-
-@Command(pkg="graphs", cmd="group-edges", alias="ge")
-public class StaticGroupEdges extends ConvertApp {
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Command {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.GROUPS, GraphOptions.EDGES);
-	private String groupEdgesName;
-
-	@Override
-	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-		EdgeTrace edges = (EdgeTrace)orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-		GroupTrace groups = (GroupTrace)orig_store.getTrace(graph_options.get(GraphOptions.GROUPS));
-		Set<Group> static_groups = groups.staticGroups();
-		EdgeTrace group_edges = (EdgeTrace)dest_store.newTrace(groupEdgesName, EdgeTrace.type, force);
-		new StaticGroupEdgeConverter(group_edges, edges, static_groups).convert();
-	}
+	public final static String default_package = "DEFAULT_PACKAGE";
 	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		groupEdgesName = args[1];
-	}
-
-	@Override
-	protected String getUsageString() {
-		return "[OPTIONS] STORE GROUP_EDGES_NAME";
-	}
-	
-	@Override
-	protected void initOptions(){
-		super.initOptions();
-		graph_options.setOptions(options);
-	}
-
+	String pkg() default default_package;
+	String cmd();
+	String alias() default "";
 }

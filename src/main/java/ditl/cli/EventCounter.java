@@ -26,16 +26,12 @@ import org.apache.commons.cli.*;
 import ditl.*;
 import ditl.Store.NoSuchTraceException;
 
+@Command(cmd="count")
 public class EventCounter extends ReadOnlyApp {
 	
 	private Double d_begin = null;
 	private Double d_end = null;
 	private String trace_name;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "count";
-	public final static String CMD_ALIAS = null;
-	
 	
 	@Override
 	protected void initOptions(){

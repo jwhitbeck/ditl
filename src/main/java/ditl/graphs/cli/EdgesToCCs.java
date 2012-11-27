@@ -24,17 +24,15 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
+@Command(pkg="graphs", cmd="edges-to-ccs", alias="e2c")
 public class EdgesToCCs extends ConvertApp {
 
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.GROUPS);
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "edges-to-ccs";
-	public final static String CMD_ALIAS = "e2c";
-	
+
 	@Override
 	protected void initOptions() {
 		super.initOptions();

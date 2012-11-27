@@ -24,10 +24,11 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-
+@Command(pkg="graphs", cmd="resample", alias="s")
 public class Resample extends ConvertApp {
 	
 	final static String missProbabilityOption = "miss-probability";
@@ -37,12 +38,6 @@ public class Resample extends ConvertApp {
 	private long period;
 	private double p;
 	private boolean randomize;
-	
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "resample";
-	public final static String CMD_ALIAS = "s";
-
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {

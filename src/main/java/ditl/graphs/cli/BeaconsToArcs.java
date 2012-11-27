@@ -24,10 +24,11 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-
+@Command(pkg="graphs", cmd="beacons-to-arcs", alias="b2a")
 public class BeaconsToArcs extends ConvertApp {
 	
 	final static String toleranceOption = "tolerance";
@@ -37,10 +38,6 @@ public class BeaconsToArcs extends ConvertApp {
 	
 	int tol;
 	double expansion;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "beacons-to-arcs";
-	public final static String CMD_ALIAS = "b2a";
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {

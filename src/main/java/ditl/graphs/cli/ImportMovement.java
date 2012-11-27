@@ -25,12 +25,13 @@ import org.apache.commons.cli.*;
 import ditl.*;
 import ditl.Store.LoadTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ImportApp;
 import ditl.graphs.*;
 
 import static ditl.graphs.cli.ExternalFormat.*;
 
-
+@Command(pkg="graphs", cmd="import-movement", alias="im")
 public class ImportMovement extends ImportApp {
 	
 	private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(NS2, ONE);
@@ -45,10 +46,6 @@ public class ImportMovement extends ImportApp {
 	private int min_id;
 	
 	private String fixPauseTimesOption = "fix-pause-times";
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "import-movement";
-	public final static String CMD_ALIAS = "im";
 
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {

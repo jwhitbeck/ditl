@@ -7,6 +7,7 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 import ditl.graphs.cli.GraphOptions;
@@ -14,6 +15,7 @@ import ditl.plausible.*;
 import ditl.plausible.constraints.*;
 import ditl.plausible.forces.*;
 
+@Command(pkg="plausible", cmd="infer", alias="i")
 public class InferMobility extends ConvertApp {
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.EDGES, GraphOptions.MOVEMENT);
@@ -60,10 +62,6 @@ public class InferMobility extends ConvertApp {
 	private boolean overlap;
 	private String knownNodesOption = "known-nodes";
 	private Integer[] known_nodes;
-	
-	public final static String PKG_NAME = "plausible";
-	public final static String CMD_NAME = "infer";
-	public final static String CMD_ALIAS = "i";
 	
 	@Override
 	protected void initOptions() {

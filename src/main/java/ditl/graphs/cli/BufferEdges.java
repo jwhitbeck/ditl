@@ -24,9 +24,11 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
+@Command(pkg="graphs", cmd="buffer-edges", alias="be")
 public class BufferEdges extends ConvertApp {
 
 	final static String randomizeOption = "randomize"; 
@@ -38,11 +40,7 @@ public class BufferEdges extends ConvertApp {
 	private long after_buffer_time;
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "buffer-edges";
-	public final static String CMD_ALIAS = "be";
-	
+
 	@Override
 	protected void initOptions() {
 		super.initOptions();

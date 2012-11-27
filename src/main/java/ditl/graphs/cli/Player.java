@@ -23,16 +23,14 @@ import java.io.*;
 import org.apache.commons.cli.*;
 
 import ditl.cli.App;
+import ditl.cli.Command;
 import ditl.graphs.viz.GraphPlayer;
 
+@Command(pkg="graphs", cmd="play", alias="p")
 public class Player extends App {
 
 	private File[] files;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "play";
-	public final static String CMD_ALIAS = "p";
-	
+
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args)
 			throws ParseException, ArrayIndexOutOfBoundsException,

@@ -22,15 +22,10 @@ import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
 
-import ditl.Reflections;
-
+import org.reflections.*;
+import org.reflections.scanners.TypeAnnotationsScanner;
 
 public class CLI {
-	
-	private final static String default_package = "DEFAULT_PACKAGE";
-	private final static String PKG_NAME = "PKG_NAME";
-	private final static String CMD_NAME = "CMD_NAME";
-	private final static String CMD_ALIAS = "CMD_ALIAS";
 	
 	private Map<String, CommandMap> cmd_maps = new HashMap<String, CommandMap>();
 	
@@ -46,7 +41,7 @@ public class CLI {
 		}
 		
 		void add(String cmd_name, String cmd_alias, Class<?> klass){
-			if ( cmd_alias != null ){
+			if ( ! cmd_alias.isEmpty() ){
 				alias_map.put(cmd_alias, cmd_name);
 				rev_alias_map.put(cmd_name, cmd_alias);
 			}
@@ -66,7 +61,7 @@ public class CLI {
 			Class<?> klass;
 			
 			// check if pkg isn't really an app in the default package
-			klass = cmd_maps.get(default_package).getClass(pkg);
+			klass = cmd_maps.get(Command.default_package).getClass(pkg);
 			if ( klass != null ){
 				startApp(pkg, klass, pkg_args);
 				return;
@@ -97,9 +92,10 @@ public class CLI {
 		buffer.append("Where PACKAGE is one of: \n\n");
 		
 		buffer.append("default package:\n");
-		appendPackageHelp(buffer, default_package);
+		if ( cmd_maps.containsKey(Command.default_package))
+			appendPackageHelp(buffer, Command.default_package);
 		for ( String pkg : cmd_maps.keySet() ){
-			if ( ! pkg.equals(default_package) ){
+			if ( ! pkg.equals(Command.default_package) ){
 				buffer.append("Package: "+pkg+"\n");
 				appendPackageHelp(buffer, pkg);
 			}
@@ -138,12 +134,12 @@ public class CLI {
 	}
 	
 	private void findPackages() throws IOException{
-		Set<Class<?>> appKlasses = Reflections.getSubClasses(App.class,
-				new Reflections("\\w+\\.class").listClasses("ditl"));
+		Set<Class<?>> appKlasses = new Reflections("ditl", new TypeAnnotationsScanner()).
+				getTypesAnnotatedWith(Command.class);
 		for ( Class<?> klass : appKlasses ){
-			String pkg_name = readStaticField(klass, PKG_NAME);
-			String cmd_name = readStaticField(klass, CMD_NAME);
-			String cmd_alias = readStaticField(klass, CMD_ALIAS);
+			String pkg_name = klass.getAnnotation(Command.class).pkg();
+			String cmd_name = klass.getAnnotation(Command.class).cmd();
+			String cmd_alias = klass.getAnnotation(Command.class).alias();
 			if ( cmd_name != null ){
 				CommandMap cmd_map = get_cmd_map(pkg_name);
 				cmd_map.add(cmd_name, cmd_alias, klass);
@@ -151,20 +147,10 @@ public class CLI {
 		}
 	}
 	
-	private String readStaticField(Class<?> klass, String fieldName ){
-		try {
-			Field field = klass.getField(fieldName);
-			String s = (String)field.get(null);
-			return s;
-		} catch (Exception e) {}
-		return null;
-	}
-	
 	private CommandMap get_cmd_map(String pkg_name){
-		String key = ( pkg_name == null )? default_package : pkg_name;
-		if ( ! cmd_maps.containsKey(key) )
-			cmd_maps.put(key, new CommandMap());
-		return cmd_maps.get(key);
+		if ( ! cmd_maps.containsKey(pkg_name) )
+			cmd_maps.put(pkg_name, new CommandMap());
+		return cmd_maps.get(pkg_name);
 	}
 	
 	public static void main(String args[]) throws IOException{

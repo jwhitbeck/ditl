@@ -24,18 +24,15 @@ import org.apache.commons.cli.*;
 
 import ditl.*;
 import ditl.Store.NoSuchTraceException;
+import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
-
+@Command(pkg="graphs", cmd="export-positions", alias="xp")
 public class ExportPositions extends ExportApp {
 
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
 	private double time;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "export-positions";
-	public final static String CMD_ALIAS = "xp";
 
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {

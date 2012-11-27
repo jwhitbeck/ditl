@@ -25,11 +25,11 @@ import org.apache.commons.cli.*;
 import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
-
-
+@Command(pkg="graphs", cmd="reachability", alias="r")
 public class Reachability extends ConvertApp {
 	
 	final static String 
@@ -66,11 +66,7 @@ public class Reachability extends ConvertApp {
 	private boolean verbose = false;
 	private long tps;
 	private long ref_time;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "reachability";
-	public final static String CMD_ALIAS = "r";
-	
+
 	@Override
 	protected String getUsageString(){
 		return "[OPTIONS] STORE ETA TAU MAXDELAY";

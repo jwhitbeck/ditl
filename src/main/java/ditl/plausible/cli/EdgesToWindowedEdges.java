@@ -24,22 +24,20 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.cli.GraphOptions;
 import ditl.plausible.*;
 
+@Command(pkg="plausible", cmd="edges-to-windowed-edges", alias="e2we")
 public class EdgesToWindowedEdges extends ConvertApp {
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
 	private String windowedEdgesOption = "windowed-edges";
 	private String windowed_edges_name;
 	private long window;
-	
-	public final static String PKG_NAME = "plausible";
-	public final static String CMD_NAME = "edges-to-windowed-edges";
-	public final static String CMD_ALIAS = "e2we";
-	
+
 	@Override
 	protected void initOptions() {
 		super.initOptions();

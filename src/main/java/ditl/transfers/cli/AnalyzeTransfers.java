@@ -25,9 +25,11 @@ import org.apache.commons.cli.*;
 
 import ditl.*;
 import ditl.Store.NoSuchTraceException;
+import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.transfers.*;
 
+@Command(pkg="transfers", cmd="analyze", alias="a")
 public class AnalyzeTransfers extends ExportApp {
 	
 	final static String 
@@ -44,11 +46,6 @@ public class AnalyzeTransfers extends ExportApp {
 	private Long minTime;
 	
 	private ReportFactory<?> factory;
-	
-	public final static String PKG_NAME = "transfers";
-	public final static String CMD_NAME = "analyze";
-	public final static String CMD_ALIAS = "a";
-	
 
 	@Override
 	protected void initOptions() {

@@ -25,15 +25,12 @@ import org.apache.commons.cli.*;
 
 import ditl.*;
 
+@Command(cmd="cp")
 public class CopyTraces extends App {
 
 	protected File inStoreFile;
 	protected File outStoreFile;
 	protected String[] traceNames;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "cp";
-	public final static String CMD_ALIAS = null;
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {

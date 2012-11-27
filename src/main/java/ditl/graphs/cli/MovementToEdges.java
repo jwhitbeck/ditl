@@ -24,20 +24,17 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
+@Command(pkg="graphs", cmd="movement-to-edges", alias="m2e")
 public class MovementToEdges extends ConvertApp {
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.MOVEMENT);
 	private double range;
 	private Long max_interval = null;
 	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "movement-to-edges";
-	public final static String CMD_ALIAS = "m2e";
-
-
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		MovementTrace movement = (MovementTrace) orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));

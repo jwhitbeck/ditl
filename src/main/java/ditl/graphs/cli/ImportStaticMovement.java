@@ -27,19 +27,16 @@ import ditl.*;
 import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.WriteApp;
 import ditl.graphs.*;
 
-
+@Command(pkg="graphs", cmd="import-positions", alias="ip")
 public class ImportStaticMovement extends WriteApp {
 	
 	private String[] positions_specs;
 	private boolean use_id_map;
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.MOVEMENT);
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "import-positions";
-	public final static String CMD_ALIAS = "ip";
 	
 	@Override
 	protected String getUsageString(){

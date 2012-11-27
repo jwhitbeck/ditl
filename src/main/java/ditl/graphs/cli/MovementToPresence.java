@@ -24,17 +24,14 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.*;
 
+@Command(pkg="graphs", cmd="movement-to-presence", alias="m2p")
 public class MovementToPresence extends ConvertApp {
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT, GraphOptions.PRESENCE);
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "movement-to-presence";
-	public final static String CMD_ALIAS = "m2p";
-
 	
 	@Override
 	protected void initOptions() {

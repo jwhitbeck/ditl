@@ -26,16 +26,13 @@ import ditl.*;
 import ditl.Store.*;
 import ditl.WritableStore.AlreadyExistsException;
 
+@Command(cmd="trunc")
 public class Truncate extends ConvertApp {
 
 	private String orig_trace_name;
 	private String dest_trace_name;
 	private long minTime;
 	private long maxTime;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "trunc";
-	public final static String CMD_ALIAS = null;
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args)

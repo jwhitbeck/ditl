@@ -23,12 +23,13 @@ import java.io.IOException;
 import org.apache.commons.cli.*;
 
 import ditl.Store.NoSuchTraceException;
+import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
 import static ditl.graphs.cli.ExternalFormat.*;
 
-
+@Command(pkg="graphs", cmd="export-movement", alias="xm")
 public class ExportMovement extends ExportApp {
 
 	private Long maxTime;
@@ -38,10 +39,6 @@ public class ExportMovement extends ExportApp {
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
 	private double d_interval;
 	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "export-movement";
-	public final static String CMD_ALIAS = "xm";
-
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
 		super.parseArgs(cli, args);

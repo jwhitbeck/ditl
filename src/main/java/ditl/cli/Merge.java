@@ -28,14 +28,11 @@ import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 
+@Command(cmd="merge")
 public class Merge extends WriteApp {
 
 	private String[] orig_store_names;
 	private Store[] orig_stores;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "merge";
-	public final static String CMD_ALIAS = null;
 	
 	@Override
 	protected void parseArgs(CommandLine cli, String[] args)
