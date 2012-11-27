@@ -52,7 +52,7 @@ public class JarDirectoryStore extends DirectoryStore {
 		JarOutputStream out = new JarOutputStream(new FileOutputStream(archive));
 		out.setLevel(Deflater.BEST_SPEED);
 		byte[] buffer = new byte[18024];
-		for ( File file : new Reflections(null,root).paths() ){
+		for ( File file : listFiles(null) ){
 			if ( ! file.isDirectory() ){
 				String path = file.getAbsolutePath().replace(root.getAbsolutePath()+"/", "");
 				JarEntry entry = new JarEntry(path);

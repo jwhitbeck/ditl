@@ -19,6 +19,9 @@
 package ditl;
 
 import java.io.*;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.jar.*;
 
 public class JarStore extends Store {
@@ -29,12 +32,24 @@ public class JarStore extends Store {
 	public JarStore(File file) throws IOException {
 		_file = file;
 		jar_file = new JarFile(_file);
-		for ( File f : new Reflections(infoFile, _file).paths() )
+		for ( File f : getInfoFiles() )
 			try {
 				loadTrace(f.getParentFile().getName());
 			} catch (LoadTraceException e) {
 				System.err.println(e);
 			}
+	}
+	
+	private Set<File> getInfoFiles()throws IOException{
+		Set<File> infoFiles = new HashSet<File>();
+		Enumeration<JarEntry> entries = jar_file.entries();
+		while ( entries.hasMoreElements() ){
+			JarEntry entry = entries.nextElement();
+			if ( entry.getName().endsWith(infoFile) )
+				infoFiles.add(new File(entry.getName()));
+			infoFiles.add(new File(entry.getName()));
+		}
+		return infoFiles;
 	}
 
 	public InputStream getInputStream(String name) throws IOException {

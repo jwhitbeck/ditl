@@ -19,6 +19,8 @@
 package ditl;
 
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DirectoryStore extends WritableStore {
 	
@@ -41,12 +43,28 @@ public class DirectoryStore extends WritableStore {
 	}
 	
 	void refresh() throws IOException {
-		for ( File file : new Reflections(infoFile+"$",root).paths() )
+		for ( File file : listFiles(infoFile) )
 			try {
 				loadTrace(file.getParentFile().getName());
 			} catch (LoadTraceException e) {
 				System.err.println(e);
 			}
+	}
+	
+	Set<File> listFiles(String filter){
+		Set<File> paths = new HashSet<File>();
+		recAddFromDir(root, paths, filter );
+		return paths;
+	}
+	
+	private static void recAddFromDir(File dir, Set<File> paths, String filter){
+		for ( File file : dir.listFiles() ){
+			if ( filter == null || file.getName().equals(filter) )
+				paths.add(file);
+			if ( file.isDirectory() ){
+				recAddFromDir(file, paths, filter);
+			}
+		}
 	}
 	
 	@Override
