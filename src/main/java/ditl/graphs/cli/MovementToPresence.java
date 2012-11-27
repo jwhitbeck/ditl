@@ -20,37 +20,41 @@ package ditl.graphs.cli;
 
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.Store.*;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
-import ditl.graphs.*;
+import ditl.graphs.MovementToPresenceConverter;
+import ditl.graphs.MovementTrace;
+import ditl.graphs.PresenceTrace;
 
-@Command(pkg="graphs", cmd="movement-to-presence", alias="m2p")
+@Command(pkg = "graphs", cmd = "movement-to-presence", alias = "m2p")
 public class MovementToPresence extends ConvertApp {
-	
-	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT, GraphOptions.PRESENCE);
-	
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-	}
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException,
-			HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-	}
+    private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT, GraphOptions.PRESENCE);
 
-	@Override
-	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		MovementTrace movement = (MovementTrace) orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
-		PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.class, force);
-		new MovementToPresenceConverter(presence, movement).convert();
-	}
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        graph_options.setOptions(options);
+    }
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException,
+            HelpException {
+        super.parseArgs(cli, args);
+        graph_options.parse(cli);
+    }
+
+    @Override
+    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+        final MovementTrace movement = (MovementTrace) orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
+        final PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.class, force);
+        new MovementToPresenceConverter(presence, movement).convert();
+    }
 }

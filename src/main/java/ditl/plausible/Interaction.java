@@ -21,5 +21,5 @@ package ditl.plausible;
 import java.util.Collection;
 
 public interface Interaction {
-	public void setNodeCollection(Collection<Node> nodes);
+    public void setNodeCollection(Collection<Node> nodes);
 }

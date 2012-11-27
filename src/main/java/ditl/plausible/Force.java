@@ -21,5 +21,5 @@ package ditl.plausible;
 import ditl.graphs.Point;
 
 public interface Force {
-	public Point apply(long time, InferredNode node);
+    public Point apply(long time, InferredNode node);
 }

@@ -18,31 +18,35 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 public abstract class ExportApp extends ReadOnlyApp {
 
-	protected String out_file_name;
-	protected OutputStream _out;
-	
-	@Override
-	protected void initOptions(){
-		super.initOptions();
-		options.addOption(null, outputOption, true, "output file");
-	}
-	
-	protected void parseArgs(CommandLine cli, String[] args) 
-		throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		super.parseArgs(cli, args);
-		out_file_name = cli.getOptionValue(outputOption);
-	}
-	
-	@Override
-	protected void init() throws IOException {
-		super.init();
-		_out = (out_file_name != null)? new FileOutputStream(out_file_name) : System.out;
-	}
+    protected String out_file_name;
+    protected OutputStream _out;
+
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        options.addOption(null, outputOption, true, "output file");
+    }
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+        super.parseArgs(cli, args);
+        out_file_name = cli.getOptionValue(outputOption);
+    }
+
+    @Override
+    protected void init() throws IOException {
+        super.init();
+        _out = (out_file_name != null) ? new FileOutputStream(out_file_name) : System.out;
+    }
 
 }

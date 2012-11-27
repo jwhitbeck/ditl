@@ -18,104 +18,108 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import ditl.*;
+import ditl.Listener;
+import ditl.Report;
+import ditl.ReportFactory;
+import ditl.StatefulListener;
 
+public final class TimeToFirstContactReport extends Report
+        implements EdgeTrace.Handler, PresenceTrace.Handler {
 
+    private final Map<Integer, Long> entry_times = new HashMap<Integer, Long>();
+    private final Set<Integer> done = new HashSet<Integer>();
 
-public final class TimeToFirstContactReport extends Report 
-	implements EdgeTrace.Handler, PresenceTrace.Handler {
+    public TimeToFirstContactReport(OutputStream out) throws IOException {
+        super(out);
+    }
 
+    public static final class Factory implements ReportFactory<TimeToFirstContactReport> {
+        @Override
+        public TimeToFirstContactReport getNew(OutputStream out) throws IOException {
+            return new TimeToFirstContactReport(out);
+        }
+    }
 
-	private Map<Integer,Long> entry_times = new HashMap<Integer,Long>();
-	private Set<Integer> done = new HashSet<Integer>();
-	
-	public TimeToFirstContactReport(OutputStream out) throws IOException {
-		super(out);
-	}
-	
-	public static final class Factory implements ReportFactory<TimeToFirstContactReport> {
-		@Override
-		public TimeToFirstContactReport getNew(OutputStream out) throws IOException {
-			return new TimeToFirstContactReport(out);
-		}
-	}
-	
-	@Override
-	public Listener<EdgeEvent> edgeEventListener(){
-		return new Listener<EdgeEvent>() {
-			@Override
-			public void handle(long time, Collection<EdgeEvent> events) throws IOException {
-				for ( EdgeEvent event : events ){
-					if ( event.isUp() ){
-						handleNode(time, event.id1);
-						handleNode(time, event.id2);
-					}
-				}
-			}
-		};
-	}
-	
-	private void handleNode(long time, Integer i) throws IOException{
-		if ( ! done.contains(i) ){
-			long t2fc = time - entry_times.get(i);
-			append ( t2fc );
-			done.add(i);
-		}
-	}
+    @Override
+    public Listener<EdgeEvent> edgeEventListener() {
+        return new Listener<EdgeEvent>() {
+            @Override
+            public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+                for (final EdgeEvent event : events)
+                    if (event.isUp()) {
+                        handleNode(time, event.id1);
+                        handleNode(time, event.id2);
+                    }
+            }
+        };
+    }
 
-	@Override
-	public Listener<Edge> edgeListener() {
-		return new StatefulListener<Edge>(){
-			@Override
-			public void handle(long time, Collection<Edge> events) throws IOException {
-				for ( Edge e : events ){
-					done.add(e.id1());
-					done.add(e.id2());
-					append( 0 ); append( 0 );
-				}
-			}
+    private void handleNode(long time, Integer i) throws IOException {
+        if (!done.contains(i)) {
+            final long t2fc = time - entry_times.get(i);
+            append(t2fc);
+            done.add(i);
+        }
+    }
 
-			@Override
-			public void reset() {
-				done.clear();
-			}
-		};
-	}
+    @Override
+    public Listener<Edge> edgeListener() {
+        return new StatefulListener<Edge>() {
+            @Override
+            public void handle(long time, Collection<Edge> events) throws IOException {
+                for (final Edge e : events) {
+                    done.add(e.id1());
+                    done.add(e.id2());
+                    append(0);
+                    append(0);
+                }
+            }
 
-	@Override
-	public Listener<PresenceEvent> presenceEventListener() {
-		return new Listener<PresenceEvent>(){
-			@Override
-			public void handle(long time, Collection<PresenceEvent> events) {
-				for ( PresenceEvent pev : events ){
-					if ( pev.isIn() ){
-						entry_times.put(pev.id(), time);
-					} else {
-						entry_times.remove(pev.id());
-						done.remove(pev.id());
-					}
-				}
-			}
-		};
-	}
+            @Override
+            public void reset() {
+                done.clear();
+            }
+        };
+    }
 
-	@Override
-	public Listener<Presence> presenceListener() {
-		return new StatefulListener<Presence>(){
-			@Override
-			public void handle(long time, Collection<Presence> events) {
-				for ( Presence p : events )
-					entry_times.put(p.id(), time);
-			}
+    @Override
+    public Listener<PresenceEvent> presenceEventListener() {
+        return new Listener<PresenceEvent>() {
+            @Override
+            public void handle(long time, Collection<PresenceEvent> events) {
+                for (final PresenceEvent pev : events)
+                    if (pev.isIn())
+                        entry_times.put(pev.id(), time);
+                    else {
+                        entry_times.remove(pev.id());
+                        done.remove(pev.id());
+                    }
+            }
+        };
+    }
 
-			@Override
-			public void reset() {
-				entry_times.clear();
-			}
-			
-		};
-	}
+    @Override
+    public Listener<Presence> presenceListener() {
+        return new StatefulListener<Presence>() {
+            @Override
+            public void handle(long time, Collection<Presence> events) {
+                for (final Presence p : events)
+                    entry_times.put(p.id(), time);
+            }
+
+            @Override
+            public void reset() {
+                entry_times.clear();
+            }
+
+        };
+    }
 }

@@ -18,74 +18,76 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-import ditl.*;
-
-
+import ditl.Listener;
+import ditl.Report;
+import ditl.ReportFactory;
+import ditl.StatefulListener;
 
 public final class NumberContactsReport extends Report implements EdgeTrace.Handler {
 
-	private Map<Integer,Integer> contactsCount = new HashMap<Integer,Integer>();
-	
-	public NumberContactsReport(OutputStream out) throws IOException {
-		super(out);
-		appendComment("ID | Number of contacts");
-	}
-	
-	
-	public static final class Factory implements ReportFactory<NumberContactsReport> {
-		@Override
-		public NumberContactsReport getNew(OutputStream out) throws IOException {
-			return new NumberContactsReport(out);
-		}
-	}
+    private final Map<Integer, Integer> contactsCount = new HashMap<Integer, Integer>();
 
-	@Override
-	public Listener<EdgeEvent> edgeEventListener() {
-		return new Listener<EdgeEvent>() {
-			@Override
-			public void handle(long time, Collection<EdgeEvent> events) {
-				for ( EdgeEvent cev : events ){
-					if ( cev.isUp() ){
-						incr(cev.id1());
-						incr(cev.id2());
-					}
-				}
-			}
-		};
-	}
-	
-	private void incr(int id){
-		Integer c = contactsCount.get(id);
-		int cp = (c==null)? 1 : c+1; 
-		contactsCount.put(id, cp);
-	}
+    public NumberContactsReport(OutputStream out) throws IOException {
+        super(out);
+        appendComment("ID | Number of contacts");
+    }
 
-	@Override
-	public Listener<Edge> edgeListener() {
-		return new StatefulListener<Edge>(){
-			@Override
-			public void handle(long time, Collection<Edge> events) {
-				for ( Edge e : events ){
-					incr(e.id1());
-					incr(e.id2());
-				}
-			}
+    public static final class Factory implements ReportFactory<NumberContactsReport> {
+        @Override
+        public NumberContactsReport getNew(OutputStream out) throws IOException {
+            return new NumberContactsReport(out);
+        }
+    }
 
-			@Override
-			public void reset() {
-				contactsCount.clear();
-			}
-		};
-	}
-	
-	@Override
-	public void finish() throws IOException {
-		for ( Map.Entry<Integer, Integer> e : contactsCount.entrySet() )
-			append(e.getKey()+" "+e.getValue());
-		super.finish();
-	}
+    @Override
+    public Listener<EdgeEvent> edgeEventListener() {
+        return new Listener<EdgeEvent>() {
+            @Override
+            public void handle(long time, Collection<EdgeEvent> events) {
+                for (final EdgeEvent cev : events)
+                    if (cev.isUp()) {
+                        incr(cev.id1());
+                        incr(cev.id2());
+                    }
+            }
+        };
+    }
+
+    private void incr(int id) {
+        final Integer c = contactsCount.get(id);
+        final int cp = (c == null) ? 1 : c + 1;
+        contactsCount.put(id, cp);
+    }
+
+    @Override
+    public Listener<Edge> edgeListener() {
+        return new StatefulListener<Edge>() {
+            @Override
+            public void handle(long time, Collection<Edge> events) {
+                for (final Edge e : events) {
+                    incr(e.id1());
+                    incr(e.id2());
+                }
+            }
+
+            @Override
+            public void reset() {
+                contactsCount.clear();
+            }
+        };
+    }
+
+    @Override
+    public void finish() throws IOException {
+        for (final Map.Entry<Integer, Integer> e : contactsCount.entrySet())
+            append(e.getKey() + " " + e.getValue());
+        super.finish();
+    }
 
 }

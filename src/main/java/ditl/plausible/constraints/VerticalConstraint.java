@@ -18,23 +18,24 @@
  *******************************************************************************/
 package ditl.plausible.constraints;
 
-import ditl.plausible.*;
 import ditl.graphs.Point;
+import ditl.plausible.Constraint;
+import ditl.plausible.InferredNode;
 
 public class VerticalConstraint implements Constraint {
 
-	private double _width;
-	
-	public VerticalConstraint(double width){
-		_width = width;
-	}
-	
-	@Override
-	public void apply(InferredNode node) {
-		Point r = node.nextPosition();
-		Point s = node.nextSpeed();
-		r.x = _width;
-		s.x = 0;
-	}
+    private final double _width;
+
+    public VerticalConstraint(double width) {
+        _width = width;
+    }
+
+    @Override
+    public void apply(InferredNode node) {
+        final Point r = node.nextPosition();
+        final Point s = node.nextSpeed();
+        r.x = _width;
+        s.x = 0;
+    }
 
 }

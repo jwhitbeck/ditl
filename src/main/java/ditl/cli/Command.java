@@ -23,13 +23,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Command {
-	
-	public final static String default_package = "DEFAULT_PACKAGE";
-	
-	String pkg() default default_package;
-	String cmd();
-	String alias() default "";
+
+    public final static String default_package = "DEFAULT_PACKAGE";
+
+    String pkg() default default_package;
+
+    String cmd();
+
+    String alias() default "";
 }

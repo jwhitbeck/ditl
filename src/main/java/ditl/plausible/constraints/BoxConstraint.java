@@ -18,55 +18,55 @@
  *******************************************************************************/
 package ditl.plausible.constraints;
 
-import ditl.plausible.*;
 import ditl.graphs.Point;
+import ditl.plausible.Constraint;
+import ditl.plausible.InferredNode;
 
 public class BoxConstraint implements Constraint {
 
-	private double _width, _height, _border;
-	private boolean elastic = true;
-	
-	public BoxConstraint(double width, double height, double border){
-		_width = width;
-		_height = height;
-		_border = border;
-	}
-	
-	public void setElastic(boolean isElastic){
-		elastic = isElastic;
-	}
+    private final double _width, _height, _border;
+    private boolean elastic = true;
 
-	@Override
-	public void apply(InferredNode node) {
-		Point r = node.nextPosition();
-		Point s = node.nextSpeed();
-		if ( r.x > _width - _border ){
-			r.x = _width - _border;
-			if ( elastic )
-				s.x = -s.x;
-			else
-				s.x = 0;
-		} else if ( r.x < _border ){
-			r.x = _border;
-			if ( elastic )
-				s.x = -s.x;
-			else
-				s.x = 0;
-		}
-		if ( r.y > _height - _border ){
-			r.y = _height - _border;
-			if ( elastic )
-				s.y = -s.y;
-			else
-				s.y = 0;
-		} else if ( r.y < _border ){
-			r.y = _border;
-			if ( elastic )
-				s.y = -s.y;
-			else
-				s.y = 0;
-		}
-	}
-	
+    public BoxConstraint(double width, double height, double border) {
+        _width = width;
+        _height = height;
+        _border = border;
+    }
+
+    public void setElastic(boolean isElastic) {
+        elastic = isElastic;
+    }
+
+    @Override
+    public void apply(InferredNode node) {
+        final Point r = node.nextPosition();
+        final Point s = node.nextSpeed();
+        if (r.x > _width - _border) {
+            r.x = _width - _border;
+            if (elastic)
+                s.x = -s.x;
+            else
+                s.x = 0;
+        } else if (r.x < _border) {
+            r.x = _border;
+            if (elastic)
+                s.x = -s.x;
+            else
+                s.x = 0;
+        }
+        if (r.y > _height - _border) {
+            r.y = _height - _border;
+            if (elastic)
+                s.y = -s.y;
+            else
+                s.y = 0;
+        } else if (r.y < _border) {
+            r.y = _border;
+            if (elastic)
+                s.y = -s.y;
+            else
+                s.y = 0;
+        }
+    }
 
 }

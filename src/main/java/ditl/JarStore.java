@@ -18,48 +18,53 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.jar.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class JarStore extends Store {
-	
-	private File _file;
-	private JarFile jar_file;
-	
-	public JarStore(File file) throws IOException {
-		_file = file;
-		jar_file = new JarFile(_file);
-		for ( File f : getInfoFiles() )
-			try {
-				loadTrace(f.getParentFile().getName());
-			} catch (LoadTraceException e) {
-				System.err.println(e);
-			}
-	}
-	
-	private Set<File> getInfoFiles()throws IOException{
-		Set<File> infoFiles = new HashSet<File>();
-		Enumeration<JarEntry> entries = jar_file.entries();
-		while ( entries.hasMoreElements() ){
-			JarEntry entry = entries.nextElement();
-			if ( entry.getName().endsWith(infoFile) )
-				infoFiles.add(new File(entry.getName()));
-			infoFiles.add(new File(entry.getName()));
-		}
-		return infoFiles;
-	}
 
-	public InputStream getInputStream(String name) throws IOException {
-		JarEntry e = jar_file.getJarEntry(name);
-		if ( e == null) throw new IOException();
-		return jar_file.getInputStream(e);
-	}
-	
-	@Override
-	public boolean hasFile(String name) {
-		return ( jar_file.getEntry(name) != null );
-	}
+    private final File _file;
+    private final JarFile jar_file;
+
+    public JarStore(File file) throws IOException {
+        _file = file;
+        jar_file = new JarFile(_file);
+        for (final File f : getInfoFiles())
+            try {
+                loadTrace(f.getParentFile().getName());
+            } catch (final LoadTraceException e) {
+                System.err.println(e);
+            }
+    }
+
+    private Set<File> getInfoFiles() throws IOException {
+        final Set<File> infoFiles = new HashSet<File>();
+        final Enumeration<JarEntry> entries = jar_file.entries();
+        while (entries.hasMoreElements()) {
+            final JarEntry entry = entries.nextElement();
+            if (entry.getName().endsWith(infoFile))
+                infoFiles.add(new File(entry.getName()));
+            infoFiles.add(new File(entry.getName()));
+        }
+        return infoFiles;
+    }
+
+    @Override
+    public InputStream getInputStream(String name) throws IOException {
+        final JarEntry e = jar_file.getJarEntry(name);
+        if (e == null)
+            throw new IOException();
+        return jar_file.getInputStream(e);
+    }
+
+    @Override
+    public boolean hasFile(String name) {
+        return (jar_file.getEntry(name) != null);
+    }
 }

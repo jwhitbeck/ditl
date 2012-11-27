@@ -19,30 +19,29 @@
 package ditl.plausible.forces;
 
 import ditl.graphs.Point;
-import ditl.plausible.*;
+import ditl.plausible.Force;
+import ditl.plausible.InferredNode;
 
 public class WellForce implements Force {
 
-	private double _height;
-	private double _width;
-	public double G = 10.0; // Gravitational constant
-	public double er = 1.0; // guard to prevent denom from going to zero
-	public double exp = 2.0; // the exponent in the coulomb force
-	
-	
-	
-	public WellForce ( double width, double height ){
-		_height = height;
-		_width = width;
-	}
-	
-	@Override
-	public Point apply(long time, InferredNode node) {
-		Point r = node.currentPosition();
-		double ax, ay;
-		ax = G * ( 1 /Math.pow(r.x+er, exp) - 1 / Math.pow(_width - r.x+er, exp) );
-		ay = G * ( 1 /Math.pow(r.y+er, exp) - 1 / Math.pow(_height - r.y+er, exp) );
-		return new Point(ax,ay);
-	}
+    private final double _height;
+    private final double _width;
+    public double G = 10.0; // Gravitational constant
+    public double er = 1.0; // guard to prevent denom from going to zero
+    public double exp = 2.0; // the exponent in the coulomb force
+
+    public WellForce(double width, double height) {
+        _height = height;
+        _width = width;
+    }
+
+    @Override
+    public Point apply(long time, InferredNode node) {
+        final Point r = node.currentPosition();
+        double ax, ay;
+        ax = G * (1 / Math.pow(r.x + er, exp) - 1 / Math.pow(_width - r.x + er, exp));
+        ay = G * (1 / Math.pow(r.y + er, exp) - 1 / Math.pow(_height - r.y + er, exp));
+        return new Point(ax, ay);
+    }
 
 }

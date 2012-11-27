@@ -19,55 +19,62 @@
 package ditl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class StatefulMergeConverter<E,S> implements Converter {
+public class StatefulMergeConverter<E, S> implements Converter {
 
-	private StatefulTrace<E,S> _to;
-	private Collection<StatefulTrace<E,S>> from_collection;
-	
-	public StatefulMergeConverter( StatefulTrace<E,S> to, Collection<StatefulTrace<E,S>> fromCollection ){
-		_to = to;
-		from_collection = fromCollection;
-	}
+    private final StatefulTrace<E, S> _to;
+    private final Collection<StatefulTrace<E, S>> from_collection;
 
-	@Override
-	public void convert() throws IOException {
-		String time_unit = "s";
-		long maxTime = Trace.INFINITY;
-		long minTime = -Trace.INFINITY;
-		Set<S> initState = new HashSet<S>();
-		for ( StatefulTrace<E,S> from : from_collection ){
-			time_unit = from.timeUnit();
-			if ( from.minTime() > minTime ) minTime = from.minTime(); // stateful traces have a first init state. They are not defined prior to that state. 
-			if ( from.maxTime() < maxTime ) maxTime = from.maxTime();
-		}
-		IdMap.Writer id_map_writer = null;
-		StatefulWriter<E,S> writer = _to.getWriter();
-		for ( StatefulTrace<E,S> from : from_collection ){
-			IdMap id_map = from.idMap();
-			if ( id_map != null ){
-				if ( id_map_writer == null )
-					id_map_writer = new IdMap.Writer(0);
-				id_map_writer.merge(id_map);
-			}
-			StatefulReader<E,S> reader = from.getReader();
-			reader.seek(minTime);
-			initState.addAll(reader.referenceState());
-			while ( reader.hasNext() ){
-				List<E> events = reader.next();
-				for ( E item : events )
-					writer.queue(reader.time(), item);
-			}
-			reader.close();
-		}
-		writer.setInitState(minTime, initState);
-		writer.flush();
-		writer.setProperty(Trace.timeUnitKey, time_unit);
-		writer.setProperty(Trace.minTimeKey, minTime);
-		writer.setProperty(Trace.maxTimeKey, maxTime);
-		if ( id_map_writer != null )
-			id_map_writer.writeTraceInfo(writer);
-		writer.close();
-	}
+    public StatefulMergeConverter(StatefulTrace<E, S> to, Collection<StatefulTrace<E, S>> fromCollection) {
+        _to = to;
+        from_collection = fromCollection;
+    }
+
+    @Override
+    public void convert() throws IOException {
+        String time_unit = "s";
+        long maxTime = Trace.INFINITY;
+        long minTime = -Trace.INFINITY;
+        final Set<S> initState = new HashSet<S>();
+        for (final StatefulTrace<E, S> from : from_collection) {
+            time_unit = from.timeUnit();
+            if (from.minTime() > minTime)
+                minTime = from.minTime(); // stateful traces have a first init
+                                          // state. They are not defined prior
+                                          // to that state.
+            if (from.maxTime() < maxTime)
+                maxTime = from.maxTime();
+        }
+        IdMap.Writer id_map_writer = null;
+        final StatefulWriter<E, S> writer = _to.getWriter();
+        for (final StatefulTrace<E, S> from : from_collection) {
+            final IdMap id_map = from.idMap();
+            if (id_map != null) {
+                if (id_map_writer == null)
+                    id_map_writer = new IdMap.Writer(0);
+                id_map_writer.merge(id_map);
+            }
+            final StatefulReader<E, S> reader = from.getReader();
+            reader.seek(minTime);
+            initState.addAll(reader.referenceState());
+            while (reader.hasNext()) {
+                final List<E> events = reader.next();
+                for (final E item : events)
+                    writer.queue(reader.time(), item);
+            }
+            reader.close();
+        }
+        writer.setInitState(minTime, initState);
+        writer.flush();
+        writer.setProperty(Trace.timeUnitKey, time_unit);
+        writer.setProperty(Trace.minTimeKey, minTime);
+        writer.setProperty(Trace.maxTimeKey, maxTime);
+        if (id_map_writer != null)
+            id_map_writer.writeTraceInfo(writer);
+        writer.close();
+    }
 }

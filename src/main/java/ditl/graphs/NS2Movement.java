@@ -18,116 +18,131 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-import ditl.*;
-
-
+import ditl.Bus;
+import ditl.IdGenerator;
+import ditl.Listener;
+import ditl.Matcher;
+import ditl.StatefulReader;
+import ditl.StatefulWriter;
+import ditl.Trace;
+import ditl.Units;
 
 public class NS2Movement {
-	
-	public static void fromNS2( MovementTrace movement,
-				InputStream in, Long maxTime, double timeMul, long ticsPerSecond,
-				long offset, final boolean fixPauseTimes, IdGenerator idGen) throws IOException {
-		
-		final StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter();
-		final Map<Integer,Movement> positions = new HashMap<Integer,Movement>();
-		BufferedReader br = new BufferedReader( new InputStreamReader(in) );
-		final Bus<MovementEvent> buffer = new Bus<MovementEvent>();
-		String line;
-		long last_time = -Trace.INFINITY;
-		
-		while ( (line = br.readLine()) != null ){
-			if ( ! line.isEmpty() ) {
-				Integer id;
-				String id_str;
-				double s;
-				Movement m;
-				long time;
-				String[] elems = line.split("\\p{Blank}+");
-				
-				if ( line.startsWith("$node") ){
-					id_str = elems[0].split("\\(|\\)")[1];
-					id = idGen.getInternalId(id_str);
-					double c = Double.parseDouble(elems[3]);
-					
-					if ( ! positions.containsKey(id) )
-						positions.put(id, new Movement(id, new Point(0,0)));
-					m = positions.get(id);
-					
-					if ( elems[2].equals("X_") ){
-						m.x = c;
-					}
-					else if ( elems[2].equals("Y_") ){
-						m.y = c;
-					}
-					
-				} else if ( line.startsWith("$ns")){
-					time = (long)( Double.parseDouble(elems[2])*timeMul )+offset;
-					if ( time > last_time)
-						last_time = time;
-					id_str = elems[3].split("\\(|\\)")[1];
-					id = idGen.getInternalId(id_str);
-					Point dest = new Point( Double.parseDouble(elems[5]), Double.parseDouble(elems[6]));
-					s = Double.parseDouble(elems[7].substring(0, elems[7].length()-2)) / timeMul;
-					buffer.queue(time, new MovementEvent(id, s, dest));
-				}
-			}
-		}
-		br.close();
-		
-		movementWriter.setInitState(offset, positions.values());
-		
-		
-		buffer.addListener(new Listener<MovementEvent>(){
-			@Override
-			public void handle(long time, Collection<MovementEvent> events) throws IOException {
-				for ( final MovementEvent mev : events ){
-					Movement m = positions.get(mev.id); // current movement
-					m.handleEvent(time, mev);
-					movementWriter.removeFromQueueAfterTime(time, new Matcher<MovementEvent>(){
-						@Override
-						public boolean matches(MovementEvent item) {
-							return ( item.id == mev.id );
-						}
-					});
-					movementWriter.queue(time, mev);
-					if ( fixPauseTimes )
-						movementWriter.queue(m.arrival, new MovementEvent(mev.id, 0, mev.dest)); // queue the waiting time as well
-				}
-				movementWriter.flush(time);
-			}
-		});
-		
-		buffer.flush();
-		
-		last_time = (maxTime != null)? maxTime : last_time;
-		movementWriter.setProperty(Trace.maxTimeKey, last_time);
-		movementWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
-		idGen.writeTraceInfo(movementWriter);
-		movementWriter.close();
-	}
-	
-	public static void toNS2(MovementTrace movement, OutputStream out, double timeMul) throws IOException {
-		
-		StatefulReader<MovementEvent,Movement> movementReader = movement.getReader();
-		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-		
-		movementReader.seek(movement.minTime());
-		for ( Movement mv : movementReader.referenceState() ){
-			bw.write(mv.ns2String());
-		}
-		
-		while ( movementReader.hasNext() ){
-			for ( MovementEvent mev : movementReader.next() ){
-				switch ( mev.type ){
-				case NEW_DEST: bw.write( mev.ns2String(movementReader.time(),timeMul) ); break;
-				default: System.err.println("IN and OUT movement events are not supported by NS2");
-				}
-			}
-		}	
-		bw.close();
-		movementReader.close();
-	}
+
+    public static void fromNS2(MovementTrace movement,
+            InputStream in, Long maxTime, double timeMul, long ticsPerSecond,
+            long offset, final boolean fixPauseTimes, IdGenerator idGen) throws IOException {
+
+        final StatefulWriter<MovementEvent, Movement> movementWriter = movement.getWriter();
+        final Map<Integer, Movement> positions = new HashMap<Integer, Movement>();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        final Bus<MovementEvent> buffer = new Bus<MovementEvent>();
+        String line;
+        long last_time = -Trace.INFINITY;
+
+        while ((line = br.readLine()) != null)
+            if (!line.isEmpty()) {
+                Integer id;
+                String id_str;
+                double s;
+                Movement m;
+                long time;
+                final String[] elems = line.split("\\p{Blank}+");
+
+                if (line.startsWith("$node")) {
+                    id_str = elems[0].split("\\(|\\)")[1];
+                    id = idGen.getInternalId(id_str);
+                    final double c = Double.parseDouble(elems[3]);
+
+                    if (!positions.containsKey(id))
+                        positions.put(id, new Movement(id, new Point(0, 0)));
+                    m = positions.get(id);
+
+                    if (elems[2].equals("X_"))
+                        m.x = c;
+                    else if (elems[2].equals("Y_"))
+                        m.y = c;
+
+                } else if (line.startsWith("$ns")) {
+                    time = (long) (Double.parseDouble(elems[2]) * timeMul) + offset;
+                    if (time > last_time)
+                        last_time = time;
+                    id_str = elems[3].split("\\(|\\)")[1];
+                    id = idGen.getInternalId(id_str);
+                    final Point dest = new Point(Double.parseDouble(elems[5]), Double.parseDouble(elems[6]));
+                    s = Double.parseDouble(elems[7].substring(0, elems[7].length() - 2)) / timeMul;
+                    buffer.queue(time, new MovementEvent(id, s, dest));
+                }
+            }
+        br.close();
+
+        movementWriter.setInitState(offset, positions.values());
+
+        buffer.addListener(new Listener<MovementEvent>() {
+            @Override
+            public void handle(long time, Collection<MovementEvent> events) throws IOException {
+                for (final MovementEvent mev : events) {
+                    final Movement m = positions.get(mev.id); // current
+                                                              // movement
+                    m.handleEvent(time, mev);
+                    movementWriter.removeFromQueueAfterTime(time, new Matcher<MovementEvent>() {
+                        @Override
+                        public boolean matches(MovementEvent item) {
+                            return (item.id == mev.id);
+                        }
+                    });
+                    movementWriter.queue(time, mev);
+                    if (fixPauseTimes)
+                        movementWriter.queue(m.arrival, new MovementEvent(mev.id, 0, mev.dest)); // queue
+                                                                                                 // the
+                                                                                                 // waiting
+                                                                                                 // time
+                                                                                                 // as
+                                                                                                 // well
+                }
+                movementWriter.flush(time);
+            }
+        });
+
+        buffer.flush();
+
+        last_time = (maxTime != null) ? maxTime : last_time;
+        movementWriter.setProperty(Trace.maxTimeKey, last_time);
+        movementWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
+        idGen.writeTraceInfo(movementWriter);
+        movementWriter.close();
+    }
+
+    public static void toNS2(MovementTrace movement, OutputStream out, double timeMul) throws IOException {
+
+        final StatefulReader<MovementEvent, Movement> movementReader = movement.getReader();
+        final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+
+        movementReader.seek(movement.minTime());
+        for (final Movement mv : movementReader.referenceState())
+            bw.write(mv.ns2String());
+
+        while (movementReader.hasNext())
+            for (final MovementEvent mev : movementReader.next())
+                switch (mev.type) {
+                    case NEW_DEST:
+                        bw.write(mev.ns2String(movementReader.time(), timeMul));
+                        break;
+                    default:
+                        System.err.println("IN and OUT movement events are not supported by NS2");
+                }
+        bw.close();
+        movementReader.close();
+    }
 }

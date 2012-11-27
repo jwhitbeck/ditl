@@ -20,45 +20,50 @@ package ditl.graphs.cli;
 
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.Store.*;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
-import ditl.graphs.*;
+import ditl.graphs.EdgeTrace;
+import ditl.graphs.EdgesToPresenceConverter;
+import ditl.graphs.PresenceTrace;
+import ditl.graphs.StrictEdgesToPresenceConverter;
 
-@Command(pkg="graphs", cmd="edges-to-presence", alias="e2p")
+@Command(pkg = "graphs", cmd = "edges-to-presence", alias = "e2p")
 public class EdgesToPresence extends ConvertApp {
 
-	final static String strictOption = "strict"; 
-	private boolean strict; 
-	
-	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.PRESENCE);
-	
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		options.addOption(null, strictOption, false, "Nodes enter with their first contact and leave after their last." );
-	}
+    final static String strictOption = "strict";
+    private boolean strict;
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException,
-			HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		strict = cli.hasOption(strictOption);
-	}
+    private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.PRESENCE);
 
-	@Override
-	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-		PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.class, force);
-		if ( strict )
-			new StrictEdgesToPresenceConverter(presence, edges).convert();
-		else
-			new EdgesToPresenceConverter(presence, edges).convert();
-	}
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        graph_options.setOptions(options);
+        options.addOption(null, strictOption, false, "Nodes enter with their first contact and leave after their last.");
+    }
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException,
+            HelpException {
+        super.parseArgs(cli, args);
+        graph_options.parse(cli);
+        strict = cli.hasOption(strictOption);
+    }
+
+    @Override
+    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+        final EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+        final PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.class, force);
+        if (strict)
+            new StrictEdgesToPresenceConverter(presence, edges).convert();
+        else
+            new EdgesToPresenceConverter(presence, edges).convert();
+    }
 }

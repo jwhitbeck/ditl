@@ -18,52 +18,56 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
 
-import ditl.*;
+import ditl.Listener;
+import ditl.ReportFactory;
+import ditl.StateTimeReport;
+import ditl.StatefulListener;
 
 public final class NodeCountReport extends StateTimeReport implements PresenceTrace.Handler {
 
-	private long count;
-	
-	public NodeCountReport(OutputStream out) throws IOException {
-		super(out);
-		appendComment("time | duration | node count");
-	}
-	
-	public static final class Factory implements ReportFactory<NodeCountReport> {
-		@Override
-		public NodeCountReport getNew(OutputStream out) throws IOException {
-			return new NodeCountReport(out);
-		}
-	}
-	
-	@Override
-	public Listener<Presence> presenceListener(){
-		return new StatefulListener<Presence>(){
-			@Override
-			public void handle(long time, Collection<Presence> events) throws IOException {
-				count += events.size();
-				append(time,count);
-			}
+    private long count;
 
-			@Override
-			public void reset() {
-				count = 0;
-			}
-		};
-	}
-	
-	@Override
-	public Listener<PresenceEvent> presenceEventListener(){
-		return new Listener<PresenceEvent>() {
-			@Override
-			public void handle(long time, Collection<PresenceEvent> events) throws IOException {
-				for ( PresenceEvent pev : events )
-					count += (pev.isIn())? 1 : -1;
-				append(time,count);
-			}
-		};
-	}
+    public NodeCountReport(OutputStream out) throws IOException {
+        super(out);
+        appendComment("time | duration | node count");
+    }
+
+    public static final class Factory implements ReportFactory<NodeCountReport> {
+        @Override
+        public NodeCountReport getNew(OutputStream out) throws IOException {
+            return new NodeCountReport(out);
+        }
+    }
+
+    @Override
+    public Listener<Presence> presenceListener() {
+        return new StatefulListener<Presence>() {
+            @Override
+            public void handle(long time, Collection<Presence> events) throws IOException {
+                count += events.size();
+                append(time, count);
+            }
+
+            @Override
+            public void reset() {
+                count = 0;
+            }
+        };
+    }
+
+    @Override
+    public Listener<PresenceEvent> presenceEventListener() {
+        return new Listener<PresenceEvent>() {
+            @Override
+            public void handle(long time, Collection<PresenceEvent> events) throws IOException {
+                for (final PresenceEvent pev : events)
+                    count += (pev.isIn()) ? 1 : -1;
+                append(time, count);
+            }
+        };
+    }
 }

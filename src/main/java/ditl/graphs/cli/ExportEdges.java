@@ -18,52 +18,60 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
+import static ditl.graphs.cli.ExternalFormat.CRAWDAD;
+import static ditl.graphs.cli.ExternalFormat.ONE;
+
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 import ditl.Store.NoSuchTraceException;
 import ditl.cli.Command;
 import ditl.cli.ExportApp;
-import ditl.graphs.*;
+import ditl.graphs.CRAWDADContacts;
+import ditl.graphs.EdgeTrace;
+import ditl.graphs.ONEContacts;
 
-import static ditl.graphs.cli.ExternalFormat.*;
-
-@Command(pkg="graphs", cmd="export-edges", alias="xe")
+@Command(pkg = "graphs", cmd = "export-edges", alias = "xe")
 public class ExportEdges extends ExportApp {
-	
-	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES);
-	private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(CRAWDAD, ONE);
-	private ExternalFormat ext_fmt;
-	private Long dtps;
-	
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		ext_fmt_parser.setOptions(options);
-		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: s)");
-	}
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		ext_fmt = ext_fmt_parser.parse(cli);
-		dtps = getTicsPerSecond( cli.getOptionValue(destTimeUnitOption,"s"));
-		if ( dtps == null )
-			throw new HelpException();
-	}
+    private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES);
+    private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(CRAWDAD, ONE);
+    private ExternalFormat ext_fmt;
+    private Long dtps;
 
-	@Override
-	protected void run() throws IOException, NoSuchTraceException {
-		EdgeTrace edges = (EdgeTrace) _store.getTrace(graph_options.get(GraphOptions.EDGES));
-		long otps = edges.ticsPerSecond();
-		double timeMul = getTimeMul(otps,dtps);
-		switch ( ext_fmt ){
-		case CRAWDAD: CRAWDADContacts.toCRAWDAD(edges, _out, timeMul); break;
-		case ONE: ONEContacts.toONE(edges, _out, timeMul); break;
-		}
-	}
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        graph_options.setOptions(options);
+        ext_fmt_parser.setOptions(options);
+        options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: s)");
+    }
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+        super.parseArgs(cli, args);
+        graph_options.parse(cli);
+        ext_fmt = ext_fmt_parser.parse(cli);
+        dtps = getTicsPerSecond(cli.getOptionValue(destTimeUnitOption, "s"));
+        if (dtps == null)
+            throw new HelpException();
+    }
+
+    @Override
+    protected void run() throws IOException, NoSuchTraceException {
+        final EdgeTrace edges = (EdgeTrace) _store.getTrace(graph_options.get(GraphOptions.EDGES));
+        final long otps = edges.ticsPerSecond();
+        final double timeMul = getTimeMul(otps, dtps);
+        switch (ext_fmt) {
+            case CRAWDAD:
+                CRAWDADContacts.toCRAWDAD(edges, _out, timeMul);
+                break;
+            case ONE:
+                ONEContacts.toONE(edges, _out, timeMul);
+                break;
+        }
+    }
 }

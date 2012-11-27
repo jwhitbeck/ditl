@@ -18,172 +18,173 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
 
-import ditl.*;
-
-
+import ditl.Listener;
+import ditl.StatefulListener;
 
 public abstract class AdjacencySet<C extends Couple> implements Set<C> {
-	
-	protected AdjacencyMap<C,C> map = null;
-	
-	@Override
-	public void clear(){
-		map.clear();
-	}
-	
-	public Set<Integer> getNext(Integer i){
-		return Collections.unmodifiableSet(map.getStartsWith(i).keySet());
-	}
-	
-	public Set<Integer> vertices(){
-		return map.vertices();
-	}
-	
-	@Override
-	public boolean add(C e) {
-		return ( map.put(e, e) != null );
-	}
 
-	@Override
-	public boolean addAll(Collection<? extends C> cs) {
-		boolean changed = false;
-		for ( C c : cs )
-			changed |= add(c);
-		return changed;
-	}
+    protected AdjacencyMap<C, C> map = null;
 
-	@Override
-	public boolean contains(Object o) {
-		return map.containsKey(o);
-	}
+    @Override
+    public void clear() {
+        map.clear();
+    }
 
-	@Override
-	public boolean containsAll(Collection<?> cs) {
-		for ( Object o : cs )
-			if ( ! map.containsKey(o) )
-				return false;
-		return true;
-	}
+    public Set<Integer> getNext(Integer i) {
+        return Collections.unmodifiableSet(map.getStartsWith(i).keySet());
+    }
 
-	@Override
-	public boolean isEmpty() {
-		return map.isEmpty();
-	}
+    public Set<Integer> vertices() {
+        return map.vertices();
+    }
 
-	@Override
-	public Iterator<C> iterator() {
-		return map.valuesIterator();
-	}
+    @Override
+    public boolean add(C e) {
+        return (map.put(e, e) != null);
+    }
 
-	@Override
-	public boolean remove(Object o) {
-		return (map.remove(o)!=null);
-	}
+    @Override
+    public boolean addAll(Collection<? extends C> cs) {
+        boolean changed = false;
+        for (final C c : cs)
+            changed |= add(c);
+        return changed;
+    }
 
-	@Override
-	public boolean removeAll(Collection<?> cs) {
-		boolean changed = false;
-		for ( Object o : cs )
-			changed |= remove(o);
-		return changed;
-	}
+    @Override
+    public boolean contains(Object o) {
+        return map.containsKey(o);
+    }
 
-	@Override
-	public boolean retainAll(Collection<?> c) {
-		return map.keySet().retainAll(c);
-	}
+    @Override
+    public boolean containsAll(Collection<?> cs) {
+        for (final Object o : cs)
+            if (!map.containsKey(o))
+                return false;
+        return true;
+    }
 
-	@Override
-	public int size() {
-		return map.size();
-	}
+    @Override
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
 
-	@Override
-	public Object[] toArray() {
-		return map.values().toArray();
-	}
+    @Override
+    public Iterator<C> iterator() {
+        return map.valuesIterator();
+    }
 
-	@Override
-	public <T> T[] toArray(T[] a) {
-		return map.values().toArray(a);
-	}
+    @Override
+    public boolean remove(Object o) {
+        return (map.remove(o) != null);
+    }
 
-	public final static class Edges extends AdjacencySet<Edge>
-		implements EdgeTrace.Handler {
-		
-		public Edges(){
-			map = new AdjacencyMap.Edges<Edge>();
-		}
-		
-		@Override
-		public Listener<Edge> edgeListener(){
-			return new StatefulListener<Edge>() {
-				@Override
-				public void handle(long time, Collection<Edge> events) {
-					for ( Edge ct : events )
-						add(ct);
-				}
-				@Override
-				public void reset() {
-					clear();
-				}
-			};
-		}
-		
-		@Override
-		public Listener<EdgeEvent> edgeEventListener(){
-			return new Listener<EdgeEvent>() {
-				@Override
-				public void handle(long time, Collection<EdgeEvent> events) {
-					for ( EdgeEvent cev : events ){
-						if ( cev.isUp() )
-							add(cev.edge());
-						else
-							remove(cev.edge());
-					}
-				}
-			};
-		}
-	}
+    @Override
+    public boolean removeAll(Collection<?> cs) {
+        boolean changed = false;
+        for (final Object o : cs)
+            changed |= remove(o);
+        return changed;
+    }
 
-	public final static class Arcs extends AdjacencySet<Arc>
-		implements ArcTrace.Handler {
-		
-		public Arcs(){
-			map = new AdjacencyMap.Arcs<Arc>();
-		}
-		
-		@Override
-		public Listener<Arc> arcListener() {
-			return new StatefulListener<Arc>() {
-				@Override
-				public void handle(long time, Collection<Arc> events){
-					for ( Arc a : events )
-						add(a);
-				}
-				
-				@Override
-				public void reset() {
-					clear();				
-				}
-			};
-		}
-	
-		@Override
-		public Listener<ArcEvent> arcEventListener() {
-			return new Listener<ArcEvent>(){
-				@Override
-				public void handle(long time, Collection<ArcEvent> events) {
-					for ( ArcEvent aev : events ){
-						if ( aev.isUp() )
-							add(aev.arc());
-						else 
-							remove(aev.arc());
-					}
-				}
-			};
-		}
-	}
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return map.keySet().retainAll(c);
+    }
+
+    @Override
+    public int size() {
+        return map.size();
+    }
+
+    @Override
+    public Object[] toArray() {
+        return map.values().toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return map.values().toArray(a);
+    }
+
+    public final static class Edges extends AdjacencySet<Edge>
+            implements EdgeTrace.Handler {
+
+        public Edges() {
+            map = new AdjacencyMap.Edges<Edge>();
+        }
+
+        @Override
+        public Listener<Edge> edgeListener() {
+            return new StatefulListener<Edge>() {
+                @Override
+                public void handle(long time, Collection<Edge> events) {
+                    for (final Edge ct : events)
+                        add(ct);
+                }
+
+                @Override
+                public void reset() {
+                    clear();
+                }
+            };
+        }
+
+        @Override
+        public Listener<EdgeEvent> edgeEventListener() {
+            return new Listener<EdgeEvent>() {
+                @Override
+                public void handle(long time, Collection<EdgeEvent> events) {
+                    for (final EdgeEvent cev : events)
+                        if (cev.isUp())
+                            add(cev.edge());
+                        else
+                            remove(cev.edge());
+                }
+            };
+        }
+    }
+
+    public final static class Arcs extends AdjacencySet<Arc>
+            implements ArcTrace.Handler {
+
+        public Arcs() {
+            map = new AdjacencyMap.Arcs<Arc>();
+        }
+
+        @Override
+        public Listener<Arc> arcListener() {
+            return new StatefulListener<Arc>() {
+                @Override
+                public void handle(long time, Collection<Arc> events) {
+                    for (final Arc a : events)
+                        add(a);
+                }
+
+                @Override
+                public void reset() {
+                    clear();
+                }
+            };
+        }
+
+        @Override
+        public Listener<ArcEvent> arcEventListener() {
+            return new Listener<ArcEvent>() {
+                @Override
+                public void handle(long time, Collection<ArcEvent> events) {
+                    for (final ArcEvent aev : events)
+                        if (aev.isUp())
+                            add(aev.arc());
+                        else
+                            remove(aev.arc());
+                }
+            };
+        }
+    }
 }

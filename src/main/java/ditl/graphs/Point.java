@@ -19,19 +19,19 @@
 package ditl.graphs;
 
 public final class Point {
-	public double x,y;
-	
-	public Point(double X, double Y){
-		x = X;
-		y = Y;
-	}
-	
-	public Point copy(){
-		return new Point(x,y);
-	}
-	
-	@Override
-	public String toString(){
-		return x+" "+y;
-	}
+    public double x, y;
+
+    public Point(double X, double Y) {
+        x = X;
+        y = Y;
+    }
+
+    public Point copy() {
+        return new Point(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return x + " " + y;
+    }
 }

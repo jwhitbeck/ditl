@@ -22,9 +22,8 @@ import java.io.IOException;
 
 import ditl.graphs.ArcTrace;
 
-
-
 public interface ArcRunner {
-	public void setArcTrace(ArcTrace arcs) throws IOException;
-	public void addArcHandler(ArcTrace.Handler handler);
+    public void setArcTrace(ArcTrace arcs) throws IOException;
+
+    public void addArcHandler(ArcTrace.Handler handler);
 }

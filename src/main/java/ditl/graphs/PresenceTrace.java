@@ -19,67 +19,78 @@
 package ditl.graphs;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.Listener;
+import ditl.PersistentMap;
+import ditl.StateUpdater;
+import ditl.StateUpdaterFactory;
+import ditl.StatefulTrace;
+import ditl.Store;
+import ditl.Trace;
+import ditl.Writer;
 
 @Trace.Type("presence")
-public class PresenceTrace extends StatefulTrace<PresenceEvent, Presence> 
-	implements StatefulTrace.Filterable<PresenceEvent, Presence>{
-	
-	public final static int defaultPriority = 10;
-	
-	public final static class Updater implements StateUpdater<PresenceEvent,Presence> {
-		private Set<Presence> currentIds = new HashSet<Presence>();
-		
-		@Override
-		public void setState(Collection<Presence> presenceState ) {
-			currentIds.clear();
-			for ( Presence p : presenceState )
-				currentIds.add(p);
-		}
+public class PresenceTrace extends StatefulTrace<PresenceEvent, Presence>
+        implements StatefulTrace.Filterable<PresenceEvent, Presence> {
 
-		@Override
-		public Set<Presence> states() {
-			return currentIds;
-		}
+    public final static int defaultPriority = 10;
 
-		@Override
-		public void handleEvent(long time, PresenceEvent event) {
-			if ( event.isIn() ){
-				currentIds.add( event.presence() );
-			} else {
-				currentIds.remove( event.presence() );
-			}
-		}
-	}
-	
-	public interface Handler {
-		public Listener<Presence> presenceListener();
-		public Listener<PresenceEvent> presenceEventListener();
-	}
-	
-	public PresenceTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new PresenceEvent.Factory(), new Presence.Factory(), 
-				new StateUpdaterFactory<PresenceEvent,Presence>(){
-					@Override
-					public StateUpdater<PresenceEvent, Presence> getNew() {
-						return new PresenceTrace.Updater();
-					}
-		});
-		info.setIfUnset(Trace.defaultPriorityKey, defaultPriority);
-	}
+    public final static class Updater implements StateUpdater<PresenceEvent, Presence> {
+        private final Set<Presence> currentIds = new HashSet<Presence>();
 
-	@Override
-	public Filter<Presence> stateFilter(Set<Integer> group) {
-		return new Presence.GroupFilter(group);
-	}
+        @Override
+        public void setState(Collection<Presence> presenceState) {
+            currentIds.clear();
+            for (final Presence p : presenceState)
+                currentIds.add(p);
+        }
 
-	@Override
-	public Filter<PresenceEvent> eventFilter(Set<Integer> group) {
-		return new PresenceEvent.GroupFilter(group);
-	}
+        @Override
+        public Set<Presence> states() {
+            return currentIds;
+        }
 
-	@Override
-	public void copyOverTraceInfo(Writer<PresenceEvent> writer) {}
+        @Override
+        public void handleEvent(long time, PresenceEvent event) {
+            if (event.isIn())
+                currentIds.add(event.presence());
+            else
+                currentIds.remove(event.presence());
+        }
+    }
+
+    public interface Handler {
+        public Listener<Presence> presenceListener();
+
+        public Listener<PresenceEvent> presenceEventListener();
+    }
+
+    public PresenceTrace(Store store, String name, PersistentMap info) throws IOException {
+        super(store, name, info, new PresenceEvent.Factory(), new Presence.Factory(),
+                new StateUpdaterFactory<PresenceEvent, Presence>() {
+                    @Override
+                    public StateUpdater<PresenceEvent, Presence> getNew() {
+                        return new PresenceTrace.Updater();
+                    }
+                });
+        info.setIfUnset(Trace.defaultPriorityKey, defaultPriority);
+    }
+
+    @Override
+    public Filter<Presence> stateFilter(Set<Integer> group) {
+        return new Presence.GroupFilter(group);
+    }
+
+    @Override
+    public Filter<PresenceEvent> eventFilter(Set<Integer> group) {
+        return new PresenceEvent.GroupFilter(group);
+    }
+
+    @Override
+    public void copyOverTraceInfo(Writer<PresenceEvent> writer) {
+    }
 }

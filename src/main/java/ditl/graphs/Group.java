@@ -18,89 +18,96 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.GroupSpecification;
+import ditl.ItemFactory;
 
 public class Group {
-	
-	Integer _gid;
-	Set<Integer> _members;
-	
-	public Group(Integer gid){
-		_gid = gid;
-		_members = new HashSet<Integer>();
-	}
-	
-	public Group(Integer gid, Set<Integer> members){
-		_gid = gid;
-		_members = members;
-	}
-	
-	public Integer gid(){
-		return _gid;
-	}
-	
-	public int size(){
-		return _members.size();
-	}
-	
-	public final static class Factory implements ItemFactory<Group> {
-		@Override
-		public Group fromString(String s) {
-			String[] elems = s.trim().split(" ", 2);
-			try {
-				Integer gid = Integer.parseInt(elems[0]);
-				Set<Integer> members = GroupSpecification.parse(elems[1]);
-				return new Group(gid, members);
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	public void handleEvent(GroupEvent event){
-		switch ( event._type ){
-		case JOIN:  
-			for ( Integer m : event._members )
-				_members.add(m); 
-			break;
-		case LEAVE: 
-			for ( Integer m : event._members )
-				_members.remove(m);
-			break;
-		}
-	}
-	
-	@Override
-	public String toString(){
-		return _gid+" "+GroupSpecification.toString(_members);
-	}
-	
-	@Override
-	public int hashCode(){
-		return _gid;
-	}
-	
-	public Set<Integer> members(){
-		return Collections.unmodifiableSet(_members);
-	}
-	
-	public final static class GroupFilter implements Filter<Group> {
-		private Set<Integer> _group;
-		public GroupFilter(Set<Integer> group){ _group = group; }
-		@Override
-		public Group filter(Group item) {
-			Group f_group = new Group(item._gid);
-			for ( Integer i : item._members ){
-				if ( _group.contains(i) )
-					f_group._members.add(i);
-			}
-			if ( f_group._members.isEmpty() )
-				return null;
-			return f_group;
-		}
-		
-	}
+
+    Integer _gid;
+    Set<Integer> _members;
+
+    public Group(Integer gid) {
+        _gid = gid;
+        _members = new HashSet<Integer>();
+    }
+
+    public Group(Integer gid, Set<Integer> members) {
+        _gid = gid;
+        _members = members;
+    }
+
+    public Integer gid() {
+        return _gid;
+    }
+
+    public int size() {
+        return _members.size();
+    }
+
+    public final static class Factory implements ItemFactory<Group> {
+        @Override
+        public Group fromString(String s) {
+            final String[] elems = s.trim().split(" ", 2);
+            try {
+                final Integer gid = Integer.parseInt(elems[0]);
+                final Set<Integer> members = GroupSpecification.parse(elems[1]);
+                return new Group(gid, members);
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
+
+    public void handleEvent(GroupEvent event) {
+        switch (event._type) {
+            case JOIN:
+                for (final Integer m : event._members)
+                    _members.add(m);
+                break;
+            case LEAVE:
+                for (final Integer m : event._members)
+                    _members.remove(m);
+                break;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return _gid + " " + GroupSpecification.toString(_members);
+    }
+
+    @Override
+    public int hashCode() {
+        return _gid;
+    }
+
+    public Set<Integer> members() {
+        return Collections.unmodifiableSet(_members);
+    }
+
+    public final static class GroupFilter implements Filter<Group> {
+        private final Set<Integer> _group;
+
+        public GroupFilter(Set<Integer> group) {
+            _group = group;
+        }
+
+        @Override
+        public Group filter(Group item) {
+            final Group f_group = new Group(item._gid);
+            for (final Integer i : item._members)
+                if (_group.contains(i))
+                    f_group._members.add(i);
+            if (f_group._members.isEmpty())
+                return null;
+            return f_group;
+        }
+
+    }
 }

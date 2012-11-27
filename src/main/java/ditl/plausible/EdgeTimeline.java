@@ -19,119 +19,119 @@
 package ditl.plausible;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
-import ditl.*;
-import ditl.graphs.*;
+import ditl.StatefulWriter;
+import ditl.Trace;
+import ditl.graphs.Edge;
+import ditl.graphs.EdgeEvent;
 
 class EdgeTimeline {
-	
-	long prev_up = -Trace.INFINITY;
-	long prev_down = -Trace.INFINITY;
-	long next_up = Trace.INFINITY;
-	long next_down = Trace.INFINITY;
-	
-	private long prev_up_tmp, prev_down_tmp, next_up_tmp, next_down_tmp;
-	
-	private final Edge _edge; 
-	
-	private TreeMap<Long,List<EdgeEvent>> buffer = new TreeMap<Long,List<EdgeEvent>>();
-	private StatefulWriter<WindowedEdgeEvent,WindowedEdge> window_writer;
-	
-	public EdgeTimeline(Edge edge, StatefulWriter<WindowedEdgeEvent,WindowedEdge> windowWriter){
-		_edge = edge;
-		window_writer = windowWriter;
-		//window_writer.append(time, new WindowedEdgesEvent(_edge, WindowedEdgesEvent.UP));
-	}
-	
-	private void write_events_if_changed(long time) throws IOException {
-		if ( prev_up_tmp != prev_up ){
-			prev_up = prev_up_tmp;
-			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.PREVUP, prev_up));
-		}
-		if ( prev_down_tmp != prev_down ){
-			prev_down = prev_down_tmp;
-			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.PREVDOWN, prev_down));
-		}
-		if ( next_up_tmp != next_up ){
-			next_up = next_up_tmp;
-			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTUP, next_up));
-		}
-		if ( next_down_tmp != next_down ){
-			next_down = next_down_tmp;
-			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTDOWN, next_down));
-		}
-	}
-	
-	private void update_tmp_values(long time) {
-		
-		prev_up_tmp = -Trace.INFINITY;
-		prev_down_tmp = -Trace.INFINITY;
-		next_up_tmp = Trace.INFINITY;
-		next_down_tmp = Trace.INFINITY;
-		
-		for ( Map.Entry<Long, List<EdgeEvent>> e : buffer.entrySet() ){
-			long t = e.getKey();
-			for ( EdgeEvent eev : e.getValue() )
-			if ( eev.isUp() ){
-				if ( t <= time && t > prev_up_tmp ){
-					prev_up_tmp = t;
-				}
-				else if ( t > time && t < next_up_tmp ){
-					next_up_tmp = t;
-				}
-			} else {
-				if ( t <= time && t > prev_down_tmp )
-					prev_down_tmp = t;
-				else if ( t > time && t < next_down_tmp )
-					next_down_tmp = t;
-			}
-		}
-	}
-	
-	public void pop(long time, long window) throws IOException {
-		buffer.pollFirstEntry();
-		if ( prev_up == time-window || prev_down == time-window )
-			update(time);
-	}
-	
-	public void queue(long time, EdgeEvent edgeEvent){
-		if ( ! buffer.containsKey(time) )
-			buffer.put(time, new LinkedList<EdgeEvent>());
-		buffer.get(time).add(edgeEvent);
-	}
-	
-	public void append(long time, long window, EdgeEvent edgeEvent) throws IOException{
-		queue(time, edgeEvent);
-		if ( edgeEvent.isUp() ){
-			if (next_up == Trace.INFINITY ){
-				next_up = time;
-				window_writer.queue(time-window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTUP, next_up));
-			}
-		} else {
-			if ( next_down == Trace.INFINITY ){
-				next_down = time;
-				window_writer.queue(time-window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTDOWN, next_down));
-			}
-		}
-	}
-	
-	public void update(long time) throws IOException {
-		update_tmp_values(time);
-		write_events_if_changed(time);
-	}
-	
-	public void expire(long time) throws IOException{
-		window_writer.queue(time, new WindowedEdgeEvent(_edge,WindowedEdgeEvent.Type.DOWN));
-	}
-	
-	public WindowedEdge windowedEdges(){
-		WindowedEdge wl = new WindowedEdge(_edge);
-		wl.prev_up = prev_up;
-		wl.prev_down = prev_down;
-		wl.next_up = next_up;
-		wl.next_down = next_down;
-		return wl;
-	}
-	
+
+    long prev_up = -Trace.INFINITY;
+    long prev_down = -Trace.INFINITY;
+    long next_up = Trace.INFINITY;
+    long next_down = Trace.INFINITY;
+
+    private long prev_up_tmp, prev_down_tmp, next_up_tmp, next_down_tmp;
+
+    private final Edge _edge;
+
+    private final TreeMap<Long, List<EdgeEvent>> buffer = new TreeMap<Long, List<EdgeEvent>>();
+    private final StatefulWriter<WindowedEdgeEvent, WindowedEdge> window_writer;
+
+    public EdgeTimeline(Edge edge, StatefulWriter<WindowedEdgeEvent, WindowedEdge> windowWriter) {
+        _edge = edge;
+        window_writer = windowWriter;
+        // window_writer.append(time, new WindowedEdgesEvent(_edge,
+        // WindowedEdgesEvent.UP));
+    }
+
+    private void write_events_if_changed(long time) throws IOException {
+        if (prev_up_tmp != prev_up) {
+            prev_up = prev_up_tmp;
+            window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.PREVUP, prev_up));
+        }
+        if (prev_down_tmp != prev_down) {
+            prev_down = prev_down_tmp;
+            window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.PREVDOWN, prev_down));
+        }
+        if (next_up_tmp != next_up) {
+            next_up = next_up_tmp;
+            window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTUP, next_up));
+        }
+        if (next_down_tmp != next_down) {
+            next_down = next_down_tmp;
+            window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTDOWN, next_down));
+        }
+    }
+
+    private void update_tmp_values(long time) {
+
+        prev_up_tmp = -Trace.INFINITY;
+        prev_down_tmp = -Trace.INFINITY;
+        next_up_tmp = Trace.INFINITY;
+        next_down_tmp = Trace.INFINITY;
+
+        for (final Map.Entry<Long, List<EdgeEvent>> e : buffer.entrySet()) {
+            final long t = e.getKey();
+            for (final EdgeEvent eev : e.getValue())
+                if (eev.isUp()) {
+                    if (t <= time && t > prev_up_tmp)
+                        prev_up_tmp = t;
+                    else if (t > time && t < next_up_tmp)
+                        next_up_tmp = t;
+                } else if (t <= time && t > prev_down_tmp)
+                    prev_down_tmp = t;
+                else if (t > time && t < next_down_tmp)
+                    next_down_tmp = t;
+        }
+    }
+
+    public void pop(long time, long window) throws IOException {
+        buffer.pollFirstEntry();
+        if (prev_up == time - window || prev_down == time - window)
+            update(time);
+    }
+
+    public void queue(long time, EdgeEvent edgeEvent) {
+        if (!buffer.containsKey(time))
+            buffer.put(time, new LinkedList<EdgeEvent>());
+        buffer.get(time).add(edgeEvent);
+    }
+
+    public void append(long time, long window, EdgeEvent edgeEvent) throws IOException {
+        queue(time, edgeEvent);
+        if (edgeEvent.isUp()) {
+            if (next_up == Trace.INFINITY) {
+                next_up = time;
+                window_writer.queue(time - window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTUP, next_up));
+            }
+        } else if (next_down == Trace.INFINITY) {
+            next_down = time;
+            window_writer.queue(time - window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTDOWN, next_down));
+        }
+    }
+
+    public void update(long time) throws IOException {
+        update_tmp_values(time);
+        write_events_if_changed(time);
+    }
+
+    public void expire(long time) throws IOException {
+        window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.DOWN));
+    }
+
+    public WindowedEdge windowedEdges() {
+        final WindowedEdge wl = new WindowedEdge(_edge);
+        wl.prev_up = prev_up;
+        wl.prev_down = prev_down;
+        wl.next_up = next_up;
+        wl.next_down = next_down;
+        return wl;
+    }
+
 }

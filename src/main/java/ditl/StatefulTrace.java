@@ -21,58 +21,61 @@ package ditl;
 import java.io.IOException;
 import java.util.Set;
 
-
 public abstract class StatefulTrace<E, S> extends Trace<E> {
 
-	protected ItemFactory<S> state_factory;
-	protected StateUpdaterFactory<E,S> updater_factory; 
-	
-	public interface Filterable<E,S> extends Trace.Filterable<E> {
-		public Filter<S> stateFilter(Set<Integer> group);
-	}
-	
-	public StatefulTrace(Store store, String name, PersistentMap info, ItemFactory<E> itemFactory, 
-			ItemFactory<S> stateFactory, StateUpdaterFactory<E,S> stateUpdaterFactory)
-			throws IOException {
-		super(store, name, info, itemFactory);
-		state_factory = stateFactory;
-		updater_factory = stateUpdaterFactory;
-	}
-	
-	public StatefulReader<E,S> getReader(int priority, long offset) throws IOException {
-		Reader<S> snap_iterator = new Reader<S>(_store,
-				_store.getStreamOpener(_store.snapshotsFile(_name)), stateMaxUpdateInterval(),
-				state_factory, Trace.defaultPriority, offset);
-		return new StatefulReader<E,S>(_store,
-				_store.getStreamOpener(_store.traceFile(_name)),
-				maxUpdateInterval(), event_factory,
-				snap_iterator, updater_factory.getNew(), 
-				priority, offset, lastSnapTime() );
-	}
-	
-	public StatefulReader<E,S> getReader(int priority) throws IOException {
-		return getReader(priority, 0L);
-	}
-	
-	public StatefulReader<E,S> getReader() throws IOException {
-		return getReader(defaultPriority(), 0L);
-	}
-	
-	public StatefulWriter<E, S> getWriter() throws IOException {
-		return new StatefulWriter<E,S>(_store, _name, updater_factory.getNew(), _info);
-	}
-	
-	public ItemFactory<S> stateFactory(){
-		return state_factory;
-	}
-	
-	public StateUpdaterFactory<E,S> stateUpdateFactory(){
-		return updater_factory;
-	}
-	
-	@Override
-	public boolean isStateful(){
-		return true;
-	}
+    protected ItemFactory<S> state_factory;
+    protected StateUpdaterFactory<E, S> updater_factory;
+
+    public interface Filterable<E, S> extends Trace.Filterable<E> {
+        public Filter<S> stateFilter(Set<Integer> group);
+    }
+
+    public StatefulTrace(Store store, String name, PersistentMap info, ItemFactory<E> itemFactory,
+            ItemFactory<S> stateFactory, StateUpdaterFactory<E, S> stateUpdaterFactory)
+            throws IOException {
+        super(store, name, info, itemFactory);
+        state_factory = stateFactory;
+        updater_factory = stateUpdaterFactory;
+    }
+
+    @Override
+    public StatefulReader<E, S> getReader(int priority, long offset) throws IOException {
+        final Reader<S> snap_iterator = new Reader<S>(_store,
+                _store.getStreamOpener(_store.snapshotsFile(_name)), stateMaxUpdateInterval(),
+                state_factory, Trace.defaultPriority, offset);
+        return new StatefulReader<E, S>(_store,
+                _store.getStreamOpener(_store.traceFile(_name)),
+                maxUpdateInterval(), event_factory,
+                snap_iterator, updater_factory.getNew(),
+                priority, offset, lastSnapTime());
+    }
+
+    @Override
+    public StatefulReader<E, S> getReader(int priority) throws IOException {
+        return getReader(priority, 0L);
+    }
+
+    @Override
+    public StatefulReader<E, S> getReader() throws IOException {
+        return getReader(defaultPriority(), 0L);
+    }
+
+    @Override
+    public StatefulWriter<E, S> getWriter() throws IOException {
+        return new StatefulWriter<E, S>(_store, _name, updater_factory.getNew(), _info);
+    }
+
+    public ItemFactory<S> stateFactory() {
+        return state_factory;
+    }
+
+    public StateUpdaterFactory<E, S> stateUpdateFactory() {
+        return updater_factory;
+    }
+
+    @Override
+    public boolean isStateful() {
+        return true;
+    }
 
 }

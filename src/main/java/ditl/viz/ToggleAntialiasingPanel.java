@@ -18,27 +18,32 @@
  *******************************************************************************/
 package ditl.viz;
 
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class ToggleAntialiasingPanel extends JPanel {
 
-	public ToggleAntialiasingPanel(final Scene scene){
-		JCheckBox idsCheckBox = new JCheckBox();
-		idsCheckBox.setSelected(scene.isAntialiasingOn());
-		idsCheckBox.addItemListener(new ItemListener(){
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				scene.setAntialising(e.getStateChange() == ItemEvent.SELECTED );
-				scene.repaint();
-			}
-		});
-		
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		add(Box.createHorizontalGlue());
-		add(new JLabel("Antialiasing: "));
-		add(idsCheckBox);
-	}
+    public ToggleAntialiasingPanel(final Scene scene) {
+        final JCheckBox idsCheckBox = new JCheckBox();
+        idsCheckBox.setSelected(scene.isAntialiasingOn());
+        idsCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                scene.setAntialising(e.getStateChange() == ItemEvent.SELECTED);
+                scene.repaint();
+            }
+        });
+
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        add(Box.createHorizontalGlue());
+        add(new JLabel("Antialiasing: "));
+        add(idsCheckBox);
+    }
 }

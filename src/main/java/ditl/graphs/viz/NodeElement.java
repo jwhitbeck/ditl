@@ -18,90 +18,94 @@
  *******************************************************************************/
 package ditl.graphs.viz;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 
-import ditl.graphs.*;
+import ditl.graphs.Movement;
+import ditl.graphs.MovementEvent;
 import ditl.graphs.Point;
-import ditl.viz.*;
-
-
+import ditl.viz.Clickable;
+import ditl.viz.ScaleListener;
+import ditl.viz.Scaler;
+import ditl.viz.SceneElement;
+import ditl.viz.TimeChangeListener;
 
 public class NodeElement implements Clickable, SceneElement, ScaleListener, TimeChangeListener {
-	
-	public final static Color defaultFillColor = GroupsPanel.noGroupColor;
-	public final static Color defaultBorderColor = Color.BLACK;
-	
-	private Color fill = defaultFillColor;
-	private Color borderColor = defaultBorderColor;
-	private boolean showId = false;
-	protected int R = 5;
-	private Movement movement;
-	public double X, Y;
-	public int sX, sY;
-	private String name;
-	
-	public NodeElement(Movement m){
-		movement = m;
-		name = String.valueOf(movement.id());
-	}
-	
-	public NodeElement(Movement m, String nodeName){
-		movement = m;
-		name = nodeName;
-	}
-	
-	public Integer id(){
-		return movement.id();
-	}
-	
-	public String name(){
-		return name;
-	}
-	
-	public void setShowId(boolean show){
-		showId = show;
-	}
-	
-	public void updateMovement(long time, MovementEvent mev){
-		movement.handleEvent(time, mev);
-	}
-	
-	public void setFillColor(Color color){
-		fill = color;
-	}
-	
-	public void setBorderColor(Color color){
-		borderColor = color;
-	}
-	
-	@Override
-	public void paint(Graphics2D g2) {
-		int x = sX - R;
-		int y = sY - R;
-		g2.setColor(fill);
-		g2.fillOval(x,y,R*2,R*2);
-		g2.setColor(borderColor);
-		g2.drawOval(x,y,R*2,R*2);
-		if ( showId )
-			g2.drawString(name, x+R*2, y+R);
-	}
 
-	@Override
-	public boolean contains(int x, int y) {
-		return ( x <= sX+R && x >= sX-R ) && ( y <= sY+R && y >= sY-R );
-	}
+    public final static Color defaultFillColor = GroupsPanel.noGroupColor;
+    public final static Color defaultBorderColor = Color.BLACK;
 
-	@Override
-	public void rescale(Scaler scaler) {
-		sX = scaler.sX(X);
-		sY = scaler.sY(Y);
-	}
+    private Color fill = defaultFillColor;
+    private Color borderColor = defaultBorderColor;
+    private boolean showId = false;
+    protected int R = 5;
+    private final Movement movement;
+    public double X, Y;
+    public int sX, sY;
+    private final String name;
 
-	@Override
-	public void changeTime(long time) {
-		Point p = movement.positionAtTime(time);
-		X = p.x;
-		Y = p.y;
-	}
+    public NodeElement(Movement m) {
+        movement = m;
+        name = String.valueOf(movement.id());
+    }
+
+    public NodeElement(Movement m, String nodeName) {
+        movement = m;
+        name = nodeName;
+    }
+
+    public Integer id() {
+        return movement.id();
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public void setShowId(boolean show) {
+        showId = show;
+    }
+
+    public void updateMovement(long time, MovementEvent mev) {
+        movement.handleEvent(time, mev);
+    }
+
+    public void setFillColor(Color color) {
+        fill = color;
+    }
+
+    public void setBorderColor(Color color) {
+        borderColor = color;
+    }
+
+    @Override
+    public void paint(Graphics2D g2) {
+        final int x = sX - R;
+        final int y = sY - R;
+        g2.setColor(fill);
+        g2.fillOval(x, y, R * 2, R * 2);
+        g2.setColor(borderColor);
+        g2.drawOval(x, y, R * 2, R * 2);
+        if (showId)
+            g2.drawString(name, x + R * 2, y + R);
+    }
+
+    @Override
+    public boolean contains(int x, int y) {
+        return (x <= sX + R && x >= sX - R) && (y <= sY + R && y >= sY - R);
+    }
+
+    @Override
+    public void rescale(Scaler scaler) {
+        sX = scaler.sX(X);
+        sY = scaler.sY(Y);
+    }
+
+    @Override
+    public void changeTime(long time) {
+        final Point p = movement.positionAtTime(time);
+        X = p.x;
+        Y = p.y;
+    }
 
 }

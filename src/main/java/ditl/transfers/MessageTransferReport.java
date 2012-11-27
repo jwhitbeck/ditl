@@ -18,89 +18,96 @@
  *******************************************************************************/
 package ditl.transfers;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import ditl.*;
+import ditl.Listener;
+import ditl.Report;
+import ditl.ReportFactory;
 
-public class MessageTransferReport extends Report 
-	implements TransferTrace.Handler {
+public class MessageTransferReport extends Report
+        implements TransferTrace.Handler {
 
-	private Map<Integer,Long> bytes_completed = new LinkedHashMap<Integer,Long>();
-	private Map<Integer,Integer> n_completed = new LinkedHashMap<Integer,Integer>();
-	private Map<Integer,Long> bytes_aborted = new LinkedHashMap<Integer,Long>();
-	private Map<Integer,Integer> n_aborted = new LinkedHashMap<Integer,Integer>();
-	
-	public MessageTransferReport(OutputStream out) throws IOException {
-		super(out);
-		appendComment("msgId | N Completed | Bytes completed | N Aborted | Bytes aborted");
-	}
+    private final Map<Integer, Long> bytes_completed = new LinkedHashMap<Integer, Long>();
+    private final Map<Integer, Integer> n_completed = new LinkedHashMap<Integer, Integer>();
+    private final Map<Integer, Long> bytes_aborted = new LinkedHashMap<Integer, Long>();
+    private final Map<Integer, Integer> n_aborted = new LinkedHashMap<Integer, Integer>();
 
-	public static final class Factory implements ReportFactory<MessageTransferReport> {
-		@Override
-		public MessageTransferReport getNew(OutputStream out)
-				throws IOException {
-			return new MessageTransferReport(out);
-		}
-	}
-	
-	@Override
-	public void finish() throws IOException {
-		StringBuffer buffer;
-		for ( Integer msgId : n_completed.keySet() ){
-			buffer = new StringBuffer();
-			buffer.append(msgId+" ");
-			buffer.append(n_completed.get(msgId)+" ");
-			buffer.append(bytes_completed.get(msgId)+" ");
-			buffer.append(n_aborted.get(msgId)+" ");
-			buffer.append(bytes_aborted.get(msgId)+" ");
-			append(buffer.toString());
-		}
-		super.finish();
-	}
-	
-	@Override
-	public Listener<TransferEvent> transferEventListener() {
-		return new Listener<TransferEvent>(){
-			@Override
-			public void handle(long time, Collection<TransferEvent> events){
-				for ( TransferEvent event : events ){
-					Integer msgId = event.msgId();
-					Integer n;
-					Long l;
-					switch ( event.type() ){
-					case START:
-						if ( ! n_completed.containsKey(msgId) ){
-							bytes_completed.put(msgId, 0L);
-							n_completed.put(msgId, 0);
-							bytes_aborted.put(msgId, 0L);
-							n_aborted.put(msgId, 0);
-						}
-						break;
-					case ABORT:
-						n = n_aborted.get(msgId);
-						if ( n != null ){ // ignore those for which we haven't registered a start event
-							n_aborted.put(msgId, n+1);
-							l = bytes_aborted.get(msgId);
-							bytes_aborted.put(msgId, l+event.bytesTransferred());
-						}
-						break;
-					case COMPLETE:
-						n = n_completed.get(msgId);
-						if ( n != null ){ // ignore those for which we haven't registered a start event
-							n_completed.put(msgId, n+1);
-							l = bytes_completed.get(msgId);
-							bytes_completed.put(msgId, l+event.bytesTransferred());
-						}
-						break;
-					}
-				}
-			}
-		};
-	}
+    public MessageTransferReport(OutputStream out) throws IOException {
+        super(out);
+        appendComment("msgId | N Completed | Bytes completed | N Aborted | Bytes aborted");
+    }
 
-	@Override
-	public Listener<Transfer> transferListener() {
-		return null;
-	}
+    public static final class Factory implements ReportFactory<MessageTransferReport> {
+        @Override
+        public MessageTransferReport getNew(OutputStream out)
+                throws IOException {
+            return new MessageTransferReport(out);
+        }
+    }
+
+    @Override
+    public void finish() throws IOException {
+        StringBuffer buffer;
+        for (final Integer msgId : n_completed.keySet()) {
+            buffer = new StringBuffer();
+            buffer.append(msgId + " ");
+            buffer.append(n_completed.get(msgId) + " ");
+            buffer.append(bytes_completed.get(msgId) + " ");
+            buffer.append(n_aborted.get(msgId) + " ");
+            buffer.append(bytes_aborted.get(msgId) + " ");
+            append(buffer.toString());
+        }
+        super.finish();
+    }
+
+    @Override
+    public Listener<TransferEvent> transferEventListener() {
+        return new Listener<TransferEvent>() {
+            @Override
+            public void handle(long time, Collection<TransferEvent> events) {
+                for (final TransferEvent event : events) {
+                    final Integer msgId = event.msgId();
+                    Integer n;
+                    Long l;
+                    switch (event.type()) {
+                        case START:
+                            if (!n_completed.containsKey(msgId)) {
+                                bytes_completed.put(msgId, 0L);
+                                n_completed.put(msgId, 0);
+                                bytes_aborted.put(msgId, 0L);
+                                n_aborted.put(msgId, 0);
+                            }
+                            break;
+                        case ABORT:
+                            n = n_aborted.get(msgId);
+                            if (n != null) { // ignore those for which we
+                                             // haven't registered a start event
+                                n_aborted.put(msgId, n + 1);
+                                l = bytes_aborted.get(msgId);
+                                bytes_aborted.put(msgId, l + event.bytesTransferred());
+                            }
+                            break;
+                        case COMPLETE:
+                            n = n_completed.get(msgId);
+                            if (n != null) { // ignore those for which we
+                                             // haven't registered a start event
+                                n_completed.put(msgId, n + 1);
+                                l = bytes_completed.get(msgId);
+                                bytes_completed.put(msgId, l + event.bytesTransferred());
+                            }
+                            break;
+                    }
+                }
+            }
+        };
+    }
+
+    @Override
+    public Listener<Transfer> transferListener() {
+        return null;
+    }
 }

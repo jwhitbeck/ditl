@@ -20,70 +20,77 @@ package ditl.graphs;
 
 import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.ItemFactory;
 
 public final class Edge implements Couple {
-	
-	final Integer id1;
-	final Integer id2;
-	
-	public Edge(Integer i1, Integer i2){
-		if ( i1 < i2 ){
-			id1 = i1;
-			id2 = i2;
-		} else {
-			id1 = i2;
-			id2 = i1;
-		}
-	}
-	
-	public Integer id1(){
-		return id1;
-	}
-	
-	public Integer id2(){
-		return id2;
-	}
-	
-	public static final class Factory implements ItemFactory<Edge> {
-		@Override
-		public Edge fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer id1 = Integer.parseInt(elems[0]);
-				Integer id2 = Integer.parseInt(elems[1]);
-				return new Edge(id1,id2);	
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	public boolean hasVertex(Integer id){
-		return ( id.equals(id1) || id.equals(id2) );
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		Edge ct = (Edge)o;
-		return (ct.id1.equals(id1)) && (ct.id2.equals(id2));
-	}
-	
-	@Override
-	public String toString(){
-		return id1+" "+id2;
-	}
-	
-	public static final class InternalGroupFilter implements Filter<Edge> {
-		private Set<Integer> _group;
-		public InternalGroupFilter(Set<Integer> group){ _group = group;}
-		@Override
-		public Edge filter(Edge item) {
-			if ( _group.contains(item.id1) && _group.contains(item.id2) )
-				return item;
-			return null;
-		}
-	}
+
+    final Integer id1;
+    final Integer id2;
+
+    public Edge(Integer i1, Integer i2) {
+        if (i1 < i2) {
+            id1 = i1;
+            id2 = i2;
+        } else {
+            id1 = i2;
+            id2 = i1;
+        }
+    }
+
+    @Override
+    public Integer id1() {
+        return id1;
+    }
+
+    @Override
+    public Integer id2() {
+        return id2;
+    }
+
+    public static final class Factory implements ItemFactory<Edge> {
+        @Override
+        public Edge fromString(String s) {
+            final String[] elems = s.trim().split(" ");
+            try {
+                final Integer id1 = Integer.parseInt(elems[0]);
+                final Integer id2 = Integer.parseInt(elems[1]);
+                return new Edge(id1, id2);
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
+
+    public boolean hasVertex(Integer id) {
+        return (id.equals(id1) || id.equals(id2));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        final Edge ct = (Edge) o;
+        return (ct.id1.equals(id1)) && (ct.id2.equals(id2));
+    }
+
+    @Override
+    public String toString() {
+        return id1 + " " + id2;
+    }
+
+    public static final class InternalGroupFilter implements Filter<Edge> {
+        private final Set<Integer> _group;
+
+        public InternalGroupFilter(Set<Integer> group) {
+            _group = group;
+        }
+
+        @Override
+        public Edge filter(Edge item) {
+            if (_group.contains(item.id1) && _group.contains(item.id2))
+                return item;
+            return null;
+        }
+    }
 
 }

@@ -20,30 +20,31 @@ package ditl.cli;
 
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.*;
+import ditl.Store;
 import ditl.WritableStore.AlreadyExistsException;
 
-@Command(cmd="mv")
+@Command(cmd = "mv")
 public class RenameTrace extends WriteApp {
 
-	private String orig_name, dest_name;
+    private String orig_name, dest_name;
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
-		super.parseArgs(cli, args);
-		orig_name = args[1];
-		dest_name = args[2];
-	}
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
+        super.parseArgs(cli, args);
+        orig_name = args[1];
+        dest_name = args[2];
+    }
 
-	@Override
-	protected String getUsageString() {
-		return "[OPTIONS] STORE ORIG_TRACE DEST_TRACE";
-	}
-	
-	@Override
-	protected void run() throws IOException, Store.NoSuchTraceException, AlreadyExistsException {
-		_store.moveTrace(orig_name, dest_name, force);
-	}	
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE ORIG_TRACE DEST_TRACE";
+    }
+
+    @Override
+    protected void run() throws IOException, Store.NoSuchTraceException, AlreadyExistsException {
+        _store.moveTrace(orig_name, dest_name, force);
+    }
 }

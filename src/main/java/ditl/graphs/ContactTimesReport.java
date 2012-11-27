@@ -18,69 +18,75 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Map;
 
-import java.io.*;
-import java.util.*;
-
-import ditl.*;
-
-
+import ditl.Listener;
+import ditl.Report;
+import ditl.ReportFactory;
+import ditl.StatefulListener;
 
 public final class ContactTimesReport extends Report implements EdgeTrace.Handler {
 
-	private boolean _contacts;
-	private Map<Edge,Long> activeContacts = new AdjacencyMap.Edges<Long>();
-	
-	public ContactTimesReport(OutputStream out, boolean contacts) throws IOException {
-		super(out);
-		_contacts = contacts;
-		appendComment("id1 | id2 | begin | end | duration");
-	}
-	
-	public static final class Factory implements ReportFactory<ContactTimesReport> {
-		private boolean _contacts;
-		public Factory(boolean contacts){ _contacts = contacts;}
-		@Override
-		public ContactTimesReport getNew(OutputStream out) throws IOException {
-			return new ContactTimesReport(out, _contacts);
-		}
-	}
-	
-	@Override
-	public Listener<EdgeEvent> edgeEventListener(){
-		return new Listener<EdgeEvent>() {
-			@Override
-			public void handle(long time, Collection<EdgeEvent> events) throws IOException {
-				for ( EdgeEvent event : events ){
-					Edge e = event.edge();
-					if( event.isUp() == _contacts ){
-						activeContacts.put(e, time);
-					} else {
-						Long b = activeContacts.get(e);
-						if ( b != null ){
-							activeContacts.remove(e);
-							append(e+" "+b+" "+time+" "+(time-b));
-						}
-					}
-				}
-			}
-		};
-	}
+    private final boolean _contacts;
+    private final Map<Edge, Long> activeContacts = new AdjacencyMap.Edges<Long>();
 
-	@Override
-	public Listener<Edge> edgeListener() {
-		return new StatefulListener<Edge>(){
-			@Override
-			public void handle(long time, Collection<Edge> events) {
-				if ( _contacts )
-					for ( Edge e : events )
-						activeContacts.put(e, time);
-			}
+    public ContactTimesReport(OutputStream out, boolean contacts) throws IOException {
+        super(out);
+        _contacts = contacts;
+        appendComment("id1 | id2 | begin | end | duration");
+    }
 
-			@Override
-			public void reset() {
-				activeContacts.clear();
-			}
-		};
-	}
+    public static final class Factory implements ReportFactory<ContactTimesReport> {
+        private final boolean _contacts;
+
+        public Factory(boolean contacts) {
+            _contacts = contacts;
+        }
+
+        @Override
+        public ContactTimesReport getNew(OutputStream out) throws IOException {
+            return new ContactTimesReport(out, _contacts);
+        }
+    }
+
+    @Override
+    public Listener<EdgeEvent> edgeEventListener() {
+        return new Listener<EdgeEvent>() {
+            @Override
+            public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+                for (final EdgeEvent event : events) {
+                    final Edge e = event.edge();
+                    if (event.isUp() == _contacts)
+                        activeContacts.put(e, time);
+                    else {
+                        final Long b = activeContacts.get(e);
+                        if (b != null) {
+                            activeContacts.remove(e);
+                            append(e + " " + b + " " + time + " " + (time - b));
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    @Override
+    public Listener<Edge> edgeListener() {
+        return new StatefulListener<Edge>() {
+            @Override
+            public void handle(long time, Collection<Edge> events) {
+                if (_contacts)
+                    for (final Edge e : events)
+                        activeContacts.put(e, time);
+            }
+
+            @Override
+            public void reset() {
+                activeContacts.clear();
+            }
+        };
+    }
 }

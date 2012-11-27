@@ -22,66 +22,68 @@ import ditl.ItemFactory;
 import ditl.graphs.Edge;
 
 public final class WindowedEdgeEvent {
-	
-	public enum Type { UP, DOWN, PREVUP, PREVDOWN, NEXTUP, NEXTDOWN }
-	
-	final Type _type;
-	final Edge _edge;
-	final long _value; 
-	
-	public WindowedEdgeEvent(Edge edge, Type type){
-		_type = type;
-		_edge = edge;
-		_value = 0;
-	}
-	
-	public WindowedEdgeEvent(Edge edge, Type type, long value){
-		_type = type;
-		_edge = edge;
-		_value = value;
-	}
-	
-	public Type type(){
-		return _type;
-	}
-	
-	public Edge edge(){
-		return _edge;
-	}
-	
-	@Override
-	public String toString(){
-		switch(_type){
-		case UP:
-		case DOWN:
-			return _edge+" "+_type;
-		default:
-			return _edge+" "+_type+" "+_value;
-		}
-	}
-	
-	public static final class Factory implements ItemFactory<WindowedEdgeEvent> {
-		@Override
-		public WindowedEdgeEvent fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer id1 = Integer.parseInt(elems[0]);
-				Integer id2 = Integer.parseInt(elems[1]);
-				Edge e = new Edge(id1,id2);
-				Type type = Type.valueOf(elems[2]);
-				switch ( type ){
-				case UP:
-				case DOWN:
-					return new WindowedEdgeEvent(e, type);
-				default:
-					long value = Long.parseLong(elems[3]);
-					return new WindowedEdgeEvent(e, type, value);
-				}
-				
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
+
+    public enum Type {
+        UP, DOWN, PREVUP, PREVDOWN, NEXTUP, NEXTDOWN
+    }
+
+    final Type _type;
+    final Edge _edge;
+    final long _value;
+
+    public WindowedEdgeEvent(Edge edge, Type type) {
+        _type = type;
+        _edge = edge;
+        _value = 0;
+    }
+
+    public WindowedEdgeEvent(Edge edge, Type type, long value) {
+        _type = type;
+        _edge = edge;
+        _value = value;
+    }
+
+    public Type type() {
+        return _type;
+    }
+
+    public Edge edge() {
+        return _edge;
+    }
+
+    @Override
+    public String toString() {
+        switch (_type) {
+            case UP:
+            case DOWN:
+                return _edge + " " + _type;
+            default:
+                return _edge + " " + _type + " " + _value;
+        }
+    }
+
+    public static final class Factory implements ItemFactory<WindowedEdgeEvent> {
+        @Override
+        public WindowedEdgeEvent fromString(String s) {
+            final String[] elems = s.trim().split(" ");
+            try {
+                final Integer id1 = Integer.parseInt(elems[0]);
+                final Integer id2 = Integer.parseInt(elems[1]);
+                final Edge e = new Edge(id1, id2);
+                final Type type = Type.valueOf(elems[2]);
+                switch (type) {
+                    case UP:
+                    case DOWN:
+                        return new WindowedEdgeEvent(e, type);
+                    default:
+                        final long value = Long.parseLong(elems[3]);
+                        return new WindowedEdgeEvent(e, type, value);
+                }
+
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
 }

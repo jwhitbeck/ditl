@@ -19,64 +19,74 @@
 package ditl.graphs;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.Listener;
+import ditl.PersistentMap;
+import ditl.StateUpdater;
+import ditl.StateUpdaterFactory;
+import ditl.StatefulTrace;
+import ditl.Store;
+import ditl.Trace;
+import ditl.Writer;
 
 @Trace.Type("edges")
-public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge> 
-	implements StatefulTrace.Filterable<EdgeEvent, Edge>{
+public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge>
+        implements StatefulTrace.Filterable<EdgeEvent, Edge> {
 
-	public final static class Updater implements StateUpdater<EdgeEvent,Edge> {
-		private Set<Edge> edges = new AdjacencySet.Edges();
-		
-		@Override
-		public void setState(Collection<Edge> contactsState ) {
-			edges.clear();
-			for ( Edge e : contactsState )
-				edges.add(e);
-		}
+    public final static class Updater implements StateUpdater<EdgeEvent, Edge> {
+        private final Set<Edge> edges = new AdjacencySet.Edges();
 
-		@Override
-		public Set<Edge> states() {
-			return edges;
-		}
+        @Override
+        public void setState(Collection<Edge> contactsState) {
+            edges.clear();
+            for (final Edge e : contactsState)
+                edges.add(e);
+        }
 
-		@Override
-		public void handleEvent(long time, EdgeEvent event) {
-			if ( event.isUp() ){
-				edges.add( event.edge() );
-			} else {
-				edges.remove( event.edge() );
-			}
-		}
-	}
-	
-	public interface Handler {
-		public Listener<Edge> edgeListener();
-		public Listener<EdgeEvent> edgeEventListener();
-	}
+        @Override
+        public Set<Edge> states() {
+            return edges;
+        }
 
-	public EdgeTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new EdgeEvent.Factory(), new Edge.Factory(), 
-				new StateUpdaterFactory<EdgeEvent,Edge>(){
-					@Override
-					public StateUpdater<EdgeEvent, Edge> getNew() {
-						return new EdgeTrace.Updater();
-					}
-		});
-	}
+        @Override
+        public void handleEvent(long time, EdgeEvent event) {
+            if (event.isUp())
+                edges.add(event.edge());
+            else
+                edges.remove(event.edge());
+        }
+    }
 
-	@Override
-	public Filter<Edge> stateFilter(Set<Integer> group) {
-		return new Edge.InternalGroupFilter(group);
-	}
+    public interface Handler {
+        public Listener<Edge> edgeListener();
 
-	@Override
-	public Filter<EdgeEvent> eventFilter(Set<Integer> group) {
-		return new EdgeEvent.InternalGroupFilter(group);
-	}
+        public Listener<EdgeEvent> edgeEventListener();
+    }
 
-	@Override
-	public void copyOverTraceInfo(Writer<EdgeEvent> writer) {}
+    public EdgeTrace(Store store, String name, PersistentMap info) throws IOException {
+        super(store, name, info, new EdgeEvent.Factory(), new Edge.Factory(),
+                new StateUpdaterFactory<EdgeEvent, Edge>() {
+                    @Override
+                    public StateUpdater<EdgeEvent, Edge> getNew() {
+                        return new EdgeTrace.Updater();
+                    }
+                });
+    }
+
+    @Override
+    public Filter<Edge> stateFilter(Set<Integer> group) {
+        return new Edge.InternalGroupFilter(group);
+    }
+
+    @Override
+    public Filter<EdgeEvent> eventFilter(Set<Integer> group) {
+        return new EdgeEvent.InternalGroupFilter(group);
+    }
+
+    @Override
+    public void copyOverTraceInfo(Writer<EdgeEvent> writer) {
+    }
 }

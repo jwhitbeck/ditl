@@ -21,61 +21,62 @@ package ditl.cli;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.*;
+import ditl.Reader;
 import ditl.Store.NoSuchTraceException;
+import ditl.Trace;
 
-@Command(cmd="count")
+@Command(cmd = "count")
 public class EventCounter extends ReadOnlyApp {
-	
-	private Double d_begin = null;
-	private Double d_end = null;
-	private String trace_name;
-	
-	@Override
-	protected void initOptions(){
-		super.initOptions();
-		options.addOption(null, maxTimeOption, true, "Maximum time");
-		options.addOption(null, minTimeOption, true, "Minimum time");
-	}
-	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
-		super.parseArgs(cli, args);
-		trace_name = args[1];
-		if ( cli.hasOption(maxTimeOption) )
-			d_end = Double.parseDouble(cli.getOptionValue(maxTimeOption));
-		if ( cli.hasOption(minTimeOption) )
-			d_begin = Double.parseDouble(cli.getOptionValue(minTimeOption));
-	}
 
-	
-	@Override
-	protected void run() throws IOException, NoSuchTraceException {
-		Trace<?> trace = _store.getTrace(trace_name);
-		long min_time = (d_begin != null )? 
-					(long)(d_begin * trace.ticsPerSecond()) 
-					: trace.minTime();
-		long max_time = (d_end != null)?
-					(long)(d_end * trace.ticsPerSecond()) 
-					: trace.maxTime();
-		Reader<?> reader = trace.getReader();
-		long event_count = 0;
-		long event_times_count = 0;
-		reader.seek(min_time);
-		while ( reader.hasNext() && reader.nextTime() <= max_time ){
-			Collection<?> events = reader.next();
-			event_times_count++;
-			event_count += events.size();
-		}
-		reader.close();
-		System.out.println(event_count+" "+event_times_count);
-	}
+    private Double d_begin = null;
+    private Double d_end = null;
+    private String trace_name;
 
-	@Override
-	protected String getUsageString(){
-		return "[OPTIONS] STORE TRACE_NAME";
-	}
-	
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        options.addOption(null, maxTimeOption, true, "Maximum time");
+        options.addOption(null, minTimeOption, true, "Minimum time");
+    }
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
+        super.parseArgs(cli, args);
+        trace_name = args[1];
+        if (cli.hasOption(maxTimeOption))
+            d_end = Double.parseDouble(cli.getOptionValue(maxTimeOption));
+        if (cli.hasOption(minTimeOption))
+            d_begin = Double.parseDouble(cli.getOptionValue(minTimeOption));
+    }
+
+    @Override
+    protected void run() throws IOException, NoSuchTraceException {
+        final Trace<?> trace = _store.getTrace(trace_name);
+        final long min_time = (d_begin != null) ?
+                (long) (d_begin * trace.ticsPerSecond())
+                : trace.minTime();
+        final long max_time = (d_end != null) ?
+                (long) (d_end * trace.ticsPerSecond())
+                : trace.maxTime();
+        final Reader<?> reader = trace.getReader();
+        long event_count = 0;
+        long event_times_count = 0;
+        reader.seek(min_time);
+        while (reader.hasNext() && reader.nextTime() <= max_time) {
+            final Collection<?> events = reader.next();
+            event_times_count++;
+            event_count += events.size();
+        }
+        reader.close();
+        System.out.println(event_count + " " + event_times_count);
+    }
+
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE TRACE_NAME";
+    }
+
 }

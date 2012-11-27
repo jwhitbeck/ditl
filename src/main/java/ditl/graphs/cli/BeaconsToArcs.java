@@ -20,47 +20,51 @@ package ditl.graphs.cli;
 
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.Store.*;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
-import ditl.graphs.*;
+import ditl.graphs.ArcTrace;
+import ditl.graphs.BeaconTrace;
+import ditl.graphs.BeaconsToArcsConverter;
 
-@Command(pkg="graphs", cmd="beacons-to-arcs", alias="b2a")
+@Command(pkg = "graphs", cmd = "beacons-to-arcs", alias = "b2a")
 public class BeaconsToArcs extends ConvertApp {
-	
-	final static String toleranceOption = "tolerance";
-	final static String expandOption = "expand";
 
-	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.BEACONS, GraphOptions.ARCS);
-	
-	int tol;
-	double expansion;
-	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		tol = Integer.parseInt(cli.getOptionValue(toleranceOption,"0"));
-		expansion = Double.parseDouble(cli.getOptionValue(expandOption, "0.0"));
-	}
+    final static String toleranceOption = "tolerance";
+    final static String expandOption = "expand";
 
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		options.addOption(null, storeOutputOption, true, "Name of store to output new traces to");
-		options.addOption(null, toleranceOption, true, "Missed beacon tolerance (default 0)");
-		options.addOption(null, expandOption, true, "Expand contacts by this fraction (default 0.0)");
-	}
+    private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.BEACONS, GraphOptions.ARCS);
 
-	@Override
-	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-		ArcTrace arcs = (ArcTrace)dest_store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.class, force);
-		BeaconTrace beacons = (BeaconTrace) orig_store.getTrace(graph_options.get(GraphOptions.BEACONS));		
-		
-		new BeaconsToArcsConverter(arcs, beacons, tol, expansion).convert();
-	}
+    int tol;
+    double expansion;
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+        super.parseArgs(cli, args);
+        graph_options.parse(cli);
+        tol = Integer.parseInt(cli.getOptionValue(toleranceOption, "0"));
+        expansion = Double.parseDouble(cli.getOptionValue(expandOption, "0.0"));
+    }
+
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        graph_options.setOptions(options);
+        options.addOption(null, storeOutputOption, true, "Name of store to output new traces to");
+        options.addOption(null, toleranceOption, true, "Missed beacon tolerance (default 0)");
+        options.addOption(null, expandOption, true, "Expand contacts by this fraction (default 0.0)");
+    }
+
+    @Override
+    protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
+        final ArcTrace arcs = (ArcTrace) dest_store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.class, force);
+        final BeaconTrace beacons = (BeaconTrace) orig_store.getTrace(graph_options.get(GraphOptions.BEACONS));
+
+        new BeaconsToArcsConverter(arcs, beacons, tol, expansion).convert();
+    }
 }

@@ -20,61 +20,68 @@ package ditl.graphs;
 
 import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.ItemFactory;
 
 public final class PresenceEvent {
 
-	public enum Type { IN, OUT }
-	
-	private final Integer id;
-	private final Type _type;
-	
-	public PresenceEvent(Integer i,  Type type){
-		id = i;
-		_type = type;
-	}
-	
-	public Integer id(){
-		return id;
-	}
-	
-	public boolean isIn(){
-		return _type == Type.IN;
-	}
-	
-	public Presence presence(){
-		return new Presence(id);
-	}
-	
-	public static final class Factory implements ItemFactory<PresenceEvent> {
-		@Override
-		public PresenceEvent fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				int id = Integer.parseInt(elems[0]);
-				Type type = Type.valueOf(elems[1]);
-				return new PresenceEvent(id,type);
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	@Override
-	public String toString(){
-		return id+" "+_type;
-	}
+    public enum Type {
+        IN, OUT
+    }
 
-	public static final class GroupFilter implements Filter<PresenceEvent> {
-		private Set<Integer> _group;
-		public GroupFilter(Set<Integer> group){ _group = group;}
-		@Override
-		public PresenceEvent filter(PresenceEvent item) { 
-			if ( _group.contains(item.id) )
-				return item;
-			return null;
-		}
-	}
+    private final Integer id;
+    private final Type _type;
+
+    public PresenceEvent(Integer i, Type type) {
+        id = i;
+        _type = type;
+    }
+
+    public Integer id() {
+        return id;
+    }
+
+    public boolean isIn() {
+        return _type == Type.IN;
+    }
+
+    public Presence presence() {
+        return new Presence(id);
+    }
+
+    public static final class Factory implements ItemFactory<PresenceEvent> {
+        @Override
+        public PresenceEvent fromString(String s) {
+            final String[] elems = s.trim().split(" ");
+            try {
+                final int id = Integer.parseInt(elems[0]);
+                final Type type = Type.valueOf(elems[1]);
+                return new PresenceEvent(id, type);
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return id + " " + _type;
+    }
+
+    public static final class GroupFilter implements Filter<PresenceEvent> {
+        private final Set<Integer> _group;
+
+        public GroupFilter(Set<Integer> group) {
+            _group = group;
+        }
+
+        @Override
+        public PresenceEvent filter(PresenceEvent item) {
+            if (_group.contains(item.id))
+                return item;
+            return null;
+        }
+    }
 
 }

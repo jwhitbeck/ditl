@@ -18,25 +18,26 @@
  *******************************************************************************/
 package ditl.plausible;
 
-import ditl.graphs.*;
+import ditl.graphs.Movement;
+import ditl.graphs.MovementEvent;
 
 public class KnownNode extends Node {
 
-	Movement _movement;
-	
-	public KnownNode(long time, Movement movement) {
-		super(movement.id());
-		_movement = movement;
-		cur = _movement.positionAtTime(time);
-		next = _movement.positionAtTime(time);
-	}
-	
-	public void updateMovement(long time, MovementEvent movementEvent){
-		_movement.handleEvent(time, movementEvent);
-	}
+    Movement _movement;
 
-	@Override
-	public void step(long time, double dt) {
-		next = _movement.positionAtTime(time);
-	}
+    public KnownNode(long time, Movement movement) {
+        super(movement.id());
+        _movement = movement;
+        cur = _movement.positionAtTime(time);
+        next = _movement.positionAtTime(time);
+    }
+
+    public void updateMovement(long time, MovementEvent movementEvent) {
+        _movement.handleEvent(time, movementEvent);
+    }
+
+    @Override
+    public void step(long time, double dt) {
+        next = _movement.positionAtTime(time);
+    }
 }

@@ -23,6 +23,7 @@ import java.io.IOException;
 import ditl.transfers.BufferTrace;
 
 public interface BufferRunner {
-	public void setBufferTrace(BufferTrace buffers) throws IOException;
-	public void addBufferHandler(BufferTrace.Handler handler);
+    public void setBufferTrace(BufferTrace buffers) throws IOException;
+
+    public void addBufferHandler(BufferTrace.Handler handler);
 }

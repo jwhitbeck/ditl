@@ -18,65 +18,72 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.Map;
 
-import ditl.*;
-
-
+import ditl.IdGenerator;
+import ditl.StatefulReader;
+import ditl.StatefulWriter;
+import ditl.Trace;
+import ditl.Units;
 
 public class CRAWDADArcs {
-	
-	public static void fromCRAWDAD(ArcTrace arcs,
-			InputStream in, double timeMul, long ticsPerSecond,
-			long offset, IdGenerator idGen) throws IOException{
-		
-		StatefulWriter<ArcEvent,Arc> arcWriter = arcs.getWriter();
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		String line;
-		
-		while ( (line=br.readLine()) != null ){
-			String[] elems = line.split("[ \t]+");
-			Integer id1 = idGen.getInternalId(elems[0]);
-			Integer id2 = idGen.getInternalId(elems[1]);
-			long begin = (long)(Long.parseLong(elems[2])*timeMul)+offset;
-			long end = (long)(Long.parseLong(elems[3])*timeMul)+offset;
-			arcWriter.queue(begin, new ArcEvent(id1,id2,ArcEvent.Type.UP));
-			arcWriter.queue(end, new ArcEvent(id1,id2,ArcEvent.Type.DOWN));
-		}
-		arcWriter.flush();
-		arcWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
-		idGen.writeTraceInfo(arcWriter);
-		arcWriter.close();
-		br.close();
-	}
-	
-	public static void toCRAWDAD(ArcTrace arcs, 
-			OutputStream out, double timeMul) throws IOException {
-	
-		StatefulReader<ArcEvent,Arc> arcReader = arcs.getReader();
-		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-		Map<Arc,Long> activeArcs = new AdjacencyMap.Arcs<Long>();
-		
-		arcReader.seek(arcs.minTime());
-		for ( Arc a : arcReader.referenceState() )
-			activeArcs.put(a, arcs.minTime());
-		while ( arcReader.hasNext() ){
-			for ( ArcEvent aev : arcReader.next() ){
-				Arc a = aev.arc();
-				if ( aev.isUp() ){
-					activeArcs.put(a, arcReader.time());
-				} else {
-					double beg = activeArcs.get(a)*timeMul;
-					double end = arcReader.time()*timeMul;
-					activeArcs.remove(a);
-					bw.write(a.from()+"\t"+a.to()+"\t"+beg+"\t"+end+"\n");
-				}
-			}
-		}
-		
-		bw.close();
-		arcReader.close();
-	}
-	
+
+    public static void fromCRAWDAD(ArcTrace arcs,
+            InputStream in, double timeMul, long ticsPerSecond,
+            long offset, IdGenerator idGen) throws IOException {
+
+        final StatefulWriter<ArcEvent, Arc> arcWriter = arcs.getWriter();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            final String[] elems = line.split("[ \t]+");
+            final Integer id1 = idGen.getInternalId(elems[0]);
+            final Integer id2 = idGen.getInternalId(elems[1]);
+            final long begin = (long) (Long.parseLong(elems[2]) * timeMul) + offset;
+            final long end = (long) (Long.parseLong(elems[3]) * timeMul) + offset;
+            arcWriter.queue(begin, new ArcEvent(id1, id2, ArcEvent.Type.UP));
+            arcWriter.queue(end, new ArcEvent(id1, id2, ArcEvent.Type.DOWN));
+        }
+        arcWriter.flush();
+        arcWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
+        idGen.writeTraceInfo(arcWriter);
+        arcWriter.close();
+        br.close();
+    }
+
+    public static void toCRAWDAD(ArcTrace arcs,
+            OutputStream out, double timeMul) throws IOException {
+
+        final StatefulReader<ArcEvent, Arc> arcReader = arcs.getReader();
+        final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+        final Map<Arc, Long> activeArcs = new AdjacencyMap.Arcs<Long>();
+
+        arcReader.seek(arcs.minTime());
+        for (final Arc a : arcReader.referenceState())
+            activeArcs.put(a, arcs.minTime());
+        while (arcReader.hasNext())
+            for (final ArcEvent aev : arcReader.next()) {
+                final Arc a = aev.arc();
+                if (aev.isUp())
+                    activeArcs.put(a, arcReader.time());
+                else {
+                    final double beg = activeArcs.get(a) * timeMul;
+                    final double end = arcReader.time() * timeMul;
+                    activeArcs.remove(a);
+                    bw.write(a.from() + "\t" + a.to() + "\t" + beg + "\t" + end + "\n");
+                }
+            }
+
+        bw.close();
+        arcReader.close();
+    }
+
 }

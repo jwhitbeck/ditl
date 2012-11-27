@@ -19,5 +19,5 @@
 package ditl.plausible;
 
 public interface Constraint {
-	public void apply(InferredNode node);
+    public void apply(InferredNode node);
 }

@@ -18,46 +18,47 @@
  *******************************************************************************/
 package ditl.transfers.cli;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 import ditl.cli.App;
 import ditl.cli.Command;
 import ditl.transfers.viz.TransferPlayer;
 
-@Command(pkg="transfers", cmd="play", alias="a")
+@Command(pkg = "transfers", cmd = "play", alias = "a")
 public class Player extends App {
 
-	private File[] files;
+    private File[] files;
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException,
-			HelpException {
-		if ( args.length > 0 ){
-			files = new File[args.length];
-			for(int i=0; i<args.length; ++i)
-				files[i] = new File(args[i]);
-		}
-	}
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException,
+            HelpException {
+        if (args.length > 0) {
+            files = new File[args.length];
+            for (int i = 0; i < args.length; ++i)
+                files[i] = new File(args[i]);
+        }
+    }
 
-	@Override
-	protected void run() throws IOException {
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				TransferPlayer player = new TransferPlayer();
-				if ( files != null )
-					player.load(files);
-			}
-		});
-	}
+    @Override
+    protected void run() throws IOException {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                final TransferPlayer player = new TransferPlayer();
+                if (files != null)
+                    player.load(files);
+            }
+        });
+    }
 
-	@Override
-	protected String getUsageString() {
-		return "STORE1 [STORE2...]";
-	}
-	
-	
+    @Override
+    protected String getUsageString() {
+        return "STORE1 [STORE2...]";
+    }
 
 }

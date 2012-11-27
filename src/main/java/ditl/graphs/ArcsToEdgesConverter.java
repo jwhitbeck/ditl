@@ -19,78 +19,73 @@
 package ditl.graphs;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Set;
 
-import ditl.*;
-
-
+import ditl.Converter;
+import ditl.StatefulReader;
+import ditl.StatefulWriter;
 
 public final class ArcsToEdgesConverter implements Converter {
 
-	public final static boolean UNION = true;
-	public final static boolean INTERSECTION = false;
-	
-	private boolean _union; 
-	private Set<Arc> arcs = new AdjacencySet.Arcs();
-	private StatefulWriter<EdgeEvent,Edge> edge_writer;
-	private StatefulReader<ArcEvent,Arc> arc_reader;
-	private EdgeTrace _edges;
-	private ArcTrace _arcs;
-	
-	public ArcsToEdgesConverter(EdgeTrace edges, ArcTrace arcs, boolean union){
-		_arcs = arcs;
-		_edges = edges;
-		_union = union;
-	}
-	
+    public final static boolean UNION = true;
+    public final static boolean INTERSECTION = false;
 
-	private void setInitStateFromArcs(long time, Set<Arc> states) throws IOException {
-		Set<Edge> contacts = new AdjacencySet.Edges();
-		for ( Arc arc : states ){
-			arcs.add(arc);
-			if ( _union ){
-				contacts.add(arc.edge());
-			} else if ( arcs.contains(arc.reverse())) {
-				contacts.add(arc.edge());
-			}
-		}
-		edge_writer.setInitState(time, contacts);
-	}
-	
-	private void handleArcEvent(long time, ArcEvent event ) throws IOException {
-		Arc a = event.arc();
-		Edge e = a.edge();
-		if ( _union && ! arcs.contains(a.reverse()) ) {
-			if ( event.isUp() ){
-				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.Type.UP) );
-			} else {
-				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.Type.DOWN) );
-			}
-		} else if ( ! _union && arcs.contains( a.reverse() )){ // intersect and reverse if present
-			if ( event.isUp() ){
-				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.Type.UP) );
-			} else {
-				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.Type.DOWN) );
-			}
-		}
-		if ( event.isUp() )
-			arcs.add(a);
-		else
-			arcs.remove(a);
-	}
-	
-	@Override
-	public void convert() throws IOException{
-		arc_reader = _arcs.getReader();
-		edge_writer = _edges.getWriter();
-		long minTime = _arcs.minTime();
-		arc_reader.seek(minTime);
-		setInitStateFromArcs(minTime,arc_reader.referenceState());
-		while ( arc_reader.hasNext() )
-			for ( ArcEvent event : arc_reader.next() )
-				handleArcEvent(arc_reader.time(), event);
-		edge_writer.setPropertiesFromTrace(_arcs);
-		arc_reader.close();
-		edge_writer.close();
-	}
+    private final boolean _union;
+    private final Set<Arc> arcs = new AdjacencySet.Arcs();
+    private StatefulWriter<EdgeEvent, Edge> edge_writer;
+    private StatefulReader<ArcEvent, Arc> arc_reader;
+    private final EdgeTrace _edges;
+    private final ArcTrace _arcs;
+
+    public ArcsToEdgesConverter(EdgeTrace edges, ArcTrace arcs, boolean union) {
+        _arcs = arcs;
+        _edges = edges;
+        _union = union;
+    }
+
+    private void setInitStateFromArcs(long time, Set<Arc> states) throws IOException {
+        final Set<Edge> contacts = new AdjacencySet.Edges();
+        for (final Arc arc : states) {
+            arcs.add(arc);
+            if (_union)
+                contacts.add(arc.edge());
+            else if (arcs.contains(arc.reverse()))
+                contacts.add(arc.edge());
+        }
+        edge_writer.setInitState(time, contacts);
+    }
+
+    private void handleArcEvent(long time, ArcEvent event) throws IOException {
+        final Arc a = event.arc();
+        final Edge e = a.edge();
+        if (_union && !arcs.contains(a.reverse())) {
+            if (event.isUp())
+                edge_writer.append(time, new EdgeEvent(e, EdgeEvent.Type.UP));
+            else
+                edge_writer.append(time, new EdgeEvent(e, EdgeEvent.Type.DOWN));
+        } else if (!_union && arcs.contains(a.reverse()))
+            if (event.isUp())
+                edge_writer.append(time, new EdgeEvent(e, EdgeEvent.Type.UP));
+            else
+                edge_writer.append(time, new EdgeEvent(e, EdgeEvent.Type.DOWN));
+        if (event.isUp())
+            arcs.add(a);
+        else
+            arcs.remove(a);
+    }
+
+    @Override
+    public void convert() throws IOException {
+        arc_reader = _arcs.getReader();
+        edge_writer = _edges.getWriter();
+        final long minTime = _arcs.minTime();
+        arc_reader.seek(minTime);
+        setInitStateFromArcs(minTime, arc_reader.referenceState());
+        while (arc_reader.hasNext())
+            for (final ArcEvent event : arc_reader.next())
+                handleArcEvent(arc_reader.time(), event);
+        edge_writer.setPropertiesFromTrace(_arcs);
+        arc_reader.close();
+        edge_writer.close();
+    }
 }

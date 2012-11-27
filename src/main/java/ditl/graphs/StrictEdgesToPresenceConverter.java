@@ -19,87 +19,92 @@
 package ditl.graphs;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import ditl.*;
+import ditl.Converter;
+import ditl.Listener;
+import ditl.Runner;
+import ditl.StatefulReader;
+import ditl.StatefulWriter;
 
+public final class StrictEdgesToPresenceConverter implements Converter, EdgeTrace.Handler {
 
+    private final PresenceTrace _presence;
+    private final EdgeTrace _edges;
 
-public final class StrictEdgesToPresenceConverter implements Converter, EdgeTrace.Handler{
-	
-	private PresenceTrace _presence;
-	private EdgeTrace _edges;
-	
-	private Map<Integer, Long> exit_times = new HashMap<Integer, Long>();
-	private Set<Integer> seen_nodes = new HashSet<Integer>();
-	private StatefulWriter<PresenceEvent,Presence> presence_writer;
-	
-	public StrictEdgesToPresenceConverter(PresenceTrace presence, EdgeTrace edges){
-		_presence = presence;
-		_edges = edges;
-	}
+    private final Map<Integer, Long> exit_times = new HashMap<Integer, Long>();
+    private final Set<Integer> seen_nodes = new HashSet<Integer>();
+    private StatefulWriter<PresenceEvent, Presence> presence_writer;
 
-	@Override
-	public void convert() throws IOException {
-		presence_writer = _presence.getWriter(); 
-		StatefulReader<EdgeEvent,Edge> edge_reader = _edges.getReader();
-		
-		edge_reader.stateBus().addListener(edgeListener());
-		edge_reader.bus().addListener(edgeEventListener());
-		
-		Runner runner = new Runner(_edges.maxUpdateInterval(), _edges.minTime(), _edges.maxTime());
-		runner.addGenerator(edge_reader);
-		runner.run();
+    public StrictEdgesToPresenceConverter(PresenceTrace presence, EdgeTrace edges) {
+        _presence = presence;
+        _edges = edges;
+    }
 
-		for ( Map.Entry<Integer, Long> e : exit_times.entrySet() ){
-			PresenceEvent pev = new PresenceEvent(e.getKey(), PresenceEvent.Type.OUT);
-			presence_writer.queue(e.getValue(), pev);
-		}
-		presence_writer.flush();
-		
-		presence_writer.setPropertiesFromTrace(_edges);
-		presence_writer.close();
-		edge_reader.close();
-	}
+    @Override
+    public void convert() throws IOException {
+        presence_writer = _presence.getWriter();
+        final StatefulReader<EdgeEvent, Edge> edge_reader = _edges.getReader();
 
-	@Override
-	public Listener<EdgeEvent> edgeEventListener() {
-		return new Listener<EdgeEvent>(){
-			@Override
-			public void handle(long time, Collection<EdgeEvent> events) {
-				for ( EdgeEvent event : events ){
-					if ( event.isUp() ){
-						if ( ! seen_nodes.contains(event.id1()) ){
-							presence_writer.queue(time, new PresenceEvent(event.id1(), PresenceEvent.Type.IN));
-							seen_nodes.add(event.id1());
-						}
-						if ( ! seen_nodes.contains(event.id2()) ){
-							presence_writer.queue(time, new PresenceEvent(event.id2(), PresenceEvent.Type.IN));
-							seen_nodes.add(event.id2());
-						}
-					} else {
-						exit_times.put(event.id1(), time);
-						exit_times.put(event.id2(), time);
-					}
-				}
-			}
-		};
-	}
+        edge_reader.stateBus().addListener(edgeListener());
+        edge_reader.bus().addListener(edgeEventListener());
 
-	@Override
-	public Listener<Edge> edgeListener() {
-		return new Listener<Edge>(){
-			@Override
-			public void handle(long time, Collection<Edge> events) throws IOException{
-				Set<Presence> init_nodes = new HashSet<Presence>();
-				for ( Edge e : events){
-					init_nodes.add(new Presence(e.id1()));
-					init_nodes.add(new Presence(e.id2()));
-					seen_nodes.add(e.id1());
-					seen_nodes.add(e.id2());
-				}
-				presence_writer.setInitState(time, init_nodes);
-			}
-		};
-	}
+        final Runner runner = new Runner(_edges.maxUpdateInterval(), _edges.minTime(), _edges.maxTime());
+        runner.addGenerator(edge_reader);
+        runner.run();
+
+        for (final Map.Entry<Integer, Long> e : exit_times.entrySet()) {
+            final PresenceEvent pev = new PresenceEvent(e.getKey(), PresenceEvent.Type.OUT);
+            presence_writer.queue(e.getValue(), pev);
+        }
+        presence_writer.flush();
+
+        presence_writer.setPropertiesFromTrace(_edges);
+        presence_writer.close();
+        edge_reader.close();
+    }
+
+    @Override
+    public Listener<EdgeEvent> edgeEventListener() {
+        return new Listener<EdgeEvent>() {
+            @Override
+            public void handle(long time, Collection<EdgeEvent> events) {
+                for (final EdgeEvent event : events)
+                    if (event.isUp()) {
+                        if (!seen_nodes.contains(event.id1())) {
+                            presence_writer.queue(time, new PresenceEvent(event.id1(), PresenceEvent.Type.IN));
+                            seen_nodes.add(event.id1());
+                        }
+                        if (!seen_nodes.contains(event.id2())) {
+                            presence_writer.queue(time, new PresenceEvent(event.id2(), PresenceEvent.Type.IN));
+                            seen_nodes.add(event.id2());
+                        }
+                    } else {
+                        exit_times.put(event.id1(), time);
+                        exit_times.put(event.id2(), time);
+                    }
+            }
+        };
+    }
+
+    @Override
+    public Listener<Edge> edgeListener() {
+        return new Listener<Edge>() {
+            @Override
+            public void handle(long time, Collection<Edge> events) throws IOException {
+                final Set<Presence> init_nodes = new HashSet<Presence>();
+                for (final Edge e : events) {
+                    init_nodes.add(new Presence(e.id1()));
+                    init_nodes.add(new Presence(e.id2()));
+                    seen_nodes.add(e.id1());
+                    seen_nodes.add(e.id2());
+                }
+                presence_writer.setInitState(time, init_nodes);
+            }
+        };
+    }
 }

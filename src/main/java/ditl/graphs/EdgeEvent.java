@@ -20,80 +20,87 @@ package ditl.graphs;
 
 import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.ItemFactory;
 
 public final class EdgeEvent {
-	
-	public enum Type { UP, DOWN };
-	
-	final Integer id1;
-	final Integer id2;
-	final Type _type;
-	
-	public EdgeEvent(Integer i1, Integer i2, Type type){
-		if ( i1 < i2 ){
-			id1 = i1;
-			id2 = i2;
-		} else {
-			id1 = i2;
-			id2 = i1;
-		}
-		_type = type;
-	}
-	
-	public EdgeEvent(Edge edge, Type type){
-		id1 = edge.id1;
-		id2 = edge.id2;
-		_type = type;
-	}
-	
-	public Integer id1(){
-		return id1;
-	}
-	
-	public Integer id2(){
-		return id2;
-	}
-	
-	public boolean isUp(){
-		return _type == Type.UP;
-	}
-	
-	public Edge edge(){
-		return new Edge(id1,id2);
-	}
-	
-	public static final class Factory implements ItemFactory<EdgeEvent>{
-		@Override
-		public EdgeEvent fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer id1 = Integer.parseInt(elems[0]);
-				Integer id2 = Integer.parseInt(elems[1]);
-				Type type = Type.valueOf(elems[2]);
-				return new EdgeEvent(id1,id2,type);
-				
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	@Override
-	public String toString(){
-		return id1+" "+id2+" "+_type;
-	}
-	
-	public static final class InternalGroupFilter implements Filter<EdgeEvent> {
-		private Set<Integer> _group;
-		public InternalGroupFilter(Set<Integer> group){ _group = group;}
-		@Override
-		public EdgeEvent filter(EdgeEvent item) {
-			if ( _group.contains(item.id1) && _group.contains(item.id2) )
-				return item;
-			return null;
-		}
-	}
+
+    public enum Type {
+        UP, DOWN
+    };
+
+    final Integer id1;
+    final Integer id2;
+    final Type _type;
+
+    public EdgeEvent(Integer i1, Integer i2, Type type) {
+        if (i1 < i2) {
+            id1 = i1;
+            id2 = i2;
+        } else {
+            id1 = i2;
+            id2 = i1;
+        }
+        _type = type;
+    }
+
+    public EdgeEvent(Edge edge, Type type) {
+        id1 = edge.id1;
+        id2 = edge.id2;
+        _type = type;
+    }
+
+    public Integer id1() {
+        return id1;
+    }
+
+    public Integer id2() {
+        return id2;
+    }
+
+    public boolean isUp() {
+        return _type == Type.UP;
+    }
+
+    public Edge edge() {
+        return new Edge(id1, id2);
+    }
+
+    public static final class Factory implements ItemFactory<EdgeEvent> {
+        @Override
+        public EdgeEvent fromString(String s) {
+            final String[] elems = s.trim().split(" ");
+            try {
+                final Integer id1 = Integer.parseInt(elems[0]);
+                final Integer id2 = Integer.parseInt(elems[1]);
+                final Type type = Type.valueOf(elems[2]);
+                return new EdgeEvent(id1, id2, type);
+
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return id1 + " " + id2 + " " + _type;
+    }
+
+    public static final class InternalGroupFilter implements Filter<EdgeEvent> {
+        private final Set<Integer> _group;
+
+        public InternalGroupFilter(Set<Integer> group) {
+            _group = group;
+        }
+
+        @Override
+        public EdgeEvent filter(EdgeEvent item) {
+            if (_group.contains(item.id1) && _group.contains(item.id2))
+                return item;
+            return null;
+        }
+    }
 
 }

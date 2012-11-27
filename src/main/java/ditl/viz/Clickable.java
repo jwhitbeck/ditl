@@ -19,5 +19,5 @@
 package ditl.viz;
 
 public interface Clickable {
-	public boolean contains(int x, int y);
+    public boolean contains(int x, int y);
 }

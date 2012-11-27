@@ -18,46 +18,48 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.*;
+import ditl.Store;
+import ditl.WritableStore;
 
-@Command(cmd="rm")
+@Command(cmd = "rm")
 public class DeleteTraces extends App {
 
-	protected String[] traceNames;
-	protected File store_file;
-	protected WritableStore _store;
+    protected String[] traceNames;
+    protected File store_file;
+    protected WritableStore _store;
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
-		store_file = new File(args[0]);
-		traceNames = Arrays.copyOfRange(args, 1, args.length);
-	}
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
+        store_file = new File(args[0]);
+        traceNames = Arrays.copyOfRange(args, 1, args.length);
+    }
 
-	@Override
-	protected String getUsageString() {
-		return "[OPTIONS] STORE TRACE1 [TRACE2...]";
-	}
-	
-	@Override
-	protected void run() throws IOException, Store.NoSuchTraceException {
-		for ( String name : traceNames ){
-			if ( _store.hasTrace(name) )
-				_store.deleteTrace(name);
-		}
-	}
-	
-	@Override
-	protected void init() throws IOException {
-		_store = WritableStore.open(store_file);
-	}
-	
-	@Override
-	protected void close() throws IOException {
-		_store.close();
-	}
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE TRACE1 [TRACE2...]";
+    }
+
+    @Override
+    protected void run() throws IOException, Store.NoSuchTraceException {
+        for (final String name : traceNames)
+            if (_store.hasTrace(name))
+                _store.deleteTrace(name);
+    }
+
+    @Override
+    protected void init() throws IOException {
+        _store = WritableStore.open(store_file);
+    }
+
+    @Override
+    protected void close() throws IOException {
+        _store.close();
+    }
 }

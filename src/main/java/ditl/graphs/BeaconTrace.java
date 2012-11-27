@@ -21,28 +21,32 @@ package ditl.graphs;
 import java.io.IOException;
 import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.PersistentMap;
+import ditl.Store;
+import ditl.Trace;
+import ditl.Writer;
 
 @Trace.Type("beacons")
 public class BeaconTrace extends Trace<Arc> implements Trace.Filterable<Arc> {
 
-	public final static String beaconningPeriodKey = "beaconning period";
-	
-	public BeaconTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new Arc.Factory());
-	}
+    public final static String beaconningPeriodKey = "beaconning period";
 
-	@Override
-	public Filter<Arc> eventFilter(Set<Integer> group) {
-		return new Arc.InternalGroupFilter(group);
-	}
-	
-	public long beaconningPeriod(){
-		return Long.parseLong(getValue(beaconningPeriodKey));
-	}
+    public BeaconTrace(Store store, String name, PersistentMap info) throws IOException {
+        super(store, name, info, new Arc.Factory());
+    }
 
-	@Override
-	public void copyOverTraceInfo(Writer<Arc> writer) {
-		writer.setProperty( beaconningPeriodKey, getValue(beaconningPeriodKey));
-	}
+    @Override
+    public Filter<Arc> eventFilter(Set<Integer> group) {
+        return new Arc.InternalGroupFilter(group);
+    }
+
+    public long beaconningPeriod() {
+        return Long.parseLong(getValue(beaconningPeriodKey));
+    }
+
+    @Override
+    public void copyOverTraceInfo(Writer<Arc> writer) {
+        writer.setProperty(beaconningPeriodKey, getValue(beaconningPeriodKey));
+    }
 }

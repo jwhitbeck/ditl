@@ -19,5 +19,5 @@
 package ditl;
 
 public interface Filter<I> {
-	public I filter(I item);
+    public I filter(I item);
 }

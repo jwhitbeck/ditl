@@ -18,8 +18,9 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public interface ReportFactory<R extends Report> {
-	public R getNew(OutputStream out) throws IOException;
+    public R getNew(OutputStream out) throws IOException;
 }

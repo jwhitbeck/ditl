@@ -23,6 +23,7 @@ import java.io.IOException;
 import ditl.transfers.MessageTrace;
 
 public interface MessageRunner {
-	public void setMessageTrace(MessageTrace messages) throws IOException;
-	public void addMessageHandler(MessageTrace.Handler handler);
+    public void setMessageTrace(MessageTrace messages) throws IOException;
+
+    public void addMessageHandler(MessageTrace.Handler handler);
 }

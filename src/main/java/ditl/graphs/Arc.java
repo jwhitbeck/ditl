@@ -20,77 +20,84 @@ package ditl.graphs;
 
 import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.ItemFactory;
 
 public final class Arc implements Couple {
-	
-	final Integer _from;
-	final Integer _to;
-	
-	public Arc(Integer from, Integer to){
-		_from = from;
-		_to = to;
-	}
-	
-	public Integer id1(){
-		return _from;
-	}
-	
-	public Integer id2(){
-		return _to;
-	}
-	
-	public Integer from(){
-		return _from;
-	}
-	
-	public Integer to(){
-		return _to;
-	}
-	
-	public final static class Factory implements ItemFactory<Arc> {
-		@Override
-		public Arc fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer from = Integer.parseInt(elems[0]);
-				Integer to = Integer.parseInt(elems[1]);
-				return new Arc(from,to);
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	public Arc reverse(){
-		return new Arc(_to,_from);
-	}
-	
-	public Edge edge(){
-		return new Edge(_from,_to);
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		Arc l = (Arc)o;
-		return (l._from.equals(_from)) && (l._to.equals(_to));
-	}
-	
-	@Override
-	public String toString(){
-		return _from+" "+_to;
-	}
-	
-	public static final class InternalGroupFilter implements Filter<Arc> {
-		private Set<Integer> _group;
-		public InternalGroupFilter(Set<Integer> group){ _group = group;}
-		@Override
-		public Arc filter(Arc item) {
-			if ( _group.contains(item._from) && _group.contains(item._to) )
-				return item;
-			return null;
-		}
-	}
+
+    final Integer _from;
+    final Integer _to;
+
+    public Arc(Integer from, Integer to) {
+        _from = from;
+        _to = to;
+    }
+
+    @Override
+    public Integer id1() {
+        return _from;
+    }
+
+    @Override
+    public Integer id2() {
+        return _to;
+    }
+
+    public Integer from() {
+        return _from;
+    }
+
+    public Integer to() {
+        return _to;
+    }
+
+    public final static class Factory implements ItemFactory<Arc> {
+        @Override
+        public Arc fromString(String s) {
+            final String[] elems = s.trim().split(" ");
+            try {
+                final Integer from = Integer.parseInt(elems[0]);
+                final Integer to = Integer.parseInt(elems[1]);
+                return new Arc(from, to);
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
+
+    public Arc reverse() {
+        return new Arc(_to, _from);
+    }
+
+    public Edge edge() {
+        return new Edge(_from, _to);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        final Arc l = (Arc) o;
+        return (l._from.equals(_from)) && (l._to.equals(_to));
+    }
+
+    @Override
+    public String toString() {
+        return _from + " " + _to;
+    }
+
+    public static final class InternalGroupFilter implements Filter<Arc> {
+        private final Set<Integer> _group;
+
+        public InternalGroupFilter(Set<Integer> group) {
+            _group = group;
+        }
+
+        @Override
+        public Arc filter(Arc item) {
+            if (_group.contains(item._from) && _group.contains(item._to))
+                return item;
+            return null;
+        }
+    }
 
 }

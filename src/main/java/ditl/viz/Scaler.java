@@ -19,10 +19,15 @@
 package ditl.viz;
 
 public interface Scaler {
-	public void addScaleListener(ScaleListener listener);
-	public void removeScaleListener(ScaleListener listener);
-	public double rX(int sx);
-	public double rY(int sy);
-	public int sX(double rx);
-	public int sY(double ry);
+    public void addScaleListener(ScaleListener listener);
+
+    public void removeScaleListener(ScaleListener listener);
+
+    public double rX(int sx);
+
+    public double rY(int sy);
+
+    public int sX(double rx);
+
+    public int sY(double ry);
 }

@@ -19,88 +19,97 @@
 package ditl.plausible;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
-import ditl.*;
-import ditl.graphs.*;
+import ditl.Listener;
+import ditl.PersistentMap;
+import ditl.StateUpdater;
+import ditl.StateUpdaterFactory;
+import ditl.StatefulTrace;
+import ditl.Store;
+import ditl.Trace;
+import ditl.graphs.AdjacencyMap;
+import ditl.graphs.AdjacencySet;
+import ditl.graphs.Edge;
 
 @Trace.Type("windowed_edges")
-public class WindowedEdgeTrace extends StatefulTrace<WindowedEdgeEvent,WindowedEdge>{
-	
-	public final static String windowLengthKey = "window length";
+public class WindowedEdgeTrace extends StatefulTrace<WindowedEdgeEvent, WindowedEdge> {
 
-	public final static class Updater implements StateUpdater<WindowedEdgeEvent,WindowedEdge>{
+    public final static String windowLengthKey = "window length";
 
-		private Set<WindowedEdge> state = new WindowedEdgesSet();
-		private Map<Edge,WindowedEdge> map = new AdjacencyMap.Edges<WindowedEdge>();
-		
-		@Override
-		public void handleEvent(long time, WindowedEdgeEvent event) {
-			Edge edge = event.edge();
-			WindowedEdge wl;
-			switch ( event.type() ){
-			case UP:
-				wl = new WindowedEdge(edge);
-				state.add(wl);
-				map.put(edge,wl);
-				break;
-			case DOWN:
-				wl = map.get(edge);
-				state.remove(wl);
-				map.remove(edge);
-				break;
-			default:
-				wl = map.get(edge);
-				wl.handleEvent(event);
-			}
-		}
+    public final static class Updater implements StateUpdater<WindowedEdgeEvent, WindowedEdge> {
 
-		@Override
-		public void setState(Collection<WindowedEdge> states) {
-			state.clear();
-			map.clear();
-			state.addAll(states);
-			for ( WindowedEdge wl : states ){
-				map.put(wl.edge(), wl);
-			}
-		}
+        private final Set<WindowedEdge> state = new WindowedEdgesSet();
+        private final Map<Edge, WindowedEdge> map = new AdjacencyMap.Edges<WindowedEdge>();
 
-		@Override
-		public Set<WindowedEdge> states() {
-			return state;
-		}
-	}
-	
-	public final static class WindowedEdgesMap extends AdjacencyMap<WindowedEdge,WindowedEdge> {
-		@Override
-		protected WindowedEdge newCouple(Integer id1, Integer id2) {
-			throw new UnsupportedOperationException();
-		}
-	}
-	
-	public final static class WindowedEdgesSet extends AdjacencySet<WindowedEdge> {
-		WindowedEdgesSet(){
-			map = new WindowedEdgesMap();
-		}
-	}
-	
-	public interface Handler {
-		public Listener<WindowedEdge> windowedEdgesListener();
-		public Listener<WindowedEdgeEvent> windowedEdgesEventListener();
-	}
-	
+        @Override
+        public void handleEvent(long time, WindowedEdgeEvent event) {
+            final Edge edge = event.edge();
+            WindowedEdge wl;
+            switch (event.type()) {
+                case UP:
+                    wl = new WindowedEdge(edge);
+                    state.add(wl);
+                    map.put(edge, wl);
+                    break;
+                case DOWN:
+                    wl = map.get(edge);
+                    state.remove(wl);
+                    map.remove(edge);
+                    break;
+                default:
+                    wl = map.get(edge);
+                    wl.handleEvent(event);
+            }
+        }
 
-	public WindowedEdgeTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new WindowedEdgeEvent.Factory(), new WindowedEdge.Factory(), 
-				new StateUpdaterFactory<WindowedEdgeEvent,WindowedEdge>(){
-					@Override
-					public StateUpdater<WindowedEdgeEvent, WindowedEdge> getNew() {
-						return new WindowedEdgeTrace.Updater();
-					}
-		});
-	}
+        @Override
+        public void setState(Collection<WindowedEdge> states) {
+            state.clear();
+            map.clear();
+            state.addAll(states);
+            for (final WindowedEdge wl : states)
+                map.put(wl.edge(), wl);
+        }
 
-	public long windowLength(){
-		return Long.parseLong(getValue(windowLengthKey));
-	}
+        @Override
+        public Set<WindowedEdge> states() {
+            return state;
+        }
+    }
+
+    public final static class WindowedEdgesMap extends AdjacencyMap<WindowedEdge, WindowedEdge> {
+        @Override
+        protected WindowedEdge newCouple(Integer id1, Integer id2) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    public final static class WindowedEdgesSet extends AdjacencySet<WindowedEdge> {
+        WindowedEdgesSet() {
+            map = new WindowedEdgesMap();
+        }
+    }
+
+    public interface Handler {
+        public Listener<WindowedEdge> windowedEdgesListener();
+
+        public Listener<WindowedEdgeEvent> windowedEdgesEventListener();
+    }
+
+    public WindowedEdgeTrace(Store store, String name, PersistentMap info) throws IOException {
+        super(store, name, info, new WindowedEdgeEvent.Factory(), new WindowedEdge.Factory(),
+                new StateUpdaterFactory<WindowedEdgeEvent, WindowedEdge>() {
+                    @Override
+                    public StateUpdater<WindowedEdgeEvent, WindowedEdge> getNew() {
+                        return new WindowedEdgeTrace.Updater();
+                    }
+                });
+    }
+
+    public long windowLength() {
+        return Long.parseLong(getValue(windowLengthKey));
+    }
 }

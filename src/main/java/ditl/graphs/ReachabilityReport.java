@@ -18,157 +18,156 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Set;
 
-import ditl.*;
-
-
+import ditl.Listener;
+import ditl.ReportFactory;
+import ditl.StateTimeReport;
+import ditl.StatefulListener;
 
 public final class ReachabilityReport extends StateTimeReport implements ArcTrace.Handler, PresenceTrace.Handler {
 
-	private Set<Arc> arcs = new AdjacencySet.Arcs();
-	private int n_bidir;
-	private int n_dir;
-	private int samp_n_bidir;
-	private int samp_n_dir;
-	private int n_total;
-	private int n_nodes;
-	
-	public ReachabilityReport(OutputStream out) throws IOException {
-		super(out);
-		appendComment("time | duration | N bidir | N dir | Sampled N bidir | Sampled N dir | N total ");
-	}
-	
-	public static final class Factory implements ReportFactory<ReachabilityReport> {
-		@Override
-		public ReachabilityReport getNew(OutputStream out) throws IOException {
-			return new ReachabilityReport(out);
-		}
-	}
-	
-	@Override
-	public Listener<PresenceEvent> presenceEventListener(){
-		return new Listener<PresenceEvent>(){
-			@Override
-			public void handle(long time, Collection<PresenceEvent> events) throws IOException {
-				int old = n_nodes;
-				for ( PresenceEvent p : events ){
-					if ( p.isIn() ){
-						n_nodes += 1;
-					} else {
-						n_nodes -= 1;
-					}
-				}
-				update_total();
-				if ( old != n_nodes )
-					update(time);
-			}
-		};
-	}
-	
-	private void update_total(){
-		n_total = (n_nodes*(n_nodes-1))/2;
-	}
-	
-	@Override
-	public Listener<Presence> presenceListener(){
-		return new StatefulListener<Presence>(){
-			@Override
-			public void handle(long time, Collection<Presence> events) throws IOException {
-				n_nodes = events.size();
-				update_total();
-			}
+    private final Set<Arc> arcs = new AdjacencySet.Arcs();
+    private int n_bidir;
+    private int n_dir;
+    private int samp_n_bidir;
+    private int samp_n_dir;
+    private int n_total;
+    private int n_nodes;
 
-			@Override
-			public void reset() {
-				n_nodes = 0;
-				n_total = 0;
-			}
-		};
-	}
-	
-	
-	private void update(long time) throws IOException {
-		append(time,n_bidir+" "+n_dir+" "+samp_n_bidir+" "+samp_n_dir+" "+n_total);
-	}
+    public ReachabilityReport(OutputStream out) throws IOException {
+        super(out);
+        appendComment("time | duration | N bidir | N dir | Sampled N bidir | Sampled N dir | N total ");
+    }
 
-	@Override
-	public Listener<ArcEvent> arcEventListener() {
-		return new Listener<ArcEvent>(){
-			@Override
-			public void handle(long time, Collection<ArcEvent> events)
-					throws IOException {
-				int old_n_dir = n_dir;
-				int old_n_bidir = n_bidir;
-				int old_samp_n_bidir = samp_n_bidir;
-				int old_samp_n_dir = samp_n_dir;
-				boolean first_down = true; // we assume that all reachability events are ordered UP first DOWN second
-				for ( ArcEvent aev : events ){
-					Arc a = aev.arc();
-					if ( aev.isUp() ){
-						if ( arcs.contains(a.reverse()) ){
-							n_bidir += 1;
-							n_dir -= 1;
-						} else {
-							n_dir += 1;
-						}
-						arcs.add(a);
-					} else {
-						if ( first_down ){
-							samp_n_bidir = n_bidir;
-							samp_n_dir = n_dir;
-							first_down = false;
-						}
-						if ( arcs.contains(a.reverse()) ){
-							n_bidir -= 1;
-							n_dir += 1;
-						} else {
-							n_dir -= 1;
-						}
-						arcs.remove(a);
-					}
-				}
-				if ( first_down ){
-					samp_n_bidir = n_bidir;
-					samp_n_dir = n_dir;
-					first_down = false;
-				}
-				if ( old_n_bidir != n_bidir || old_n_dir != n_dir || 
-						old_samp_n_dir != samp_n_dir || old_samp_n_bidir != samp_n_bidir)
-					update(time);
-			}
-		};
-	}
+    public static final class Factory implements ReportFactory<ReachabilityReport> {
+        @Override
+        public ReachabilityReport getNew(OutputStream out) throws IOException {
+            return new ReachabilityReport(out);
+        }
+    }
 
-	@Override
-	public Listener<Arc> arcListener() {
-		return new StatefulListener<Arc>(){
-			@Override
-			public void handle(long time, Collection<Arc> events)
-					throws IOException {
-				for ( Arc a : events ){
-					if ( arcs.contains(a.reverse()) ){
-						n_bidir += 1;
-						n_dir -= 1;
-					} else {
-						n_dir += 1;
-					}
-					arcs.add(a);
-				}
-				samp_n_dir = n_dir;
-				samp_n_bidir = n_bidir;
-				update(time);
-			}
+    @Override
+    public Listener<PresenceEvent> presenceEventListener() {
+        return new Listener<PresenceEvent>() {
+            @Override
+            public void handle(long time, Collection<PresenceEvent> events) throws IOException {
+                final int old = n_nodes;
+                for (final PresenceEvent p : events)
+                    if (p.isIn())
+                        n_nodes += 1;
+                    else
+                        n_nodes -= 1;
+                update_total();
+                if (old != n_nodes)
+                    update(time);
+            }
+        };
+    }
 
-			@Override
-			public void reset() {
-				arcs.clear();
-				n_bidir = 0;
-				n_dir = 0;
-				samp_n_bidir = 0;
-				samp_n_dir = 0;
-			}
-		};
-	}
+    private void update_total() {
+        n_total = (n_nodes * (n_nodes - 1)) / 2;
+    }
+
+    @Override
+    public Listener<Presence> presenceListener() {
+        return new StatefulListener<Presence>() {
+            @Override
+            public void handle(long time, Collection<Presence> events) throws IOException {
+                n_nodes = events.size();
+                update_total();
+            }
+
+            @Override
+            public void reset() {
+                n_nodes = 0;
+                n_total = 0;
+            }
+        };
+    }
+
+    private void update(long time) throws IOException {
+        append(time, n_bidir + " " + n_dir + " " + samp_n_bidir + " " + samp_n_dir + " " + n_total);
+    }
+
+    @Override
+    public Listener<ArcEvent> arcEventListener() {
+        return new Listener<ArcEvent>() {
+            @Override
+            public void handle(long time, Collection<ArcEvent> events)
+                    throws IOException {
+                final int old_n_dir = n_dir;
+                final int old_n_bidir = n_bidir;
+                final int old_samp_n_bidir = samp_n_bidir;
+                final int old_samp_n_dir = samp_n_dir;
+                boolean first_down = true; // we assume that all reachability
+                                           // events are ordered UP first DOWN
+                                           // second
+                for (final ArcEvent aev : events) {
+                    final Arc a = aev.arc();
+                    if (aev.isUp()) {
+                        if (arcs.contains(a.reverse())) {
+                            n_bidir += 1;
+                            n_dir -= 1;
+                        } else
+                            n_dir += 1;
+                        arcs.add(a);
+                    } else {
+                        if (first_down) {
+                            samp_n_bidir = n_bidir;
+                            samp_n_dir = n_dir;
+                            first_down = false;
+                        }
+                        if (arcs.contains(a.reverse())) {
+                            n_bidir -= 1;
+                            n_dir += 1;
+                        } else
+                            n_dir -= 1;
+                        arcs.remove(a);
+                    }
+                }
+                if (first_down) {
+                    samp_n_bidir = n_bidir;
+                    samp_n_dir = n_dir;
+                    first_down = false;
+                }
+                if (old_n_bidir != n_bidir || old_n_dir != n_dir ||
+                        old_samp_n_dir != samp_n_dir || old_samp_n_bidir != samp_n_bidir)
+                    update(time);
+            }
+        };
+    }
+
+    @Override
+    public Listener<Arc> arcListener() {
+        return new StatefulListener<Arc>() {
+            @Override
+            public void handle(long time, Collection<Arc> events)
+                    throws IOException {
+                for (final Arc a : events) {
+                    if (arcs.contains(a.reverse())) {
+                        n_bidir += 1;
+                        n_dir -= 1;
+                    } else
+                        n_dir += 1;
+                    arcs.add(a);
+                }
+                samp_n_dir = n_dir;
+                samp_n_bidir = n_bidir;
+                update(time);
+            }
+
+            @Override
+            public void reset() {
+                arcs.clear();
+                n_bidir = 0;
+                n_dir = 0;
+                samp_n_bidir = 0;
+                samp_n_dir = 0;
+            }
+        };
+    }
 }

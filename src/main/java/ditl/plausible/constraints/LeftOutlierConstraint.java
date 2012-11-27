@@ -20,28 +20,31 @@ package ditl.plausible.constraints;
 
 import java.util.Collection;
 
-import ditl.plausible.*;
 import ditl.graphs.Point;
+import ditl.plausible.Constraint;
+import ditl.plausible.InferredNode;
+import ditl.plausible.Interaction;
+import ditl.plausible.Node;
 
 public class LeftOutlierConstraint implements Constraint, Interaction {
 
-	private Collection<Node> _nodes = null;
-	
-	@Override
-	public void apply(InferredNode node) {
-		if ( _nodes != null ){
-			Point r = node.nextPosition();
-			for ( Node other_node : _nodes ){
-				Point or = other_node.nextPosition();
-				if ( or.x < r.x )
-					r.x = or.x;
-			}
-		}
-	}
+    private Collection<Node> _nodes = null;
 
-	@Override
-	public void setNodeCollection(Collection<Node> nodes) {
-		_nodes = nodes;
-	}
+    @Override
+    public void apply(InferredNode node) {
+        if (_nodes != null) {
+            final Point r = node.nextPosition();
+            for (final Node other_node : _nodes) {
+                final Point or = other_node.nextPosition();
+                if (or.x < r.x)
+                    r.x = or.x;
+            }
+        }
+    }
+
+    @Override
+    public void setNodeCollection(Collection<Node> nodes) {
+        _nodes = nodes;
+    }
 
 }

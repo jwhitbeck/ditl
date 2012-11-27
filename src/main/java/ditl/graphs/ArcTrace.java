@@ -19,64 +19,75 @@
 package ditl.graphs;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.Listener;
+import ditl.PersistentMap;
+import ditl.StateUpdater;
+import ditl.StateUpdaterFactory;
+import ditl.StatefulTrace;
+import ditl.Store;
+import ditl.Trace;
+import ditl.Writer;
 
 @Trace.Type("arcs")
-public class ArcTrace extends StatefulTrace<ArcEvent, Arc> 
-	implements StatefulTrace.Filterable<ArcEvent, Arc>{
+public class ArcTrace extends StatefulTrace<ArcEvent, Arc>
+        implements StatefulTrace.Filterable<ArcEvent, Arc> {
 
-	public final static class Updater implements StateUpdater<ArcEvent, Arc> {
+    public final static class Updater implements StateUpdater<ArcEvent, Arc> {
 
-		private Set<Arc> arcs = new AdjacencySet.Arcs(); 
-		
-		@Override
-		public void setState(Collection<Arc> arcsState ) {
-			arcs.clear();
-			for ( Arc a : arcsState )
-				arcs.add(a);
-		}
+        private final Set<Arc> arcs = new AdjacencySet.Arcs();
 
-		@Override
-		public Set<Arc> states() {
-			return arcs;
-		}
+        @Override
+        public void setState(Collection<Arc> arcsState) {
+            arcs.clear();
+            for (final Arc a : arcsState)
+                arcs.add(a);
+        }
 
-		@Override
-		public void handleEvent(long time, ArcEvent event) {
-			if ( event.isUp() )
-				arcs.add(event.arc());
-			else
-				arcs.remove(event.arc());
-		}
-	}
-	
-	public interface Handler {
-		public Listener<Arc> arcListener();
-		public Listener<ArcEvent> arcEventListener();
-	}
+        @Override
+        public Set<Arc> states() {
+            return arcs;
+        }
 
-	public ArcTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new ArcEvent.Factory(), new Arc.Factory(), 
-				new StateUpdaterFactory<ArcEvent,Arc>(){
-					@Override
-					public StateUpdater<ArcEvent, Arc> getNew() {
-						return new ArcTrace.Updater();
-					}
-		});
-	}
+        @Override
+        public void handleEvent(long time, ArcEvent event) {
+            if (event.isUp())
+                arcs.add(event.arc());
+            else
+                arcs.remove(event.arc());
+        }
+    }
 
-	@Override
-	public Filter<Arc> stateFilter(Set<Integer> group) {
-		return new Arc.InternalGroupFilter(group);
-	}
+    public interface Handler {
+        public Listener<Arc> arcListener();
 
-	@Override
-	public Filter<ArcEvent> eventFilter(Set<Integer> group) {
-		return new ArcEvent.InternalGroupFilter(group);
-	}
+        public Listener<ArcEvent> arcEventListener();
+    }
 
-	@Override
-	public void copyOverTraceInfo(Writer<ArcEvent> writer) {}
+    public ArcTrace(Store store, String name, PersistentMap info) throws IOException {
+        super(store, name, info, new ArcEvent.Factory(), new Arc.Factory(),
+                new StateUpdaterFactory<ArcEvent, Arc>() {
+                    @Override
+                    public StateUpdater<ArcEvent, Arc> getNew() {
+                        return new ArcTrace.Updater();
+                    }
+                });
+    }
+
+    @Override
+    public Filter<Arc> stateFilter(Set<Integer> group) {
+        return new Arc.InternalGroupFilter(group);
+    }
+
+    @Override
+    public Filter<ArcEvent> eventFilter(Set<Integer> group) {
+        return new ArcEvent.InternalGroupFilter(group);
+    }
+
+    @Override
+    public void copyOverTraceInfo(Writer<ArcEvent> writer) {
+    }
 }

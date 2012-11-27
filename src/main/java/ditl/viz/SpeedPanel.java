@@ -18,19 +18,25 @@
  *******************************************************************************/
 package ditl.viz;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 
 @SuppressWarnings("serial")
 public class SpeedPanel extends JPanel {
 
-	public SpeedPanel(SceneRunner runner){
-		SpinnerModel model = new SpinnerNumberModel(runner.speed(),0,100,1);
-		JSpinner speedSpinner = new JSpinner(model);
-		speedSpinner.addChangeListener(runner.speedListener());
-		
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		add(Box.createHorizontalGlue());
-		add(new JLabel("Speed: "));
-		add(speedSpinner);
-	}
+    public SpeedPanel(SceneRunner runner) {
+        final SpinnerModel model = new SpinnerNumberModel(runner.speed(), 0, 100, 1);
+        final JSpinner speedSpinner = new JSpinner(model);
+        speedSpinner.addChangeListener(runner.speedListener());
+
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        add(Box.createHorizontalGlue());
+        add(new JLabel("Speed: "));
+        add(speedSpinner);
+    }
 }

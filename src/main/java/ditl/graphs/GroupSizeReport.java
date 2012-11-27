@@ -18,65 +18,67 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Collections;
 
-import ditl.*;
-
-
+import ditl.Listener;
+import ditl.ReportFactory;
+import ditl.StateTimeReport;
+import ditl.StatefulListener;
 
 public final class GroupSizeReport extends StateTimeReport implements GroupTrace.Handler {
 
-	private GroupTrace.Updater updater = new GroupTrace.Updater();
-	
-	public GroupSizeReport(OutputStream out) throws IOException {
-		super(out);
-		appendComment("time | duration | group size distribution");
-	}
-	
-	public static final class Factory implements ReportFactory<GroupSizeReport> {
-		@Override
-		public GroupSizeReport getNew(OutputStream out) throws IOException {
-			return new GroupSizeReport(out);
-		}
-	}
-	
-	private void update(long time) throws IOException {
-		StringBuffer buffer = new StringBuffer();
-		for ( Group g : updater.states() )
-			buffer.append(g.size()+" ");
-		append(time, buffer.toString());
-	}
+    private final GroupTrace.Updater updater = new GroupTrace.Updater();
 
-	@Override
-	public Listener<GroupEvent> groupEventListener() {
-		return new Listener<GroupEvent>(){
-			@Override
-			public void handle(long time, Collection<GroupEvent> events)
-					throws IOException {
-				for ( GroupEvent gev : events )
-					updater.handleEvent(time, gev);
-				update(time);
-			}
-		};
-	}
+    public GroupSizeReport(OutputStream out) throws IOException {
+        super(out);
+        appendComment("time | duration | group size distribution");
+    }
 
-	@Override
-	public Listener<Group> groupListener() {
-		return new StatefulListener<Group>(){
-			@Override
-			public void reset() {
-				updater.setState(Collections.<Group>emptySet());
-			}
+    public static final class Factory implements ReportFactory<GroupSizeReport> {
+        @Override
+        public GroupSizeReport getNew(OutputStream out) throws IOException {
+            return new GroupSizeReport(out);
+        }
+    }
 
-			@Override
-			public void handle(long time, Collection<Group> events)
-					throws IOException {
-				updater.setState(events);
-				update(time);
-			}
-		};
-	}
-	
-	
+    private void update(long time) throws IOException {
+        final StringBuffer buffer = new StringBuffer();
+        for (final Group g : updater.states())
+            buffer.append(g.size() + " ");
+        append(time, buffer.toString());
+    }
+
+    @Override
+    public Listener<GroupEvent> groupEventListener() {
+        return new Listener<GroupEvent>() {
+            @Override
+            public void handle(long time, Collection<GroupEvent> events)
+                    throws IOException {
+                for (final GroupEvent gev : events)
+                    updater.handleEvent(time, gev);
+                update(time);
+            }
+        };
+    }
+
+    @Override
+    public Listener<Group> groupListener() {
+        return new StatefulListener<Group>() {
+            @Override
+            public void reset() {
+                updater.setState(Collections.<Group> emptySet());
+            }
+
+            @Override
+            public void handle(long time, Collection<Group> events)
+                    throws IOException {
+                updater.setState(events);
+                update(time);
+            }
+        };
+    }
+
 }

@@ -18,104 +18,111 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.GroupSpecification;
+import ditl.ItemFactory;
 
 public class GroupEvent {
-	
-	public enum Type {
-		NEW,
-		JOIN,
-		LEAVE,
-		DELETE;
-	}
-	
-	Type _type;
-	Integer _gid;
-	Set<Integer> _members;
-	
-	public GroupEvent(Integer gid, Type type){ // NEW and DELETE events
-		_gid = gid;
-		_type = type;
-	}
-	
-	public GroupEvent(Integer gid, Type type, Integer[] members){
-		_gid = gid;
-		_type = type;
-		_members = new HashSet<Integer>();
-		for ( Integer i : members )
-			_members.add(i);
-	}
-	
-	public GroupEvent(Integer gid, Type type, Set<Integer> members){
-		_gid = gid;
-		_type = type;
-		_members = members;
-	}
-	
-	public Type type(){
-		return _type;
-	}
-	
-	public Integer gid(){
-		return _gid;
-	}
-	
-	public Set<Integer> members(){
-		return Collections.unmodifiableSet(_members);
-	}
-	
-	public final static class Factory implements ItemFactory<GroupEvent> {
-		@Override
-		public GroupEvent fromString(String s) {
-			String[] elems = s.trim().split(" ",3);
-			try {
-				Type type = Type.valueOf(elems[0]);
-				Integer gid = Integer.parseInt(elems[1]);
-				switch (type) {
-				case NEW:
-				case DELETE: 
-					return new GroupEvent(gid, type);
-				default:
-					Set<Integer> members = GroupSpecification.parse(elems[2]);
-					return new GroupEvent(gid, type, members);
-				}
-				
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	@Override
-	public String toString(){
-		switch ( _type ){
-		case NEW: 
-		case DELETE: 
-			return _type +" "+_gid;
-		default:
-			return _type+" "+_gid+" "+GroupSpecification.toString(_members);
-		}
-	}
-	
-	public final static class GroupFilter implements Filter<GroupEvent> {
-		private Set<Integer> _group;
-		public GroupFilter(Set<Integer> group){ _group = group; }
-		@Override
-		public GroupEvent filter(GroupEvent item) {
-			Set<Integer> f_members = new HashSet<Integer>();
-			if ( item._type == Type.JOIN || item._type == Type.LEAVE ){
-				for ( Integer i : item._members ){
-					if ( _group.contains(i) )
-						f_members.add(i);
-				}
-				if ( f_members.isEmpty() )
-					return null;
-				return new GroupEvent( item._gid, item._type, f_members);
-			} 
-			return item;
-		}
-	}
+
+    public enum Type {
+        NEW,
+        JOIN,
+        LEAVE,
+        DELETE;
+    }
+
+    Type _type;
+    Integer _gid;
+    Set<Integer> _members;
+
+    public GroupEvent(Integer gid, Type type) { // NEW and DELETE events
+        _gid = gid;
+        _type = type;
+    }
+
+    public GroupEvent(Integer gid, Type type, Integer[] members) {
+        _gid = gid;
+        _type = type;
+        _members = new HashSet<Integer>();
+        for (final Integer i : members)
+            _members.add(i);
+    }
+
+    public GroupEvent(Integer gid, Type type, Set<Integer> members) {
+        _gid = gid;
+        _type = type;
+        _members = members;
+    }
+
+    public Type type() {
+        return _type;
+    }
+
+    public Integer gid() {
+        return _gid;
+    }
+
+    public Set<Integer> members() {
+        return Collections.unmodifiableSet(_members);
+    }
+
+    public final static class Factory implements ItemFactory<GroupEvent> {
+        @Override
+        public GroupEvent fromString(String s) {
+            final String[] elems = s.trim().split(" ", 3);
+            try {
+                final Type type = Type.valueOf(elems[0]);
+                final Integer gid = Integer.parseInt(elems[1]);
+                switch (type) {
+                    case NEW:
+                    case DELETE:
+                        return new GroupEvent(gid, type);
+                    default:
+                        final Set<Integer> members = GroupSpecification.parse(elems[2]);
+                        return new GroupEvent(gid, type, members);
+                }
+
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        switch (_type) {
+            case NEW:
+            case DELETE:
+                return _type + " " + _gid;
+            default:
+                return _type + " " + _gid + " " + GroupSpecification.toString(_members);
+        }
+    }
+
+    public final static class GroupFilter implements Filter<GroupEvent> {
+        private final Set<Integer> _group;
+
+        public GroupFilter(Set<Integer> group) {
+            _group = group;
+        }
+
+        @Override
+        public GroupEvent filter(GroupEvent item) {
+            final Set<Integer> f_members = new HashSet<Integer>();
+            if (item._type == Type.JOIN || item._type == Type.LEAVE) {
+                for (final Integer i : item._members)
+                    if (_group.contains(i))
+                        f_members.add(i);
+                if (f_members.isEmpty())
+                    return null;
+                return new GroupEvent(item._gid, item._type, f_members);
+            }
+            return item;
+        }
+    }
 }

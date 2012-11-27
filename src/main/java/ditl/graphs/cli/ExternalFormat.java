@@ -21,55 +21,55 @@ package ditl.graphs.cli;
 import java.util.EnumSet;
 import java.util.Iterator;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 public enum ExternalFormat {
-	
-	NS2("ns2"),
-	ONE("one"),
-	CRAWDAD("crawdad");
-		
-	private final String _label;
-	
-	private ExternalFormat(String label){
-		_label = label;
-	}
-	
-	public final static class CLIParser {
-		
-		private final static String fmtOption = "format";
-		private final ExternalFormat default_fmt;
-		private final EnumSet<ExternalFormat> fmt_options;
-		
-		public CLIParser(ExternalFormat defaultFormat, ExternalFormat...otherFormats){
-			fmt_options = EnumSet.of(defaultFormat, otherFormats);
-			default_fmt = defaultFormat;
-		}
-		
-		public void setOptions(Options options){
-			StringBuffer buffer = new StringBuffer();
-			Iterator<ExternalFormat> i = fmt_options.iterator();
-			while ( i.hasNext() ){
-				buffer.append(i.next()._label);
-				if ( i.hasNext() ){
-					buffer.append(" | ");
-				}
-			}
-			if ( default_fmt != null )
-				buffer.append(" (default: "+default_fmt._label+")");
-			options.addOption(null, fmtOption, true, buffer.toString());
-		}
-		
-		public ExternalFormat parse(CommandLine cli) throws ParseException{
-			if ( cli.hasOption(fmtOption) ){
-				String v = cli.getOptionValue(fmtOption);
-				for ( ExternalFormat fmt : ExternalFormat.values()){
-					if ( fmt._label.equals(v.toLowerCase()))
-						return fmt;
-				}
-				throw new ParseException("Invalid format '+v+'");
-			}
-			return default_fmt;
-		}
-	}
+
+    NS2("ns2"),
+    ONE("one"),
+    CRAWDAD("crawdad");
+
+    private final String _label;
+
+    private ExternalFormat(String label) {
+        _label = label;
+    }
+
+    public final static class CLIParser {
+
+        private final static String fmtOption = "format";
+        private final ExternalFormat default_fmt;
+        private final EnumSet<ExternalFormat> fmt_options;
+
+        public CLIParser(ExternalFormat defaultFormat, ExternalFormat... otherFormats) {
+            fmt_options = EnumSet.of(defaultFormat, otherFormats);
+            default_fmt = defaultFormat;
+        }
+
+        public void setOptions(Options options) {
+            final StringBuffer buffer = new StringBuffer();
+            final Iterator<ExternalFormat> i = fmt_options.iterator();
+            while (i.hasNext()) {
+                buffer.append(i.next()._label);
+                if (i.hasNext())
+                    buffer.append(" | ");
+            }
+            if (default_fmt != null)
+                buffer.append(" (default: " + default_fmt._label + ")");
+            options.addOption(null, fmtOption, true, buffer.toString());
+        }
+
+        public ExternalFormat parse(CommandLine cli) throws ParseException {
+            if (cli.hasOption(fmtOption)) {
+                final String v = cli.getOptionValue(fmtOption);
+                for (final ExternalFormat fmt : ExternalFormat.values())
+                    if (fmt._label.equals(v.toLowerCase()))
+                        return fmt;
+                throw new ParseException("Invalid format '+v+'");
+            }
+            return default_fmt;
+        }
+    }
 }
