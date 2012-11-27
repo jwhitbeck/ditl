@@ -18,53 +18,58 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
+import java.util.EnumSet;
+import java.util.Iterator;
+
 import org.apache.commons.cli.*;
 
-public final class ExternalFormat {
+public enum ExternalFormat {
 	
-	public final static int NS2 = 0;
-	public final static int ONE = 1;
-	public final static int CRAWDAD = 2;
+	NS2("ns2"),
+	ONE("one"),
+	CRAWDAD("crawdad");
+		
+	private final String _label;
 	
-	public final static String[] labels = {
-		"ns2",
-		"one",
-		"crawdad"
-	};
-	
-	private Integer[] _fmts;
-	private Integer cur_fmt;
-	
-	private final static String fmtOption = "format";
-	
-	public ExternalFormat(Integer...fmts){
-		_fmts = fmts;
-		cur_fmt = _fmts[0];
+	private ExternalFormat(String label){
+		_label = label;
 	}
 	
-	public void setOptions(Options options){
-		StringBuffer buffer = new StringBuffer();
-		for ( int i=0; i<_fmts.length; ++i){
-			buffer.append(labels[_fmts[i]]);
-			if ( i<_fmts.length-1)
-				buffer.append(" | ");
+	public final static class CLIParser {
+		
+		private final static String fmtOption = "format";
+		private final ExternalFormat default_fmt;
+		private final EnumSet<ExternalFormat> fmt_options;
+		
+		public CLIParser(ExternalFormat defaultFormat, ExternalFormat...otherFormats){
+			fmt_options = EnumSet.of(defaultFormat, otherFormats);
+			default_fmt = defaultFormat;
 		}
-		if ( _fmts.length >= 2 )
-			buffer.append(" (default: "+labels[cur_fmt]+")");
-		options.addOption(null, fmtOption, true, buffer.toString());
-	}
-	
-	public void parse(CommandLine cli){
-		if ( cli.hasOption(fmtOption) ){
-			String v = cli.getOptionValue(fmtOption);
-			for ( int i=0; i<labels.length; ++i){
-				if ( labels[i].equals(v.toLowerCase()))
-					cur_fmt = i;
+		
+		public void setOptions(Options options){
+			StringBuffer buffer = new StringBuffer();
+			Iterator<ExternalFormat> i = fmt_options.iterator();
+			while ( i.hasNext() ){
+				buffer.append(i.next()._label);
+				if ( i.hasNext() ){
+					buffer.append(" | ");
+				}
 			}
+			if ( default_fmt != null )
+				buffer.append(" (default: "+default_fmt._label+")");
+			options.addOption(null, fmtOption, true, buffer.toString());
 		}
-	}
-	
-	public boolean is(Integer fmt){
-		return fmt.equals(cur_fmt);
+		
+		public ExternalFormat parse(CommandLine cli) throws ParseException{
+			if ( cli.hasOption(fmtOption) ){
+				String v = cli.getOptionValue(fmtOption);
+				for ( ExternalFormat fmt : ExternalFormat.values()){
+					if ( fmt._label.equals(v.toLowerCase()))
+						return fmt;
+				}
+				throw new ParseException("Invalid format '+v+'");
+			}
+			return default_fmt;
+		}
 	}
 }

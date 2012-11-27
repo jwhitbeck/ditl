@@ -28,10 +28,13 @@ import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ImportApp;
 import ditl.graphs.*;
 
+import static ditl.graphs.cli.ExternalFormat.*;
+
 
 public class ImportMovement extends ImportApp {
 	
-	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.NS2, ExternalFormat.ONE);
+	private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(NS2, ONE);
+	private ExternalFormat ext_fmt;
 	private Long maxTime;
 	private long ticsPerSecond;
 	private Double timeMul;
@@ -51,7 +54,7 @@ public class ImportMovement extends ImportApp {
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
-		ext_fmt.parse(cli);
+		ext_fmt = ext_fmt_parser.parse(cli);
 		ticsPerSecond = getTicsPerSecond(cli.getOptionValue(destTimeUnitOption,"ms"));
 		Long otps = getTicsPerSecond(cli.getOptionValue(origTimeUnitOption,"s"));
 		timeMul = getTimeMul(otps,ticsPerSecond);
@@ -69,10 +72,10 @@ public class ImportMovement extends ImportApp {
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException {
 		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
 		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
-		if ( ext_fmt.is(ExternalFormat.NS2) )
-			NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, fix_pause_times, id_gen);
-		else
-			ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, id_gen);
+		switch (ext_fmt){
+		case NS2: NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, fix_pause_times, id_gen); break;
+		case ONE: ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, id_gen); break;
+		}	
 	}
 
 
@@ -80,7 +83,7 @@ public class ImportMovement extends ImportApp {
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
-		ext_fmt.setOptions(options);
+		ext_fmt_parser.setOptions(options);
 		options.addOption(null, maxTimeOption, true, "maximum movement time in seconds");
 		options.addOption(null, origTimeUnitOption, true, "time unit of original trace [s, ms, us, ns] (default: s)");
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: ms)");

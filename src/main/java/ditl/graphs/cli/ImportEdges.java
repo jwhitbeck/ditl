@@ -28,10 +28,12 @@ import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.ImportApp;
 import ditl.graphs.*;
 
+import static ditl.graphs.cli.ExternalFormat.*;
 
 public class ImportEdges extends ImportApp {
 
-	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.CRAWDAD, ExternalFormat.ONE);
+	private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(CRAWDAD, ONE);
+	private ExternalFormat ext_fmt;
 	private long ticsPerSecond;
 	private Double timeMul;
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
@@ -47,7 +49,7 @@ public class ImportEdges extends ImportApp {
 	protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
-		ext_fmt.parse(cli);
+		ext_fmt = ext_fmt_parser.parse(cli);
 		ticsPerSecond = getTicsPerSecond(cli.getOptionValue(destTimeUnitOption,"ms"));
 		Long otps = getTicsPerSecond(cli.getOptionValue(origTimeUnitOption,"s"));
 		offset = Long.parseLong(cli.getOptionValue(offsetOption,"0")) * ticsPerSecond;
@@ -62,7 +64,7 @@ public class ImportEdges extends ImportApp {
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
-		ext_fmt.setOptions(options);
+		ext_fmt_parser.setOptions(options);
 		options.addOption(null, origTimeUnitOption, true, "time unit of original trace [s, ms, us, ns] (default: s)");
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: ms)");
 		options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
@@ -74,9 +76,9 @@ public class ImportEdges extends ImportApp {
 	public void run() throws IOException, AlreadyExistsException, LoadTraceException {
 		EdgeTrace edges = (EdgeTrace) _store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
 		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
-		if ( ext_fmt.is(ExternalFormat.CRAWDAD) )
-			CRAWDADContacts.fromCRAWDAD(edges, _in, timeMul, ticsPerSecond, offset, id_gen);
-		else
-			ONEContacts.fromONE(edges, _in, timeMul, ticsPerSecond, offset, id_gen);
+		switch ( ext_fmt ){
+		case CRAWDAD: CRAWDADContacts.fromCRAWDAD(edges, _in, timeMul, ticsPerSecond, offset, id_gen); break;
+		case ONE: ONEContacts.fromONE(edges, _in, timeMul, ticsPerSecond, offset, id_gen); break;
+		}
 	}
 }

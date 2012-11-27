@@ -26,12 +26,15 @@ import ditl.Store.NoSuchTraceException;
 import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
+import static ditl.graphs.cli.ExternalFormat.*;
+
 
 public class ExportMovement extends ExportApp {
 
 	private Long maxTime;
 	private Long dtps;
-	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.NS2, ExternalFormat.ONE);
+	private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(NS2, ONE);
+	private ExternalFormat ext_fmt;
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
 	private double d_interval;
 	
@@ -43,7 +46,7 @@ public class ExportMovement extends ExportApp {
 	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
-		ext_fmt.parse(cli);
+		ext_fmt = ext_fmt_parser.parse(cli);
 		if ( cli.hasOption(maxTimeOption) )
 			maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption));
 		dtps = getTicsPerSecond( cli.getOptionValue(destTimeUnitOption,"s"));
@@ -56,7 +59,7 @@ public class ExportMovement extends ExportApp {
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
-		ext_fmt.setOptions(options);
+		ext_fmt_parser.setOptions(options);
 		options.addOption(null, maxTimeOption, true, "maximum movement time (for ONE only)");
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: s)");
 		options.addOption(null, intervalOption, true, "interval (for ONE only)");
@@ -69,9 +72,9 @@ public class ExportMovement extends ExportApp {
 		long interval = Math.max( (long)(d_interval * otps), 1);
 		if ( maxTime != null ) maxTime *= otps;
 		double timeMul = getTimeMul(otps,dtps);
-		if ( ext_fmt.is(ExternalFormat.NS2) )
-			NS2Movement.toNS2(movement, _out, timeMul);
-		else
-			ONEMovement.toONE(movement, _out, timeMul, interval, maxTime);
+		switch ( ext_fmt ){
+		case NS2: NS2Movement.toNS2(movement, _out, timeMul); break;
+		case ONE: ONEMovement.toONE(movement, _out, timeMul, interval, maxTime); break;
+		}
 	}
 }

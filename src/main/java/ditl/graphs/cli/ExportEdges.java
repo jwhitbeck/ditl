@@ -26,10 +26,13 @@ import ditl.Store.NoSuchTraceException;
 import ditl.cli.ExportApp;
 import ditl.graphs.*;
 
+import static ditl.graphs.cli.ExternalFormat.*;
+
 public class ExportEdges extends ExportApp {
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
-	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.CRAWDAD, ExternalFormat.ONE);
+	private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(CRAWDAD, ONE);
+	private ExternalFormat ext_fmt;
 	private Long dtps;
 
 	public final static String PKG_NAME = "graphs";
@@ -40,7 +43,7 @@ public class ExportEdges extends ExportApp {
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
-		ext_fmt.setOptions(options);
+		ext_fmt_parser.setOptions(options);
 		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: s)");
 	}
 
@@ -49,7 +52,7 @@ public class ExportEdges extends ExportApp {
 			throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
-		ext_fmt.parse(cli);
+		ext_fmt = ext_fmt_parser.parse(cli);
 		dtps = getTicsPerSecond( cli.getOptionValue(destTimeUnitOption,"s"));
 		if ( dtps == null )
 			throw new HelpException();
@@ -60,9 +63,9 @@ public class ExportEdges extends ExportApp {
 		EdgeTrace edges = (EdgeTrace) _store.getTrace(graph_options.get(GraphOptions.EDGES));
 		long otps = edges.ticsPerSecond();
 		double timeMul = getTimeMul(otps,dtps);
-		if ( ext_fmt.is(ExternalFormat.CRAWDAD) )
-			CRAWDADContacts.toCRAWDAD(edges, _out, timeMul);
-		else
-			ONEContacts.toONE(edges, _out, timeMul);
+		switch ( ext_fmt ){
+		case CRAWDAD: CRAWDADContacts.toCRAWDAD(edges, _out, timeMul); break;
+		case ONE: ONEContacts.toONE(edges, _out, timeMul); break;
+		}
 	}
 }
