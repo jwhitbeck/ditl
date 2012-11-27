@@ -125,7 +125,7 @@ public class FloodingReachableConverter implements
 		arc_writer = _reachability.getWriter();
 		
 		arc_writer.setProperty(ReachabilityTrace.delayKey, _delay);
-		arc_writer.setProperty(Trace.ticsPerSecondKey, _edges.ticsPerSecond());
+		arc_writer.setProperty(Trace.timeUnitKey, _edges.timeUnit());
 		arc_writer.setProperty(ReachabilityTrace.tauKey, _tau);
 		arc_writer.setProperty(Trace.minTimeKey, _edges.minTime());
 		arc_writer.setProperty(Trace.maxTimeKey, _edges.maxTime());

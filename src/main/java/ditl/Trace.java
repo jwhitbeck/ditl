@@ -28,7 +28,6 @@ public abstract class Trace<E> {
 	final public static String 
 		nameKey = "name",
 		typeKey = "type",
-		ticsPerSecondKey = "tics per second", // deprecated. Will be remove in future versions
 		timeUnitKey = "time unit",
 		descriptionKey = "description",
 		minUpdateIntervalKey = "min update interval",
@@ -39,7 +38,6 @@ public abstract class Trace<E> {
 		minTimeKey = "min time",
 		maxTimeKey = "max time",
 		defaultPriorityKey = "default priority",
-		snapshotIntervalKey = "snapshot interval", // deprecated. Will be removed in future versions.
 		idMapKey = "id map";
 	
 	final public static int 
@@ -123,19 +121,11 @@ public abstract class Trace<E> {
 	}
 	
 	public long ticsPerSecond(){
-		String time_unit = getValue(timeUnitKey);
-		if ( time_unit == null ){
-			return Long.parseLong(getValue(ticsPerSecondKey)); // support for legacy info format. Will be removed in future versions
-		}
-		return Units.getTicsPerSecond(time_unit);
+		return Units.getTicsPerSecond(getValue(timeUnitKey));
 	}
 	
 	public String timeUnit(){
-		String time_unit = getValue(timeUnitKey);
-		if ( time_unit == null ){ // support for legacy info file format. Will be removed in future
-			time_unit = Units.toTimeUnit( ticsPerSecond());
-		}
-		return time_unit;
+		return getValue(timeUnitKey);
 	}
 	
 	public IdMap idMap(){
