@@ -30,12 +30,12 @@ import ditl.transfers.*;
 
 public class AnalyzeTransfers extends ExportApp {
 	
-	final static String broadcastDeliveryOption = "broadcast-delivery";
-	final static String messageTransferOption = "message-transfers";
-	
-	final static String messagesOption = "messages";
-	final static String buffersOption = "buffers";
-	final static String transfersOption = "transfers";
+	final static String 
+		broadcastDeliveryOption = "broadcast-delivery",
+		messageTransferOption = "message-transfers",
+		messagesOption = "messages",
+		buffersOption = "buffers",
+		transfersOption = "transfers";
 	
 	private String messagesName;
 	private String buffersName;

@@ -24,9 +24,10 @@ import ditl.*;
 
 public final class MovementEvent {
 	
-	public final static int IN = 0;
-	public final static int OUT = 1;
-	public final static int NEW_DEST = 2;
+	public final static int 
+		IN = 0,
+		OUT = 1,
+		NEW_DEST = 2;
 	
 	Integer id;
 	Point dest;

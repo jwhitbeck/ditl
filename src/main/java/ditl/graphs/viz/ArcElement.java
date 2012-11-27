@@ -28,13 +28,15 @@ import ditl.viz.SceneElement;
 
 public class ArcElement implements SceneElement {
 
-	public final static int DOWN = 0;
-	public final static int LEFT = 1;
-	public final static int RIGHT = 2;
-	public final static int SYM = 3;
+	public final static int 
+		DOWN = 0,
+		LEFT = 1,
+		RIGHT = 2,
+		SYM = 3;
 	
-	protected static Color directionalColor = Color.RED;
-	protected static Color biColor = Color.GREEN;
+	protected static Color 
+		directionalColor = Color.RED,
+		biColor = Color.GREEN;
 	
 	private NodeElement node1;
 	private NodeElement node2;

@@ -30,18 +30,19 @@ import ditl.graphs.*;
 
 public class Analyze extends ExportApp {
 	
-	final static String nodeCountOption = "node-count";
-	final static String transitTimesOption = "transit-times";
-	final static String timeToFirstContactOption = "first-contact-time";
-	final static String numContactsOption = "num-contacts";
-	final static String nodeDegreeOption = "node-degree";
-	final static String contactsOption = "contacts";
-	final static String interContactsOption = "inter-contacts";
-	final static String anyContactsOption = "any-contacts";
-	final static String interAnyContactsOption = "inter-any-contacts";
-	final static String clusteringOption = "clustering";
-	final static String groupSizeOption = "group-size";
-	final static String reachabilityOption = "reachability";
+	final static String 
+		nodeCountOption = "node-count",
+		transitTimesOption = "transit-times",
+		timeToFirstContactOption = "first-contact-time",
+		numContactsOption = "num-contacts",
+		nodeDegreeOption = "node-degree",
+		contactsOption = "contacts",
+		interContactsOption = "inter-contacts",
+		anyContactsOption = "any-contacts",
+		interAnyContactsOption = "inter-any-contacts",
+		clusteringOption = "clustering",
+		groupSizeOption = "group-size",
+		reachabilityOption = "reachability";
 	
 	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.EDGES, GraphOptions.GROUPS, GraphOptions.ARCS);
 	private ReportFactory<?> factory;

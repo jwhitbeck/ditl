@@ -24,9 +24,10 @@ import ditl.*;
 
 public class ReachabilityTrace extends ArcTrace {
 
-	final public static String tauKey = "tau";
-	final public static String etaKey = "eta";
-	final public static String delayKey = "delay";
+	final public static String 
+		tauKey = "tau",
+		etaKey = "eta",
+		delayKey = "delay";
 	
 	final public static String type = "reachability";
 	final public static String defaultName = "reachability";

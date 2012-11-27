@@ -23,9 +23,10 @@ import ditl.graphs.Arc;
 
 public class TransferEvent {
 	
-	public final static int START = 0;
-	public final static int COMPLETE = 1;
-	public final static int ABORT = 2;
+	public final static int 
+		START = 0,
+		COMPLETE = 1,
+		ABORT = 2;
 	
 	Integer msg_id;
 	int _type;

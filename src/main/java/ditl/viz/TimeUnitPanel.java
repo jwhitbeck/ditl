@@ -27,10 +27,11 @@ import ditl.Trace;
 @SuppressWarnings("serial")
 public class TimeUnitPanel extends JPanel {
 	
-	final static int SECONDS = 0;
-	final static int MINUTES = 1;
-	final static int HOURS = 2;
-	final static int DAYS = 3;
+	final static int 
+		SECONDS = 0,
+		MINUTES = 1,
+		HOURS = 2,
+		DAYS = 3;
 	
 	final static String[] long_units = { "seconds", "minutes", "hours", "days" };
 	final static String[] short_units = { "s", "m", "h", "d" };

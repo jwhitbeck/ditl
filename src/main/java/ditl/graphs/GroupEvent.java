@@ -24,15 +24,17 @@ import ditl.*;
 
 public class GroupEvent {
 
-	public final static int NEW = 0;
-	public final static int JOIN = 1;
-	public final static int LEAVE = 2;
-	public final static int DELETE = 3;
+	public final static int 
+		NEW = 0,
+		JOIN = 1,
+		LEAVE = 2,
+		DELETE = 3;
 	
-	private final static String NEW_LABEL = "NEW";
-	private final static String JOIN_LABEL = "JOIN";
-	private final static String LEAVE_LABEL = "LEAVE";
-	private final static String DELETE_LABEL = "DEL";
+	private final static String 
+		NEW_LABEL = "NEW",
+		JOIN_LABEL = "JOIN",
+		LEAVE_LABEL = "LEAVE",
+		DELETE_LABEL = "DEL";
 	
 	int _type;
 	Integer _gid;

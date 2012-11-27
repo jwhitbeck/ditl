@@ -29,19 +29,20 @@ import ditl.WritableStore.AlreadyExistsException;
 
 public abstract class App {
 	
-	protected final static String offsetOption = "offset";
-	protected final static String origTimeUnitOption = "orig-time-unit";
-	protected final static String destTimeUnitOption = "dest-time-unit";
-	protected final static String maxTimeOption = "max-time";
-	protected final static String minTimeOption = "min-time";
-	protected final static String intervalOption = "interval";
-	protected final static String traceOption = "trace";
-	protected final static String outputOption = "output";
-	protected final static String storeOutputOption = "out-store";
-	protected final static String forceOption = "force";
-	protected final static String typeOption = "type";
-	protected final static String stringIdsOption = "string-ids";
-	protected final static String minIdOption = "min-id";
+	protected final static String 
+		offsetOption = "offset",
+		origTimeUnitOption = "orig-time-unit",
+		destTimeUnitOption = "dest-time-unit",
+		maxTimeOption = "max-time",
+		minTimeOption = "min-time",
+		intervalOption = "interval",
+		traceOption = "trace",
+		outputOption = "output",
+		storeOutputOption = "out-store",
+		forceOption = "force",
+		typeOption = "type",
+		stringIdsOption = "string-ids",
+		minIdOption = "min-id";
 	
 	protected Options options = new Options();
 	protected String usageString;

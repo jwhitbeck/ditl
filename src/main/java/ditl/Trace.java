@@ -25,25 +25,27 @@ public abstract class Trace<E> {
 	
 	final public static long INFINITY = Long.MAX_VALUE / 2; // divided by 2 to avoid edge effects on signs of longs
 	
-	final public static String nameKey = "name";
-	final public static String typeKey = "type";
-	final public static String ticsPerSecondKey = "tics per second"; // deprecated. Will be remove in future versions
-	final public static String timeUnitKey = "time unit";
-	final public static String descriptionKey = "description";
-	final public static String minUpdateIntervalKey = "min update interval";
-	final public static String maxUpdateIntervalKey = "max update interval";
-	final public static String stateMinUpdateIntervalKey = "snapshots min update interval";
-	final public static String stateMaxUpdateIntervalKey = "snapshots max update interval";
-	final public static String lastSnapTimeKey = "last snapshot time";
-	final public static String minTimeKey = "min time";
-	final public static String maxTimeKey = "max time";
-	final public static String defaultPriorityKey = "default priority";
-	final public static String snapshotIntervalKey = "snapshot interval"; // deprecated. Will be removed in future versions.
-	final public static String idMapKey = "id map";
+	final public static String 
+		nameKey = "name",
+		typeKey = "type",
+		ticsPerSecondKey = "tics per second", // deprecated. Will be remove in future versions
+		timeUnitKey = "time unit",
+		descriptionKey = "description",
+		minUpdateIntervalKey = "min update interval",
+		maxUpdateIntervalKey = "max update interval",
+		stateMinUpdateIntervalKey = "snapshots min update interval",
+		stateMaxUpdateIntervalKey = "snapshots max update interval",
+		lastSnapTimeKey = "last snapshot time",
+		minTimeKey = "min time",
+		maxTimeKey = "max time",
+		defaultPriorityKey = "default priority",
+		snapshotIntervalKey = "snapshot interval", // deprecated. Will be removed in future versions.
+		idMapKey = "id map";
 	
-	final public static int defaultPriority = 100;
-	final public static int highestPriority = 0;
-	final public static int lowestPriority = Integer.MAX_VALUE;
+	final public static int 
+		defaultPriority = 100,
+		highestPriority = 0,
+		lowestPriority = Integer.MAX_VALUE;
 	
 	protected String _name;
 	protected Store _store;

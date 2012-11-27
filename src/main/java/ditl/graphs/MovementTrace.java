@@ -26,10 +26,11 @@ import ditl.*;
 public class MovementTrace extends StatefulTrace<MovementEvent, Movement> 
 	implements StatefulTrace.Filterable<MovementEvent, Movement>{
 
-	final public static String minXKey = "min X";
-	final public static String maxXKey = "max X";
-	final public static String minYKey = "min Y";
-	final public static String maxYKey = "max Y";
+	final public static String 
+		minXKey = "min X",
+		maxXKey = "max X",
+		minYKey = "min Y",
+		maxYKey = "max Y";
 	
 	public final static String defaultName = "movement";
 	public final static String type = "movement";

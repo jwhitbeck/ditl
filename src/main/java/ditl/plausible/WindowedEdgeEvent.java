@@ -23,19 +23,21 @@ import ditl.graphs.Edge;
 
 public final class WindowedEdgeEvent {
 	
-	public final static int UP = 0;
-	public final static int DOWN = 1;
-	public final static int PREV_UP = 2;
-	public final static int PREV_DOWN = 3;
-	public final static int NEXT_UP = 4;
-	public final static int NEXT_DOWN = 5;
+	public final static int 
+		UP = 0,
+		DOWN = 1,
+		PREV_UP = 2,
+		PREV_DOWN = 3,
+		NEXT_UP = 4,
+		NEXT_DOWN = 5;
 	
-	private final static String _up = "UP";
-	private final static String _down = "DOWN";
-	private final static String prev_up = "PREVUP";
-	private final static String prev_down = "PREVDOWN";
-	private final static String next_up = "NEXTUP";
-	private final static String next_down = "NEXTDOWN";
+	private final static String 
+		_up = "UP",
+		_down = "DOWN",
+		prev_up = "PREVUP",
+		prev_down = "PREVDOWN",
+		next_up = "NEXTUP",
+		next_down = "NEXTDOWN";
 	
 	final int _type;
 	final Edge _edge;

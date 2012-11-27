@@ -22,10 +22,11 @@ import ditl.ItemFactory;
 
 public class BufferEvent {
 
-	public final static int IN = 0;
-	public final static int ADD = 1;
-	public final static int REMOVE = 2;
-	public final static int OUT = 3;
+	public final static int 
+		IN = 0,
+		ADD = 1,
+		REMOVE = 2,
+		OUT = 3;
 	
 	Integer _id;
 	Integer msg_id;

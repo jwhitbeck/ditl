@@ -32,15 +32,16 @@ import ditl.graphs.*;
 
 public class Reachability extends ConvertApp {
 	
-	final static String everyOption = "every";
-	final static String noDeleteOption = "no-delete";
-	final static String noPruneOption = "no-prune";
-	final static String pruneReusedOption = "prune-reused";
-	final static String noPruneLastOption = "no-prune-last";
-	final static String minDelayOption = "min-delay";
-	final static String verboseOption = "verbose";
-	final static String prefixOption = "prefix";
-	final static String timeFileOption = "times-file"; 
+	final static String 
+		everyOption = "every",
+		noDeleteOption = "no-delete",
+		noPruneOption = "no-prune",
+		pruneReusedOption = "prune-reused",
+		noPruneLastOption = "no-prune-last",
+		minDelayOption = "min-delay",
+		verboseOption = "verbose",
+		prefixOption = "prefix",
+		timeFileOption = "times-file"; 
 	
 	private double u_tau;
 	private double u_eta;
