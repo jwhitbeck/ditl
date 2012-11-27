@@ -67,9 +67,9 @@ public class AnalyzeTransfers extends ExportApp {
 			throws ParseException, ArrayIndexOutOfBoundsException,
 			HelpException {
 		super.parseArgs(cli, args);
-		messagesName = cli.getOptionValue(messagesOption, MessageTrace.defaultName);
-		transfersName = cli.getOptionValue(transfersOption, TransferTrace.defaultName);
-		buffersName = cli.getOptionValue(buffersOption, BufferTrace.defaultName);
+		messagesName = cli.getOptionValue(messagesOption, getDefaultName(MessageTrace.class));
+		transfersName = cli.getOptionValue(transfersOption, getDefaultName(TransferTrace.class));
+		buffersName = cli.getOptionValue(buffersOption, getDefaultName(BufferTrace.class));
 		if ( cli.hasOption(minTimeOption) )
 			minTime = Long.parseLong(cli.getOptionValue(minTimeOption));
 		if ( cli.hasOption(maxTimeOption) )

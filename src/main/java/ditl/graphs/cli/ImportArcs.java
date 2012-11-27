@@ -35,7 +35,7 @@ public class ImportArcs extends ImportApp {
 	
 	private long ticsPerSecond;
 	private Double timeMul;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.ARCS);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.ARCS);
 	private long offset;
 	private boolean use_id_map;
 	private int min_id;
@@ -67,7 +67,7 @@ public class ImportArcs extends ImportApp {
 	
 	@Override
 	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		ArcTrace arcs = (ArcTrace) _store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.type, force);
+		ArcTrace arcs = (ArcTrace) _store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.class, force);
 		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
 		CRAWDADArcs.fromCRAWDAD(arcs, _in, timeMul, ticsPerSecond, offset, id_gen);
 	}

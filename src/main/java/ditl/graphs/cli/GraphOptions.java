@@ -20,64 +20,47 @@ package ditl.graphs.cli;
 
 import org.apache.commons.cli.*;
 
+import ditl.Trace;
 import ditl.graphs.*;
 
-public class GraphOptions {
-
-	public final static int PRESENCE = 0;
-	public final static int EDGES = 1;
-	public final static int ARCS = 2;
-	public final static int MOVEMENT = 3;
-	public final static int GROUPS = 4;
-	public final static int BEACONS = 5;
+public enum GraphOptions {
 	
-	private final static String[] _options = {
-		"presence",
-		"edges",
-		"arcs",
-		"movement",
-		"groups",
-		"beacons",
-	};
+	PRESENCE(PresenceTrace.class),
+	EDGES(EdgeTrace.class),
+	ARCS(ArcTrace.class),
+	MOVEMENT(MovementTrace.class),
+	GROUPS(GroupTrace.class),
+	BEACONS(BeaconTrace.class);
 	
-	private final static String[] _defaults = {
-		PresenceTrace.defaultName,
-		EdgeTrace.defaultName,
-		ArcTrace.defaultName,
-		MovementTrace.defaultName,
-		GroupTrace.defaultName,
-		BeaconTrace.defaultName,
-	};
+	final String name;
 	
-	private final static String[] _help = {
-		"name of presence trace (default: "+PresenceTrace.defaultName+")",
-		"name of edge trace (default: "+EdgeTrace.defaultName+")",
-		"name of arc trace (default: "+ArcTrace.defaultName+")",
-		"name of movement trace (default: "+MovementTrace.defaultName+")",
-		"name of group trace (default: "+GroupTrace.defaultName+")",
-		"name of beacon trace (default: "+BeaconTrace.defaultName+")",
-	};
-	
-	private Integer[] _opts;
-	private String[] _values;
-	
-	public GraphOptions (Integer... opts){
-		_opts = opts;
-		_values = new String[_options.length];
+	private GraphOptions(Class<? extends Trace<?>> klass){
+		name = klass.getAnnotation(Trace.Type.class).value();
 	}
 	
-	public void setOptions(Options options){
-		for ( Integer i : _opts )
-			options.addOption(null, _options[i], true, _help[i]);
+	public final static class CliParser {
+		
+		private final GraphOptions[] _opts;
+		private final String[] _values = new String[GraphOptions.values().length];
+		
+		public CliParser(GraphOptions...opts){
+			_opts = opts;
+		}
+		
+		public void setOptions(Options options){
+			for ( GraphOptions opt : _opts )
+				options.addOption(null, opt.name, true, 
+						String.format("name of %s trace (default: %s)", opt.name, opt.name));
+		}
+		
+		public void parse(CommandLine cli){
+			for ( GraphOptions opt : _opts )
+				_values[opt.ordinal()] = cli.getOptionValue(opt.name,opt.name);
+		}
+		
+		public String get(GraphOptions opt){
+			return _values[opt.ordinal()];
+		}
+		
 	}
-	
-	public void parse(CommandLine cli){
-		for ( Integer i : _opts )
-			_values[i] = cli.getOptionValue(_options[i],_defaults[i]);
-	}
-	
-	public String get(Integer i){
-		return _values[i];
-	}
-	
 }

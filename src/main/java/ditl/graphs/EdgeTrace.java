@@ -23,12 +23,10 @@ import java.util.*;
 
 import ditl.*;
 
+@Trace.Type("edges")
 public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge> 
 	implements StatefulTrace.Filterable<EdgeEvent, Edge>{
-	
-	public final static String type = "edges";
-	public final static String defaultName = "edges";
-	
+
 	public final static class Updater implements StateUpdater<EdgeEvent,Edge> {
 		private Set<Edge> edges = new AdjacencySet.Edges();
 		

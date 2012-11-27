@@ -32,7 +32,7 @@ import ditl.graphs.*;
 @Command(pkg="graphs", cmd="group-edges", alias="ge")
 public class StaticGroupEdges extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.GROUPS, GraphOptions.EDGES);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.GROUPS, GraphOptions.EDGES);
 	private String groupEdgesName;
 
 	@Override
@@ -40,7 +40,7 @@ public class StaticGroupEdges extends ConvertApp {
 		EdgeTrace edges = (EdgeTrace)orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
 		GroupTrace groups = (GroupTrace)orig_store.getTrace(graph_options.get(GraphOptions.GROUPS));
 		Set<Group> static_groups = groups.staticGroups();
-		EdgeTrace group_edges = (EdgeTrace)dest_store.newTrace(groupEdgesName, EdgeTrace.type, force);
+		EdgeTrace group_edges = (EdgeTrace)dest_store.newTrace(groupEdgesName, EdgeTrace.class, force);
 		new StaticGroupEdgeConverter(group_edges, edges, static_groups).convert();
 	}
 	

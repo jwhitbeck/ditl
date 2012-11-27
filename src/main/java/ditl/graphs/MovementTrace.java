@@ -23,6 +23,7 @@ import java.util.*;
 
 import ditl.*;
 
+@Trace.Type("movement")
 public class MovementTrace extends StatefulTrace<MovementEvent, Movement> 
 	implements StatefulTrace.Filterable<MovementEvent, Movement>{
 
@@ -31,9 +32,7 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 		maxXKey = "max X",
 		minYKey = "min Y",
 		maxYKey = "max Y";
-	
-	public final static String defaultName = "movement";
-	public final static String type = "movement";
+
 	public final static int defaultPriority = 20;
 	
 	public double minX(){ 

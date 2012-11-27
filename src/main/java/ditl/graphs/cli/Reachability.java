@@ -50,7 +50,7 @@ public class Reachability extends ConvertApp {
 	private long delay;
 	private long eta;
 	private Long every;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.GROUPS);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.GROUPS);
 	private String timeFileName;
 	private BufferedWriter time_writer;
 	private String edgesName;

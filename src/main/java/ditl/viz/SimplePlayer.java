@@ -111,14 +111,10 @@ public abstract class SimplePlayer extends JFrame {
 		}
 	}
 	
-	public void loadTracesFromClassPath(String[] traceNames, Object[] klasses){
+	public void loadTracesFromClassPath(String[] traceNames){
 		close();
 		try {
 			_store = Store.open();
-			for ( Object obj : klasses ){
-				if ( obj instanceof Class<?> )
-					Store.addTraceClass((Class<?>)obj);
-			}
 			for ( String traceName : traceNames )
 				_store.loadTrace(traceName);
 			loadReaders();

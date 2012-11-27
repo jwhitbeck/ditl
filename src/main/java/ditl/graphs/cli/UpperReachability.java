@@ -23,6 +23,7 @@ import org.apache.commons.cli.*;
 
 import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
+import ditl.Trace;
 import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
@@ -47,7 +48,7 @@ public class UpperReachability extends ConvertApp {
 		super.parseArgs(cli, args);
 		long tau = Long.parseLong(args[1]);
 		long delay = Long.parseLong(args[2]);
-		String lower_prefix = cli.hasOption(lowerPrefixOption)? cli.getOptionValue(lowerPrefixOption) : EdgeTrace.defaultName;
+		String lower_prefix = cli.hasOption(lowerPrefixOption)? cli.getOptionValue(lowerPrefixOption) : EdgeTrace.class.getAnnotation(Trace.Type.class).value();
 		lower_name = ReachabilityTrace.defaultName(lower_prefix, tau, delay);
 		String upper_prefix = cli.hasOption(upperPrefixOption)? cli.getOptionValue(upperPrefixOption) : lower_prefix+"_upper";
 		upper_name = ReachabilityTrace.defaultName(upper_prefix, tau, delay);
@@ -64,7 +65,7 @@ public class UpperReachability extends ConvertApp {
 
 	@Override
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-		ReachabilityTrace upper_trace = (ReachabilityTrace)dest_store.newTrace(upper_name, ReachabilityTrace.type, force);
+		ReachabilityTrace upper_trace = (ReachabilityTrace)dest_store.newTrace(upper_name, ReachabilityTrace.class, force);
 		ReachabilityTrace lower_trace = (ReachabilityTrace)orig_store.getTrace(lower_name);
 		new UpperReachableConverter(upper_trace, lower_trace).convert();
 	}

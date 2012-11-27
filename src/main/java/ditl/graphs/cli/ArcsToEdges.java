@@ -33,7 +33,7 @@ public class ArcsToEdges extends ConvertApp {
 
 	private final static String intersectOption = "intersect";
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.ARCS);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.ARCS);
 	private boolean union;
 	
 	@Override
@@ -56,7 +56,7 @@ public class ArcsToEdges extends ConvertApp {
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		ArcTrace arcs = (ArcTrace) orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
-		EdgeTrace edges = (EdgeTrace) dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
+		EdgeTrace edges = (EdgeTrace) dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.class, force);
 		new ArcsToEdgesConverter(edges, arcs, union).convert();
 	}
 }

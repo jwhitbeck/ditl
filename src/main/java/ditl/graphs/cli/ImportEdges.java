@@ -38,7 +38,7 @@ public class ImportEdges extends ImportApp {
 	private ExternalFormat ext_fmt;
 	private long ticsPerSecond;
 	private Double timeMul;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES);
 	private long offset;
 	private boolean use_id_map;
 	private int min_id;
@@ -72,7 +72,7 @@ public class ImportEdges extends ImportApp {
 	
 	@Override
 	public void run() throws IOException, AlreadyExistsException, LoadTraceException {
-		EdgeTrace edges = (EdgeTrace) _store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
+		EdgeTrace edges = (EdgeTrace) _store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.class, force);
 		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
 		switch ( ext_fmt ){
 		case CRAWDAD: CRAWDADContacts.fromCRAWDAD(edges, _in, timeMul, ticsPerSecond, offset, id_gen); break;

@@ -23,11 +23,9 @@ import java.util.*;
 
 import ditl.*;
 
+@Trace.Type("buffers")
 public class BufferTrace extends StatefulTrace<BufferEvent, Buffer> {
-	
-	public final static String type = "buffers";
-	public final static String defaultName = "buffers";
-	
+
 	public final static class Updater implements StateUpdater<BufferEvent,Buffer>{
 
 		private Map<Integer,Buffer> buffer_map = new HashMap<Integer,Buffer>();

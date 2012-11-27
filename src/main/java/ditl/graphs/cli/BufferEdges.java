@@ -39,7 +39,7 @@ public class BufferEdges extends ConvertApp {
 	private long before_buffer_time;
 	private long after_buffer_time;
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES);
 
 	@Override
 	protected void initOptions() {
@@ -67,7 +67,7 @@ public class BufferEdges extends ConvertApp {
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-		EdgeTrace buffered_edges = (EdgeTrace) dest_store.newTrace(bufferedEdgesName, EdgeTrace.type, force);
+		EdgeTrace buffered_edges = (EdgeTrace) dest_store.newTrace(bufferedEdgesName, EdgeTrace.class, force);
 		before_buffer_time *= edges.ticsPerSecond();
 		after_buffer_time *= edges.ticsPerSecond();
 		new BufferEdgesConverter(buffered_edges, edges, before_buffer_time, after_buffer_time, randomize).convert();

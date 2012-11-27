@@ -100,7 +100,7 @@ public class ReachabilityFamily {
 	}
 	
 	public ReachabilityTrace newMember(long delay) throws AlreadyExistsException, LoadTraceException{
-		ReachabilityTrace rt = (ReachabilityTrace)((WritableStore)_store).newTrace(ReachabilityTrace.defaultName(_prefix, _tau, delay), ReachabilityTrace.type, true);
+		ReachabilityTrace rt = (ReachabilityTrace)((WritableStore)_store).newTrace(ReachabilityTrace.defaultName(_prefix, _tau, delay), ReachabilityTrace.class, true);
 		members[j(delay)] = rt;
 		return rt;
 	}

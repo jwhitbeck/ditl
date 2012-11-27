@@ -24,10 +24,8 @@ import java.util.*;
 import ditl.*;
 import ditl.graphs.*;
 
+@Trace.Type("transfers")
 public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
-	
-	public final static String type = "transfers";
-	public final static String defaultName = "transfers";
 	
 	public final static class Updater implements StateUpdater<TransferEvent,Transfer>{
 		private Map<Arc,Transfer> transfer_map = new AdjacencyMap.Arcs<Transfer>();

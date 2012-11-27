@@ -34,7 +34,7 @@ public class BeaconsToArcs extends ConvertApp {
 	final static String toleranceOption = "tolerance";
 	final static String expandOption = "expand";
 
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.ARCS);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.BEACONS, GraphOptions.ARCS);
 	
 	int tol;
 	double expansion;
@@ -58,7 +58,7 @@ public class BeaconsToArcs extends ConvertApp {
 
 	@Override
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-		ArcTrace arcs = (ArcTrace)dest_store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.type, force);
+		ArcTrace arcs = (ArcTrace)dest_store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.class, force);
 		BeaconTrace beacons = (BeaconTrace) orig_store.getTrace(graph_options.get(GraphOptions.BEACONS));		
 		
 		new BeaconsToArcsConverter(arcs, beacons, tol, expansion).convert();

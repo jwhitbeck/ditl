@@ -30,7 +30,7 @@ import ditl.graphs.*;
 @Command(pkg="graphs", cmd="export-arcs", alias="xa")
 public class ExportArcs extends ExportApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.ARCS);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.ARCS);
 	private Long dtps;
 	
 	@Override

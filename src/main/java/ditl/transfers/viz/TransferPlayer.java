@@ -71,16 +71,16 @@ public class TransferPlayer extends GraphPlayer {
 		super.loadReaders();
 		
 		transferSelector.setStore(_store);
-		transferSelector.load(_store.listTraces(TransferTrace.type));
+		transferSelector.load(_store.listTraces(TransferTrace.class));
 		
-		BufferTrace buffers = (BufferTrace)_store.listTraces(BufferTrace.type).get(0);
+		BufferTrace buffers = (BufferTrace)_store.listTraces(BufferTrace.class).get(0);
 		try {
 			((RoutingRunner)runner).setBufferTrace(buffers);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(this, "Failed to load buffer trace '"+buffers+"'", "Warning", JOptionPane.ERROR_MESSAGE);
 		}
 		
-		MessageTrace messages = (MessageTrace)_store.listTraces(MessageTrace.type).get(0);
+		MessageTrace messages = (MessageTrace)_store.listTraces(MessageTrace.class).get(0);
 		try {
 			((RoutingRunner)runner).setMessageTrace(messages);
 		} catch (IOException e) {

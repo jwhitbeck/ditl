@@ -36,7 +36,7 @@ public class ExportMovement extends ExportApp {
 	private Long dtps;
 	private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(NS2, ONE);
 	private ExternalFormat ext_fmt;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT);
 	private double d_interval;
 	
 	@Override

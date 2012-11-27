@@ -23,10 +23,8 @@ import java.util.*;
 
 import ditl.*;
 
+@Trace.Type("messages")
 public class MessageTrace extends StatefulTrace<MessageEvent, Message> {
-	
-	public final static String type = "messages";
-	public final static String defaultName = "messages";
 	
 	public final static int defaultPriority = 50;
 	

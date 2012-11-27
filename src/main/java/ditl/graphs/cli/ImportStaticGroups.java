@@ -37,7 +37,7 @@ public class ImportStaticGroups extends WriteApp {
 	private static String labelsOption = "labels";
 	private boolean use_id_map;
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.GROUPS);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.PRESENCE, GraphOptions.GROUPS);
 	private String[] group_specs;
 	String[] labels;
 	
@@ -68,7 +68,7 @@ public class ImportStaticGroups extends WriteApp {
 	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
 		IdMap id_map = (use_id_map)? presence.idMap() : null;
-		GroupTrace groups = (GroupTrace) _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
+		GroupTrace groups = (GroupTrace) _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
 		StatefulWriter<GroupEvent,Group> groupWriter = groups.getWriter(); 
 		Set<Group> initState = new HashSet<Group>();
 		int i = 0;

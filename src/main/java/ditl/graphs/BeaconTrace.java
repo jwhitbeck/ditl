@@ -23,11 +23,9 @@ import java.util.Set;
 
 import ditl.*;
 
+@Trace.Type("beacons")
 public class BeaconTrace extends Trace<Arc> implements Trace.Filterable<Arc> {
-	
-	public final static String type = "beacons";
-	public final static String defaultName = "beacons";
-	
+
 	public final static String beaconningPeriodKey = "beaconning period";
 	
 	public BeaconTrace(Store store, String name, PersistentMap info) throws IOException {

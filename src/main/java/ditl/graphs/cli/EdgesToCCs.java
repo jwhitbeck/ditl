@@ -31,7 +31,7 @@ import ditl.graphs.*;
 @Command(pkg="graphs", cmd="edges-to-ccs", alias="e2c")
 public class EdgesToCCs extends ConvertApp {
 
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.GROUPS);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.GROUPS);
 
 	@Override
 	protected void initOptions() {
@@ -50,7 +50,7 @@ public class EdgesToCCs extends ConvertApp {
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-		GroupTrace ccs = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
+		GroupTrace ccs = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
 		new EdgesToConnectedComponentsConverter(ccs, edges).convert();
 	}
 

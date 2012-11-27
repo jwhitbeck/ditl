@@ -22,15 +22,13 @@ import java.io.IOException;
 
 import ditl.*;
 
+@Trace.Type("reachability")
 public class ReachabilityTrace extends ArcTrace {
 
 	final public static String 
 		tauKey = "tau",
 		etaKey = "eta",
 		delayKey = "delay";
-	
-	final public static String type = "reachability";
-	final public static String defaultName = "reachability";
 	
 	public long tau(){
 		return Long.parseLong(getValue(tauKey));

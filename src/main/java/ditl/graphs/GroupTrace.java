@@ -23,14 +23,12 @@ import java.util.*;
 
 import ditl.*;
 
+@Trace.Type("groups")
 public class GroupTrace extends StatefulTrace<GroupEvent,Group> 
 	implements StatefulTrace.Filterable<GroupEvent, Group> {
 
 	final public static String labelsKey = "labels";
 	final public static String delim = ",";
-	
-	public final static String type = "groups";
-	public final static String defaultName = "groups";
 	
 	private Map<Integer,String> labels = new HashMap<Integer,String>();
 	

@@ -85,7 +85,6 @@ public abstract class WritableStore extends Store {
 	}
 	
 	public static WritableStore open(File file) throws IOException {
-		buildTypeClassMap();
 		if ( file.exists() ){
 			if ( file.isDirectory() )
 				return new DirectoryStore(file);
@@ -112,10 +111,14 @@ public abstract class WritableStore extends Store {
 	}
 	
 	public Trace<?> newTrace(String name, String type, boolean force) throws AlreadyExistsException, LoadTraceException {
+		return newTrace(name, getTraceClass(type), force);
+	}
+	
+	public Trace<?> newTrace(String name, Class<? extends Trace<?>> klass, boolean force) throws AlreadyExistsException, LoadTraceException {
 		if ( traces.containsKey(name) && ! force ){
 			throw new AlreadyExistsException(name);
 		}
-		Trace<?> trace = buildTrace(name, new PersistentMap(), type);
+		Trace<?> trace = buildTrace(name, new PersistentMap(), klass);
 		return trace;
 	}
 	

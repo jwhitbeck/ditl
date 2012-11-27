@@ -22,6 +22,9 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 
+import org.reflections.Reflections;
+import org.reflections.scanners.TypeAnnotationsScanner;
+
 public abstract class Store {
 	
 	final protected static String snapshotsFile = "snapshots";
@@ -31,7 +34,7 @@ public abstract class Store {
 	protected String separator = "/";
 	
 	final Map<String,Trace<?>> traces = new HashMap<String,Trace<?>>();
-	final static Map<String,Class<?>> type_class_map = new HashMap<String,Class<?>>();
+	final static Map<String,Class<? extends Trace<?>>> type_class_map = buildTypeClassMap();
 	
 	private Set<Reader<?>> openReaders = new HashSet<Reader<?>>();
 	private boolean closing = false;
@@ -56,24 +59,20 @@ public abstract class Store {
 		}
 	}
 	
-	public static void buildTypeClassMap() throws IOException{
-		if ( type_class_map.isEmpty() ){
-			Reflections reflections = new Reflections("\\w+\\.class");
-			for ( Class<?> klass : Reflections.getSubClasses(Trace.class, reflections.listClasses("ditl")))
-				addTraceClass(klass);
-		}
-	}
-	
-	public static void addTraceClass(Class<?> klass){
-		if ( Trace.class.isAssignableFrom(klass) ){
-			try {
-				Field f = klass.getField("type");
-				String type = (String)f.get(null);
-				type_class_map.put(type, klass);
-			} catch (Exception e) {
-				System.err.println(klass+": "+e);
+	@SuppressWarnings("unchecked")
+	private static Map<String,Class<? extends Trace<?>>> buildTypeClassMap() {
+		Map<String,Class<? extends Trace<?>>> type_class = new HashMap<String,Class<? extends Trace<?>>>();
+		if ( type_class.isEmpty() ){
+			Set<Class<?>> traceClasses = new Reflections("ditl", new TypeAnnotationsScanner()).
+					getTypesAnnotatedWith(Trace.Type.class);
+			for ( Class<?> klass : traceClasses ){
+				if ( Trace.class.isAssignableFrom(klass) ){
+					type_class.put(klass.getAnnotation(Trace.Type.class).value(), 
+							(Class<? extends Trace<?>>)klass);
+				}
 			}
 		}
+		return type_class;
 	}
 	
 	String traceFile(String name){
@@ -94,11 +93,18 @@ public abstract class Store {
 	}
 	
 	public List<Trace<?>> listTraces(String type){
+		try {
+			return listTraces(getTraceClass(type));
+		} catch ( LoadTraceException e){
+			return Collections.emptyList();
+		}
+	}
+	
+	public List<Trace<?>> listTraces(Class<? extends Trace<?>> klass){
 		List<Trace<?>> list = new LinkedList<Trace<?>>();
 		for ( Trace<?> trace : traces.values() )
-			if ( trace.type() != null )
-				if ( trace.type().equals(type) )
-					list.add(trace);
+			if ( klass.equals(trace.getClass()))
+				list.add(trace);
 		return list;
 	}
 	
@@ -136,7 +142,6 @@ public abstract class Store {
 	}
 	
 	public static Store open(File...files) throws IOException {
-		if ( files.length > 0 ) buildTypeClassMap();
 		switch ( files.length ){
 		case 0: return new ClassPathStore();
 		case 1: if ( files[0].isDirectory() )
@@ -163,19 +168,24 @@ public abstract class Store {
 		closing = false;
 	}
 	
+	Class<? extends Trace<?>> getTraceClass(String type) throws LoadTraceException{
+		buildTypeClassMap();
+		if ( ! type_class_map.containsKey(type) ){
+			throw new LoadTraceException(type);
+		}
+		return type_class_map.get(type);
+	}
+	
 	public void loadTrace(String name) throws IOException, LoadTraceException {
 		PersistentMap _info = readTraceInfo(name);
-		Trace<?> trace = buildTrace(name, _info, _info.get(Trace.typeKey));
+		Trace<?> trace = buildTrace(name, _info, type_class_map.get(_info.get(Trace.typeKey)));
 		traces.put(name, trace);
 	}
 	
-	Trace<?> buildTrace(String name, PersistentMap info, String type) throws LoadTraceException {
-		Class<?> klass = type_class_map.get(type);
-		if ( klass == null )
-			throw new LoadTraceException(name);
+	Trace<?> buildTrace(String name, PersistentMap info, Class<? extends Trace<?>> klass) throws LoadTraceException {
 		try {
 			Constructor<?> ctor = klass.getConstructor(new Class[]{Store.class, String.class, PersistentMap.class});
-			info.put(Trace.typeKey, type);
+			info.put(Trace.typeKey, klass.getAnnotation(Trace.Type.class).value());
 			Trace<?> trace = (Trace<?>)ctor.newInstance(this, name, info);
 			return trace;
 		} catch ( Exception e ){

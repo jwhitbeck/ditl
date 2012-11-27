@@ -33,7 +33,7 @@ import ditl.plausible.*;
 @Command(pkg="plausible", cmd="edges-to-windowed-edges", alias="e2we")
 public class EdgesToWindowedEdges extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES);
 	private String windowedEdgesOption = "windowed-edges";
 	private String windowed_edges_name;
 	private long window;
@@ -42,7 +42,7 @@ public class EdgesToWindowedEdges extends ConvertApp {
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
-		options.addOption(null, windowedEdgesOption, true, "name of windowed edge trace (default: "+WindowedEdgeTrace.defaultName+")");
+		options.addOption(null, windowedEdgesOption, true, "name of windowed edge trace (default: "+getDefaultName(WindowedEdgeTrace.class)+")");
 	}
 
 	@Override
@@ -51,14 +51,14 @@ public class EdgesToWindowedEdges extends ConvertApp {
 			HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
-		windowed_edges_name = cli.getOptionValue(windowedEdgesOption, WindowedEdgeTrace.defaultName);
+		windowed_edges_name = cli.getOptionValue(windowedEdgesOption, getDefaultName(WindowedEdgeTrace.class));
 		window = Long.parseLong(args[1]);
 	}
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-		WindowedEdgeTrace windowed_edges = (WindowedEdgeTrace) dest_store.newTrace(windowed_edges_name, WindowedEdgeTrace.type, force);
+		WindowedEdgeTrace windowed_edges = (WindowedEdgeTrace) dest_store.newTrace(windowed_edges_name, WindowedEdgeTrace.class, force);
 		window *= edges.ticsPerSecond();
 		new WindowedEdgeConverter(windowed_edges, edges, window).convert();
 	}

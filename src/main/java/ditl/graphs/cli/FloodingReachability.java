@@ -33,7 +33,7 @@ public class FloodingReachability extends ConvertApp {
 	
 	private double tau;
 	private long delay;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES,GraphOptions.PRESENCE);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES,GraphOptions.PRESENCE);
 	private Long min_time;
 	
 	@Override
@@ -70,7 +70,7 @@ public class FloodingReachability extends ConvertApp {
 		long _tau = (long)(tau * edges.ticsPerSecond());
 		delay *= edges.ticsPerSecond();
 		String name = edges.name()+"_t"+_tau+"_pd"+delay;
-		ReachabilityTrace reachability = (ReachabilityTrace)dest_store.newTrace(name, ReachabilityTrace.type, force);
+		ReachabilityTrace reachability = (ReachabilityTrace)dest_store.newTrace(name, ReachabilityTrace.class, force);
 		new FloodingReachableConverter(reachability, presence, edges, _tau, delay, min_time).convert();
 		
 	}

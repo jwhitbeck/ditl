@@ -18,7 +18,7 @@ import ditl.plausible.forces.*;
 @Command(pkg="plausible", cmd="infer", alias="i")
 public class InferMobility extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.EDGES, GraphOptions.MOVEMENT);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.PRESENCE, GraphOptions.EDGES, GraphOptions.MOVEMENT);
 	private String windowedEdgesOption = "windowed-edges";
 	private String windowed_edges_name;
 	private String knownMovementOption = "known-movement";
@@ -67,7 +67,7 @@ public class InferMobility extends ConvertApp {
 	protected void initOptions() {
 		super.initOptions();
 		graph_options.setOptions(options);
-		options.addOption(null, windowedEdgesOption, true, "name of windowed edge trace (default: "+WindowedEdgeTrace.defaultName+")");
+		options.addOption(null, windowedEdgesOption, true, "name of windowed edge trace (default: "+getDefaultName(WindowedEdgeTrace.class)+")");
 		options.addOption(null, constraintsOption, true, "list of constraints (default: empty)");
 		options.addOption(null, vmaxOption, true, "max node speed (default: "+AnticipatedForce.defaultVmax+")");
 		options.addOption(null, kOption, true, "the Hooke parameter (default: "+AnticipatedForce.defaultK+")");
@@ -95,7 +95,7 @@ public class InferMobility extends ConvertApp {
 			HelpException {
 		super.parseArgs(cli, args);
 		graph_options.parse(cli);
-		windowed_edges_name = cli.getOptionValue(windowedEdgesOption, WindowedEdgeTrace.defaultName);
+		windowed_edges_name = cli.getOptionValue(windowedEdgesOption, getDefaultName(WindowedEdgeTrace.class));
 		width = Double.parseDouble(args[1]);
 		height = Double.parseDouble(args[2]);
 		vmax = Double.parseDouble(cli.getOptionValue(vmaxOption, String.valueOf(AnticipatedForce.defaultVmax)));
@@ -130,7 +130,7 @@ public class InferMobility extends ConvertApp {
 		MovementTrace known_movement = null;
 		if ( known_movement_name != null ) 
 			known_movement = (MovementTrace)orig_store.getTrace(known_movement_name);
-		MovementTrace movement = (MovementTrace)dest_store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
+		MovementTrace movement = (MovementTrace)dest_store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.class, force);
 		
 		long tps = presence.ticsPerSecond();
 		update_interval *= tps;

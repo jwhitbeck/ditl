@@ -28,6 +28,7 @@ import ditl.Store.NoSuchTraceException;
 import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.*;
+import static ditl.graphs.cli.GraphOptions.*;
 
 @Command(pkg="graphs", cmd="analyze", alias="a")
 public class Analyze extends ExportApp {
@@ -46,7 +47,7 @@ public class Analyze extends ExportApp {
 		groupSizeOption = "group-size",
 		reachabilityOption = "reachability";
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.EDGES, GraphOptions.GROUPS, GraphOptions.ARCS);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(PRESENCE, EDGES, GROUPS, ARCS);
 	private ReportFactory<?> factory;
 	private Long min_time;
 	private Long max_time;
@@ -125,7 +126,7 @@ public class Analyze extends ExportApp {
 		Long tps = null;
 		
 		if ( report instanceof PresenceTrace.Handler ){
-			PresenceTrace presence = (PresenceTrace)_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+			PresenceTrace presence = (PresenceTrace)_store.getTrace(graph_options.get(PRESENCE));
 			StatefulReader<PresenceEvent,Presence> presenceReader = presence.getReader();
 
 			PresenceTrace.Handler ph = (PresenceTrace.Handler)report;
@@ -141,7 +142,7 @@ public class Analyze extends ExportApp {
 		}		
 		
 		if ( report instanceof EdgeTrace.Handler ){
-			EdgeTrace edges = (EdgeTrace)_store.getTrace(graph_options.get(GraphOptions.EDGES));			
+			EdgeTrace edges = (EdgeTrace)_store.getTrace(graph_options.get(EDGES));			
 			StatefulReader<EdgeEvent,Edge> edgesReader = edges.getReader();
 
 			EdgeTrace.Handler lh = (EdgeTrace.Handler)report;
@@ -157,7 +158,7 @@ public class Analyze extends ExportApp {
 		}
 		
 		if ( report instanceof ArcTrace.Handler ){
-			ArcTrace arcs = (ArcTrace)_store.getTrace(graph_options.get(GraphOptions.ARCS));		
+			ArcTrace arcs = (ArcTrace)_store.getTrace(graph_options.get(ARCS));		
 			StatefulReader<ArcEvent,Arc> arcReader = arcs.getReader();
 
 			ArcTrace.Handler eh = (ArcTrace.Handler)report;
@@ -173,7 +174,7 @@ public class Analyze extends ExportApp {
 		}
 		
 		if ( report instanceof GroupTrace.Handler ){
-			GroupTrace groups = (GroupTrace)_store.getTrace(graph_options.get(GraphOptions.GROUPS));
+			GroupTrace groups = (GroupTrace)_store.getTrace(graph_options.get(GROUPS));
 			StatefulReader<GroupEvent,Group> groupReader = groups.getReader();
 			
 			GroupTrace.Handler gh = (GroupTrace.Handler)report;

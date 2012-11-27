@@ -34,7 +34,7 @@ public class Resample extends ConvertApp {
 	final static String missProbabilityOption = "miss-probability";
 	final static String randomizeOption = "randomize";
 
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.PRESENCE, GraphOptions.EDGES);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.BEACONS, GraphOptions.PRESENCE, GraphOptions.EDGES);
 	private long period;
 	private double p;
 	private boolean randomize;
@@ -59,7 +59,7 @@ public class Resample extends ConvertApp {
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
 		PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
-		BeaconTrace beacons = (BeaconTrace) dest_store.newTrace(graph_options.get(GraphOptions.BEACONS), BeaconTrace.type, force);
+		BeaconTrace beacons = (BeaconTrace) dest_store.newTrace(graph_options.get(GraphOptions.BEACONS), BeaconTrace.class, force);
 		period *= edges.ticsPerSecond();
 		new BeaconningConverter(beacons, presence, edges, period, p, randomize).convert();
 	}

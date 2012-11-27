@@ -31,7 +31,7 @@ import ditl.graphs.*;
 @Command(pkg="graphs", cmd="movement-to-presence", alias="m2p")
 public class MovementToPresence extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT, GraphOptions.PRESENCE);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT, GraphOptions.PRESENCE);
 	
 	@Override
 	protected void initOptions() {
@@ -50,7 +50,7 @@ public class MovementToPresence extends ConvertApp {
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		MovementTrace movement = (MovementTrace) orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
-		PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.type, force);
+		PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.class, force);
 		new MovementToPresenceConverter(presence, movement).convert();
 	}
 }

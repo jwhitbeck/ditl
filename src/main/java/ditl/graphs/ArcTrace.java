@@ -23,12 +23,10 @@ import java.util.*;
 
 import ditl.*;
 
+@Trace.Type("arcs")
 public class ArcTrace extends StatefulTrace<ArcEvent, Arc> 
 	implements StatefulTrace.Filterable<ArcEvent, Arc>{
-	
-	public final static String type = "arcs";
-	public final static String defaultName = "arcs";
-	
+
 	public final static class Updater implements StateUpdater<ArcEvent, Arc> {
 
 		private Set<Arc> arcs = new AdjacencySet.Arcs(); 

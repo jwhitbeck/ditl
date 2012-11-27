@@ -31,13 +31,13 @@ import ditl.graphs.*;
 @Command(pkg="graphs", cmd="arcs-to-dominating-set", alias="a2ds")
 public class ArcsToDominatingSet extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.GROUPS, GraphOptions.ARCS, GraphOptions.PRESENCE);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.GROUPS, GraphOptions.ARCS, GraphOptions.PRESENCE);
 
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
 		ArcTrace arcs = (ArcTrace) orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
-		GroupTrace ds = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
+		GroupTrace ds = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
 		new ArcsToDominatingSetConverter(ds, arcs, presence).convert();
 	}
 	

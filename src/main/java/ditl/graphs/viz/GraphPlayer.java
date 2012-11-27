@@ -74,23 +74,23 @@ public class GraphPlayer extends SimplePlayer {
 	}
 	
 	protected void loadReaders(){
-		movement = (MovementTrace)_store.listTraces(MovementTrace.type).get(0); // use first movement trace
+		movement = (MovementTrace)_store.listTraces(MovementTrace.class).get(0); // use first movement trace
 		
 		setMovementTrace(movement);
 		
 		if ( groups != null ){
 			groups.setStore(_store);
-			groups.load(_store.listTraces(GroupTrace.type));
+			groups.load(_store.listTraces(GroupTrace.class));
 		}
 		
 		if ( edgesSelector != null ){
 			edgesSelector.setStore(_store);
-			edgesSelector.load(_store.listTraces(EdgeTrace.type));
+			edgesSelector.load(_store.listTraces(EdgeTrace.class));
 		}
 
 		if ( reachabilitySelector != null ){
 			reachabilitySelector.setStore(_store);
-			reachabilitySelector.load(_store.listTraces(ReachabilityTrace.type));
+			reachabilitySelector.load(_store.listTraces(ReachabilityTrace.class));
 		}
 	}
 			

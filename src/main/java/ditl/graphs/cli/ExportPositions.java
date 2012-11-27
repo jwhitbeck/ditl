@@ -31,7 +31,7 @@ import ditl.graphs.*;
 @Command(pkg="graphs", cmd="export-positions", alias="xp")
 public class ExportPositions extends ExportApp {
 
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT);
 	private double time;
 
 	@Override

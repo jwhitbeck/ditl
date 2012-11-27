@@ -39,7 +39,7 @@ public class ImportMovement extends ImportApp {
 	private Long maxTime;
 	private long ticsPerSecond;
 	private Double timeMul;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT);
 	private long offset;
 	private boolean fix_pause_times;
 	private boolean use_id_map;
@@ -67,7 +67,7 @@ public class ImportMovement extends ImportApp {
 	
 	@Override
 	protected void run() throws IOException, AlreadyExistsException, LoadTraceException {
-		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
+		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.class, force);
 		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
 		switch (ext_fmt){
 		case NS2: NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, fix_pause_times, id_gen); break;

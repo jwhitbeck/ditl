@@ -24,10 +24,8 @@ import java.util.*;
 import ditl.*;
 import ditl.graphs.*;
 
+@Trace.Type("windowed_edges")
 public class WindowedEdgeTrace extends StatefulTrace<WindowedEdgeEvent,WindowedEdge>{
-	
-	public static final String type = "windowed edges";
-	public static final String defaultName = "windowed_edges";
 	
 	public final static String windowLengthKey = "window length";
 

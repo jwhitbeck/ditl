@@ -124,4 +124,8 @@ public abstract class App {
 			throw new ParseException("Error parsing time unit '"+unitString+"'");
 		return tps;
 	}
+	
+	protected String getDefaultName(Class<? extends Trace<?>> klass){
+		return klass.getAnnotation(Trace.Type.class).value();
+	}
 }

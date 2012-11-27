@@ -31,14 +31,14 @@ import ditl.graphs.*;
 @Command(pkg="graphs", cmd="movement-to-edges", alias="m2e")
 public class MovementToEdges extends ConvertApp {
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.MOVEMENT);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.MOVEMENT);
 	private double range;
 	private Long max_interval = null;
 	
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		MovementTrace movement = (MovementTrace) orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
-		EdgeTrace edges = (EdgeTrace) dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.type, force);
+		EdgeTrace edges = (EdgeTrace) dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.class, force);
 		if ( max_interval == null )
 			max_interval = movement.maxTime()-movement.minTime();
 		else

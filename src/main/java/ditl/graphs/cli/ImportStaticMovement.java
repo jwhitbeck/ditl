@@ -36,7 +36,7 @@ public class ImportStaticMovement extends WriteApp {
 	
 	private String[] positions_specs;
 	private boolean use_id_map;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.MOVEMENT);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.PRESENCE, GraphOptions.MOVEMENT);
 	
 	@Override
 	protected String getUsageString(){
@@ -62,7 +62,7 @@ public class ImportStaticMovement extends WriteApp {
 	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
 		IdMap id_map = presence.idMap();
-		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
+		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.class, force);
 		StatefulWriter<MovementEvent,Movement> movementWriter = movement.getWriter();
 		Set<Movement> initState = new HashSet<Movement>();
 		for ( String spec : positions_specs ){

@@ -34,7 +34,7 @@ public class EdgesToPresence extends ConvertApp {
 	final static String strictOption = "strict"; 
 	private boolean strict; 
 	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.EDGES, GraphOptions.PRESENCE);
+	private GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.PRESENCE);
 	
 	@Override
 	protected void initOptions() {
@@ -55,7 +55,7 @@ public class EdgesToPresence extends ConvertApp {
 	@Override
 	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
 		EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-		PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.type, force);
+		PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.class, force);
 		if ( strict )
 			new StrictEdgesToPresenceConverter(presence, edges).convert();
 		else

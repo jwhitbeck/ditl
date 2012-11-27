@@ -23,11 +23,10 @@ import java.util.*;
 
 import ditl.*;
 
+@Trace.Type("presence")
 public class PresenceTrace extends StatefulTrace<PresenceEvent, Presence> 
 	implements StatefulTrace.Filterable<PresenceEvent, Presence>{
 	
-	public final static String defaultName = "presence";
-	public final static String type = "presence";
 	public final static int defaultPriority = 10;
 	
 	public final static class Updater implements StateUpdater<PresenceEvent,Presence> {
