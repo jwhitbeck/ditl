@@ -196,12 +196,12 @@ public final class AddingReachableConverter implements Converter, Generator, Lis
 				init_state_set = true;
 			} else {
 				for ( Arc a : to_bring_up )
-					writer.append(time, new ArcEvent(a,ArcEvent.UP));
+					writer.append(time, new ArcEvent(a,ArcEvent.Type.UP));
 			}
 			to_bring_up.clear();
 			for ( Arc a : to_bring_down ){
 				arc_infos.remove(a);
-				writer.append(time, new ArcEvent(a,ArcEvent.DOWN));
+				writer.append(time, new ArcEvent(a,ArcEvent.Type.DOWN));
 			}
 			to_bring_down.clear();
 		}

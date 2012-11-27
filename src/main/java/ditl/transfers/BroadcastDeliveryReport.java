@@ -86,7 +86,7 @@ public class BroadcastDeliveryReport extends Report
 					Integer msgId = event.msgId();
 					List<Long> deliveries = delivery_times.get(msgId);
 					if ( deliveries != null ){
-						if ( event.type() == BufferEvent.ADD ){
+						if ( event.type() == BufferEvent.Type.ADD ){
 							Long dtime = time-ctimes.get(msgId);
 							deliveries.add(dtime);
 						}

@@ -36,19 +36,19 @@ public class BufferTrace extends StatefulTrace<BufferEvent, Buffer> {
 			Buffer b;
 			Integer id = event._id;
 			switch ( event._type ){
-			case BufferEvent.ADD:
+			case ADD:
 				b = buffer_map.get(id);
 				b.msg_ids.add(event.msg_id);
 				break;
-			case BufferEvent.REMOVE:
+			case REMOVE:
 				b = buffer_map.get(id);
 				b.msg_ids.remove(event.msg_id);
 				break;
-			case BufferEvent.IN:
+			case IN:
 				b = new Buffer(id);
 				buffer_map.put(id, b);
 				break;
-			case BufferEvent.OUT:
+			case OUT:
 				b = buffer_map.get(id);
 				buffers.remove(b);
 				buffer_map.remove(id);

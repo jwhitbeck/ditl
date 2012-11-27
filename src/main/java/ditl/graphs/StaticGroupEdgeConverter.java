@@ -73,13 +73,13 @@ public class StaticGroupEdgeConverter implements Converter {
 					if ( g_edge == null ){
 						g_edge = new AdjacencySet.Edges();
 						group_edges.put(gl, g_edge);
-						group_edge_writer.append(time, new EdgeEvent(gl, EdgeEvent.UP));
+						group_edge_writer.append(time, new EdgeEvent(gl, EdgeEvent.Type.UP));
 					}
 					group_edges.get(gl).add(e);
 				} else {
 					g_edge.remove(e);
 					if ( g_edge.isEmpty() ){
-						group_edge_writer.append(time, new EdgeEvent(gl, EdgeEvent.DOWN));
+						group_edge_writer.append(time, new EdgeEvent(gl, EdgeEvent.Type.DOWN));
 						group_edges.remove(gl);
 					}
 				}

@@ -114,11 +114,11 @@ public class GroupsPanel extends JPanel implements
 			public void handle(long time, Collection<GroupEvent> events) {
 				for ( GroupEvent gev : events ){
 					switch ( gev.type() ){
-					case GroupEvent.NEW: 
+					case NEW: 
 						addGroup(gev.gid()); 
 						updateColorPanel(); 
 						break;
-					case GroupEvent.DELETE: 
+					case DELETE: 
 						color_map.remove(gev.gid());
 						updateColorPanel();
 						break;

@@ -21,15 +21,15 @@ package ditl.transfers;
 import ditl.ItemFactory;
 
 public class MessageEvent {
-	public final static boolean NEW = true;
-	public final static boolean EXPIRE = false;
+	
+	public enum Type { NEW, EXPIRE }
 	
 	Integer msg_id;
-	boolean is_new;
+	Type _type;
 	
-	public MessageEvent(Integer msgId, boolean isNew){
+	public MessageEvent(Integer msgId, Type type){
 		msg_id = msgId;
-		is_new = isNew;
+		_type = type;
 	}
 	
 	public Integer msgId(){
@@ -37,7 +37,7 @@ public class MessageEvent {
 	}
 	
 	public boolean isNew(){
-		return is_new;
+		return _type == Type.NEW;
 	}
 	
 	public Message message(){
@@ -50,8 +50,8 @@ public class MessageEvent {
 			String[] elems = s.trim().split(" ");
 			try {
 				Integer msgId = Integer.parseInt(elems[0]);
-				boolean isNew = elems[1].equals("NEW");
-				return new MessageEvent(msgId, isNew);
+				Type type = Type.valueOf(elems[1]);
+				return new MessageEvent(msgId, type);
 			} catch ( Exception e ){
 				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
 				return null;
@@ -61,8 +61,6 @@ public class MessageEvent {
 	
 	@Override
 	public String toString(){
-		if ( is_new )
-			return msg_id+" NEW";
-		return msg_id+" EXPIRE";
+		return msg_id+" "+_type;
 	}
 }

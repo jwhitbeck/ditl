@@ -88,10 +88,10 @@ public final class WindowedEdge implements Couple {
 	
 	public void handleEvent(WindowedEdgeEvent wle){
 		switch( wle._type ){
-		case WindowedEdgeEvent.PREV_UP: prev_up = wle._value; break;
-		case WindowedEdgeEvent.PREV_DOWN: prev_down = wle._value; break;
-		case WindowedEdgeEvent.NEXT_UP: next_up = wle._value; break;
-		case WindowedEdgeEvent.NEXT_DOWN: next_down = wle._value; break;
+		case PREVUP: prev_up = wle._value; break;
+		case PREVDOWN: prev_down = wle._value; break;
+		case NEXTUP: next_up = wle._value; break;
+		case NEXTDOWN: next_down = wle._value; break;
 		}
 	}
 }

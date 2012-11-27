@@ -92,13 +92,13 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 		public void handleEvent(long time, MovementEvent event) {
 			Movement m;
 			switch(event.type){
-			case MovementEvent.IN: 
+			case IN: 
 				m = event.origMovement();
 				movements.add(m);
 				movement_map.put(m.id(), m);
 				break;
 				
-			case MovementEvent.OUT:
+			case OUT:
 				m = movement_map.get(event.id());
 				movements.remove(m);
 				movement_map.remove(m.id());
@@ -118,10 +118,11 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 	
 	private static class MovementWriter extends StatefulWriter<MovementEvent,Movement> {
 		
-		private double minX = Double.MAX_VALUE;
-		private double maxX = Double.MIN_VALUE;
-		private double minY = Double.MAX_VALUE;
-		private double maxY = Double.MIN_VALUE;
+		private double 
+			minX = Double.MAX_VALUE,
+			maxX = Double.MIN_VALUE,
+			minY = Double.MAX_VALUE,
+			maxY = Double.MIN_VALUE;
 		
 		public MovementWriter(Store store, String name, PersistentMap info) throws IOException {
 			super(store, name, new MovementTrace.Updater(), info);

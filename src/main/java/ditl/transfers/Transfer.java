@@ -34,7 +34,7 @@ public class Transfer {
 	}
 	
 	public Transfer(TransferEvent event){
-		if ( event.type() == TransferEvent.START ){
+		if ( event.type() == TransferEvent.Type.START ){
 			msg_id = event.msg_id;
 			_to = event._to;
 			_from = event._from;

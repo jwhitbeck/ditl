@@ -170,10 +170,10 @@ public class AnticipatedForce implements Force, Interaction,
 				for ( WindowedEdgeEvent wle : events ){
 					Edge e = wle.edge();
 					switch( wle.type() ){
-					case WindowedEdgeEvent.UP:
+					case UP:
 						window_map.put(e, new WindowedEdge(e));
 						break;
-					case WindowedEdgeEvent.DOWN:
+					case DOWN:
 						window_map.remove(e);
 						break;
 					default:

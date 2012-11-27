@@ -265,9 +265,9 @@ public final class ArcsToDominatingSetConverter implements Converter,
 				if ( ! ds_nodes.contains(n) )
 					to_add.add(n);
 			if ( ! to_del.isEmpty() )
-				group_writer.append(time, new GroupEvent(gid, GroupEvent.LEAVE, to_del));
+				group_writer.append(time, new GroupEvent(gid, GroupEvent.Type.LEAVE, to_del));
 			if ( ! to_add.isEmpty() )
-				group_writer.append(time, new GroupEvent(gid, GroupEvent.JOIN, to_add));
+				group_writer.append(time, new GroupEvent(gid, GroupEvent.Type.JOIN, to_add));
 			ds_nodes = new_ds_nodes;
 		}
 	}

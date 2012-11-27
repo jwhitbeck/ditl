@@ -62,15 +62,15 @@ public final class ArcsToEdgesConverter implements Converter {
 		Edge e = a.edge();
 		if ( _union && ! arcs.contains(a.reverse()) ) {
 			if ( event.isUp() ){
-				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.UP) );
+				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.Type.UP) );
 			} else {
-				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.DOWN) );
+				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.Type.DOWN) );
 			}
 		} else if ( ! _union && arcs.contains( a.reverse() )){ // intersect and reverse if present
 			if ( event.isUp() ){
-				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.UP) );
+				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.Type.UP) );
 			} else {
-				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.DOWN) );
+				edge_writer.append(time, new EdgeEvent(e,EdgeEvent.Type.DOWN) );
 			}
 		}
 		if ( event.isUp() )

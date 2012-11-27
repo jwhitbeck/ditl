@@ -78,8 +78,9 @@ public class EdgesToReachableConverter implements EdgeTrace.Handler, Generator, 
 	}
 	
 	private void fire(long time, Edge e, boolean up) {
-		outbus.queue(time, new ArcEvent(e.id1(),e.id2(),up));
-		outbus.queue(time, new ArcEvent(e.id2(),e.id1(),up));
+		ArcEvent.Type type = up? ArcEvent.Type.UP : ArcEvent.Type.DOWN;
+		outbus.queue(time, new ArcEvent(e.id1(),e.id2(), type ));
+		outbus.queue(time, new ArcEvent(e.id2(),e.id1(), type));
 	}
 
 	@Override

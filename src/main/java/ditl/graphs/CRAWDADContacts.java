@@ -41,8 +41,8 @@ public class CRAWDADContacts {
 			Integer id2 = idGen.getInternalId(elems[1]);
 			long begin = (long)(Long.parseLong(elems[2])*timeMul)+offset;
 			long end = (long)(Long.parseLong(elems[3])*timeMul)+offset;
-			edgeWriter.queue(begin, new EdgeEvent(id1,id2,EdgeEvent.UP));
-			edgeWriter.queue(end, new EdgeEvent(id1,id2,EdgeEvent.DOWN));
+			edgeWriter.queue(begin, new EdgeEvent(id1,id2,EdgeEvent.Type.UP));
+			edgeWriter.queue(end, new EdgeEvent(id1,id2,EdgeEvent.Type.DOWN));
 		}
 		edgeWriter.flush();
 		edgeWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));

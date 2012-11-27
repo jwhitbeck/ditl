@@ -258,12 +258,12 @@ public final class PlausibleMobilityConverter implements Converter,
 					id = mev.id();
 					if ( known_movement_ids.contains(id) ){
 						switch ( mev.type() ){
-						case MovementEvent.IN:
+						case IN:
 							node = new KnownNode(id, mev.origMovement());
 							known_nodes.put(id,node);
 							all_nodes.add(node);
 							break;
-						case MovementEvent.OUT:
+						case OUT:
 							node = known_nodes.remove(id);
 							all_nodes.remove(node);
 							break;

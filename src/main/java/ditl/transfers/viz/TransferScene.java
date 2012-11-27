@@ -40,7 +40,7 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
 			public void handle(long time, Collection<TransferEvent> events) {
 				for ( TransferEvent tev : events ){
 					Edge e = tev.arc().edge();
-					if ( tev.type() == TransferEvent.START ){
+					if ( tev.type() == TransferEvent.Type.START ){
 						incrTransfer(e);
 					} else {
 						decrTransfer(e);

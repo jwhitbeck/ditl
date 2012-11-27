@@ -112,7 +112,7 @@ public class WindowedEdgeConverter implements Converter, Generator, EdgeTrace.Ha
 					final Edge e = eev.edge();
 					if ( ! edge_timelines.containsKey(e) ){
 						edge_timelines.put(e, new EdgeTimeline(e, windowed_writer));
-						windowed_writer.queue(time, new WindowedEdgeEvent(e, WindowedEdgeEvent.UP));
+						windowed_writer.queue(time, new WindowedEdgeEvent(e, WindowedEdgeEvent.Type.UP));
 					}
 					EdgeTimeline timeline = edge_timelines.get(e);
 					timeline.append(time+_window, _window, eev);
@@ -151,7 +151,7 @@ public class WindowedEdgeConverter implements Converter, Generator, EdgeTrace.Ha
 					EdgeTimeline timeline = new EdgeTimeline(e, windowed_writer);
 					long delta = (long)(rng.nextDouble()*_window);
 					timeline.next_up = time + delta; // random start date for edges that are already up
-					timeline.queue(time + delta, new EdgeEvent(e, EdgeEvent.UP));
+					timeline.queue(time + delta, new EdgeEvent(e, EdgeEvent.Type.UP));
 					pop_bus.queue(time+_window + delta, e);
 					update_bus.queue(time+delta, e);
 					edge_timelines.put(e, timeline);

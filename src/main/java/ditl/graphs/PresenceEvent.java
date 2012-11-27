@@ -24,15 +24,14 @@ import ditl.*;
 
 public final class PresenceEvent {
 
-	public final static boolean IN = true;
-	public final static boolean OUT = false;
+	public enum Type { IN, OUT }
 	
 	private final Integer id;
-	private final boolean in;
+	private final Type _type;
 	
-	public PresenceEvent(Integer i,  boolean isIn){
+	public PresenceEvent(Integer i,  Type type){
 		id = i;
-		in = isIn;
+		_type = type;
 	}
 	
 	public Integer id(){
@@ -40,7 +39,7 @@ public final class PresenceEvent {
 	}
 	
 	public boolean isIn(){
-		return in;
+		return _type == Type.IN;
 	}
 	
 	public Presence presence(){
@@ -53,8 +52,8 @@ public final class PresenceEvent {
 			String[] elems = s.trim().split(" ");
 			try {
 				int id = Integer.parseInt(elems[0]);
-				boolean in = elems[1].equals("IN");
-				return new PresenceEvent(id,in);
+				Type type = Type.valueOf(elems[1]);
+				return new PresenceEvent(id,type);
 			} catch ( Exception e ){
 				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
 				return null;
@@ -64,7 +63,7 @@ public final class PresenceEvent {
 	
 	@Override
 	public String toString(){
-		return id+" "+(in? "IN" : "OUT");
+		return id+" "+_type;
 	}
 
 	public static final class GroupFilter implements Filter<PresenceEvent> {

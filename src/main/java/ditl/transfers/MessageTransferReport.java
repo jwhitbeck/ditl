@@ -69,7 +69,7 @@ public class MessageTransferReport extends Report
 					Integer n;
 					Long l;
 					switch ( event.type() ){
-					case TransferEvent.START:
+					case START:
 						if ( ! n_completed.containsKey(msgId) ){
 							bytes_completed.put(msgId, 0L);
 							n_completed.put(msgId, 0);
@@ -77,7 +77,7 @@ public class MessageTransferReport extends Report
 							n_aborted.put(msgId, 0);
 						}
 						break;
-					case TransferEvent.ABORT:
+					case ABORT:
 						n = n_aborted.get(msgId);
 						if ( n != null ){ // ignore those for which we haven't registered a start event
 							n_aborted.put(msgId, n+1);
@@ -85,7 +85,7 @@ public class MessageTransferReport extends Report
 							bytes_aborted.put(msgId, l+event.bytesTransferred());
 						}
 						break;
-					case TransferEvent.COMPLETE:
+					case COMPLETE:
 						n = n_completed.get(msgId);
 						if ( n != null ){ // ignore those for which we haven't registered a start event
 							n_completed.put(msgId, n+1);

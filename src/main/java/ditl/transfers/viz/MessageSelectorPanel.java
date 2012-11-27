@@ -160,7 +160,7 @@ public class MessageSelectorPanel extends JPanel
 					Integer id = event.id();
 					Integer msgId;
 					switch ( event.type() ){
-					case BufferEvent.ADD:
+					case ADD:
 						msgId = event.msgId();
 						if ( message_holders.containsKey(msgId) ){
 							message_holders.get(msgId).add(id);
@@ -168,7 +168,7 @@ public class MessageSelectorPanel extends JPanel
 								scene.addInfected(id);
 						}
 						break;
-					case BufferEvent.REMOVE:
+					case REMOVE:
 						msgId = event.msgId();
 						if ( message_holders.containsKey(msgId) ){
 							message_holders.get(msgId).remove(id);

@@ -47,19 +47,19 @@ class EdgeTimeline {
 	private void write_events_if_changed(long time) throws IOException {
 		if ( prev_up_tmp != prev_up ){
 			prev_up = prev_up_tmp;
-			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.PREV_UP, prev_up));
+			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.PREVUP, prev_up));
 		}
 		if ( prev_down_tmp != prev_down ){
 			prev_down = prev_down_tmp;
-			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.PREV_DOWN, prev_down));
+			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.PREVDOWN, prev_down));
 		}
 		if ( next_up_tmp != next_up ){
 			next_up = next_up_tmp;
-			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.NEXT_UP, next_up));
+			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTUP, next_up));
 		}
 		if ( next_down_tmp != next_down ){
 			next_down = next_down_tmp;
-			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.NEXT_DOWN, next_down));
+			window_writer.queue(time, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTDOWN, next_down));
 		}
 	}
 	
@@ -106,12 +106,12 @@ class EdgeTimeline {
 		if ( edgeEvent.isUp() ){
 			if (next_up == Trace.INFINITY ){
 				next_up = time;
-				window_writer.queue(time-window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.NEXT_UP, next_up));
+				window_writer.queue(time-window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTUP, next_up));
 			}
 		} else {
 			if ( next_down == Trace.INFINITY ){
 				next_down = time;
-				window_writer.queue(time-window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.NEXT_DOWN, next_down));
+				window_writer.queue(time-window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTDOWN, next_down));
 			}
 		}
 	}
@@ -122,7 +122,7 @@ class EdgeTimeline {
 	}
 	
 	public void expire(long time) throws IOException{
-		window_writer.queue(time, new WindowedEdgeEvent(_edge,WindowedEdgeEvent.DOWN));
+		window_writer.queue(time, new WindowedEdgeEvent(_edge,WindowedEdgeEvent.Type.DOWN));
 	}
 	
 	public WindowedEdge windowedEdges(){

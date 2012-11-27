@@ -77,13 +77,13 @@ public class MovementToEdgesConverter implements Incrementable, MovementTrace.Ha
 						if ( time <= end ){
 							initEdges.add(e); // edge is already up
 							if ( end-time < max_interval ) // edge goes down before max_interval
-								edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.DOWN) );
+								edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.Type.DOWN) );
 						}
 					} else { // begin >= time
 						if ( begin-time < max_interval ){
-							edge_writer.queue(begin, new EdgeEvent(e, EdgeEvent.UP));
+							edge_writer.queue(begin, new EdgeEvent(e, EdgeEvent.Type.UP));
 							if ( end-time < max_interval ){
-								edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.DOWN));
+								edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.Type.DOWN));
 							}
 						}
 					}
@@ -103,11 +103,11 @@ public class MovementToEdgesConverter implements Incrementable, MovementTrace.Ha
 				for ( MovementEvent event : events ){
 					Integer id = event.id();
 					switch(event.type){
-					case MovementEvent.IN: 
+					case IN: 
 						invalid_movements.put(id,event.origMovement());
 						break;
 						
-					case MovementEvent.OUT:
+					case OUT:
 						valid_movements.remove(id);
 						invalidNodeMeetings(time, id);
 						break;
@@ -141,9 +141,9 @@ public class MovementToEdgesConverter implements Incrementable, MovementTrace.Ha
 					long begin = meetings[0], end = meetings[1];
 					Edge e = new Edge(m.id(), vm.id());
 					if ( begin >= time && begin-time < max_interval )
-						edge_writer.queue(begin, new EdgeEvent(e, EdgeEvent.UP));
+						edge_writer.queue(begin, new EdgeEvent(e, EdgeEvent.Type.UP));
 					if ( end >= time && end-time < max_interval ) // edge goes down before max_interval
-						edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.DOWN) );
+						edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.Type.DOWN) );
 				}
 			}
 			valid_movements.put(m.id(), m);

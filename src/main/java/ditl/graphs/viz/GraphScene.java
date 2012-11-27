@@ -79,18 +79,18 @@ public class GraphScene extends Scene implements
 					NodeElement node;
 					Integer id = mev.id(); 
 					switch (mev.type() ){
-					case MovementEvent.IN:
+					case IN:
 						node = new NodeElement(mev.origMovement());
 						nodes.put(id, node);
 						addScaleListener(node);
 						break;
 						
-					case MovementEvent.OUT:
+					case OUT:
 						removeScaleListener(nodes.get(id));
 						nodes.remove(id);
 						break;
 						
-					case MovementEvent.NEW_DEST:
+					case NEW_DEST:
 						node = nodes.get(id);
 						node.updateMovement(time, mev); break;
 					}
@@ -160,7 +160,7 @@ public class GraphScene extends Scene implements
 					} else {
 						ae = arcs.get(e);
 						ae.bringArcDown(a);
-						if ( ae.state == ArcElement.DOWN ){
+						if ( ae.state == ArcElement.State.DOWN ){
 							arcs.remove(e);
 						}
 					}
@@ -235,14 +235,14 @@ public class GraphScene extends Scene implements
 			public void handle(long time, Collection<GroupEvent> events) {
 				for ( GroupEvent gev : events ){
 					switch (gev.type()){
-					case GroupEvent.LEAVE:
+					case LEAVE:
 						for ( Integer i : gev.members() ){
 							NodeElement node = nodes.get(i);
 							if ( node != null ) // node is null if it has also left the simulation
 								node.setFillColor(GroupsPanel.noGroupColor);
 						}
 						break;
-					case GroupEvent.JOIN:
+					case JOIN:
 						for ( Integer i : gev.members() )
 							nodes.get(i).setFillColor(group_color_map.get(gev.gid()));
 						break;

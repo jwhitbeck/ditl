@@ -24,14 +24,13 @@ import ditl.*;
 
 public final class EdgeEvent {
 	
-	public final static boolean UP = true;
-	public final static boolean DOWN = false;
+	public enum Type { UP, DOWN };
 	
 	final Integer id1;
 	final Integer id2;
-	final boolean _up;
+	final Type _type;
 	
-	public EdgeEvent(Integer i1, Integer i2, boolean up){
+	public EdgeEvent(Integer i1, Integer i2, Type type){
 		if ( i1 < i2 ){
 			id1 = i1;
 			id2 = i2;
@@ -39,13 +38,13 @@ public final class EdgeEvent {
 			id1 = i2;
 			id2 = i1;
 		}
-		_up = up;
+		_type = type;
 	}
 	
-	public EdgeEvent(Edge edge, boolean up){
+	public EdgeEvent(Edge edge, Type type){
 		id1 = edge.id1;
 		id2 = edge.id2;
-		_up = up;
+		_type = type;
 	}
 	
 	public Integer id1(){
@@ -57,7 +56,7 @@ public final class EdgeEvent {
 	}
 	
 	public boolean isUp(){
-		return _up;
+		return _type == Type.UP;
 	}
 	
 	public Edge edge(){
@@ -71,8 +70,8 @@ public final class EdgeEvent {
 			try {
 				Integer id1 = Integer.parseInt(elems[0]);
 				Integer id2 = Integer.parseInt(elems[1]);
-				boolean up = elems[2].equals("UP");
-				return new EdgeEvent(id1,id2,up);
+				Type type = Type.valueOf(elems[2]);
+				return new EdgeEvent(id1,id2,type);
 				
 			} catch ( Exception e ){
 				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
@@ -83,7 +82,7 @@ public final class EdgeEvent {
 	
 	@Override
 	public String toString(){
-		return id1+" "+id2+" "+(_up? "UP" : "DOWN");
+		return id1+" "+id2+" "+_type;
 	}
 	
 	public static final class InternalGroupFilter implements Filter<EdgeEvent> {

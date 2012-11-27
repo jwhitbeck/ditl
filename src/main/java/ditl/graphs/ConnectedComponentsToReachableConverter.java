@@ -104,23 +104,23 @@ public class ConnectedComponentsToReachableConverter
 					Group g;
 					Integer gid = gev.gid();
 					switch ( gev.type() ){
-					case GroupEvent.NEW: 
+					case NEW: 
 						g = new Group(gid);
 						group_map.put(gid, g);
 						break;
-					case GroupEvent.JOIN:
+					case JOIN:
 						g = group_map.get(gid);
 						join(g,gev);
 						scheduleUpdate(time);
 						g.handleEvent(gev);
 						break;
-					case GroupEvent.LEAVE:
+					case LEAVE:
 						g = group_map.get(gid);
 						g.handleEvent(gev);
 						leave(g,gev);
 						scheduleUpdate(time);
 						break;
-					case GroupEvent.DELETE:
+					case DELETE:
 						g = group_map.get(gid);
 						group_map.remove(gid);
 					}
@@ -172,10 +172,10 @@ public class ConnectedComponentsToReachableConverter
 	@Override
 	public void handle(long time, Collection<Object> events) throws IOException {
 		while ( ! to_bring_up.isEmpty() ){
-			arc_writer.append(time, new ArcEvent(to_bring_up.poll(),ArcEvent.UP));
+			arc_writer.append(time, new ArcEvent(to_bring_up.poll(),ArcEvent.Type.UP));
 		}
 		while ( ! to_bring_down.isEmpty() ){
-			arc_writer.append(time, new ArcEvent(to_bring_down.poll(),ArcEvent.DOWN));
+			arc_writer.append(time, new ArcEvent(to_bring_down.poll(),ArcEvent.Type.DOWN));
 		}
 	}
 

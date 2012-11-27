@@ -62,11 +62,11 @@ public class Group {
 	
 	public void handleEvent(GroupEvent event){
 		switch ( event._type ){
-		case GroupEvent.JOIN:  
+		case JOIN:  
 			for ( Integer m : event._members )
 				_members.add(m); 
 			break;
-		case GroupEvent.LEAVE: 
+		case LEAVE: 
 			for ( Integer m : event._members )
 				_members.remove(m);
 			break;

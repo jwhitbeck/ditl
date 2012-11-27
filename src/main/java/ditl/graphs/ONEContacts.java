@@ -38,9 +38,9 @@ public class ONEContacts {
 			Integer id2 = idGen.getInternalId(elems[3]);
 			String action = elems[4].toUpperCase();
 			if ( action.equals("UP") )
-				edgeWriter.append(time, new EdgeEvent(id1, id2, EdgeEvent.UP));
+				edgeWriter.append(time, new EdgeEvent(id1, id2, EdgeEvent.Type.UP));
 			else
-				edgeWriter.append(time, new EdgeEvent(id1, id2, EdgeEvent.DOWN));
+				edgeWriter.append(time, new EdgeEvent(id1, id2, EdgeEvent.Type.DOWN));
 		}
 		edgeWriter.setProperty(Trace.timeUnitKey, Units.toTimeUnit(ticsPerSecond));
 		edgeWriter.close();

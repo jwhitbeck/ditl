@@ -24,24 +24,21 @@ import ditl.*;
 
 public final class MovementEvent {
 	
-	public final static int 
-		IN = 0,
-		OUT = 1,
-		NEW_DEST = 2;
+	public enum Type { IN, OUT, NEW_DEST }
 	
 	Integer id;
 	Point dest;
 	double speed;
-	int type;
+	Type type;
 	
 	public MovementEvent(Integer i){
 		id = i;
-		type = OUT;
+		type = Type.OUT;
 	}
 	
 	public MovementEvent(Integer i, Point d){
 		id = i;
-		type = IN;
+		type = Type.IN;
 		dest = d;
 	}
 	
@@ -49,14 +46,14 @@ public final class MovementEvent {
 		id = i;
 		dest = d;
 		speed = sp;
-		type = NEW_DEST;
+		type = Type.NEW_DEST;
 	}
 	
 	public Integer id(){
 		return id;
 	}
 	
-	public int type(){
+	public Type type(){
 		return type;
 	}
 	
@@ -74,12 +71,12 @@ public final class MovementEvent {
 			String[] elems = s.trim().split(" ");
 			try {
 				Integer id = Integer.parseInt(elems[0]);
-				if ( elems[1].equals("OUT") ){
+				if ( elems[1].equals(Type.OUT.toString()) ){
 					return new MovementEvent(id);
 				} else {
 					double x = Double.parseDouble(elems[2]);
 					double y = Double.parseDouble(elems[3]);
-					if ( elems[1].equals("IN") ){
+					if ( elems[1].equals(Type.IN.toString()) ){
 						return new MovementEvent(id,new Point(x,y));
 					} else {
 						double sp = Double.parseDouble(elems[1]);

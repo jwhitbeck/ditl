@@ -58,8 +58,8 @@ public class MovementToPresenceConverter implements Converter, MovementTrace.Han
 			public void handle(long time, Collection<MovementEvent> events) throws IOException {
 				for ( MovementEvent event : events ){
 					switch ( event.type ){
-					case MovementEvent.IN: presence_writer.append(time, new PresenceEvent(event.id(),PresenceEvent.IN)); break;
-					case MovementEvent.OUT: presence_writer.append(time, new PresenceEvent(event.id(),PresenceEvent.OUT)); break;
+					case IN: presence_writer.append(time, new PresenceEvent(event.id(),PresenceEvent.Type.IN)); break;
+					case OUT: presence_writer.append(time, new PresenceEvent(event.id(),PresenceEvent.Type.OUT)); break;
 					}
 				}
 			}

@@ -57,7 +57,7 @@ public final class BeaconsToArcsConverter implements Incrementable, Converter {
 				for ( Arc a : events ){
 					if ( ! lastArcs.containsKey(a) ){ // edge comes up
 						long start_time = time - (long)(_expansion*rand()); 
-						arc_writer.queue(start_time, new ArcEvent(a,ArcEvent.UP));
+						arc_writer.queue(start_time, new ArcEvent(a,ArcEvent.Type.UP));
 					}
 					appendLastArc(time,a);
 				}
@@ -87,7 +87,7 @@ public final class BeaconsToArcsConverter implements Incrementable, Converter {
 			long time = e.getKey();
 			for ( Arc arc : e.getValue() ){
 				long end_time = time + (long)(_expansion*rand());
-				arc_writer.queue(end_time, new ArcEvent(arc,ArcEvent.DOWN));
+				arc_writer.queue(end_time, new ArcEvent(arc,ArcEvent.Type.DOWN));
 				lastArcs.remove(arc);
 			}
 		}

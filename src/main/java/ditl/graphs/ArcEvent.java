@@ -24,23 +24,22 @@ import ditl.*;
 
 public final class ArcEvent {
 	
-	public final static boolean UP = true;
-	public final static boolean DOWN = false;
+	public enum Type { UP, DOWN };
 	
 	final Integer _to;
 	final Integer _from;
-	final boolean _up;
+	final Type _type;
 	
-	public ArcEvent(Integer from, Integer to, boolean up){
+	public ArcEvent(Integer from, Integer to, Type type){
 		_from = from;
 		_to = to;
-		_up = up;
+		_type = type;
 	}
 	
-	public ArcEvent(Arc a, boolean up){
+	public ArcEvent(Arc a, Type type){
 		_from = a._from;
 		_to = a._to;
-		_up = up;
+		_type = type;
 	}
 	
 	public Integer from(){
@@ -52,7 +51,7 @@ public final class ArcEvent {
 	}
 	
 	public boolean isUp(){
-		return _up;
+		return _type == Type.UP;
 	}
 	
 	public Arc arc(){
@@ -66,8 +65,8 @@ public final class ArcEvent {
 			try {
 				Integer from = Integer.parseInt(elems[0]);
 				Integer to = Integer.parseInt(elems[1]);
-				boolean up = elems[2].equals("UP");
-				return new ArcEvent(from,to,up);
+				Type type = Type.valueOf(elems[2]);
+				return new ArcEvent(from,to,type);
 				
 			} catch ( Exception e ){
 				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
@@ -78,7 +77,7 @@ public final class ArcEvent {
 	
 	@Override
 	public String toString(){
-		return _from+" "+_to+" "+(_up? "UP" : "DOWN");
+		return _from+" "+_to+" "+ _type;
 	}
 	
 	public static final class InternalGroupFilter implements Filter<ArcEvent> {

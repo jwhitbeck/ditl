@@ -77,20 +77,20 @@ public class GroupTrace extends StatefulTrace<GroupEvent,Group>
 			Group g;
 			Integer gid = event._gid;
 			switch ( event._type ){
-			case GroupEvent.NEW: 
+			case NEW: 
 				g = new Group(gid);
 				groups.add(g);
 				group_map.put(gid, g);
 				break;
-			case GroupEvent.JOIN:
+			case JOIN:
 				g = group_map.get(gid);
 				g.handleEvent(event);
 				break;
-			case GroupEvent.LEAVE:
+			case LEAVE:
 				g = group_map.get(gid);
 				g.handleEvent(event);
 				break;
-			case GroupEvent.DELETE:
+			case DELETE:
 				g = group_map.get(gid);
 				groups.remove(g);
 				group_map.remove(gid);

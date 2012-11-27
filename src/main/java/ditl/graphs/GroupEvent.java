@@ -23,29 +23,24 @@ import java.util.*;
 import ditl.*;
 
 public class GroupEvent {
-
-	public final static int 
-		NEW = 0,
-		JOIN = 1,
-		LEAVE = 2,
-		DELETE = 3;
 	
-	private final static String 
-		NEW_LABEL = "NEW",
-		JOIN_LABEL = "JOIN",
-		LEAVE_LABEL = "LEAVE",
-		DELETE_LABEL = "DEL";
+	public enum Type {
+		NEW,
+		JOIN,
+		LEAVE,
+		DELETE;
+	}
 	
-	int _type;
+	Type _type;
 	Integer _gid;
 	Set<Integer> _members;
 	
-	public GroupEvent(Integer gid, int type){ // NEW and DELETE events
+	public GroupEvent(Integer gid, Type type){ // NEW and DELETE events
 		_gid = gid;
 		_type = type;
 	}
 	
-	public GroupEvent(Integer gid, int type, Integer[] members){
+	public GroupEvent(Integer gid, Type type, Integer[] members){
 		_gid = gid;
 		_type = type;
 		_members = new HashSet<Integer>();
@@ -53,13 +48,13 @@ public class GroupEvent {
 			_members.add(i);
 	}
 	
-	public GroupEvent(Integer gid, int type, Set<Integer> members){
+	public GroupEvent(Integer gid, Type type, Set<Integer> members){
 		_gid = gid;
 		_type = type;
 		_members = members;
 	}
 	
-	public int type(){
+	public Type type(){
 		return _type;
 	}
 	
@@ -76,19 +71,15 @@ public class GroupEvent {
 		public GroupEvent fromString(String s) {
 			String[] elems = s.trim().split(" ",3);
 			try {
-				String sType = elems[0];
+				Type type = Type.valueOf(elems[0]);
 				Integer gid = Integer.parseInt(elems[1]);
-				if ( sType.equals(NEW_LABEL) ){
-					return new GroupEvent(gid, NEW);
-				} else if ( sType.equals(DELETE_LABEL) ){
-					return new GroupEvent(gid, DELETE);
-				} else {
+				switch (type) {
+				case NEW:
+				case DELETE: 
+					return new GroupEvent(gid, type);
+				default:
 					Set<Integer> members = GroupSpecification.parse(elems[2]);
-					if ( sType.equals(JOIN_LABEL) ){
-						return new GroupEvent(gid, JOIN, members);
-					} else {
-						return new GroupEvent(gid, LEAVE, members);
-					}
+					return new GroupEvent(gid, type, members);
 				}
 				
 			} catch ( Exception e ){
@@ -101,10 +92,11 @@ public class GroupEvent {
 	@Override
 	public String toString(){
 		switch ( _type ){
-		case NEW: return NEW_LABEL+" "+_gid;
-		case JOIN: return JOIN_LABEL+" "+_gid+" "+GroupSpecification.toString(_members);
-		case LEAVE: return LEAVE_LABEL+" "+_gid+" "+GroupSpecification.toString(_members);
-		default: return DELETE_LABEL+" "+_gid;
+		case NEW: 
+		case DELETE: 
+			return _type +" "+_gid;
+		default:
+			return _type+" "+_gid+" "+GroupSpecification.toString(_members);
 		}
 	}
 	
@@ -114,7 +106,7 @@ public class GroupEvent {
 		@Override
 		public GroupEvent filter(GroupEvent item) {
 			Set<Integer> f_members = new HashSet<Integer>();
-			if ( item._type == JOIN || item._type == LEAVE ){
+			if ( item._type == Type.JOIN || item._type == Type.LEAVE ){
 				for ( Integer i : item._members ){
 					if ( _group.contains(i) )
 						f_members.add(i);

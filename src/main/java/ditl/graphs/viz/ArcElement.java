@@ -28,11 +28,7 @@ import ditl.viz.SceneElement;
 
 public class ArcElement implements SceneElement {
 
-	public final static int 
-		DOWN = 0,
-		LEFT = 1,
-		RIGHT = 2,
-		SYM = 3;
+	enum State { DOWN, LEFT, RIGHT, SYM }
 	
 	protected static Color 
 		directionalColor = Color.RED,
@@ -40,7 +36,7 @@ public class ArcElement implements SceneElement {
 	
 	private NodeElement node1;
 	private NodeElement node2;
-	protected int state = DOWN;
+	protected State state = State.DOWN;
 	protected double alpha = Math.toRadians(30);
 	protected float barb = 10;
 	protected float offset = 5;
@@ -58,13 +54,13 @@ public class ArcElement implements SceneElement {
 	public void bringArcUp(Arc a){ // from n1 to n2
 		if ( node1.id().equals(a.from()) ){ // RIGHT EDGE
 			switch ( state ){
-			case DOWN: state=RIGHT; break;
-			case LEFT: state=SYM; break;
+			case DOWN: state=State.RIGHT; break;
+			case LEFT: state=State.SYM; break;
 			}
 		} else { // LEFT EDGE
 			switch ( state ){
-			case DOWN: state=LEFT; break;
-			case RIGHT: state=SYM; break;
+			case DOWN: state=State.LEFT; break;
+			case RIGHT: state=State.SYM; break;
 			}
 		}
 	}
@@ -72,28 +68,28 @@ public class ArcElement implements SceneElement {
 	public void bringArcDown(Arc a){ // from n1 to n2
 		if ( node1.id().equals(a.from()) ){ // RIGHT EDGE
 			switch ( state ){
-			case SYM: state=LEFT; break;
-			case RIGHT: state=DOWN; break;
+			case SYM: state=State.LEFT; break;
+			case RIGHT: state=State.DOWN; break;
 			}
 		} else { // LEFT EDGE
 			switch ( state ){
-			case SYM: state=RIGHT; break;
-			case LEFT: state=DOWN; break;
+			case SYM: state=State.RIGHT; break;
+			case LEFT: state=State.DOWN; break;
 			}
 		}
 	}
 
 	@Override
 	public void paint(Graphics2D g2) {
-		g2.setColor( (state==SYM)? biColor : directionalColor );
-		if ( state != SYM ){
+		g2.setColor( (state==State.SYM)? biColor : directionalColor );
+		if ( state != State.SYM ){
 			int DX = node2.sX-node1.sX;
 			int DY = node2.sY-node1.sY;
 			double theta = Math.atan2(DY, DX);
 			double d = Math.sqrt(DX*DX+DY*DY);
 			double ox = offset/d*DX;
 			double oy = offset/d*DY;
-			if ( state == LEFT )
+			if ( state == State.LEFT )
 				g2.draw(createArrowHead(node1.sX+ox,node1.sY+oy,theta));
 			else 
 				g2.draw(createArrowHead(node2.sX-ox,node2.sY-oy,theta + Math.PI)); 

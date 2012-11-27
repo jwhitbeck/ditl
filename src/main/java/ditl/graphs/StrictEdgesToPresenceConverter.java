@@ -52,7 +52,7 @@ public final class StrictEdgesToPresenceConverter implements Converter, EdgeTrac
 		runner.run();
 
 		for ( Map.Entry<Integer, Long> e : exit_times.entrySet() ){
-			PresenceEvent pev = new PresenceEvent(e.getKey(), PresenceEvent.OUT);
+			PresenceEvent pev = new PresenceEvent(e.getKey(), PresenceEvent.Type.OUT);
 			presence_writer.queue(e.getValue(), pev);
 		}
 		presence_writer.flush();
@@ -70,11 +70,11 @@ public final class StrictEdgesToPresenceConverter implements Converter, EdgeTrac
 				for ( EdgeEvent event : events ){
 					if ( event.isUp() ){
 						if ( ! seen_nodes.contains(event.id1()) ){
-							presence_writer.queue(time, new PresenceEvent(event.id1(), PresenceEvent.IN));
+							presence_writer.queue(time, new PresenceEvent(event.id1(), PresenceEvent.Type.IN));
 							seen_nodes.add(event.id1());
 						}
 						if ( ! seen_nodes.contains(event.id2()) ){
-							presence_writer.queue(time, new PresenceEvent(event.id2(), PresenceEvent.IN));
+							presence_writer.queue(time, new PresenceEvent(event.id2(), PresenceEvent.Type.IN));
 							seen_nodes.add(event.id2());
 						}
 					} else {

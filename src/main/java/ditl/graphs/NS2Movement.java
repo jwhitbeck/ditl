@@ -122,7 +122,7 @@ public class NS2Movement {
 		while ( movementReader.hasNext() ){
 			for ( MovementEvent mev : movementReader.next() ){
 				switch ( mev.type ){
-				case MovementEvent.NEW_DEST: bw.write( mev.ns2String(movementReader.time(),timeMul) ); break;
+				case NEW_DEST: bw.write( mev.ns2String(movementReader.time(),timeMul) ); break;
 				default: System.err.println("IN and OUT movement events are not supported by NS2");
 				}
 			}

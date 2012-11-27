@@ -23,25 +23,22 @@ import ditl.graphs.Arc;
 
 public class TransferEvent {
 	
-	public final static int 
-		START = 0,
-		COMPLETE = 1,
-		ABORT = 2;
+	public enum Type { START, COMPLETE, ABORT }
 	
 	Integer msg_id;
-	int _type;
+	Type _type;
 	long bytes_transferred;
 	Integer _from;
 	Integer _to;
 
-	public TransferEvent(Integer msgId, Integer from, Integer to, int type){
+	public TransferEvent(Integer msgId, Integer from, Integer to, Type type){
 		msg_id = msgId;
 		_type = type;
 		_from = from;
 		_to = to;
 	}
 	
-	public TransferEvent(Integer msgId, Integer from, Integer to, int type, long bytesTransferred){
+	public TransferEvent(Integer msgId, Integer from, Integer to, Type type, long bytesTransferred){
 		msg_id = msgId;
 		_type = type;
 		_from = from;
@@ -53,7 +50,7 @@ public class TransferEvent {
 		return bytes_transferred;
 	}
 	
-	public int type(){
+	public Type type(){
 		return _type;
 	}
 	
@@ -79,21 +76,14 @@ public class TransferEvent {
 		public TransferEvent fromString(String s) {
 			String[] elems = s.trim().split(" ");
 			try {
-				String typeString = elems[0];
-				int type;
-				if ( typeString.equals("START") ){
-					type = START;
-				} else if ( typeString.endsWith("COMPLETE") ){
-					type = COMPLETE;
-				} else {
-					type = ABORT;
-				}
+				Type type = Type.valueOf(elems[0]);
 				Integer msgId = Integer.parseInt(elems[1]);
 				Integer from = Integer.parseInt(elems[2]);
 				Integer to = Integer.parseInt(elems[3]);
-				if ( type == START ){
+				switch ( type ){
+				case START:
 					return new TransferEvent(msgId, from, to, type);
-				} else {
+				default:
 					long bytesTransferred = Long.parseLong(elems[4]);
 					return new TransferEvent(msgId, from, to, type, bytesTransferred);
 				}

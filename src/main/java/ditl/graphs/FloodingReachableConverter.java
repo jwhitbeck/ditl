@@ -180,11 +180,11 @@ public class FloodingReachableConverter implements
 					Set<Arc> cur_state = arc_writer.states();
 					for ( Arc a : state ){
 						if ( ! cur_state.contains(a) )
-							arc_writer.queue(t, new ArcEvent(a, ArcEvent.UP));
+							arc_writer.queue(t, new ArcEvent(a, ArcEvent.Type.UP));
 					}
 					for ( Arc a : cur_state ){
 						if ( ! state.contains(a) )
-							arc_writer.queue(t, new ArcEvent(a, ArcEvent.DOWN));
+							arc_writer.queue(t, new ArcEvent(a, ArcEvent.Type.DOWN));
 					}
 					arc_writer.flush();
 				}

@@ -35,7 +35,7 @@ public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
 		public void handleEvent(long time, TransferEvent event) {
 			Transfer transfer;
 			switch ( event.type() ){
-			case TransferEvent.START: 
+			case START: 
 				transfer = new Transfer(event);
 				transfer_map.put(event.arc(), transfer);
 				transfers.add(transfer);
