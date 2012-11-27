@@ -19,125 +19,136 @@
 package ditl.graphs;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.Listener;
+import ditl.PersistentMap;
+import ditl.StateUpdater;
+import ditl.StateUpdaterFactory;
+import ditl.StatefulReader;
+import ditl.StatefulTrace;
+import ditl.Store;
+import ditl.Trace;
+import ditl.Writer;
 
-public class GroupTrace extends StatefulTrace<GroupEvent,Group> 
-	implements StatefulTrace.Filterable<GroupEvent, Group> {
+@Trace.Type("groups")
+public class GroupTrace extends StatefulTrace<GroupEvent, Group>
+        implements StatefulTrace.Filterable<GroupEvent, Group> {
 
-	final public static String labelsKey = "labels";
-	final public static String delim = ",";
-	
-	public final static String type = "groups";
-	public final static String defaultName = "groups";
-	
-	private Map<Integer,String> labels = new HashMap<Integer,String>();
-	
-	public String getLabel(Integer id){
-		return labels.get(id);
-	}
-	
-	public boolean hasLabels(){
-		return ! labels.isEmpty();
-	}
-	
-	public Set<Group> staticGroups() throws IOException{
-		return staticGroups(minTime());
-	}
-	
-	public Set<Group> staticGroups(long time) throws IOException{
-		StatefulReader<GroupEvent,Group> reader = getReader();
-		reader.seek(time);
-		Set<Group> groups = reader.referenceState();
-		reader.close();
-		return groups;
-	}
-	
-	public final static class Updater implements StateUpdater<GroupEvent, Group> {
+    final public static String labelsKey = "labels";
+    final public static String delim = ",";
 
-		private Map<Integer,Group> group_map = new HashMap<Integer,Group>();
-		private Set<Group> groups = new HashSet<Group>();
-		
-		@Override
-		public void setState(Collection<Group> groupState ) {
-			groups.clear();
-			group_map.clear();
-			for ( Group g : groupState ){
-				groups.add(g);
-				group_map.put(g._gid, g);
-			}
-		}
+    private final Map<Integer, String> labels = new HashMap<Integer, String>();
 
-		@Override
-		public Set<Group> states() {
-			return groups;
-		}
+    public String getLabel(Integer id) {
+        return labels.get(id);
+    }
 
-		@Override
-		public void handleEvent(long time, GroupEvent event) {
-			Group g;
-			Integer gid = event._gid;
-			switch ( event._type ){
-			case GroupEvent.NEW: 
-				g = new Group(gid);
-				groups.add(g);
-				group_map.put(gid, g);
-				break;
-			case GroupEvent.JOIN:
-				g = group_map.get(gid);
-				g.handleEvent(event);
-				break;
-			case GroupEvent.LEAVE:
-				g = group_map.get(gid);
-				g.handleEvent(event);
-				break;
-			case GroupEvent.DELETE:
-				g = group_map.get(gid);
-				groups.remove(g);
-				group_map.remove(gid);
-			}
-		}
-	}
-	
-	public interface Handler {
-		public Listener<Group> groupListener();
-		public Listener<GroupEvent> groupEventListener();
-	}
+    public boolean hasLabels() {
+        return !labels.isEmpty();
+    }
 
-	
-	public GroupTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new GroupEvent.Factory(), new Group.Factory(), 
-				new StateUpdaterFactory<GroupEvent,Group>(){
-					@Override
-					public StateUpdater<GroupEvent, Group> getNew() {
-						return new GroupTrace.Updater();
-					}
-		});
-		String labelsString = getValue(labelsKey);
-		if ( labelsString != null ){
-			int id = 0;
-			for ( String label : labelsString.split(delim) ){
-				labels.put(id, label);
-				id++;
-			}
-		}
-	}
+    public Set<Group> staticGroups() throws IOException {
+        return staticGroups(minTime());
+    }
 
-	@Override
-	public Filter<GroupEvent> eventFilter(Set<Integer> group) {
-		return new GroupEvent.GroupFilter(group);
-	}
+    public Set<Group> staticGroups(long time) throws IOException {
+        final StatefulReader<GroupEvent, Group> reader = getReader();
+        reader.seek(time);
+        final Set<Group> groups = reader.referenceState();
+        reader.close();
+        return groups;
+    }
 
-	@Override
-	public Filter<Group> stateFilter(Set<Integer> group) {
-		return new Group.GroupFilter(group);
-	}
+    public final static class Updater implements StateUpdater<GroupEvent, Group> {
 
-	@Override
-	public void copyOverTraceInfo(Writer<GroupEvent> writer) {
-		String labels = getValue(labelsKey);
-		if ( labels != null )
-			writer.setProperty(labelsKey, labels);
-	}
+        private final Map<Integer, Group> group_map = new HashMap<Integer, Group>();
+        private final Set<Group> groups = new HashSet<Group>();
+
+        @Override
+        public void setState(Collection<Group> groupState) {
+            groups.clear();
+            group_map.clear();
+            for (final Group g : groupState) {
+                groups.add(g);
+                group_map.put(g._gid, g);
+            }
+        }
+
+        @Override
+        public Set<Group> states() {
+            return groups;
+        }
+
+        @Override
+        public void handleEvent(long time, GroupEvent event) {
+            Group g;
+            final Integer gid = event._gid;
+            switch (event._type) {
+                case NEW:
+                    g = new Group(gid);
+                    groups.add(g);
+                    group_map.put(gid, g);
+                    break;
+                case JOIN:
+                    g = group_map.get(gid);
+                    g.handleEvent(event);
+                    break;
+                case LEAVE:
+                    g = group_map.get(gid);
+                    g.handleEvent(event);
+                    break;
+                case DELETE:
+                    g = group_map.get(gid);
+                    groups.remove(g);
+                    group_map.remove(gid);
+            }
+        }
+    }
+
+    public interface Handler {
+        public Listener<Group> groupListener();
+
+        public Listener<GroupEvent> groupEventListener();
+    }
+
+    public GroupTrace(Store store, String name, PersistentMap info) throws IOException {
+        super(store, name, info, new GroupEvent.Factory(), new Group.Factory(),
+                new StateUpdaterFactory<GroupEvent, Group>() {
+                    @Override
+                    public StateUpdater<GroupEvent, Group> getNew() {
+                        return new GroupTrace.Updater();
+                    }
+                });
+        final String labelsString = getValue(labelsKey);
+        if (labelsString != null) {
+            int id = 0;
+            for (final String label : labelsString.split(delim)) {
+                labels.put(id, label);
+                id++;
+            }
+        }
+    }
+
+    @Override
+    public Filter<GroupEvent> eventFilter(Set<Integer> group) {
+        return new GroupEvent.GroupFilter(group);
+    }
+
+    @Override
+    public Filter<Group> stateFilter(Set<Integer> group) {
+        return new Group.GroupFilter(group);
+    }
+
+    @Override
+    public void copyOverTraceInfo(Writer<GroupEvent> writer) {
+        final String labels = getValue(labelsKey);
+        if (labels != null)
+            writer.setProperty(labelsKey, labels);
+    }
 }

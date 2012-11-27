@@ -23,34 +23,34 @@ import java.util.List;
 
 public class SubtraceConverter<I> implements Converter {
 
-	private Trace<I> _to;
-	private Trace<I> _from;
-	private long _minTime, _maxTime;
-	
-	public SubtraceConverter( Trace<I> to, Trace<I> from, long minTime, long maxTime){
-		_to = to;
-		_from = from;
-		_minTime = minTime;
-		_maxTime = maxTime;
-	}
+    private final Trace<I> _to;
+    private final Trace<I> _from;
+    private final long _minTime, _maxTime;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void convert() throws IOException {
-		Reader<I> reader = _from.getReader();
-		Writer<I> writer = _to.getWriter();
-		reader.seek(_minTime);
-		while ( reader.hasNext() && reader.nextTime() <= _maxTime){
-			List<I> events = reader.next();
-			for ( I item : events )
-				writer.append(reader.time(), item);
-		}
-		writer.setProperty(Trace.minTimeKey, _minTime);
-		writer.setProperty(Trace.maxTimeKey, _maxTime);
-		writer.setPropertiesFromTrace(_from);
-		if ( _from instanceof Trace.Copyable<?> )
-			((Trace.Copyable<I>)_from).copyOverTraceInfo(writer);
-		reader.close();
-		writer.close();
-	}
+    public SubtraceConverter(Trace<I> to, Trace<I> from, long minTime, long maxTime) {
+        _to = to;
+        _from = from;
+        _minTime = minTime;
+        _maxTime = maxTime;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void convert() throws IOException {
+        final Reader<I> reader = _from.getReader();
+        final Writer<I> writer = _to.getWriter();
+        reader.seek(_minTime);
+        while (reader.hasNext() && reader.nextTime() <= _maxTime) {
+            final List<I> events = reader.next();
+            for (final I item : events)
+                writer.append(reader.time(), item);
+        }
+        writer.setProperty(Trace.minTimeKey, _minTime);
+        writer.setProperty(Trace.maxTimeKey, _maxTime);
+        writer.setPropertiesFromTrace(_from);
+        if (_from instanceof Trace.Copyable<?>)
+            ((Trace.Copyable<I>) _from).copyOverTraceInfo(writer);
+        reader.close();
+        writer.close();
+    }
 }

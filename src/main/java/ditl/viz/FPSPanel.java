@@ -18,19 +18,25 @@
  *******************************************************************************/
 package ditl.viz;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 
 @SuppressWarnings("serial")
 public class FPSPanel extends JPanel {
 
-	public FPSPanel(SceneRunner runner){
-		SpinnerModel fpsModel = new SpinnerNumberModel(runner.fps(),1,30,1);
-		JSpinner fpsSpinner = new JSpinner(fpsModel);
-		fpsSpinner.addChangeListener(runner.fpsListener());
-		
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		add(Box.createHorizontalGlue());
-		add(new JLabel("Frames/s: "));
-		add(fpsSpinner);
-	}
+    public FPSPanel(SceneRunner runner) {
+        final SpinnerModel fpsModel = new SpinnerNumberModel(runner.fps(), 1, 30, 1);
+        final JSpinner fpsSpinner = new JSpinner(fpsModel);
+        fpsSpinner.addChangeListener(runner.fpsListener());
+
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        add(Box.createHorizontalGlue());
+        add(new JLabel("Frames/s: "));
+        add(fpsSpinner);
+    }
 }

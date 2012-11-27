@@ -18,46 +18,47 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.*;
+import ditl.Store;
+import ditl.Trace;
+import ditl.WritableStore;
 
+@Command(cmd = "cp")
 public class CopyTraces extends App {
 
-	protected File inStoreFile;
-	protected File outStoreFile;
-	protected String[] traceNames;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "cp";
-	public final static String CMD_ALIAS = null;
-	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
-		inStoreFile = new File(args[0]);
-		outStoreFile = new File(args[1]);
-		traceNames = Arrays.copyOfRange(args, 2, args.length);
-		if ( traceNames.length == 0 )
-			throw new HelpException();
-	}
+    protected File inStoreFile;
+    protected File outStoreFile;
+    protected String[] traceNames;
 
-	@Override
-	protected String getUsageString() {
-		return "[OPTIONS] STORE OUT_STORE TRACE1 [TRACE2...]";
-	}
-	
-	@Override
-	protected void run() throws IOException, Store.NoSuchTraceException {
-		Store inStore = Store.open(inStoreFile);
-		WritableStore outStore = WritableStore.open(outStoreFile);
-		for ( String name : traceNames ){
-			Trace<?> trace = inStore.getTrace(name);
-			outStore.copyTrace(inStore, trace);
-		}
-		inStore.close();
-		outStore.close();
-	}
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException {
+        inStoreFile = new File(args[0]);
+        outStoreFile = new File(args[1]);
+        traceNames = Arrays.copyOfRange(args, 2, args.length);
+        if (traceNames.length == 0)
+            throw new HelpException();
+    }
+
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE OUT_STORE TRACE1 [TRACE2...]";
+    }
+
+    @Override
+    protected void run() throws IOException, Store.NoSuchTraceException {
+        final Store inStore = Store.open(inStoreFile);
+        final WritableStore outStore = WritableStore.open(outStoreFile);
+        for (final String name : traceNames) {
+            final Trace<?> trace = inStore.getTrace(name);
+            outStore.copyTrace(inStore, trace);
+        }
+        inStore.close();
+        outStore.close();
+    }
 }

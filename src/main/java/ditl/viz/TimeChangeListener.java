@@ -19,5 +19,5 @@
 package ditl.viz;
 
 public interface TimeChangeListener {
-	public void changeTime(long time);
+    public void changeTime(long time);
 }

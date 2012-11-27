@@ -18,48 +18,47 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 import ditl.cli.App;
+import ditl.cli.Command;
 import ditl.graphs.viz.GraphPlayer;
 
+@Command(pkg = "graphs", cmd = "play", alias = "p")
 public class Player extends App {
 
-	private File[] files;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "play";
-	public final static String CMD_ALIAS = "p";
-	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException,
-			HelpException {
-		if ( args.length > 0 ){
-			files = new File[args.length];
-			for(int i=0; i<args.length; ++i)
-				files[i] = new File(args[i]);
-		}
-	}
+    private File[] files;
 
-	@Override
-	protected void run() throws IOException {
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				GraphPlayer player = new GraphPlayer();
-				if ( files != null )
-					player.load(files);
-			}
-		});
-	}
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException,
+            HelpException {
+        if (args.length > 0) {
+            files = new File[args.length];
+            for (int i = 0; i < args.length; ++i)
+                files[i] = new File(args[i]);
+        }
+    }
 
-	@Override
-	protected String getUsageString() {
-		return "STORE1 [STORE2...]";
-	}
-	
-	
+    @Override
+    protected void run() throws IOException {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                final GraphPlayer player = new GraphPlayer();
+                if (files != null)
+                    player.load(files);
+            }
+        });
+    }
+
+    @Override
+    protected String getUsageString() {
+        return "STORE1 [STORE2...]";
+    }
 
 }

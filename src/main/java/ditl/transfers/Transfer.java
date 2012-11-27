@@ -19,62 +19,62 @@
 package ditl.transfers;
 
 import ditl.ItemFactory;
-import ditl.graphs.Edge;
+import ditl.graphs.Arc;
 
 public class Transfer {
 
-	Integer msg_id;
-	Integer _from;
-	Integer _to;
-	
-	public Transfer(Integer msgId, Integer from, Integer to ){
-		msg_id = msgId;
-		_from = from;
-		_to = to;
-	}
-	
-	public Transfer(TransferEvent event){
-		if ( event.type() == TransferEvent.START ){
-			msg_id = event.msg_id;
-			_to = event._to;
-			_from = event._from;
-		}
-	}
-	
-	public Edge edge(){
-		return new Edge(_from,_to);
-	}
-	
-	public Integer from(){
-		return _from;
-	}
-	
-	public Integer to(){
-		return _to;
-	}
-	
-	public Integer msgId(){
-		return msg_id;
-	}
-	
-	@Override
-	public String toString(){
-		return msg_id+" "+_from+" "+_to;
-	}
-	
-	public static final class Factory implements ItemFactory<Transfer> {
-		@Override
-		public Transfer fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer msgId = Integer.parseInt(elems[0]);
-				Integer from = Integer.parseInt(elems[1]);
-				Integer to = Integer.parseInt(elems[2]);
-				return new Transfer(msgId, from, to);					
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
+    Integer msg_id;
+    Integer _from;
+    Integer _to;
+
+    public Transfer(Integer msgId, Integer from, Integer to) {
+        msg_id = msgId;
+        _from = from;
+        _to = to;
+    }
+
+    public Transfer(TransferEvent event) {
+        if (event.type() == TransferEvent.Type.START) {
+            msg_id = event.msg_id;
+            _to = event._to;
+            _from = event._from;
+        }
+    }
+
+    public Arc arc() {
+        return new Arc(_from, _to);
+    }
+
+    public Integer from() {
+        return _from;
+    }
+
+    public Integer to() {
+        return _to;
+    }
+
+    public Integer msgId() {
+        return msg_id;
+    }
+
+    @Override
+    public String toString() {
+        return msg_id + " " + _from + " " + _to;
+    }
+
+    public static final class Factory implements ItemFactory<Transfer> {
+        @Override
+        public Transfer fromString(String s) {
+            final String[] elems = s.trim().split(" ");
+            try {
+                final Integer msgId = Integer.parseInt(elems[0]);
+                final Integer from = Integer.parseInt(elems[1]);
+                final Integer to = Integer.parseInt(elems[2]);
+                return new Transfer(msgId, from, to);
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
 }

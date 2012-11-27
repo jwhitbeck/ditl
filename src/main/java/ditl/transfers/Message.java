@@ -22,43 +22,43 @@ import ditl.ItemFactory;
 
 public class Message {
 
-	private Integer msg_id;
-	
-	public Message(Integer msgId){
-		msg_id = msgId;
-	}
-	
-	public Integer msgId(){
-		return msg_id;
-	}
-	
-	public static final class Factory implements ItemFactory<Message> {
-		@Override
-		public Message fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer msgId = Integer.parseInt(elems[1]);
-				return new Message(msgId);
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	@Override
-	public int hashCode(){
-		return msg_id;
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		Message m = (Message)o;
-		return m.msg_id.equals(msg_id);
-	}
-	
-	@Override
-	public String toString(){
-		return "m "+msg_id;
-	}
+    private final Integer msg_id;
+
+    public Message(Integer msgId) {
+        msg_id = msgId;
+    }
+
+    public Integer msgId() {
+        return msg_id;
+    }
+
+    public static final class Factory implements ItemFactory<Message> {
+        @Override
+        public Message fromString(String s) {
+            final String[] elems = s.trim().split(" ");
+            try {
+                final Integer msgId = Integer.parseInt(elems[1]);
+                return new Message(msgId);
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return msg_id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        final Message m = (Message) o;
+        return m.msg_id.equals(msg_id);
+    }
+
+    @Override
+    public String toString() {
+        return "m " + msg_id;
+    }
 }

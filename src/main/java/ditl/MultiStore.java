@@ -18,41 +18,42 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MultiStore extends Store {
 
-	final private Store[] stores;
-	
-	public MultiStore(File...files) throws IOException {
-		super();
-		stores = new Store[files.length];
-		for ( int i=0; i<files.length; ++i ){
-			stores[i] = Store.open(files[i]);
-			for ( Trace<?> trace : stores[i].listTraces() ){
-				String name = trace.name();
-				if ( hasTrace(name) )
-					System.err.println("Warning: trace '"+name+"' exists in multiple stores. Only keeping first occurence.");
-				else
-					traces.put(name, trace);
-			}
-		}
-	}
-	
-	@Override
-	public InputStream getInputStream(String name) throws IOException {
-		for ( Store store : stores ){
-			if ( store.hasFile(name) )
-				return store.getInputStream(name);
-		}
-		throw new IOException();
-	}
-	
-	@Override
-	public boolean hasFile(String name) {
-		for ( Store store : stores )
-			if ( store.hasFile(name) )
-				return true;
-		return false;
-	}
+    final private Store[] stores;
+
+    public MultiStore(File... files) throws IOException {
+        super();
+        stores = new Store[files.length];
+        for (int i = 0; i < files.length; ++i) {
+            stores[i] = Store.open(files[i]);
+            for (final Trace<?> trace : stores[i].listTraces()) {
+                final String name = trace.name();
+                if (hasTrace(name))
+                    System.err.println("Warning: trace '" + name + "' exists in multiple stores. Only keeping first occurence.");
+                else
+                    traces.put(name, trace);
+            }
+        }
+    }
+
+    @Override
+    public InputStream getInputStream(String name) throws IOException {
+        for (final Store store : stores)
+            if (store.hasFile(name))
+                return store.getInputStream(name);
+        throw new IOException();
+    }
+
+    @Override
+    public boolean hasFile(String name) {
+        for (final Store store : stores)
+            if (store.hasFile(name))
+                return true;
+        return false;
+    }
 }

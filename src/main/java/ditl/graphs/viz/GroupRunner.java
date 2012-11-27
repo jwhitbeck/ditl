@@ -19,9 +19,11 @@
 package ditl.graphs.viz;
 
 import java.io.IOException;
+
 import ditl.graphs.GroupTrace;
 
 public interface GroupRunner {
-	public void setGroupTrace(GroupTrace groups) throws IOException;
-	public void addGroupHandler(GroupTrace.Handler handler);
+    public void setGroupTrace(GroupTrace groups) throws IOException;
+
+    public void addGroupHandler(GroupTrace.Handler handler);
 }

@@ -18,168 +18,195 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.reflections.Reflections;
+import org.reflections.scanners.TypeAnnotationsScanner;
 
 public abstract class Store {
-	
-	final protected static String snapshotsFile = "snapshots";
-	final protected static String infoFile = "info";
-	final protected static String traceFile = "trace";
-	
-	protected String separator = "/";
-	
-	final Map<String,Trace<?>> traces = new HashMap<String,Trace<?>>();
-	final static Map<String,Class<?>> type_class_map = new HashMap<String,Class<?>>();
-	
-	private Set<Reader<?>> openReaders = new HashSet<Reader<?>>();
-	private boolean closing = false;
-	
-	@SuppressWarnings("serial")
-	public static class NoSuchTraceException extends Exception {
-		private String trace_name; 
-		public NoSuchTraceException(String traceName){ trace_name = traceName;}
-		@Override
-		public String toString(){
-			return "Error! Could not find trace '"+trace_name+"'";
-		}
-	}
-	
-	@SuppressWarnings("serial")
-	public static class LoadTraceException extends Exception {
-		private String _name; 
-		public LoadTraceException(String name){ _name = name;}
-		@Override
-		public String toString(){
-			return "Error! Failed to load trace '"+_name+"'";
-		}
-	}
-	
-	public static void buildTypeClassMap() throws IOException{
-		if ( type_class_map.isEmpty() ){
-			Reflections reflections = new Reflections("\\w+\\.class");
-			for ( Class<?> klass : Reflections.getSubClasses(Trace.class, reflections.listClasses("ditl")))
-				addTraceClass(klass);
-		}
-	}
-	
-	public static void addTraceClass(Class<?> klass){
-		if ( Trace.class.isAssignableFrom(klass) ){
-			try {
-				Field f = klass.getField("type");
-				String type = (String)f.get(null);
-				type_class_map.put(type, klass);
-			} catch (Exception e) {
-				System.err.println(klass+": "+e);
-			}
-		}
-	}
-	
-	String traceFile(String name){
-		return name+separator+traceFile;
-	}
-	
-	String infoFile(String name){
-		return name+separator+infoFile;
-	}
-	
-	String snapshotsFile(String name){
-		return name+separator+snapshotsFile;
-	}
-	
-	
-	public Collection<Trace<?>> listTraces() {
-		return traces.values();
-	}
-	
-	public List<Trace<?>> listTraces(String type){
-		List<Trace<?>> list = new LinkedList<Trace<?>>();
-		for ( Trace<?> trace : traces.values() )
-			if ( trace.type() != null )
-				if ( trace.type().equals(type) )
-					list.add(trace);
-		return list;
-	}
-	
-	Reader.InputStreamOpener getStreamOpener(final String name){
-		return new Reader.InputStreamOpener(){
-			@Override
-			public InputStream open() throws IOException {
-				return getInputStream(name);
-			}
-		};
-	}
-	
-	public abstract boolean hasFile(String name);
-	
-	public boolean hasTrace(String name){
-		return traces.containsKey(name);
-	}
-	
-	public Trace<?> getTrace(String name) throws NoSuchTraceException {
-		Trace<?> trace = traces.get(name);
-		if ( trace == null ) throw new NoSuchTraceException(name);
-		return trace;
-	}
-	
-	public abstract InputStream getInputStream (String name) throws IOException;
-	
-	public String getTraceResource(Trace<?> trace, String resource) throws IOException{
-		return trace.name() + separator + resource;
-	}
-	
-	PersistentMap readTraceInfo(String path) throws IOException {
-		PersistentMap info = new PersistentMap();
-		info.read(getInputStream(infoFile(path)));
-		return info;
-	}
-	
-	public static Store open(File...files) throws IOException {
-		if ( files.length > 0 ) buildTypeClassMap();
-		switch ( files.length ){
-		case 0: return new ClassPathStore();
-		case 1: if ( files[0].isDirectory() )
-					return new DirectoryStore(files[0]);
-				return new JarStore(files[0]);
-		default: return new MultiStore(files);
-		}
-	}
-	
-	void notifyClose(Reader<?> reader){
-		if ( ! closing )
-			openReaders.remove(reader);
-	}
-	
-	void notifyOpen(Reader<?> reader){
-		openReaders.add(reader);
-	}
-	
-	public void close() throws IOException {
-		closing = true;
-		for ( Reader<?> reader : openReaders )
-			reader.close();
-		openReaders.clear();
-		closing = false;
-	}
-	
-	public void loadTrace(String name) throws IOException, LoadTraceException {
-		PersistentMap _info = readTraceInfo(name);
-		Trace<?> trace = buildTrace(name, _info, _info.get(Trace.typeKey));
-		traces.put(name, trace);
-	}
-	
-	Trace<?> buildTrace(String name, PersistentMap info, String type) throws LoadTraceException {
-		Class<?> klass = type_class_map.get(type);
-		if ( klass == null )
-			throw new LoadTraceException(name);
-		try {
-			Constructor<?> ctor = klass.getConstructor(new Class[]{Store.class, String.class, PersistentMap.class});
-			info.put(Trace.typeKey, type);
-			Trace<?> trace = (Trace<?>)ctor.newInstance(this, name, info);
-			return trace;
-		} catch ( Exception e ){
-			throw new LoadTraceException(name);
-		}
-	}
+
+    final protected static String snapshotsFile = "snapshots";
+    final protected static String infoFile = "info";
+    final protected static String traceFile = "trace";
+
+    protected String separator = "/";
+
+    final Map<String, Trace<?>> traces = new HashMap<String, Trace<?>>();
+    final static Map<String, Class<? extends Trace<?>>> type_class_map = buildTypeClassMap();
+
+    private final Set<Reader<?>> openReaders = new HashSet<Reader<?>>();
+    private boolean closing = false;
+
+    @SuppressWarnings("serial")
+    public static class NoSuchTraceException extends Exception {
+        private final String trace_name;
+
+        public NoSuchTraceException(String traceName) {
+            trace_name = traceName;
+        }
+
+        @Override
+        public String toString() {
+            return "Error! Could not find trace '" + trace_name + "'";
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public static class LoadTraceException extends Exception {
+        private final String _name;
+
+        public LoadTraceException(String name) {
+            _name = name;
+        }
+
+        @Override
+        public String toString() {
+            return "Error! Failed to load trace '" + _name + "'";
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Class<? extends Trace<?>>> buildTypeClassMap() {
+        final Map<String, Class<? extends Trace<?>>> type_class = new HashMap<String, Class<? extends Trace<?>>>();
+        if (type_class.isEmpty()) {
+            final Set<Class<?>> traceClasses = new Reflections("ditl", new TypeAnnotationsScanner()).
+                    getTypesAnnotatedWith(Trace.Type.class);
+            for (final Class<?> klass : traceClasses)
+                if (Trace.class.isAssignableFrom(klass))
+                    type_class.put(klass.getAnnotation(Trace.Type.class).value(),
+                            (Class<? extends Trace<?>>) klass);
+        }
+        return type_class;
+    }
+
+    String traceFile(String name) {
+        return name + separator + traceFile;
+    }
+
+    String infoFile(String name) {
+        return name + separator + infoFile;
+    }
+
+    String snapshotsFile(String name) {
+        return name + separator + snapshotsFile;
+    }
+
+    public Collection<Trace<?>> listTraces() {
+        return traces.values();
+    }
+
+    public List<Trace<?>> listTraces(String type) {
+        try {
+            return listTraces(getTraceClass(type));
+        } catch (final LoadTraceException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    public List<Trace<?>> listTraces(Class<? extends Trace<?>> klass) {
+        final List<Trace<?>> list = new LinkedList<Trace<?>>();
+        for (final Trace<?> trace : traces.values())
+            if (klass.equals(trace.getClass()))
+                list.add(trace);
+        return list;
+    }
+
+    Reader.InputStreamOpener getStreamOpener(final String name) {
+        return new Reader.InputStreamOpener() {
+            @Override
+            public InputStream open() throws IOException {
+                return getInputStream(name);
+            }
+        };
+    }
+
+    public abstract boolean hasFile(String name);
+
+    public boolean hasTrace(String name) {
+        return traces.containsKey(name);
+    }
+
+    public Trace<?> getTrace(String name) throws NoSuchTraceException {
+        final Trace<?> trace = traces.get(name);
+        if (trace == null)
+            throw new NoSuchTraceException(name);
+        return trace;
+    }
+
+    public abstract InputStream getInputStream(String name) throws IOException;
+
+    public String getTraceResource(Trace<?> trace, String resource) throws IOException {
+        return trace.name() + separator + resource;
+    }
+
+    PersistentMap readTraceInfo(String path) throws IOException {
+        final PersistentMap info = new PersistentMap();
+        info.read(getInputStream(infoFile(path)));
+        return info;
+    }
+
+    public static Store open(File... files) throws IOException {
+        switch (files.length) {
+            case 0:
+                return new ClassPathStore();
+            case 1:
+                if (files[0].isDirectory())
+                    return new DirectoryStore(files[0]);
+                return new JarStore(files[0]);
+            default:
+                return new MultiStore(files);
+        }
+    }
+
+    void notifyClose(Reader<?> reader) {
+        if (!closing)
+            openReaders.remove(reader);
+    }
+
+    void notifyOpen(Reader<?> reader) {
+        openReaders.add(reader);
+    }
+
+    public void close() throws IOException {
+        closing = true;
+        for (final Reader<?> reader : openReaders)
+            reader.close();
+        openReaders.clear();
+        closing = false;
+    }
+
+    Class<? extends Trace<?>> getTraceClass(String type) throws LoadTraceException {
+        buildTypeClassMap();
+        if (!type_class_map.containsKey(type))
+            throw new LoadTraceException(type);
+        return type_class_map.get(type);
+    }
+
+    public void loadTrace(String name) throws IOException, LoadTraceException {
+        final PersistentMap _info = readTraceInfo(name);
+        final Trace<?> trace = buildTrace(name, _info, type_class_map.get(_info.get(Trace.typeKey)));
+        traces.put(name, trace);
+    }
+
+    Trace<?> buildTrace(String name, PersistentMap info, Class<? extends Trace<?>> klass) throws LoadTraceException {
+        try {
+            final Constructor<?> ctor = klass.getConstructor(new Class[] { Store.class, String.class, PersistentMap.class });
+            info.put(Trace.typeKey, klass.getAnnotation(Trace.Type.class).value());
+            final Trace<?> trace = (Trace<?>) ctor.newInstance(this, name, info);
+            return trace;
+        } catch (final Exception e) {
+            throw new LoadTraceException(name);
+        }
+    }
 }

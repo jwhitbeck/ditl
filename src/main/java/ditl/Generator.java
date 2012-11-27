@@ -19,6 +19,7 @@
 package ditl;
 
 public interface Generator extends Incrementable {
-	public Bus<?>[] busses();
-	public int priority();
+    public Bus<?>[] busses();
+
+    public int priority();
 }

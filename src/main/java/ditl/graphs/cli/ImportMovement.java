@@ -18,75 +18,84 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
+import static ditl.graphs.cli.ExternalFormat.NS2;
+import static ditl.graphs.cli.ExternalFormat.ONE;
+
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.*;
+import ditl.IdGenerator;
+import ditl.IdMap;
+import ditl.OffsetIdGenerator;
 import ditl.Store.LoadTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ImportApp;
-import ditl.graphs.*;
+import ditl.graphs.MovementTrace;
+import ditl.graphs.NS2Movement;
+import ditl.graphs.ONEMovement;
 
-
+@Command(pkg = "graphs", cmd = "import-movement", alias = "im")
 public class ImportMovement extends ImportApp {
-	
-	private ExternalFormat ext_fmt = new ExternalFormat(ExternalFormat.NS2, ExternalFormat.ONE);
-	private Long maxTime;
-	private long ticsPerSecond;
-	private Double timeMul;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.MOVEMENT);
-	private long offset;
-	private boolean fix_pause_times;
-	private boolean use_id_map;
-	private int min_id;
-	
-	private String fixPauseTimesOption = "fix-pause-times";
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "import-movement";
-	public final static String CMD_ALIAS = "im";
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		ext_fmt.parse(cli);
-		ticsPerSecond = getTicsPerSecond(cli.getOptionValue(destTimeUnitOption,"ms"));
-		Long otps = getTicsPerSecond(cli.getOptionValue(origTimeUnitOption,"s"));
-		timeMul = getTimeMul(otps,ticsPerSecond);
-		if ( timeMul == null )
-			throw new HelpException();
-		offset = Long.parseLong(cli.getOptionValue(offsetOption,"0")) * ticsPerSecond;
-		if ( cli.hasOption(maxTimeOption) )
-			maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption)) * ticsPerSecond;
-		fix_pause_times = cli.hasOption(fixPauseTimesOption);
-		use_id_map = cli.hasOption(stringIdsOption);
-		min_id = Integer.parseInt(cli.getOptionValue(minIdOption, "0"));
-	}
-	
-	@Override
-	protected void run() throws IOException, AlreadyExistsException, LoadTraceException {
-		MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.type, force);
-		IdGenerator id_gen = (use_id_map)? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
-		if ( ext_fmt.is(ExternalFormat.NS2) )
-			NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, fix_pause_times, id_gen);
-		else
-			ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, id_gen);
-	}
+    private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(NS2, ONE);
+    private ExternalFormat ext_fmt;
+    private Long maxTime;
+    private long ticsPerSecond;
+    private Double timeMul;
+    private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT);
+    private long offset;
+    private boolean fix_pause_times;
+    private boolean use_id_map;
+    private int min_id;
 
+    private final String fixPauseTimesOption = "fix-pause-times";
 
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		ext_fmt.setOptions(options);
-		options.addOption(null, maxTimeOption, true, "maximum movement time in seconds");
-		options.addOption(null, origTimeUnitOption, true, "time unit of original trace [s, ms, us, ns] (default: s)");
-		options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: ms)");
-		options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
-		options.addOption(null, fixPauseTimesOption, false, "fix missing pause times in NS2");
-		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
-		options.addOption(null, minIdOption, true, "ensure that all imported ids are greater than <arg> (default: 0)");
-	}
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+        super.parseArgs(cli, args);
+        graph_options.parse(cli);
+        ext_fmt = ext_fmt_parser.parse(cli);
+        ticsPerSecond = getTicsPerSecond(cli.getOptionValue(destTimeUnitOption, "ms"));
+        final Long otps = getTicsPerSecond(cli.getOptionValue(origTimeUnitOption, "s"));
+        timeMul = getTimeMul(otps, ticsPerSecond);
+        if (timeMul == null)
+            throw new HelpException();
+        offset = Long.parseLong(cli.getOptionValue(offsetOption, "0")) * ticsPerSecond;
+        if (cli.hasOption(maxTimeOption))
+            maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption)) * ticsPerSecond;
+        fix_pause_times = cli.hasOption(fixPauseTimesOption);
+        use_id_map = cli.hasOption(stringIdsOption);
+        min_id = Integer.parseInt(cli.getOptionValue(minIdOption, "0"));
+    }
+
+    @Override
+    protected void run() throws IOException, AlreadyExistsException, LoadTraceException {
+        final MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.class, force);
+        final IdGenerator id_gen = (use_id_map) ? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
+        switch (ext_fmt) {
+            case NS2:
+                NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, fix_pause_times, id_gen);
+                break;
+            case ONE:
+                ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, id_gen);
+                break;
+        }
+    }
+
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        graph_options.setOptions(options);
+        ext_fmt_parser.setOptions(options);
+        options.addOption(null, maxTimeOption, true, "maximum movement time in seconds");
+        options.addOption(null, origTimeUnitOption, true, "time unit of original trace [s, ms, us, ns] (default: s)");
+        options.addOption(null, destTimeUnitOption, true, "time unit of destination trace [s, ms, us, ns] (default: ms)");
+        options.addOption(null, offsetOption, true, "offset to add to all times in seconds (default 0)");
+        options.addOption(null, fixPauseTimesOption, false, "fix missing pause times in NS2");
+        options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
+        options.addOption(null, minIdOption, true, "ensure that all imported ids are greater than <arg> (default: 0)");
+    }
 }

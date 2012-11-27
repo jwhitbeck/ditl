@@ -19,81 +19,86 @@
 package ditl.graphs.cli;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.*;
+import ditl.GroupSpecification;
+import ditl.IdMap;
+import ditl.StatefulWriter;
 import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
+import ditl.Trace;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.WriteApp;
-import ditl.graphs.*;
+import ditl.graphs.Group;
+import ditl.graphs.GroupEvent;
+import ditl.graphs.GroupTrace;
 
-
+@Command(pkg = "graphs", cmd = "import-groups", alias = "ig")
 public class ImportStaticGroups extends WriteApp {
 
-	private static String labelsOption = "labels";
-	private boolean use_id_map;
-	
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.PRESENCE, GraphOptions.GROUPS);
-	private String[] group_specs;
-	String[] labels;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "import-groups";
-	public final static String CMD_ALIAS = "ig";
-	
-	@Override
-	protected String getUsageString(){
-		return"[OPTIONS] STORE GROUP [GROUP..]";
-	}
+    private static String labelsOption = "labels";
+    private boolean use_id_map;
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		group_specs = Arrays.copyOfRange(args,1,args.length);
-		if ( cli.hasOption(labelsOption) )
-			labels = cli.getOptionValue(labelsOption).split(",");
-		use_id_map = cli.hasOption(stringIdsOption);
-	}
+    private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.PRESENCE, GraphOptions.GROUPS);
+    private String[] group_specs;
+    String[] labels;
 
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		options.addOption(null, labelsOption, true, "comma-separated list of groups labels");
-		options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
-	}
-	
-	@Override
-	public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
-		IdMap id_map = (use_id_map)? presence.idMap() : null;
-		GroupTrace groups = (GroupTrace) _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.type, force);
-		StatefulWriter<GroupEvent,Group> groupWriter = groups.getWriter(); 
-		Set<Group> initState = new HashSet<Group>();
-		int i = 0;
-		for ( String g_spec : group_specs ){
-			Set<Integer> members = GroupSpecification.parse(g_spec, id_map);
-			initState.add(new Group(i, members));
-			i++;
-		}
-		
-		groupWriter.setInitState(presence.minTime(), initState);
-		groupWriter.setPropertiesFromTrace(presence);
-		
-		if ( labels != null ){
-			StringBuffer buffer = new StringBuffer();
-			for ( int j=0; j<labels.length; ++j){
-				buffer.append(labels[j].trim());
-				if ( j<labels.length-1)
-					buffer.append(GroupTrace.delim);
-			}
-			groupWriter.setProperty(GroupTrace.labelsKey, buffer.toString());
-		}
-		
-		groupWriter.close();		
-	}
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE GROUP [GROUP..]";
+    }
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
+        super.parseArgs(cli, args);
+        graph_options.parse(cli);
+        group_specs = Arrays.copyOfRange(args, 1, args.length);
+        if (cli.hasOption(labelsOption))
+            labels = cli.getOptionValue(labelsOption).split(",");
+        use_id_map = cli.hasOption(stringIdsOption);
+    }
+
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        graph_options.setOptions(options);
+        options.addOption(null, labelsOption, true, "comma-separated list of groups labels");
+        options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
+    }
+
+    @Override
+    public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+        final Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+        final IdMap id_map = (use_id_map) ? presence.idMap() : null;
+        final GroupTrace groups = (GroupTrace) _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
+        final StatefulWriter<GroupEvent, Group> groupWriter = groups.getWriter();
+        final Set<Group> initState = new HashSet<Group>();
+        int i = 0;
+        for (final String g_spec : group_specs) {
+            final Set<Integer> members = GroupSpecification.parse(g_spec, id_map);
+            initState.add(new Group(i, members));
+            i++;
+        }
+
+        groupWriter.setInitState(presence.minTime(), initState);
+        groupWriter.setPropertiesFromTrace(presence);
+
+        if (labels != null) {
+            final StringBuffer buffer = new StringBuffer();
+            for (int j = 0; j < labels.length; ++j) {
+                buffer.append(labels[j].trim());
+                if (j < labels.length - 1)
+                    buffer.append(GroupTrace.delim);
+            }
+            groupWriter.setProperty(GroupTrace.labelsKey, buffer.toString());
+        }
+
+        groupWriter.close();
+    }
 }

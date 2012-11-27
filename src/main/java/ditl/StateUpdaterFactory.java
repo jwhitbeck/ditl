@@ -18,6 +18,6 @@
  *******************************************************************************/
 package ditl;
 
-public interface StateUpdaterFactory<E,S> {
-	public StateUpdater<E,S> getNew();
+public interface StateUpdaterFactory<E, S> {
+    public StateUpdater<E, S> getNew();
 }

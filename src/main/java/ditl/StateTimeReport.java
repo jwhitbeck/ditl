@@ -18,28 +18,28 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class StateTimeReport extends Report {
-	
-	protected long prev_time;
-	protected Object prev_state;
 
-	public StateTimeReport(OutputStream out) throws IOException {
-		super(out);
-	}
-	
-	public void append(long time, Object s) throws IOException{
-		if ( prev_state != null ){
-			append(prev_time+" "+(time-prev_time)+" "+prev_state);
-		}
-		prev_time = time;
-		prev_state = s;
-	}
-	
-	public void finish(long time) throws IOException{
-		append(prev_time+" "+(time-prev_time)+" "+prev_state);
-		finish();
-	}
+    protected long prev_time;
+    protected Object prev_state;
+
+    public StateTimeReport(OutputStream out) throws IOException {
+        super(out);
+    }
+
+    public void append(long time, Object s) throws IOException {
+        if (prev_state != null)
+            append(prev_time + " " + (time - prev_time) + " " + prev_state);
+        prev_time = time;
+        prev_state = s;
+    }
+
+    public void finish(long time) throws IOException {
+        append(prev_time + " " + (time - prev_time) + " " + prev_state);
+        finish();
+    }
 
 }

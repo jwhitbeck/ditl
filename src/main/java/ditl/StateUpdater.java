@@ -18,10 +18,13 @@
  *******************************************************************************/
 package ditl;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
 
-public interface StateUpdater<E,S> {
-	public void setState(Collection<S> states);
-	public void handleEvent(long time, E event);
-	public Set<S> states();
+public interface StateUpdater<E, S> {
+    public void setState(Collection<S> states);
+
+    public void handleEvent(long time, E event);
+
+    public Set<S> states();
 }

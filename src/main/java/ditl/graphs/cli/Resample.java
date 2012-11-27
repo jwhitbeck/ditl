@@ -20,58 +20,58 @@ package ditl.graphs.cli;
 
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.Store.*;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
-import ditl.graphs.*;
+import ditl.graphs.BeaconTrace;
+import ditl.graphs.BeaconningConverter;
+import ditl.graphs.EdgeTrace;
+import ditl.graphs.PresenceTrace;
 
-
+@Command(pkg = "graphs", cmd = "resample", alias = "s")
 public class Resample extends ConvertApp {
-	
-	final static String missProbabilityOption = "miss-probability";
-	final static String randomizeOption = "randomize";
 
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.BEACONS, GraphOptions.PRESENCE, GraphOptions.LINKS);
-	private long period;
-	private double p;
-	private boolean randomize;
-	
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "resample";
-	public final static String CMD_ALIAS = "s";
+    final static String missProbabilityOption = "miss-probability";
+    final static String randomizeOption = "randomize";
 
-	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);
-		period = Long.parseLong(args[1]);
-		p = Double.parseDouble(cli.getOptionValue(missProbabilityOption,"0.0"));
-		randomize = cli.hasOption(randomizeOption);
-	}
+    private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.BEACONS, GraphOptions.PRESENCE, GraphOptions.EDGES);
+    private long period;
+    private double p;
+    private boolean randomize;
 
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		options.addOption(null, missProbabilityOption, true, "Missed beacon probability (default 0.0)");
-		options.addOption(null, randomizeOption, false, "Randomize beaconning starting times");
-	}
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+        super.parseArgs(cli, args);
+        graph_options.parse(cli);
+        period = Long.parseLong(args[1]);
+        p = Double.parseDouble(cli.getOptionValue(missProbabilityOption, "0.0"));
+        randomize = cli.hasOption(randomizeOption);
+    }
 
-	@Override
-	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		LinkTrace links = (LinkTrace) orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
-		PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
-		BeaconTrace beacons = (BeaconTrace) dest_store.newTrace(graph_options.get(GraphOptions.BEACONS), BeaconTrace.type, force);
-		period *= links.ticsPerSecond();
-		new BeaconningConverter(beacons, presence, links, period, p, randomize).convert();
-	}
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        options.addOption(null, missProbabilityOption, true, "Missed beacon probability (default 0.0)");
+        options.addOption(null, randomizeOption, false, "Randomize beaconning starting times");
+    }
 
-	@Override
-	protected String getUsageString() {
-		return "[OPTIONS] STORE BEACONNING_PERIOD";
-	}
+    @Override
+    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+        final EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+        final PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+        final BeaconTrace beacons = (BeaconTrace) dest_store.newTrace(graph_options.get(GraphOptions.BEACONS), BeaconTrace.class, force);
+        period *= edges.ticsPerSecond();
+        new BeaconningConverter(beacons, presence, edges, period, p, randomize).convert();
+    }
+
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE BEACONNING_PERIOD";
+    }
 
 }

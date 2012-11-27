@@ -18,29 +18,32 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 
 public class Report {
-	
-	public final static char commentChar = '#';
-	
-	private BufferedWriter writer;
-	private OutputStream _out;
-	
-	public Report(OutputStream out) throws IOException {
-		_out = out;
-		writer = new BufferedWriter( new OutputStreamWriter(_out) );
-	}
-	
-	public void finish() throws IOException {
-		writer.close();
-	}
-	
-	public void append(Object line) throws IOException {
-		writer.write(line+"\n");
-	}
-	
-	public void appendComment(Object comment) throws IOException {
-		writer.write(commentChar+" "+comment+"\n");
-	}
+
+    public final static char commentChar = '#';
+
+    private final BufferedWriter writer;
+    private final OutputStream _out;
+
+    public Report(OutputStream out) throws IOException {
+        _out = out;
+        writer = new BufferedWriter(new OutputStreamWriter(_out));
+    }
+
+    public void finish() throws IOException {
+        writer.close();
+    }
+
+    public void append(Object line) throws IOException {
+        writer.write(line + "\n");
+    }
+
+    public void appendComment(Object comment) throws IOException {
+        writer.write(commentChar + " " + comment + "\n");
+    }
 }

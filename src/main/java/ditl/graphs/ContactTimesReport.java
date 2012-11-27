@@ -18,69 +18,75 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Map;
 
-import java.io.*;
-import java.util.*;
+import ditl.Listener;
+import ditl.Report;
+import ditl.ReportFactory;
+import ditl.StatefulListener;
 
-import ditl.*;
+public final class ContactTimesReport extends Report implements EdgeTrace.Handler {
 
+    private final boolean _contacts;
+    private final Map<Edge, Long> activeContacts = new AdjacencyMap.Edges<Long>();
 
+    public ContactTimesReport(OutputStream out, boolean contacts) throws IOException {
+        super(out);
+        _contacts = contacts;
+        appendComment("id1 | id2 | begin | end | duration");
+    }
 
-public final class ContactTimesReport extends Report implements LinkTrace.Handler {
+    public static final class Factory implements ReportFactory<ContactTimesReport> {
+        private final boolean _contacts;
 
-	private boolean _contacts;
-	private Map<Link,Long> activeContacts = new AdjacencyMap.Links<Long>();
-	
-	public ContactTimesReport(OutputStream out, boolean contacts) throws IOException {
-		super(out);
-		_contacts = contacts;
-		appendComment("id1 | id2 | begin | end | duration");
-	}
-	
-	public static final class Factory implements ReportFactory<ContactTimesReport> {
-		private boolean _contacts;
-		public Factory(boolean contacts){ _contacts = contacts;}
-		@Override
-		public ContactTimesReport getNew(OutputStream out) throws IOException {
-			return new ContactTimesReport(out, _contacts);
-		}
-	}
-	
-	@Override
-	public Listener<LinkEvent> linkEventListener(){
-		return new Listener<LinkEvent>() {
-			@Override
-			public void handle(long time, Collection<LinkEvent> events) throws IOException {
-				for ( LinkEvent event : events ){
-					Link l = event.link();
-					if( event.isUp() == _contacts ){
-						activeContacts.put(l, time);
-					} else {
-						Long b = activeContacts.get(l);
-						if ( b != null ){
-							activeContacts.remove(l);
-							append(l+" "+b+" "+time+" "+(time-b));
-						}
-					}
-				}
-			}
-		};
-	}
+        public Factory(boolean contacts) {
+            _contacts = contacts;
+        }
 
-	@Override
-	public Listener<Link> linkListener() {
-		return new StatefulListener<Link>(){
-			@Override
-			public void handle(long time, Collection<Link> events) {
-				if ( _contacts )
-					for ( Link l : events )
-						activeContacts.put(l, time);
-			}
+        @Override
+        public ContactTimesReport getNew(OutputStream out) throws IOException {
+            return new ContactTimesReport(out, _contacts);
+        }
+    }
 
-			@Override
-			public void reset() {
-				activeContacts.clear();
-			}
-		};
-	}
+    @Override
+    public Listener<EdgeEvent> edgeEventListener() {
+        return new Listener<EdgeEvent>() {
+            @Override
+            public void handle(long time, Collection<EdgeEvent> events) throws IOException {
+                for (final EdgeEvent event : events) {
+                    final Edge e = event.edge();
+                    if (event.isUp() == _contacts)
+                        activeContacts.put(e, time);
+                    else {
+                        final Long b = activeContacts.get(e);
+                        if (b != null) {
+                            activeContacts.remove(e);
+                            append(e + " " + b + " " + time + " " + (time - b));
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    @Override
+    public Listener<Edge> edgeListener() {
+        return new StatefulListener<Edge>() {
+            @Override
+            public void handle(long time, Collection<Edge> events) {
+                if (_contacts)
+                    for (final Edge e : events)
+                        activeContacts.put(e, time);
+            }
+
+            @Override
+            public void reset() {
+                activeContacts.clear();
+            }
+        };
+    }
 }

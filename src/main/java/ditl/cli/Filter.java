@@ -18,81 +18,80 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.*;
-import ditl.Store.*;
+import ditl.Converter;
+import ditl.FilterConverter;
+import ditl.GroupSpecification;
+import ditl.StatefulFilterConverter;
+import ditl.StatefulTrace;
+import ditl.Store.LoadTraceException;
+import ditl.Store.NoSuchTraceException;
+import ditl.Trace;
 import ditl.WritableStore.AlreadyExistsException;
 
+@Command(cmd = "filter")
 public class Filter extends ConvertApp {
 
-	private String orig_trace_name;
-	private String dest_trace_name;
-	private String group_spec;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "filter";
-	public final static String CMD_ALIAS = null;
-	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args)
-			throws ParseException, ArrayIndexOutOfBoundsException,
-			HelpException {
-		if ( args.length == 4 ){
-			super.parseArgs(cli, args);
-			orig_trace_name = args[1];
-			dest_trace_name = args[2];
-			group_spec = args[3];
-		} else {
-			orig_store_file = new File(args[0]);
-			dest_store_file = new File(args[1]);
-			group_spec = args[2];
-			force = cli.hasOption(forceOption);
-		}
-	}
+    private String orig_trace_name;
+    private String dest_trace_name;
+    private String group_spec;
 
-	@Override
-	protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-		if ( orig_trace_name != null ){
-			Trace<?> orig_trace = orig_store.getTrace(orig_trace_name);
-			Trace<?> dest_trace = dest_store.newTrace(dest_trace_name, orig_trace.type(), force);
-			filter(dest_trace, orig_trace);
-		} else {
-			for ( Trace<?> orig_trace : orig_store.listTraces() ){
-				Trace<?> dest_trace = dest_store.newTrace(orig_trace.name(), orig_trace.type(), force);
-				filter ( dest_trace, orig_trace );
-			}
-		}
-	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void filter(Trace<?> dest, Trace<?> orig) throws IOException {
-		Converter filterer = null;
-		Set<Integer> group = GroupSpecification.parse(group_spec, orig.idMap());
-		if ( orig instanceof Trace.Filterable ){
-			if ( orig.isStateful() ){
-				if ( orig instanceof StatefulTrace.Filterable ){
-					filterer = new StatefulFilterConverter((StatefulTrace<?,?>)dest, 
-							(StatefulTrace<?,?>)orig, group);
-				}
-			} else {
-				filterer = new FilterConverter(dest, orig, group);
-			}
-		} 
-		if ( filterer == null ) {
-			System.err.println("Trace '"+orig.name()+"' is not filterable. Skipping");
-		} else {
-			filterer.convert();
-		}
-	}
-	
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException,
+            HelpException {
+        if (args.length == 4) {
+            super.parseArgs(cli, args);
+            orig_trace_name = args[1];
+            dest_trace_name = args[2];
+            group_spec = args[3];
+        } else {
+            orig_store_file = new File(args[0]);
+            dest_store_file = new File(args[1]);
+            group_spec = args[2];
+            force = cli.hasOption(forceOption);
+        }
+    }
 
-	@Override
-	protected String getUsageString() {
-		return "\t[OPTIONS] STORE NEWSTORE GROUP_COMPOSITION\n\t[OPTIONS] STORE ORIG_TRACE DEST_TRACE GROUP_COMPOSITION";
-	}
-	
+    @Override
+    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+        if (orig_trace_name != null) {
+            final Trace<?> orig_trace = orig_store.getTrace(orig_trace_name);
+            final Trace<?> dest_trace = dest_store.newTrace(dest_trace_name, orig_trace.type(), force);
+            filter(dest_trace, orig_trace);
+        } else
+            for (final Trace<?> orig_trace : orig_store.listTraces()) {
+                final Trace<?> dest_trace = dest_store.newTrace(orig_trace.name(), orig_trace.type(), force);
+                filter(dest_trace, orig_trace);
+            }
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void filter(Trace<?> dest, Trace<?> orig) throws IOException {
+        Converter filterer = null;
+        final Set<Integer> group = GroupSpecification.parse(group_spec, orig.idMap());
+        if (orig instanceof Trace.Filterable)
+            if (orig.isStateful()) {
+                if (orig instanceof StatefulTrace.Filterable)
+                    filterer = new StatefulFilterConverter((StatefulTrace<?, ?>) dest,
+                            (StatefulTrace<?, ?>) orig, group);
+            } else
+                filterer = new FilterConverter(dest, orig, group);
+        if (filterer == null)
+            System.err.println("Trace '" + orig.name() + "' is not filterable. Skipping");
+        else
+            filterer.convert();
+    }
+
+    @Override
+    protected String getUsageString() {
+        return "\t[OPTIONS] STORE NEWSTORE GROUP_COMPOSITION\n\t[OPTIONS] STORE ORIG_TRACE DEST_TRACE GROUP_COMPOSITION";
+    }
+
 }

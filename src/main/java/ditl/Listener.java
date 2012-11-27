@@ -18,9 +18,9 @@
  *******************************************************************************/
 package ditl;
 
-import java.util.*;
 import java.io.IOException;
+import java.util.Collection;
 
 public interface Listener<E> {
-	public void handle(long time, Collection<E> events) throws IOException;
+    public void handle(long time, Collection<E> events) throws IOException;
 }

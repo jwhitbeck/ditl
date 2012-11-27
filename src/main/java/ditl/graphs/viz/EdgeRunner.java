@@ -22,9 +22,8 @@ import java.io.IOException;
 
 import ditl.graphs.EdgeTrace;
 
-
-
 public interface EdgeRunner {
-	public void setEdgeTrace(EdgeTrace edges) throws IOException;
-	public void addEdgeHandler(EdgeTrace.Handler handler);
+    public void setEdgesTrace(EdgeTrace edges) throws IOException;
+
+    public void addEdgesHandler(EdgeTrace.Handler handler);
 }

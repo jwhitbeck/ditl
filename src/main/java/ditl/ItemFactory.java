@@ -19,5 +19,5 @@
 package ditl;
 
 public interface ItemFactory<I> {
-	public I fromString(String s);
+    public I fromString(String s);
 }

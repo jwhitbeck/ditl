@@ -18,23 +18,24 @@
  *******************************************************************************/
 package ditl.plausible.constraints;
 
-import ditl.plausible.*;
 import ditl.graphs.Point;
+import ditl.plausible.Constraint;
+import ditl.plausible.InferredNode;
 
 public class HorizontalConstraint implements Constraint {
 
-	private double _height;
-	
-	public HorizontalConstraint(double height){
-		_height = height;
-	}
-	
-	@Override
-	public void apply(InferredNode node) {
-		Point r = node.nextPosition();
-		Point s = node.nextSpeed();
-		r.y = _height;
-		s.y = 0;
-	}
+    private final double _height;
+
+    public HorizontalConstraint(double height) {
+        _height = height;
+    }
+
+    @Override
+    public void apply(InferredNode node) {
+        final Point r = node.nextPosition();
+        final Point s = node.nextSpeed();
+        r.y = _height;
+        s.y = 0;
+    }
 
 }

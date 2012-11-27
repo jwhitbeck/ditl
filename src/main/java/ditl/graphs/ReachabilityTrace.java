@@ -20,42 +20,44 @@ package ditl.graphs;
 
 import java.io.IOException;
 
-import ditl.*;
+import ditl.PersistentMap;
+import ditl.Store;
+import ditl.Trace;
+import ditl.Writer;
 
-public class ReachabilityTrace extends EdgeTrace {
+@Trace.Type("reachability")
+public class ReachabilityTrace extends ArcTrace {
 
-	final public static String tauKey = "tau";
-	final public static String etaKey = "eta";
-	final public static String delayKey = "delay";
-	
-	final public static String type = "reachability";
-	final public static String defaultName = "reachability";
-	
-	public long tau(){
-		return Long.parseLong(getValue(tauKey));
-	}
-	
-	public long eta(){
-		return Long.parseLong(getValue(etaKey));
-	}
-	
-	public long delay(){
-		return Integer.parseInt(getValue(delayKey));
-	}
-	
-	public static String defaultName(String prefix, long tau, long delay){
-		return prefix+"_t"+tau+"_d"+delay;
-	}
+    final public static String
+            tauKey = "tau",
+            etaKey = "eta",
+            delayKey = "delay";
 
-	public ReachabilityTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info);
-	}
-	
-	@Override
-	public void copyOverTraceInfo(Writer<EdgeEvent> writer) {
-		writer.setProperty(tauKey, tau());
-		writer.setProperty(etaKey, eta());
-		writer.setProperty(delayKey, delay());
-	}
+    public long tau() {
+        return Long.parseLong(getValue(tauKey));
+    }
+
+    public long eta() {
+        return Long.parseLong(getValue(etaKey));
+    }
+
+    public long delay() {
+        return Integer.parseInt(getValue(delayKey));
+    }
+
+    public static String defaultName(String prefix, long tau, long delay) {
+        return prefix + "_t" + tau + "_d" + delay;
+    }
+
+    public ReachabilityTrace(Store store, String name, PersistentMap info) throws IOException {
+        super(store, name, info);
+    }
+
+    @Override
+    public void copyOverTraceInfo(Writer<ArcEvent> writer) {
+        writer.setProperty(tauKey, tau());
+        writer.setProperty(etaKey, eta());
+        writer.setProperty(delayKey, delay());
+    }
 
 }

@@ -18,30 +18,31 @@
  *******************************************************************************/
 package ditl.graphs.viz;
 
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
-import javax.swing.*;
-
-import ditl.graphs.viz.GraphScene;
-
-
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class ShowIdsPanel extends JPanel {
 
-	public ShowIdsPanel(final GraphScene scene){
-		JCheckBox idsCheckBox = new JCheckBox();
-		idsCheckBox.setSelected(scene.getShowIds());
-		idsCheckBox.addItemListener(new ItemListener(){
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				scene.setShowIds(e.getStateChange() == ItemEvent.SELECTED );
-			}
-		});
-		
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		add(Box.createHorizontalGlue());
-		add(new JLabel("Display Ids: "));
-		add(idsCheckBox);
-	}
+    public ShowIdsPanel(final GraphScene scene) {
+        final JCheckBox idsCheckBox = new JCheckBox();
+        idsCheckBox.setSelected(scene.getShowIds());
+        idsCheckBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                scene.setShowIds(e.getStateChange() == ItemEvent.SELECTED);
+            }
+        });
+
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        add(Box.createHorizontalGlue());
+        add(new JLabel("Display Ids: "));
+        add(idsCheckBox);
+    }
 }

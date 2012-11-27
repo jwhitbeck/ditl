@@ -19,52 +19,55 @@
 package ditl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 public class MergeConverter<I> implements Converter {
 
-	private Trace<I> _to;
-	private Collection<Trace<I>> from_collection;
-	
-	public MergeConverter( Trace<I> to, Collection<Trace<I>> fromCollection ){
-		_to = to;
-		from_collection = fromCollection;
-	}
+    private final Trace<I> _to;
+    private final Collection<Trace<I>> from_collection;
 
-	@Override
-	public void convert() throws IOException {
-		String time_unit = "s";
-		long maxTime = -Trace.INFINITY;
-		long minTime =  Trace.INFINITY;
-		for ( Trace<I> from : from_collection ){
-			time_unit = from.timeUnit();
-			if ( from.minTime() < minTime ) minTime = from.minTime();
-			if ( from.maxTime() > maxTime ) maxTime = from.maxTime();
-		}
-		IdMap.Writer id_map_writer = null;
-		Writer<I> writer = _to.getWriter();
-		for ( Trace<I> from : from_collection ){
-			IdMap id_map = from.idMap();
-			if ( id_map != null ){
-				if ( id_map_writer == null )
-					id_map_writer = new IdMap.Writer(0);
-				id_map_writer.merge(id_map);
-			}
-			Reader<I> reader = from.getReader();
-			reader.seek(minTime);
-			while ( reader.hasNext() ){
-				List<I> events = reader.next();
-				for ( I item : events )
-					writer.queue(reader.time(), item);
-			}
-			reader.close();
-		}
-		writer.flush();
-		writer.setProperty(Trace.timeUnitKey, time_unit);
-		writer.setProperty(Trace.minTimeKey, minTime);
-		writer.setProperty(Trace.maxTimeKey, maxTime);
-		if ( id_map_writer != null )
-			id_map_writer.writeTraceInfo(writer);
-		writer.close();
-	}
+    public MergeConverter(Trace<I> to, Collection<Trace<I>> fromCollection) {
+        _to = to;
+        from_collection = fromCollection;
+    }
+
+    @Override
+    public void convert() throws IOException {
+        String time_unit = "s";
+        long maxTime = -Trace.INFINITY;
+        long minTime = Trace.INFINITY;
+        for (final Trace<I> from : from_collection) {
+            time_unit = from.timeUnit();
+            if (from.minTime() < minTime)
+                minTime = from.minTime();
+            if (from.maxTime() > maxTime)
+                maxTime = from.maxTime();
+        }
+        IdMap.Writer id_map_writer = null;
+        final Writer<I> writer = _to.getWriter();
+        for (final Trace<I> from : from_collection) {
+            final IdMap id_map = from.idMap();
+            if (id_map != null) {
+                if (id_map_writer == null)
+                    id_map_writer = new IdMap.Writer(0);
+                id_map_writer.merge(id_map);
+            }
+            final Reader<I> reader = from.getReader();
+            reader.seek(minTime);
+            while (reader.hasNext()) {
+                final List<I> events = reader.next();
+                for (final I item : events)
+                    writer.queue(reader.time(), item);
+            }
+            reader.close();
+        }
+        writer.flush();
+        writer.setProperty(Trace.timeUnitKey, time_unit);
+        writer.setProperty(Trace.minTimeKey, minTime);
+        writer.setProperty(Trace.maxTimeKey, maxTime);
+        if (id_map_writer != null)
+            id_map_writer.writeTraceInfo(writer);
+        writer.close();
+    }
 }

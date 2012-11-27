@@ -21,37 +21,37 @@ package ditl;
 import java.io.IOException;
 import java.util.List;
 
-public class StatefulSubtraceConverter<E,S> implements Converter {
+public class StatefulSubtraceConverter<E, S> implements Converter {
 
-	private StatefulTrace<E,S> _to;
-	private StatefulTrace<E,S> _from;
-	private long _minTime, _maxTime;
-	
-	public StatefulSubtraceConverter( StatefulTrace<E,S> to, StatefulTrace<E,S> from, long minTime, long maxTime){
-		_to = to;
-		_from = from;
-		_minTime = minTime;
-		_maxTime = maxTime;
-	}
+    private final StatefulTrace<E, S> _to;
+    private final StatefulTrace<E, S> _from;
+    private final long _minTime, _maxTime;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void convert() throws IOException {
-		StatefulReader<E,S> reader = _from.getReader();
-		StatefulWriter<E,S> writer = _to.getWriter();
-		reader.seek(_minTime);
-		writer.setInitState(_minTime, reader.referenceState());
-		while ( reader.hasNext() && reader.nextTime() <= _maxTime){
-			List<E> events = reader.next();
-			for ( E item : events )
-				writer.append(reader.time(), item);
-		}
-		writer.setProperty(Trace.minTimeKey, _minTime);
-		writer.setProperty(Trace.maxTimeKey, _maxTime);
-		writer.setPropertiesFromTrace(_from);
-		if ( _from instanceof Trace.Copyable<?> )
-			((Trace.Copyable<E>)_from).copyOverTraceInfo(writer);
-		reader.close();
-		writer.close();
-	}
+    public StatefulSubtraceConverter(StatefulTrace<E, S> to, StatefulTrace<E, S> from, long minTime, long maxTime) {
+        _to = to;
+        _from = from;
+        _minTime = minTime;
+        _maxTime = maxTime;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void convert() throws IOException {
+        final StatefulReader<E, S> reader = _from.getReader();
+        final StatefulWriter<E, S> writer = _to.getWriter();
+        reader.seek(_minTime);
+        writer.setInitState(_minTime, reader.referenceState());
+        while (reader.hasNext() && reader.nextTime() <= _maxTime) {
+            final List<E> events = reader.next();
+            for (final E item : events)
+                writer.append(reader.time(), item);
+        }
+        writer.setProperty(Trace.minTimeKey, _minTime);
+        writer.setProperty(Trace.maxTimeKey, _maxTime);
+        writer.setPropertiesFromTrace(_from);
+        if (_from instanceof Trace.Copyable<?>)
+            ((Trace.Copyable<E>) _from).copyOverTraceInfo(writer);
+        reader.close();
+        writer.close();
+    }
 }

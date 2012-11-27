@@ -20,99 +20,107 @@ package ditl.graphs;
 
 import java.util.Set;
 
-import ditl.*;
+import ditl.Filter;
+import ditl.ItemFactory;
 
 public final class MovementEvent {
-	
-	public final static int IN = 0;
-	public final static int OUT = 1;
-	public final static int NEW_DEST = 2;
-	
-	Integer id;
-	Point dest;
-	double speed;
-	int type;
-	
-	public MovementEvent(Integer i){
-		id = i;
-		type = OUT;
-	}
-	
-	public MovementEvent(Integer i, Point d){
-		id = i;
-		type = IN;
-		dest = d;
-	}
-	
-	public MovementEvent(Integer i, double sp, Point d) {
-		id = i;
-		dest = d;
-		speed = sp;
-		type = NEW_DEST;
-	}
-	
-	public Integer id(){
-		return id;
-	}
-	
-	public int type(){
-		return type;
-	}
-	
-	public Point dest(){
-		return dest;
-	}
-	
-	public Movement origMovement(){
-		return new Movement(id, dest);
-	}
-	
-	public static final class Factory implements ItemFactory<MovementEvent> {
-		@Override
-		public MovementEvent fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer id = Integer.parseInt(elems[0]);
-				if ( elems[1].equals("OUT") ){
-					return new MovementEvent(id);
-				} else {
-					double x = Double.parseDouble(elems[2]);
-					double y = Double.parseDouble(elems[3]);
-					if ( elems[1].equals("IN") ){
-						return new MovementEvent(id,new Point(x,y));
-					} else {
-						double sp = Double.parseDouble(elems[1]);
-						return new MovementEvent(id, sp, new Point(x,y));
-					}
-				}
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
-	
-	@Override
-	public String toString(){
-		switch ( type ){
-		case IN: return id+" IN "+dest;
-		case OUT: return id+" OUT";
-		default: return id+" "+speed+" "+dest; 
-		}
-	}
-	
-	public String ns2String(double time, double mul){
-		return "$ns_ at "+time*mul+ " \"$node_("+id+") setdest "+dest+" "+speed/mul+"\"\n";
-	}
-	
-	public static final class GroupFilter implements Filter<MovementEvent> {
-		private Set<Integer> _group;
-		public GroupFilter(Set<Integer> group){ _group = group;}
-		@Override
-		public MovementEvent filter(MovementEvent item) { 
-			if ( _group.contains(item.id) )
-				return item;
-			return null;
-		}
-	}
+
+    public enum Type {
+        IN, OUT, NEW_DEST
+    }
+
+    Integer id;
+    Point dest;
+    double speed;
+    Type type;
+
+    public MovementEvent(Integer i) {
+        id = i;
+        type = Type.OUT;
+    }
+
+    public MovementEvent(Integer i, Point d) {
+        id = i;
+        type = Type.IN;
+        dest = d;
+    }
+
+    public MovementEvent(Integer i, double sp, Point d) {
+        id = i;
+        dest = d;
+        speed = sp;
+        type = Type.NEW_DEST;
+    }
+
+    public Integer id() {
+        return id;
+    }
+
+    public Type type() {
+        return type;
+    }
+
+    public Point dest() {
+        return dest;
+    }
+
+    public Movement origMovement() {
+        return new Movement(id, dest);
+    }
+
+    public static final class Factory implements ItemFactory<MovementEvent> {
+        @Override
+        public MovementEvent fromString(String s) {
+            final String[] elems = s.trim().split(" ");
+            try {
+                final Integer id = Integer.parseInt(elems[0]);
+                if (elems[1].equals(Type.OUT.toString()))
+                    return new MovementEvent(id);
+                else {
+                    final double x = Double.parseDouble(elems[2]);
+                    final double y = Double.parseDouble(elems[3]);
+                    if (elems[1].equals(Type.IN.toString()))
+                        return new MovementEvent(id, new Point(x, y));
+                    else {
+                        final double sp = Double.parseDouble(elems[1]);
+                        return new MovementEvent(id, sp, new Point(x, y));
+                    }
+                }
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        switch (type) {
+            case IN:
+                return id + " IN " + dest;
+            case OUT:
+                return id + " OUT";
+            default:
+                return id + " " + speed + " " + dest;
+        }
+    }
+
+    public String ns2String(double time, double mul) {
+        return "$ns_ at " + time * mul + " \"$node_(" + id + ") setdest " + dest + " " + speed / mul + "\"\n";
+    }
+
+    public static final class GroupFilter implements Filter<MovementEvent> {
+        private final Set<Integer> _group;
+
+        public GroupFilter(Set<Integer> group) {
+            _group = group;
+        }
+
+        @Override
+        public MovementEvent filter(MovementEvent item) {
+            if (_group.contains(item.id))
+                return item;
+            return null;
+        }
+    }
 }

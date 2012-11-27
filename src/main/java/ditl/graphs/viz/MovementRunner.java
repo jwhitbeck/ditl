@@ -22,9 +22,8 @@ import java.io.IOException;
 
 import ditl.graphs.MovementTrace;
 
-
-
 public interface MovementRunner {
-	public void setMovementTrace(MovementTrace movement) throws IOException;
-	public void addMovementHandler(MovementTrace.Handler handler);
+    public void setMovementTrace(MovementTrace movement) throws IOException;
+
+    public void addMovementHandler(MovementTrace.Handler handler);
 }

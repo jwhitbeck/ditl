@@ -20,97 +20,106 @@ package ditl.transfers.viz;
 
 import java.io.IOException;
 
-import ditl.*;
+import ditl.Bus;
+import ditl.StatefulReader;
 import ditl.graphs.viz.GraphRunner;
-import ditl.transfers.*;
+import ditl.transfers.Buffer;
+import ditl.transfers.BufferEvent;
+import ditl.transfers.BufferTrace;
+import ditl.transfers.Message;
+import ditl.transfers.MessageEvent;
+import ditl.transfers.MessageTrace;
+import ditl.transfers.Transfer;
+import ditl.transfers.TransferEvent;
+import ditl.transfers.TransferTrace;
 
 @SuppressWarnings("serial")
-public class RoutingRunner extends GraphRunner 
-	implements TransferRunner, MessageRunner, BufferRunner {
-	
-	protected Bus<Transfer> transferBus = new Bus<Transfer>();
-	protected Bus<TransferEvent> transferEventBus = new Bus<TransferEvent>();
-	protected StatefulReader<TransferEvent, Transfer> transfer_reader;
-	
-	protected Bus<Message> messageBus = new Bus<Message>();
-	protected Bus<MessageEvent> messageEventBus = new Bus<MessageEvent>();
-	protected StatefulReader<MessageEvent, Message> message_reader;
-	
-	protected Bus<Buffer> bufferBus = new Bus<Buffer>();
-	protected Bus<BufferEvent> bufferEventBus = new Bus<BufferEvent>();
-	protected StatefulReader<BufferEvent, Buffer> buffer_reader;
+public class RoutingRunner extends GraphRunner
+        implements TransferRunner, MessageRunner, BufferRunner {
 
-	@Override
-	public void addTransferHandler(TransferTrace.Handler handler) {
-		transferBus.addListener(handler.transferListener());
-		transferEventBus.addListener(handler.transferEventListener());
-	}
+    protected Bus<Transfer> transferBus = new Bus<Transfer>();
+    protected Bus<TransferEvent> transferEventBus = new Bus<TransferEvent>();
+    protected StatefulReader<TransferEvent, Transfer> transfer_reader;
 
-	@Override
-	public void setTransferTrace(TransferTrace transfers) throws IOException {
-		transferEventBus.reset();
-		transferBus.reset();
-		if ( transfer_reader != null ){
-			runner.removeGenerator(transfer_reader);
-			transfer_reader.close();
-		}
-		if ( transfers != null ){
-			transfer_reader = transfers.getReader();
-			transfer_reader.setBus(transferEventBus);
-			transfer_reader.setStateBus(transferBus);
-			transfer_reader.seek(runner.time());
-			transferBus.flush();
-			runner.addGenerator(transfer_reader);
-		}
-	}
+    protected Bus<Message> messageBus = new Bus<Message>();
+    protected Bus<MessageEvent> messageEventBus = new Bus<MessageEvent>();
+    protected StatefulReader<MessageEvent, Message> message_reader;
 
-	@Override
-	public void addMessageHandler(MessageTrace.Handler handler) {
-		messageBus.addListener(handler.messageListener());
-		messageEventBus.addListener(handler.messageEventListener());
-	}
+    protected Bus<Buffer> bufferBus = new Bus<Buffer>();
+    protected Bus<BufferEvent> bufferEventBus = new Bus<BufferEvent>();
+    protected StatefulReader<BufferEvent, Buffer> buffer_reader;
 
-	@Override
-	public void setMessageTrace(MessageTrace messages) throws IOException {
-		messageEventBus.reset();
-		messageBus.reset();
-		if ( message_reader != null ){
-			runner.removeGenerator(message_reader);
-			message_reader.close();
-		}
-		if ( messages != null ){
-			message_reader = messages.getReader();
-			message_reader.setBus(messageEventBus);
-			message_reader.setStateBus(messageBus);
-			message_reader.seek(runner.time());
-			messageBus.flush();
-			runner.addGenerator(message_reader);
-		}
-	}
+    @Override
+    public void addTransferHandler(TransferTrace.Handler handler) {
+        transferBus.addListener(handler.transferListener());
+        transferEventBus.addListener(handler.transferEventListener());
+    }
 
-	@Override
-	public void addBufferHandler(BufferTrace.Handler handler) {
-		bufferBus.addListener(handler.bufferListener());
-		bufferEventBus.addListener(handler.bufferEventListener());
-	}
+    @Override
+    public void setTransferTrace(TransferTrace transfers) throws IOException {
+        transferEventBus.reset();
+        transferBus.reset();
+        if (transfer_reader != null) {
+            runner.removeGenerator(transfer_reader);
+            transfer_reader.close();
+        }
+        if (transfers != null) {
+            transfer_reader = transfers.getReader();
+            transfer_reader.setBus(transferEventBus);
+            transfer_reader.setStateBus(transferBus);
+            transfer_reader.seek(runner.time());
+            transferBus.flush();
+            runner.addGenerator(transfer_reader);
+        }
+    }
 
-	@Override
-	public void setBufferTrace(BufferTrace buffers) throws IOException {
-		bufferEventBus.reset();
-		bufferBus.reset();
-		if ( buffer_reader != null ){
-			runner.removeGenerator(buffer_reader);
-			buffer_reader.close();
-		}
-		if ( buffers != null ){
-			buffer_reader = buffers.getReader();
-			buffer_reader.setBus(bufferEventBus);
-			buffer_reader.setStateBus(bufferBus);
-			buffer_reader.seek(runner.time());
-			bufferBus.flush();
-			runner.addGenerator(buffer_reader);
-		}
-		
-	}
+    @Override
+    public void addMessageHandler(MessageTrace.Handler handler) {
+        messageBus.addListener(handler.messageListener());
+        messageEventBus.addListener(handler.messageEventListener());
+    }
+
+    @Override
+    public void setMessageTrace(MessageTrace messages) throws IOException {
+        messageEventBus.reset();
+        messageBus.reset();
+        if (message_reader != null) {
+            runner.removeGenerator(message_reader);
+            message_reader.close();
+        }
+        if (messages != null) {
+            message_reader = messages.getReader();
+            message_reader.setBus(messageEventBus);
+            message_reader.setStateBus(messageBus);
+            message_reader.seek(runner.time());
+            messageBus.flush();
+            runner.addGenerator(message_reader);
+        }
+    }
+
+    @Override
+    public void addBufferHandler(BufferTrace.Handler handler) {
+        bufferBus.addListener(handler.bufferListener());
+        bufferEventBus.addListener(handler.bufferEventListener());
+    }
+
+    @Override
+    public void setBufferTrace(BufferTrace buffers) throws IOException {
+        bufferEventBus.reset();
+        bufferBus.reset();
+        if (buffer_reader != null) {
+            runner.removeGenerator(buffer_reader);
+            buffer_reader.close();
+        }
+        if (buffers != null) {
+            buffer_reader = buffers.getReader();
+            buffer_reader.setBus(bufferEventBus);
+            buffer_reader.setStateBus(bufferBus);
+            buffer_reader.seek(runner.time());
+            bufferBus.flush();
+            runner.addGenerator(buffer_reader);
+        }
+
+    }
 
 }

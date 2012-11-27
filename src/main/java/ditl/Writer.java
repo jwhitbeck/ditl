@@ -18,107 +18,113 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.Collection;
 
 public class Writer<I> extends Bus<I> implements Listener<I> {
-	
-	BufferedWriter writer;
-	long max_time;
-	long min_time;
-	long max_interval;
-	long min_interval;
-	long last_time;
-	PersistentMap _info;
-	WritableStore _store;
-	String _name;
-	
-	public Writer(Store store, String name, PersistentMap info) throws IOException {
-		if ( ! ( store instanceof WritableStore )) throw new IOException();
-		_store = (WritableStore)store;
-		if ( _store.isAlreadyWriting(name) ) throw new IOException();
-		_info = info;
-		_name = name;
-		_store.notifyOpen(_name, this);
-		writer = new BufferedWriter(new OutputStreamWriter(_store.getOutputStream(_store.traceFile(_name))));
-		last_time = -Trace.INFINITY;
-		addListener(this);
-		min_time = Trace.INFINITY;
-		max_time = -Trace.INFINITY;
-		min_interval = Trace.INFINITY;
-		max_interval = -Trace.INFINITY;
-	}
-	
-	void setRemainingInfo(){
-		_info.setIfUnset(Trace.maxTimeKey, max_time);
-		_info.setIfUnset(Trace.minTimeKey, min_time);
-		if ( max_interval < 0 ){ // single event trace
-			max_interval = Long.parseLong(_info.get(Trace.maxTimeKey)) - Long.parseLong(_info.get(Trace.minTimeKey));
-			min_interval = max_interval;
-		}
-		_info.setIfUnset(Trace.maxUpdateIntervalKey, max_interval);
-		_info.setIfUnset(Trace.minUpdateIntervalKey, min_interval);
-		_info.setIfUnset(Trace.defaultPriorityKey, Trace.defaultPriority);
-	}
-	
-	public void close() throws IOException {
-		writer.close();
-		setRemainingInfo();
-		_info.save(_store.getOutputStream(_store.infoFile(_name)));
-		_store.notifyClose(_name);
-	}
-	
-	public void setProperty(String key, Object value){
-		_info.put(key, value);
-	}
-	
-	public void setPropertiesFromTrace(Trace<?> trace){
-		_info.setIfUnset(Trace.minTimeKey, trace.minTime());
-		_info.setIfUnset(Trace.maxTimeKey, trace.maxTime());
-		_info.setIfUnset(Trace.timeUnitKey, trace.timeUnit());
-		String id_map_str = trace.getValue(Trace.idMapKey);
-		if ( id_map_str != null )
-			_info.setIfUnset(Trace.idMapKey, id_map_str);
-	}
 
-	public void append(long time, I item) throws IOException {
-		updateTime(time);
-		write(time,item);
-	}
-	
-	@Override
-	public void handle(long time, Collection<I> items) throws IOException {
-		updateTime(time);
-		for ( I item : items )
-			write(time,item);
-	}
-	
-	public void write(long time, I item) throws IOException {
-		writer.write(item+"\n");
-	}
-	
-	void updateTime(long time) throws IOException {
-		if ( time < max_time ){
-			System.err.println ( "States at time "+time+" are out of order");
-			return;
-		}
-		if ( time > max_time ){
-			writer.write(time+"\n");
-			max_time = time;
-		}
-		if ( time < min_time ){
-			min_time = time;
-		}
-		if ( last_time == -Trace.INFINITY ){ // first batch of items
-			last_time = time;
-		} else if ( time > last_time ){ // we have changed times
-			long interval = time - last_time;
-			if ( interval > max_interval ) max_interval = interval;
-			if ( interval < min_interval ) min_interval = interval;
-			last_time = time;
-		}
-	}
+    BufferedWriter writer;
+    long max_time;
+    long min_time;
+    long max_interval;
+    long min_interval;
+    long last_time;
+    PersistentMap _info;
+    WritableStore _store;
+    String _name;
 
-	@Override
-	public void reset() {}
+    public Writer(Store store, String name, PersistentMap info) throws IOException {
+        if (!(store instanceof WritableStore))
+            throw new IOException();
+        _store = (WritableStore) store;
+        if (_store.isAlreadyWriting(name))
+            throw new IOException();
+        _info = info;
+        _name = name;
+        _store.notifyOpen(_name, this);
+        writer = new BufferedWriter(new OutputStreamWriter(_store.getOutputStream(_store.traceFile(_name))));
+        last_time = -Trace.INFINITY;
+        addListener(this);
+        min_time = Trace.INFINITY;
+        max_time = -Trace.INFINITY;
+        min_interval = Trace.INFINITY;
+        max_interval = -Trace.INFINITY;
+    }
+
+    void setRemainingInfo() {
+        _info.setIfUnset(Trace.maxTimeKey, max_time);
+        _info.setIfUnset(Trace.minTimeKey, min_time);
+        if (max_interval < 0) { // single event trace
+            max_interval = Long.parseLong(_info.get(Trace.maxTimeKey)) - Long.parseLong(_info.get(Trace.minTimeKey));
+            min_interval = max_interval;
+        }
+        _info.setIfUnset(Trace.maxUpdateIntervalKey, max_interval);
+        _info.setIfUnset(Trace.minUpdateIntervalKey, min_interval);
+        _info.setIfUnset(Trace.defaultPriorityKey, Trace.defaultPriority);
+    }
+
+    public void close() throws IOException {
+        writer.close();
+        setRemainingInfo();
+        _info.save(_store.getOutputStream(_store.infoFile(_name)));
+        _store.notifyClose(_name);
+    }
+
+    public void setProperty(String key, Object value) {
+        _info.put(key, value);
+    }
+
+    public void setPropertiesFromTrace(Trace<?> trace) {
+        _info.setIfUnset(Trace.minTimeKey, trace.minTime());
+        _info.setIfUnset(Trace.maxTimeKey, trace.maxTime());
+        _info.setIfUnset(Trace.timeUnitKey, trace.timeUnit());
+        final String id_map_str = trace.getValue(Trace.idMapKey);
+        if (id_map_str != null)
+            _info.setIfUnset(Trace.idMapKey, id_map_str);
+    }
+
+    public void append(long time, I item) throws IOException {
+        updateTime(time);
+        write(time, item);
+    }
+
+    @Override
+    public void handle(long time, Collection<I> items) throws IOException {
+        updateTime(time);
+        for (final I item : items)
+            write(time, item);
+    }
+
+    public void write(long time, I item) throws IOException {
+        writer.write(item + "\n");
+    }
+
+    void updateTime(long time) throws IOException {
+        if (time < max_time) {
+            System.err.println("States at time " + time + " are out of order");
+            return;
+        }
+        if (time > max_time) {
+            writer.write(time + "\n");
+            max_time = time;
+        }
+        if (time < min_time)
+            min_time = time;
+        if (last_time == -Trace.INFINITY)
+            last_time = time;
+        else if (time > last_time) { // we have changed times
+            final long interval = time - last_time;
+            if (interval > max_interval)
+                max_interval = interval;
+            if (interval < min_interval)
+                min_interval = interval;
+            last_time = time;
+        }
+    }
+
+    @Override
+    public void reset() {
+    }
 }

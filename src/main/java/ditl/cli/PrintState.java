@@ -20,45 +20,44 @@ package ditl.cli;
 
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
-import ditl.*;
+import ditl.StatefulReader;
+import ditl.StatefulTrace;
 import ditl.Store.NoSuchTraceException;
+import ditl.Trace;
 
+@Command(cmd = "ps")
 public class PrintState extends ReadOnlyApp {
-	
-	private double d_time;
-	private String trace_name;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "ps";
-	public final static String CMD_ALIAS = null;
-	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
-		super.parseArgs(cli, args);
-		trace_name = args[1];
-		d_time = Double.parseDouble(args[2]);
-	}
 
-	
-	@Override
-	protected void run() throws IOException, NoSuchTraceException {
-		Trace<?> trace = _store.getTrace(trace_name);
-		if ( ! trace.isStateful() )
-			System.out.println("Trace '"+trace_name+"' is not a stateful trace.");
-		StatefulTrace<?,?> strace = (StatefulTrace<?,?>)trace;
-		long time = (long)(d_time * strace.ticsPerSecond());
-		StatefulReader<?,?> reader = strace.getReader();
-		reader.seek(time);
-		for ( Object state : reader.referenceState() )
-			System.out.println(state);
-		reader.close();
-	}
+    private double d_time;
+    private String trace_name;
 
-	@Override
-	protected String getUsageString(){
-		return "[OPTIONS] STORE TRACE_NAME TIME";
-	}
-	
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
+        super.parseArgs(cli, args);
+        trace_name = args[1];
+        d_time = Double.parseDouble(args[2]);
+    }
+
+    @Override
+    protected void run() throws IOException, NoSuchTraceException {
+        final Trace<?> trace = _store.getTrace(trace_name);
+        if (!trace.isStateful())
+            System.out.println("Trace '" + trace_name + "' is not a stateful trace.");
+        final StatefulTrace<?, ?> strace = (StatefulTrace<?, ?>) trace;
+        final long time = (long) (d_time * strace.ticsPerSecond());
+        final StatefulReader<?, ?> reader = strace.getReader();
+        reader.seek(time);
+        for (final Object state : reader.referenceState())
+            System.out.println(state);
+        reader.close();
+    }
+
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE TRACE_NAME TIME";
+    }
+
 }

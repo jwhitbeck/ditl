@@ -17,65 +17,65 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
 package ditl.graphs.cli;
+
 import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 import ditl.Store.LoadTraceException;
 import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore.AlreadyExistsException;
+import ditl.cli.Command;
 import ditl.cli.ConvertApp;
-import ditl.graphs.*;
+import ditl.graphs.EdgeTrace;
+import ditl.graphs.FloodingReachableConverter;
+import ditl.graphs.PresenceTrace;
+import ditl.graphs.ReachabilityTrace;
 
-
-
+@Command(pkg = "graphs", cmd = "flooding-reachability", alias = "fr")
 public class FloodingReachability extends ConvertApp {
-	
-	private double tau;
-	private long delay;
-	private GraphOptions graph_options = new GraphOptions(GraphOptions.LINKS,GraphOptions.PRESENCE);
-	private Long min_time;
-	
-	public final static String PKG_NAME = "graphs";
-	public final static String CMD_NAME = "flooding-reachability";
-	public final static String CMD_ALIAS = "fr";
-	
-	@Override
-	protected String getUsageString(){
-		return "[OPTIONS] STORE TAU PERIOD";
-	}
 
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		super.parseArgs(cli, args);
-		graph_options.parse(cli);		
-		tau = Double.parseDouble(args[1]);
-		delay = Integer.parseInt(args[2]);
-		if ( cli.hasOption(minTimeOption) )
-			min_time = Long.parseLong(cli.getOptionValue(minTimeOption));
-	}	
+    private double tau;
+    private long delay;
+    private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.PRESENCE);
+    private Long min_time;
 
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		graph_options.setOptions(options);
-		options.addOption(null, minTimeOption, true, "Start flooding at time <arg>");
-	}
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE TAU PERIOD";
+    }
 
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+        super.parseArgs(cli, args);
+        graph_options.parse(cli);
+        tau = Double.parseDouble(args[1]);
+        delay = Integer.parseInt(args[2]);
+        if (cli.hasOption(minTimeOption))
+            min_time = Long.parseLong(cli.getOptionValue(minTimeOption));
+    }
 
-	@Override
-	protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-		LinkTrace links = (LinkTrace)orig_store.getTrace(graph_options.get(GraphOptions.LINKS));
-		PresenceTrace presence = (PresenceTrace)orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
-		if ( min_time == null )
-			min_time = presence.minTime();
-		else
-			min_time *= links.ticsPerSecond();
-		long _tau = (long)(tau * links.ticsPerSecond());
-		delay *= links.ticsPerSecond();
-		String name = links.name()+"_t"+_tau+"_pd"+delay;
-		ReachabilityTrace reachability = (ReachabilityTrace)dest_store.newTrace(name, ReachabilityTrace.type, force);
-		new FloodingReachableConverter(reachability, presence, links, _tau, delay, min_time).convert();
-		
-	}
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        graph_options.setOptions(options);
+        options.addOption(null, minTimeOption, true, "Start flooding at time <arg>");
+    }
+
+    @Override
+    protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
+        final EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+        final PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+        if (min_time == null)
+            min_time = presence.minTime();
+        else
+            min_time *= edges.ticsPerSecond();
+        final long _tau = (long) (tau * edges.ticsPerSecond());
+        delay *= edges.ticsPerSecond();
+        final String name = edges.name() + "_t" + _tau + "_pd" + delay;
+        final ReachabilityTrace reachability = (ReachabilityTrace) dest_store.newTrace(name, ReachabilityTrace.class, force);
+        new FloodingReachableConverter(reachability, presence, edges, _tau, delay, min_time).convert();
+
+    }
 }

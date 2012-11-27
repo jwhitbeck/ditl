@@ -45,21 +45,21 @@ $(TARGET): $(ORIG_DATA) $(DITL_LIB)
 	@echo "     timestamp in the trace (1156083900)"
 	@echo "   - Keep only iMote data (nodes 1-62)"
 	@echo ""
-	$(DITL) graphs import-links --links all_links \
+	$(DITL) graphs import-edges --edges all_edges \
 		--orig-time-unit s \
 		--offset -1156083900 \
 	$@ imote-traces-RollerNet/contacts.dat
-	$(DITL) filter $@ all_links links 1:62
-	$(DITL) rm $@ all_links
-	$(DITL) graphs links-to-presence $@
+	$(DITL) filter $@ all_edges edges 1:62
+	$(DITL) rm $@ all_edges
+	$(DITL) graphs edges-to-presence $@
 	$(DITL) graphs import-groups --labels members,staff,friends $@ 1:26 27:51 52:62
 	@echo ""
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
-	$(DITL) plausible links-to-windowed-links $@ 500
+	$(DITL) plausible edges-to-windowed-edges $@ 500
 	$(DITL) plausible infer --constraints "LeftOutlier,node@38:Horizontal,node@38,height@25:RightOutlier,node@27:Horizontal,node@27,height@25" $@ 700 70
-	$(DITL) rm $@ windowed_links
+	$(DITL) rm $@ windowed_edges
 
 clean:
 	rm -rf *.jar.tmp imote-traces-RollerNet

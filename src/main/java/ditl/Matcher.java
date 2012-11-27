@@ -19,5 +19,5 @@
 package ditl;
 
 public interface Matcher<I> {
-	public boolean matches(I item);
+    public boolean matches(I item);
 }

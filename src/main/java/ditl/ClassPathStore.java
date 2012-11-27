@@ -18,16 +18,18 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ClassPathStore extends Store {
 
-	public InputStream getInputStream(String name) throws IOException {
-		return getClass().getClassLoader().getResourceAsStream(name);
-	}
-	
-	@Override
-	public boolean hasFile(String name) {
-		return ( getClass().getClassLoader().getResource(name) != null );
-	}
+    @Override
+    public InputStream getInputStream(String name) throws IOException {
+        return getClass().getClassLoader().getResourceAsStream(name);
+    }
+
+    @Override
+    public boolean hasFile(String name) {
+        return (getClass().getClassLoader().getResource(name) != null);
+    }
 }

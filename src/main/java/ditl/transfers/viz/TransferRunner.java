@@ -23,6 +23,7 @@ import java.io.IOException;
 import ditl.transfers.TransferTrace;
 
 public interface TransferRunner {
-	public void setTransferTrace(TransferTrace transfers) throws IOException;
-	public void addTransferHandler(TransferTrace.Handler handler);
+    public void setTransferTrace(TransferTrace transfers) throws IOException;
+
+    public void addTransferHandler(TransferTrace.Handler handler);
 }

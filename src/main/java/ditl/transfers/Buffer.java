@@ -18,71 +18,74 @@
  *******************************************************************************/
 package ditl.transfers;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import ditl.ItemFactory;
 
 public class Buffer implements Iterable<Integer> {
-	
-	public static String delim = ":";
-	
-	Integer _id;
-	Set<Integer> msg_ids = new HashSet<Integer>();
-	
-	public Buffer(Integer id){
-		_id = id;
-	}
-	
-	public Integer id(){
-		return _id;
-	}
-	
-	@Override
-	public int hashCode(){
-		return _id;
-	}
-	
-	@Override 
-	public String toString(){
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(_id+" ");
-		if ( ! msg_ids.isEmpty() )
-			for ( Iterator<Integer> i = msg_ids.iterator(); i.hasNext(); ){
-				Integer msgId = i.next();
-				buffer.append(msgId);
-				if ( i.hasNext() )
-					buffer.append(delim);
-			}
-		else buffer.append("-");
-		return buffer.toString();
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		Buffer b = (Buffer)o;
-		return _id.equals(b._id);
-	}
-	
-	public static final class Factory implements ItemFactory<Buffer> {
-		@Override
-		public Buffer fromString(String s) {
-			String[] elems = s.trim().split(" ");
-			try {
-				Integer id = Integer.parseInt(elems[0]);
-				Buffer b = new Buffer(id);
-				if ( ! elems[1].equals("-") )
-					for ( String m : elems[1].split(delim))
-						b.msg_ids.add(Integer.parseInt(m));
-				return b;					
-			} catch ( Exception e ){
-				System.err.println( "Error parsing '"+s+"': "+e.getMessage() );
-				return null;
-			}
-		}
-	}
 
-	@Override
-	public Iterator<Integer> iterator() {
-		return msg_ids.iterator();
-	}
+    public static String delim = ":";
+
+    Integer _id;
+    Set<Integer> msg_ids = new HashSet<Integer>();
+
+    public Buffer(Integer id) {
+        _id = id;
+    }
+
+    public Integer id() {
+        return _id;
+    }
+
+    @Override
+    public int hashCode() {
+        return _id;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer buffer = new StringBuffer();
+        buffer.append(_id + " ");
+        if (!msg_ids.isEmpty())
+            for (final Iterator<Integer> i = msg_ids.iterator(); i.hasNext();) {
+                final Integer msgId = i.next();
+                buffer.append(msgId);
+                if (i.hasNext())
+                    buffer.append(delim);
+            }
+        else
+            buffer.append("-");
+        return buffer.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        final Buffer b = (Buffer) o;
+        return _id.equals(b._id);
+    }
+
+    public static final class Factory implements ItemFactory<Buffer> {
+        @Override
+        public Buffer fromString(String s) {
+            final String[] elems = s.trim().split(" ");
+            try {
+                final Integer id = Integer.parseInt(elems[0]);
+                final Buffer b = new Buffer(id);
+                if (!elems[1].equals("-"))
+                    for (final String m : elems[1].split(delim))
+                        b.msg_ids.add(Integer.parseInt(m));
+                return b;
+            } catch (final Exception e) {
+                System.err.println("Error parsing '" + s + "': " + e.getMessage());
+                return null;
+            }
+        }
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        return msg_ids.iterator();
+    }
 }

@@ -20,91 +20,102 @@ package ditl.graphs.viz;
 
 import java.awt.Dimension;
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
-import ditl.graphs.*;
-import ditl.viz.*;
-
-
+import ditl.graphs.EdgeTrace;
+import ditl.graphs.GroupTrace;
+import ditl.graphs.MovementTrace;
+import ditl.graphs.ReachabilityTrace;
+import ditl.viz.FPSPanel;
+import ditl.viz.SimplePlayer;
+import ditl.viz.SpeedPanel;
+import ditl.viz.TimeUnitPanel;
+import ditl.viz.ToggleAntialiasingPanel;
 
 @SuppressWarnings("serial")
 public class GraphPlayer extends SimplePlayer {
-	
-	protected GraphScene scene;
-	protected GraphRunner runner;
-	protected LinksSelectorPanel linksSelector;
-	protected TimeUnitPanel timeUnitPanel;
-	protected ReachabilitySelectorPanel reachabilitySelector; 
-	protected GroupsPanel groups;
-	protected MovementTrace movement;
-	
-	public GraphPlayer(){
-		build();
-	}
-	
-	protected void build(){
-		scene = new GraphScene();
-		runner = new GraphRunner();
-		linksSelector = new LinksSelectorPanel(runner, scene);
-		groups = new GroupsPanel(runner, scene);
-		timeUnitPanel = new TimeUnitPanel(controls);
-		reachabilitySelector = new ReachabilitySelectorPanel(runner, scene);
-		
-		scene.setPreferredSize(new Dimension(700,500));
-		runner.addMovementHandler(scene);
-		runner.addLinkHandler(scene);
-		runner.addEdgeHandler(scene);
-		runner.addGroupHandler(scene);
-		scene.setGroupColorMap(groups.colorMap());
-		
-		List<JPanel> widgets = new LinkedList<JPanel>();
-		widgets.add(timeUnitPanel);
-		widgets.add(new SpeedPanel(runner));
-		widgets.add(new FPSPanel(runner));
-		widgets.add(new ShowIdsPanel(scene));
-		widgets.add(new ToggleAntialiasingPanel(scene));
-		widgets.add(linksSelector); 
-		widgets.add(reachabilitySelector);
-		widgets.add(groups);
-		
-		init(scene,runner, widgets);
-		enableControls(false);
-	}
-	
-	protected void loadReaders(){
-		movement = (MovementTrace)_store.listTraces(MovementTrace.type).get(0); // use first movement trace
-		
-		setMovementTrace(movement);
-		
-		if ( groups != null ){
-			groups.setStore(_store);
-			groups.load(_store.listTraces(GroupTrace.type));
-		}
-		
-		if ( linksSelector != null ){
-			linksSelector.setStore(_store);
-			linksSelector.load(_store.listTraces(LinkTrace.type));
-		}
 
-		if ( reachabilitySelector != null ){
-			reachabilitySelector.setStore(_store);
-			reachabilitySelector.load(_store.listTraces(ReachabilityTrace.type));
-		}
-	}
-			
-	protected void setMovementTrace(MovementTrace movement) {
-		try {
-			scene.updateSize(movement.minX(),movement.minY(),movement.maxX(),movement.maxY());
-			scene.setIdMap(movement.idMap());
-			runner.setMovementTrace(movement);
-			runner.setTicsPerSecond(movement.ticsPerSecond());
-			controls.setBounds(movement.ticsPerSecond(),movement.minTime(), movement.maxTime());
-			timeUnitPanel.setPreferredTimeUnit(movement);
-			runner.seek(movement.minTime());
-		} catch ( IOException ioe ){
-			JOptionPane.showMessageDialog(this, "Error opening movement file", "Warning", JOptionPane.ERROR_MESSAGE);
-		}
-	}
+    protected GraphScene scene;
+    protected GraphRunner runner;
+    protected EdgeSelectorPanel edgesSelector;
+    protected TimeUnitPanel timeUnitPanel;
+    protected ReachabilitySelectorPanel reachabilitySelector;
+    protected GroupsPanel groups;
+    protected MovementTrace movement;
+
+    public GraphPlayer() {
+        build();
+    }
+
+    protected void build() {
+        scene = new GraphScene();
+        runner = new GraphRunner();
+        edgesSelector = new EdgeSelectorPanel(runner, scene);
+        groups = new GroupsPanel(runner, scene);
+        timeUnitPanel = new TimeUnitPanel(controls);
+        reachabilitySelector = new ReachabilitySelectorPanel(runner, scene);
+
+        scene.setPreferredSize(new Dimension(700, 500));
+        runner.addMovementHandler(scene);
+        runner.addEdgesHandler(scene);
+        runner.addArcHandler(scene);
+        runner.addGroupHandler(scene);
+        scene.setGroupColorMap(groups.colorMap());
+
+        final List<JPanel> widgets = new LinkedList<JPanel>();
+        widgets.add(timeUnitPanel);
+        widgets.add(new SpeedPanel(runner));
+        widgets.add(new FPSPanel(runner));
+        widgets.add(new ShowIdsPanel(scene));
+        widgets.add(new ToggleAntialiasingPanel(scene));
+        widgets.add(edgesSelector);
+        widgets.add(reachabilitySelector);
+        widgets.add(groups);
+
+        init(scene, runner, widgets);
+        enableControls(false);
+    }
+
+    @Override
+    protected void loadReaders() {
+        movement = (MovementTrace) _store.listTraces(MovementTrace.class).get(0); // use
+                                                                                  // first
+                                                                                  // movement
+                                                                                  // trace
+
+        setMovementTrace(movement);
+
+        if (groups != null) {
+            groups.setStore(_store);
+            groups.load(_store.listTraces(GroupTrace.class));
+        }
+
+        if (edgesSelector != null) {
+            edgesSelector.setStore(_store);
+            edgesSelector.load(_store.listTraces(EdgeTrace.class));
+        }
+
+        if (reachabilitySelector != null) {
+            reachabilitySelector.setStore(_store);
+            reachabilitySelector.load(_store.listTraces(ReachabilityTrace.class));
+        }
+    }
+
+    protected void setMovementTrace(MovementTrace movement) {
+        try {
+            scene.updateSize(movement.minX(), movement.minY(), movement.maxX(), movement.maxY());
+            scene.setIdMap(movement.idMap());
+            runner.setMovementTrace(movement);
+            runner.setTicsPerSecond(movement.ticsPerSecond());
+            controls.setBounds(movement.ticsPerSecond(), movement.minTime(), movement.maxTime());
+            timeUnitPanel.setPreferredTimeUnit(movement);
+            runner.seek(movement.minTime());
+        } catch (final IOException ioe) {
+            JOptionPane.showMessageDialog(this, "Error opening movement file", "Warning", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }

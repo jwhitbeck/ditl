@@ -18,86 +18,92 @@
  *******************************************************************************/
 package ditl.transfers;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-import ditl.*;
+import ditl.Listener;
+import ditl.Report;
+import ditl.ReportFactory;
 
-public class BroadcastDeliveryReport extends Report 
-	implements MessageTrace.Handler, BufferTrace.Handler {
+public class BroadcastDeliveryReport extends Report
+        implements MessageTrace.Handler, BufferTrace.Handler {
 
-	private Map<Integer,List<Long>> delivery_times = new HashMap<Integer,List<Long>>();
-	private Map<Integer,Long> ctimes = new HashMap<Integer,Long>();
-	
-	public BroadcastDeliveryReport(OutputStream out) throws IOException {
-		super(out);
-		appendComment("msg_id | delivery times");
-	}
+    private final Map<Integer, List<Long>> delivery_times = new HashMap<Integer, List<Long>>();
+    private final Map<Integer, Long> ctimes = new HashMap<Integer, Long>();
 
-	public static final class Factory implements ReportFactory<BroadcastDeliveryReport> {
-		@Override
-		public BroadcastDeliveryReport getNew(OutputStream out) throws IOException {
-			return new BroadcastDeliveryReport(out);
-		}
-	};
-	
-	@Override
-	public Listener<Message> messageListener() {
-		// Note: this class deliberately only listens to MessageEvents to prevent any weird side effects with creation times
-		return null;
-	}
+    public BroadcastDeliveryReport(OutputStream out) throws IOException {
+        super(out);
+        appendComment("msg_id | delivery times");
+    }
 
-	@Override
-	public Listener<MessageEvent> messageEventListener() {
-		return new Listener<MessageEvent>(){
-			@Override
-			public void handle(long time, Collection<MessageEvent> events) throws IOException {
-				for ( MessageEvent mev: events ){
-					Integer msgId = mev.msgId();
-					if ( mev.isNew() ){
-						delivery_times.put(msgId, new LinkedList<Long>());
-						ctimes.put(msgId, time);
-					} else {
-						if ( ctimes.containsKey(msgId)){
-							print(msgId);
-							delivery_times.remove(msgId);
-							ctimes.remove(msgId);
-						}
-					}
-				}
-			}
-		};
-	}
-	
-	private void print(Integer msgId) throws IOException {
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(msgId);
-		for ( Long t : delivery_times.get(msgId) )
-			buffer.append(" "+t);
-		append(buffer.toString());
-	}
+    public static final class Factory implements ReportFactory<BroadcastDeliveryReport> {
+        @Override
+        public BroadcastDeliveryReport getNew(OutputStream out) throws IOException {
+            return new BroadcastDeliveryReport(out);
+        }
+    };
 
-	public Listener<BufferEvent> bufferEventListener() {
-		return new Listener<BufferEvent>(){
-			@Override
-			public void handle(long time, Collection<BufferEvent> events)
-					throws IOException {
-				for ( BufferEvent event : events ){
-					Integer msgId = event.msgId();
-					List<Long> deliveries = delivery_times.get(msgId);
-					if ( deliveries != null ){
-						if ( event.type() == BufferEvent.ADD ){
-							Long dtime = time-ctimes.get(msgId);
-							deliveries.add(dtime);
-						}
-					}
-				}
-			}
-		};
-	}
+    @Override
+    public Listener<Message> messageListener() {
+        // Note: this class deliberately only listens to MessageEvents to
+        // prevent any weird side effects with creation times
+        return null;
+    }
 
-	@Override
-	public Listener<Buffer> bufferListener() {
-		return null;
-	}
+    @Override
+    public Listener<MessageEvent> messageEventListener() {
+        return new Listener<MessageEvent>() {
+            @Override
+            public void handle(long time, Collection<MessageEvent> events) throws IOException {
+                for (final MessageEvent mev : events) {
+                    final Integer msgId = mev.msgId();
+                    if (mev.isNew()) {
+                        delivery_times.put(msgId, new LinkedList<Long>());
+                        ctimes.put(msgId, time);
+                    } else if (ctimes.containsKey(msgId)) {
+                        print(msgId);
+                        delivery_times.remove(msgId);
+                        ctimes.remove(msgId);
+                    }
+                }
+            }
+        };
+    }
+
+    private void print(Integer msgId) throws IOException {
+        final StringBuffer buffer = new StringBuffer();
+        buffer.append(msgId);
+        for (final Long t : delivery_times.get(msgId))
+            buffer.append(" " + t);
+        append(buffer.toString());
+    }
+
+    @Override
+    public Listener<BufferEvent> bufferEventListener() {
+        return new Listener<BufferEvent>() {
+            @Override
+            public void handle(long time, Collection<BufferEvent> events)
+                    throws IOException {
+                for (final BufferEvent event : events) {
+                    final Integer msgId = event.msgId();
+                    final List<Long> deliveries = delivery_times.get(msgId);
+                    if (deliveries != null)
+                        if (event.type() == BufferEvent.Type.ADD) {
+                            final Long dtime = time - ctimes.get(msgId);
+                            deliveries.add(dtime);
+                        }
+                }
+            }
+        };
+    }
+
+    @Override
+    public Listener<Buffer> bufferListener() {
+        return null;
+    }
 }

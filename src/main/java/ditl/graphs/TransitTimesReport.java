@@ -18,57 +18,62 @@
  *******************************************************************************/
 package ditl.graphs;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-import ditl.*;
+import ditl.Listener;
+import ditl.Report;
+import ditl.ReportFactory;
+import ditl.StatefulListener;
 
 public final class TransitTimesReport extends Report implements PresenceTrace.Handler {
 
-	private Map<Integer,Long> entry_times = new HashMap<Integer,Long>();
-	
-	public TransitTimesReport(OutputStream out) throws IOException {
-		super(out);
-	}
-	
-	public static final class Factory implements ReportFactory<TransitTimesReport> {
-		@Override
-		public TransitTimesReport getNew(OutputStream out) throws IOException {
-			return new TransitTimesReport(out); 
-		}
-	}
-	
-	@Override
-	public Listener<PresenceEvent> presenceEventListener() {
-		return new Listener<PresenceEvent>(){
-			@Override
-			public void handle(long time, Collection<PresenceEvent> events) throws IOException {
-				for ( PresenceEvent pev : events ){
-					if ( pev.isIn() ) {
-						entry_times.put(pev.id(), time);
-					} else {
-						long transit_time = time - entry_times.get(pev.id());
-						append(transit_time);
-						entry_times.remove(pev.id());
-					}
-				}
-			}
-		};
-	}
+    private final Map<Integer, Long> entry_times = new HashMap<Integer, Long>();
 
-	@Override
-	public Listener<Presence> presenceListener() {
-		return new StatefulListener<Presence>(){
-			@Override
-			public void handle(long time, Collection<Presence> events) {
-				for ( Presence p : events )
-					entry_times.put(p.id(), time);
-			}
+    public TransitTimesReport(OutputStream out) throws IOException {
+        super(out);
+    }
 
-			@Override
-			public void reset() {
-				entry_times.clear();
-			}
-		};
-	}
+    public static final class Factory implements ReportFactory<TransitTimesReport> {
+        @Override
+        public TransitTimesReport getNew(OutputStream out) throws IOException {
+            return new TransitTimesReport(out);
+        }
+    }
+
+    @Override
+    public Listener<PresenceEvent> presenceEventListener() {
+        return new Listener<PresenceEvent>() {
+            @Override
+            public void handle(long time, Collection<PresenceEvent> events) throws IOException {
+                for (final PresenceEvent pev : events)
+                    if (pev.isIn())
+                        entry_times.put(pev.id(), time);
+                    else {
+                        final long transit_time = time - entry_times.get(pev.id());
+                        append(transit_time);
+                        entry_times.remove(pev.id());
+                    }
+            }
+        };
+    }
+
+    @Override
+    public Listener<Presence> presenceListener() {
+        return new StatefulListener<Presence>() {
+            @Override
+            public void handle(long time, Collection<Presence> events) {
+                for (final Presence p : events)
+                    entry_times.put(p.id(), time);
+            }
+
+            @Override
+            public void reset() {
+                entry_times.clear();
+            }
+        };
+    }
 }

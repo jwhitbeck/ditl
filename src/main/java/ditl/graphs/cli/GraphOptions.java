@@ -18,66 +18,55 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
 
-import ditl.graphs.*;
+import ditl.Trace;
+import ditl.graphs.ArcTrace;
+import ditl.graphs.BeaconTrace;
+import ditl.graphs.EdgeTrace;
+import ditl.graphs.GroupTrace;
+import ditl.graphs.MovementTrace;
+import ditl.graphs.PresenceTrace;
 
-public class GraphOptions {
+public enum GraphOptions {
 
-	public final static int PRESENCE = 0;
-	public final static int LINKS = 1;
-	public final static int EDGES = 2;
-	public final static int MOVEMENT = 3;
-	public final static int GROUPS = 4;
-	public final static int BEACONS = 5;
-	
-	private final static String[] _options = {
-		"presence",
-		"links",
-		"edges",
-		"movement",
-		"groups",
-		"beacons",
-	};
-	
-	private final static String[] _defaults = {
-		PresenceTrace.defaultName,
-		LinkTrace.defaultName,
-		EdgeTrace.defaultName,
-		MovementTrace.defaultName,
-		GroupTrace.defaultName,
-		BeaconTrace.defaultName,
-	};
-	
-	private final static String[] _help = {
-		"name of presence trace (default: "+PresenceTrace.defaultName+")",
-		"name of link trace (default: "+LinkTrace.defaultName+")",
-		"name of edge trace (default: "+EdgeTrace.defaultName+")",
-		"name of movement trace (default: "+MovementTrace.defaultName+")",
-		"name of group trace (default: "+GroupTrace.defaultName+")",
-		"name of beacon trace (default: "+BeaconTrace.defaultName+")",
-	};
-	
-	private Integer[] _opts;
-	private String[] _values;
-	
-	public GraphOptions (Integer... opts){
-		_opts = opts;
-		_values = new String[_options.length];
-	}
-	
-	public void setOptions(Options options){
-		for ( Integer i : _opts )
-			options.addOption(null, _options[i], true, _help[i]);
-	}
-	
-	public void parse(CommandLine cli){
-		for ( Integer i : _opts )
-			_values[i] = cli.getOptionValue(_options[i],_defaults[i]);
-	}
-	
-	public String get(Integer i){
-		return _values[i];
-	}
-	
+    PRESENCE(PresenceTrace.class),
+    EDGES(EdgeTrace.class),
+    ARCS(ArcTrace.class),
+    MOVEMENT(MovementTrace.class),
+    GROUPS(GroupTrace.class),
+    BEACONS(BeaconTrace.class);
+
+    final String name;
+
+    private GraphOptions(Class<? extends Trace<?>> klass) {
+        name = klass.getAnnotation(Trace.Type.class).value();
+    }
+
+    public final static class CliParser {
+
+        private final GraphOptions[] _opts;
+        private final String[] _values = new String[GraphOptions.values().length];
+
+        public CliParser(GraphOptions... opts) {
+            _opts = opts;
+        }
+
+        public void setOptions(Options options) {
+            for (final GraphOptions opt : _opts)
+                options.addOption(null, opt.name, true,
+                        String.format("name of %s trace (default: %s)", opt.name, opt.name));
+        }
+
+        public void parse(CommandLine cli) {
+            for (final GraphOptions opt : _opts)
+                _values[opt.ordinal()] = cli.getOptionValue(opt.name, opt.name);
+        }
+
+        public String get(GraphOptions opt) {
+            return _values[opt.ordinal()];
+        }
+
+    }
 }

@@ -18,42 +18,48 @@
  *******************************************************************************/
 package ditl;
 
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
-public class PersistentMap extends LinkedHashMap<String,String> {
-	
-	public void read ( InputStream in ) throws IOException {
-		BufferedReader br = new BufferedReader ( new InputStreamReader( in ) );
-		String line;
-		while ( (line = br.readLine()) != null ){
-			line = line.trim();
-			if ( ! line.isEmpty() && line.charAt(0) != '#' && line.charAt(0) != ';'){ // not a comment
-				String[] elems = line.split(":",2);
-				if ( elems.length == 2 ){ // key, value pair
-					put(elems[0].trim(), elems[1].trim() );
-				}
-			}
-		}
-		br.close();
-	}
-	
-	
-	public void save (OutputStream out) throws IOException {
-		BufferedWriter bw = new BufferedWriter ( new OutputStreamWriter( out ) );
-		for ( Map.Entry<String, String> e : entrySet() ){
-			bw.write(e.getKey()+": "+e.getValue()+"\n");
-		}
-		bw.close();
-	}
-	
-	public void put(String key, Object value){
-		super.put(key, value.toString());
-	}
-	
-	public void setIfUnset(String key, Object value){
-		if ( ! containsKey(key) )
-			put(key, String.valueOf(value));
-	}
+public class PersistentMap extends LinkedHashMap<String, String> {
+
+    public void read(InputStream in) throws IOException {
+        final BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (!line.isEmpty() && line.charAt(0) != '#' && line.charAt(0) != ';') { // not
+                                                                                     // a
+                                                                                     // comment
+                final String[] elems = line.split(":", 2);
+                if (elems.length == 2)
+                    put(elems[0].trim(), elems[1].trim());
+            }
+        }
+        br.close();
+    }
+
+    public void save(OutputStream out) throws IOException {
+        final BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+        for (final Map.Entry<String, String> e : entrySet())
+            bw.write(e.getKey() + ": " + e.getValue() + "\n");
+        bw.close();
+    }
+
+    public void put(String key, Object value) {
+        super.put(key, value.toString());
+    }
+
+    public void setIfUnset(String key, Object value) {
+        if (!containsKey(key))
+            put(key, String.valueOf(value));
+    }
 }

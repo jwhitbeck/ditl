@@ -19,6 +19,7 @@
 package ditl.viz;
 
 public interface PlayListener {
-	public void handlePause();
-	public void handlePlay();
+    public void handlePause();
+
+    public void handlePlay();
 }

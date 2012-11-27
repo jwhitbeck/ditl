@@ -18,35 +18,38 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 import ditl.Store;
 
 public abstract class ReadOnlyApp extends App {
 
-	protected File store_file;
-	protected Store _store;
-	
-	protected void parseArgs(CommandLine cli, String[] args) 
-		throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		store_file = new File(args[0]);
-	}
-	
-	@Override
-	protected void init() throws IOException {
-		_store = Store.open(store_file);
-	}
-	
-	@Override
-	protected void close() throws IOException {
-		_store.close();
-	}
-	
-	@Override
-	protected String getUsageString() {
-		return "[OPTIONS] STORE";
-	}
+    protected File store_file;
+    protected Store _store;
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+        store_file = new File(args[0]);
+    }
+
+    @Override
+    protected void init() throws IOException {
+        _store = Store.open(store_file);
+    }
+
+    @Override
+    protected void close() throws IOException {
+        _store.close();
+    }
+
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE";
+    }
 
 }

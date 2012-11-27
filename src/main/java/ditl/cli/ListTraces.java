@@ -21,46 +21,43 @@ package ditl.cli;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 import ditl.Trace;
 
+@Command(cmd = "ls")
 public class ListTraces extends ReadOnlyApp {
 
-	private final static String detailsOption = "all"; 
-	private boolean show_descr;
-	private String type;
-	
-	public final static String PKG_NAME = null;
-	public final static String CMD_NAME = "ls";
-	public final static String CMD_ALIAS = null;
-	
-	@Override
-	protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
-		super.parseArgs(cli, args);
-		show_descr = cli.hasOption(detailsOption);
-		type = cli.getOptionValue(typeOption);
-	}
+    private final static String detailsOption = "all";
+    private boolean show_descr;
+    private String type;
 
-	
-	@Override
-	protected void run() throws IOException {
-		Collection<Trace<?>> traces = (type==null)? _store.listTraces() : _store.listTraces(type);
-		for ( Trace<?> trace : traces ){
-			System.out.println(trace.name());
-			if ( show_descr ){
-				System.out.println("   type:        "+trace.type());
-				System.out.println("   description: "+trace.description());
-				System.out.println();
-			}
-		}
-	}
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args) throws ParseException, HelpException, ArrayIndexOutOfBoundsException {
+        super.parseArgs(cli, args);
+        show_descr = cli.hasOption(detailsOption);
+        type = cli.getOptionValue(typeOption);
+    }
 
-	@Override
-	protected void initOptions() {
-		super.initOptions();
-		options.addOption("a",detailsOption, false, "Show trace descriptions");
-		options.addOption("t", typeOption, true, "Show only traces of type <arg>");
-	}
-	
+    @Override
+    protected void run() throws IOException {
+        final Collection<Trace<?>> traces = (type == null) ? _store.listTraces() : _store.listTraces(type);
+        for (final Trace<?> trace : traces) {
+            System.out.println(trace.name());
+            if (show_descr) {
+                System.out.println("   type:        " + trace.type());
+                System.out.println("   description: " + trace.description());
+                System.out.println();
+            }
+        }
+    }
+
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        options.addOption("a", detailsOption, false, "Show trace descriptions");
+        options.addOption("t", typeOption, true, "Show only traces of type <arg>");
+    }
+
 }

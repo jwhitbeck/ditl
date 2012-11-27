@@ -18,189 +18,195 @@
  *******************************************************************************/
 package ditl.viz;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
-import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.Timer;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import ditl.*;
-
-
+import ditl.Runner;
 
 @SuppressWarnings("serial")
 public abstract class SceneRunner extends Component {
 
-	protected Runner runner;
-	private Timer timer; 
-	private int fps = 20;
-	private int speed = 1;
-	private List<TimeChangeListener> timeListeners = new LinkedList<TimeChangeListener>();
-	private List<PlayListener> playListeners = new LinkedList<PlayListener>();
-	private boolean blockSeek = false;
-	private ChangeListener sliderListener;
-	public long tics_per_second = 1L;
-	
-	public SceneRunner(){
-		timer = new Timer(1000/fps, timeOutListener());
-		sliderListener = new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if ( ! blockSeek ){
-					JSlider slider = (JSlider)e.getSource();
-					long time = (long)slider.getValue()*tics_per_second;
-					pause();
-					seek( time );
-				} else {
-					blockSeek = false;
-				}
-			}
-		};
-	}
-	
-	public void setTicsPerSecond(long ticsPerSecond){
-		tics_per_second = ticsPerSecond;
-		updateIncrTime();
-	}
-	
-	protected long incrTime(){
-		return (long)((tics_per_second * speed)/fps);
-	}
-	
-	protected void updateIncrTime(){
-		runner.setIncrTime( incrTime() );
-	}
-	
-	public ActionListener timeOutListener(){
-		return new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				step();
-			}
-		};
-	}
-	
-	public void addTimeChangeListener(TimeChangeListener listener){
-		timeListeners.add(listener);
-	}
-	
-	public void addPlayListener(PlayListener listener){
-		playListeners.add(listener);
-	}
-	
-	protected void notifyTime(){
-		blockSeek = true;
-		for ( TimeChangeListener listener : timeListeners )
-			listener.changeTime(runner.time());
-	}
-	
-	protected void pause(){
-		timer.stop();
-		for ( PlayListener listener : playListeners )
-			listener.handlePause();
-	}
-	
-	protected void play(){
-		timer.start();
-		for ( PlayListener listener : playListeners )
-			listener.handlePlay();
-	}
-	
-	public ActionListener playpauseListener(){
-		return new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if ( timer.isRunning() )
-					pause();
-				else
-					play();
-			}		
-		};
-	}
-	
-	public ActionListener incrListener(){
-		return new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if ( timer.isRunning() )
-					pause();
-				step();
-			}
-		};
-	}
-	
-	public ActionListener stopListener(){
-		return new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				pause();
-				seek(runner.minTime());
-			}
-		};
-	}
-	
-	public ChangeListener sliderListener(){
-		return sliderListener;
-	}
-	
-	public void seek(long time){
-		try {
-			runner.seek(time);
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-			throw new RuntimeException(ioe.getMessage());
-		}
-		notifyTime();
-	}
-	
-	public ChangeListener speedListener(){
-		return new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				JSpinner speedSpinner = (JSpinner)e.getSource();
-				setSpeed((Integer) speedSpinner.getValue());
-			}
-		};
-	}
-	
-	public ChangeListener fpsListener(){
-		return new ChangeListener(){
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				JSpinner fpsSpinner = (JSpinner)e.getSource();
-				setFps((Integer) fpsSpinner.getValue());
-			}
-		};
-	}
-	
-	public void step() {
-		if ( runner.incrTime()+runner.time() > runner.maxTime() ){
-			pause();
-		} else {
-			try {
-				runner.incr();
-			} catch (IOException ioe ){
-				ioe.printStackTrace();
-				throw new RuntimeException(ioe.getMessage());
-			}
-			notifyTime();
-		}
-	}
-	
-	public void setFps(int f){
-		fps = f;
-		timer.setDelay(1000/fps);
-		updateIncrTime();
-	}
-	
-	public void setSpeed(int s){
-		speed = s;
-		updateIncrTime();
-	}
-	
-	public int speed(){ return speed; }
-	public int fps(){ return fps; }
+    protected Runner runner;
+    private final Timer timer;
+    private int fps = 20;
+    private int speed = 1;
+    private final List<TimeChangeListener> timeListeners = new LinkedList<TimeChangeListener>();
+    private final List<PlayListener> playListeners = new LinkedList<PlayListener>();
+    private boolean blockSeek = false;
+    private final ChangeListener sliderListener;
+    public long tics_per_second = 1L;
+
+    public SceneRunner() {
+        timer = new Timer(1000 / fps, timeOutListener());
+        sliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (!blockSeek) {
+                    final JSlider slider = (JSlider) e.getSource();
+                    final long time = slider.getValue() * tics_per_second;
+                    pause();
+                    seek(time);
+                } else
+                    blockSeek = false;
+            }
+        };
+    }
+
+    public void setTicsPerSecond(long ticsPerSecond) {
+        tics_per_second = ticsPerSecond;
+        updateIncrTime();
+    }
+
+    protected long incrTime() {
+        return ((tics_per_second * speed) / fps);
+    }
+
+    protected void updateIncrTime() {
+        runner.setIncrTime(incrTime());
+    }
+
+    public ActionListener timeOutListener() {
+        return new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                step();
+            }
+        };
+    }
+
+    public void addTimeChangeListener(TimeChangeListener listener) {
+        timeListeners.add(listener);
+    }
+
+    public void addPlayListener(PlayListener listener) {
+        playListeners.add(listener);
+    }
+
+    protected void notifyTime() {
+        blockSeek = true;
+        for (final TimeChangeListener listener : timeListeners)
+            listener.changeTime(runner.time());
+    }
+
+    protected void pause() {
+        timer.stop();
+        for (final PlayListener listener : playListeners)
+            listener.handlePause();
+    }
+
+    protected void play() {
+        timer.start();
+        for (final PlayListener listener : playListeners)
+            listener.handlePlay();
+    }
+
+    public ActionListener playpauseListener() {
+        return new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (timer.isRunning())
+                    pause();
+                else
+                    play();
+            }
+        };
+    }
+
+    public ActionListener incrListener() {
+        return new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if (timer.isRunning())
+                    pause();
+                step();
+            }
+        };
+    }
+
+    public ActionListener stopListener() {
+        return new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pause();
+                seek(runner.minTime());
+            }
+        };
+    }
+
+    public ChangeListener sliderListener() {
+        return sliderListener;
+    }
+
+    public void seek(long time) {
+        try {
+            runner.seek(time);
+        } catch (final IOException ioe) {
+            ioe.printStackTrace();
+            throw new RuntimeException(ioe.getMessage());
+        }
+        notifyTime();
+    }
+
+    public ChangeListener speedListener() {
+        return new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSpinner speedSpinner = (JSpinner) e.getSource();
+                setSpeed((Integer) speedSpinner.getValue());
+            }
+        };
+    }
+
+    public ChangeListener fpsListener() {
+        return new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSpinner fpsSpinner = (JSpinner) e.getSource();
+                setFps((Integer) fpsSpinner.getValue());
+            }
+        };
+    }
+
+    public void step() {
+        if (runner.incrTime() + runner.time() > runner.maxTime())
+            pause();
+        else {
+            try {
+                runner.incr();
+            } catch (final IOException ioe) {
+                ioe.printStackTrace();
+                throw new RuntimeException(ioe.getMessage());
+            }
+            notifyTime();
+        }
+    }
+
+    public void setFps(int f) {
+        fps = f;
+        timer.setDelay(1000 / fps);
+        updateIncrTime();
+    }
+
+    public void setSpeed(int s) {
+        speed = s;
+        updateIncrTime();
+    }
+
+    public int speed() {
+        return speed;
+    }
+
+    public int fps() {
+        return fps;
+    }
 }

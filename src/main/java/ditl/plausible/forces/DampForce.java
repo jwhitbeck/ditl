@@ -19,19 +19,22 @@
 package ditl.plausible.forces;
 
 import ditl.graphs.Point;
-import ditl.plausible.*;
+import ditl.plausible.Force;
+import ditl.plausible.InferredNode;
 
 public class DampForce implements Force {
 
-	public static final double defaultD = 10;
-	
-	private double _D;
-	
-	public DampForce(double D){ _D = D; }
-	
-	@Override
-	public Point apply(long time, InferredNode node) {
-		Point s = node.currentSpeed();
-		return new Point( -_D * s.x, -_D* s.y );
-	}
+    public static final double defaultD = 10;
+
+    private final double _D;
+
+    public DampForce(double D) {
+        _D = D;
+    }
+
+    @Override
+    public Point apply(long time, InferredNode node) {
+        final Point s = node.currentSpeed();
+        return new Point(-_D * s.x, -_D * s.y);
+    }
 }

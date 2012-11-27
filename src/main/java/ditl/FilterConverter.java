@@ -19,43 +19,44 @@
 package ditl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 public class FilterConverter<I> implements Converter {
 
-	private Trace<I> _to;
-	private Trace<I> _from;
-	private Set<Integer> _group;
-	
-	public FilterConverter( Trace<I> to, Trace<I> from, Set<Integer> group ){
-		_to = to;
-		_from = from;
-		_group = group;
-	}
+    private final Trace<I> _to;
+    private final Trace<I> _from;
+    private final Set<Integer> _group;
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void convert() throws IOException {
-		Filter<I> filter = ((Trace.Filterable<I>)_from).eventFilter(_group);
-		Reader<I> reader = _from.getReader();
-		Writer<I> writer = _to.getWriter();
-		reader.seek(_from.minTime());
-		while ( reader.hasNext() ){
-			List<I> events = reader.next();
-			for ( I item : events ){
-				I f_item = filter.filter(item);
-				if ( f_item != null )
-					writer.append(reader.time(), item);
-			}
-		}
-		IdMap id_map = _from.idMap();
-		if ( id_map != null ){
-			IdMap.Writer id_map_writer = IdMap.Writer.filter(id_map, _group);
-			writer.setProperty(Trace.idMapKey, id_map_writer.toString());
-		}
-		writer.setPropertiesFromTrace(_from);
-		((Trace.Filterable<I>)_from).copyOverTraceInfo(writer);
-		writer.close();
-		reader.close();
-	}
+    public FilterConverter(Trace<I> to, Trace<I> from, Set<Integer> group) {
+        _to = to;
+        _from = from;
+        _group = group;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void convert() throws IOException {
+        final Filter<I> filter = ((Trace.Filterable<I>) _from).eventFilter(_group);
+        final Reader<I> reader = _from.getReader();
+        final Writer<I> writer = _to.getWriter();
+        reader.seek(_from.minTime());
+        while (reader.hasNext()) {
+            final List<I> events = reader.next();
+            for (final I item : events) {
+                final I f_item = filter.filter(item);
+                if (f_item != null)
+                    writer.append(reader.time(), item);
+            }
+        }
+        final IdMap id_map = _from.idMap();
+        if (id_map != null) {
+            final IdMap.Writer id_map_writer = IdMap.Writer.filter(id_map, _group);
+            writer.setProperty(Trace.idMapKey, id_map_writer.toString());
+        }
+        writer.setPropertiesFromTrace(_from);
+        ((Trace.Filterable<I>) _from).copyOverTraceInfo(writer);
+        writer.close();
+        reader.close();
+    }
 }

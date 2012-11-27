@@ -18,28 +18,29 @@
  *******************************************************************************/
 package ditl.plausible.constraints;
 
-import ditl.plausible.*;
 import ditl.graphs.Point;
+import ditl.plausible.Constraint;
+import ditl.plausible.InferredNode;
 
 public class MaxSpeedConstraint implements Constraint {
 
-	private double max_speed;
-	private double max_speed_2;
-	
-	public MaxSpeedConstraint(double maxSpeed){
-		max_speed = maxSpeed;
-		max_speed_2 = max_speed * max_speed;
-	}
-	
-	@Override
-	public void apply(InferredNode node) {
-		Point s = node.nextSpeed();
-		double ns2 = s.x*s.x + s.y*s.y;
-		if ( ns2 > max_speed_2 ){
-			double a = max_speed / Math.sqrt(ns2);
-			s.x *= a;
-			s.y *= a;
-		}
-	}
+    private final double max_speed;
+    private final double max_speed_2;
+
+    public MaxSpeedConstraint(double maxSpeed) {
+        max_speed = maxSpeed;
+        max_speed_2 = max_speed * max_speed;
+    }
+
+    @Override
+    public void apply(InferredNode node) {
+        final Point s = node.nextSpeed();
+        final double ns2 = s.x * s.x + s.y * s.y;
+        if (ns2 > max_speed_2) {
+            final double a = max_speed / Math.sqrt(ns2);
+            s.x *= a;
+            s.y *= a;
+        }
+    }
 
 }

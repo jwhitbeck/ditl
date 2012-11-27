@@ -19,66 +19,75 @@
 package ditl.transfers;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import ditl.*;
-import ditl.graphs.*;
+import ditl.Listener;
+import ditl.PersistentMap;
+import ditl.StateUpdater;
+import ditl.StateUpdaterFactory;
+import ditl.StatefulTrace;
+import ditl.Store;
+import ditl.Trace;
+import ditl.graphs.AdjacencyMap;
+import ditl.graphs.Arc;
 
+@Trace.Type("transfers")
 public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
-	
-	public final static String type = "transfers";
-	public final static String defaultName = "transfers";
-	
-	public final static class Updater implements StateUpdater<TransferEvent,Transfer>{
-		private Map<Edge,Transfer> transfer_map = new AdjacencyMap.Edges<Transfer>();
-		private Set<Transfer> transfers = new HashSet<Transfer>();
-		
-		@Override
-		public void handleEvent(long time, TransferEvent event) {
-			Transfer transfer;
-			switch ( event.type() ){
-			case TransferEvent.START: 
-				transfer = new Transfer(event);
-				transfer_map.put(event.edge(), transfer);
-				transfers.add(transfer);
-				break;
-			default:
-				Edge e = event.edge();
-				transfer = transfer_map.get(e);
-				transfers.remove(transfer);
-				transfer_map.remove(e);
-			}
-		}
 
-		@Override
-		public void setState(Collection<Transfer> state) {
-			transfer_map.clear();
-			transfers.clear();
-			for ( Transfer transfer : state ){
-				transfer_map.put(transfer.edge(), transfer);
-				transfers.add(transfer);
-			}
-		}
+    public final static class Updater implements StateUpdater<TransferEvent, Transfer> {
+        private final Map<Arc, Transfer> transfer_map = new AdjacencyMap.Arcs<Transfer>();
+        private final Set<Transfer> transfers = new HashSet<Transfer>();
 
-		@Override
-		public Set<Transfer> states() {
-			return transfers;
-		}
-	}
-	
-	public interface Handler {
-		Listener<TransferEvent> transferEventListener();
-		Listener<Transfer> transferListener();
-	}
-	
-	public TransferTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new TransferEvent.Factory(), new Transfer.Factory(), 
-				new StateUpdaterFactory<TransferEvent,Transfer>(){
-					@Override
-					public StateUpdater<TransferEvent, Transfer> getNew() {
-						return new TransferTrace.Updater();
-					}
-		});
-	}
+        @Override
+        public void handleEvent(long time, TransferEvent event) {
+            Transfer transfer;
+            switch (event.type()) {
+                case START:
+                    transfer = new Transfer(event);
+                    transfer_map.put(event.arc(), transfer);
+                    transfers.add(transfer);
+                    break;
+                default:
+                    final Arc a = event.arc();
+                    transfer = transfer_map.get(a);
+                    transfers.remove(transfer);
+                    transfer_map.remove(a);
+            }
+        }
+
+        @Override
+        public void setState(Collection<Transfer> state) {
+            transfer_map.clear();
+            transfers.clear();
+            for (final Transfer transfer : state) {
+                transfer_map.put(transfer.arc(), transfer);
+                transfers.add(transfer);
+            }
+        }
+
+        @Override
+        public Set<Transfer> states() {
+            return transfers;
+        }
+    }
+
+    public interface Handler {
+        Listener<TransferEvent> transferEventListener();
+
+        Listener<Transfer> transferListener();
+    }
+
+    public TransferTrace(Store store, String name, PersistentMap info) throws IOException {
+        super(store, name, info, new TransferEvent.Factory(), new Transfer.Factory(),
+                new StateUpdaterFactory<TransferEvent, Transfer>() {
+                    @Override
+                    public StateUpdater<TransferEvent, Transfer> getNew() {
+                        return new TransferTrace.Updater();
+                    }
+                });
+    }
 
 }

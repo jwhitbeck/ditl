@@ -23,7 +23,6 @@ public class ImportStanford implements Converter {
     int maxTimeStamp = middleTimeStep + ((numberOfTimeSteps-1)/2); // integer division!
     int minTimeStamp = maxTimeStamp - (numberOfTimeSteps-1);
 
-    //Writer<Edge> beacon_writer;
     BeaconTrace _beacons;
 
     ImportStanford(BeaconTrace beacons, Map<Integer,File> moteFiles, boolean randomize){
@@ -42,7 +41,7 @@ public class ImportStanford implements Converter {
 
     @Override
     public void convert() throws IOException {
-    	Writer<Edge> beacon_writer = _beacons.getWriter();
+    	Writer<Arc> beacon_writer = _beacons.getWriter();
 		for ( Map.Entry<Integer,File> e : mote_files.entrySet() ){
 		    Integer to = e.getKey();
 		    File f = e.getValue();
@@ -54,7 +53,7 @@ public class ImportStanford implements Converter {
 				Integer time_stamp = Integer.parseInt(elems[4]);
 				if ( time_stamp >= minTimeStamp && time_stamp <= maxTimeStamp ){
 				    long time = getBeaconTime(from, time_stamp);
-				    beacon_writer.queue(time, new Edge(from, to));
+				    beacon_writer.queue(time, new Arc(from, to));
 				}
 		    }
 		    reader.close();

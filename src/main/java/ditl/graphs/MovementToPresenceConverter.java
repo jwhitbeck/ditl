@@ -19,64 +19,71 @@
 package ditl.graphs;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-import ditl.*;
-
-
+import ditl.Converter;
+import ditl.Listener;
+import ditl.Runner;
+import ditl.StatefulReader;
+import ditl.StatefulWriter;
 
 public class MovementToPresenceConverter implements Converter, MovementTrace.Handler {
 
-	private StatefulReader<MovementEvent,Movement> movement_reader;
-	private StatefulWriter<PresenceEvent,Presence> presence_writer;
-	private MovementTrace _movement;
-	private PresenceTrace _presence;
-	
-	public MovementToPresenceConverter(PresenceTrace presence, MovementTrace movement) {
-		_movement = movement;
-		_presence = presence;
-	}
+    private StatefulReader<MovementEvent, Movement> movement_reader;
+    private StatefulWriter<PresenceEvent, Presence> presence_writer;
+    private final MovementTrace _movement;
+    private final PresenceTrace _presence;
 
-	@Override
-	public void convert() throws IOException {
-		movement_reader = _movement.getReader();
-		presence_writer = _presence.getWriter();
-		movement_reader.bus().addListener(movementEventListener());
-		movement_reader.stateBus().addListener(movementListener());
-		Runner runner = new Runner(_movement.maxUpdateInterval(), _movement.minTime(), _movement.maxTime());
-		runner.addGenerator(movement_reader);
-		runner.run();
-		presence_writer.setPropertiesFromTrace(_movement);
-		presence_writer.close();
-		movement_reader.close();
-	}
+    public MovementToPresenceConverter(PresenceTrace presence, MovementTrace movement) {
+        _movement = movement;
+        _presence = presence;
+    }
 
-	@Override
-	public Listener<MovementEvent> movementEventListener() {
-		return new Listener<MovementEvent>(){
-			@Override
-			public void handle(long time, Collection<MovementEvent> events) throws IOException {
-				for ( MovementEvent event : events ){
-					switch ( event.type ){
-					case MovementEvent.IN: presence_writer.append(time, new PresenceEvent(event.id(),PresenceEvent.IN)); break;
-					case MovementEvent.OUT: presence_writer.append(time, new PresenceEvent(event.id(),PresenceEvent.OUT)); break;
-					}
-				}
-			}
-		};
-	}
+    @Override
+    public void convert() throws IOException {
+        movement_reader = _movement.getReader();
+        presence_writer = _presence.getWriter();
+        movement_reader.bus().addListener(movementEventListener());
+        movement_reader.stateBus().addListener(movementListener());
+        final Runner runner = new Runner(_movement.maxUpdateInterval(), _movement.minTime(), _movement.maxTime());
+        runner.addGenerator(movement_reader);
+        runner.run();
+        presence_writer.setPropertiesFromTrace(_movement);
+        presence_writer.close();
+        movement_reader.close();
+    }
 
-	@Override
-	public Listener<Movement> movementListener() {
-		return new Listener<Movement>(){
-			@Override
-			public void handle(long time, Collection<Movement> events) throws IOException {
-				Set<Presence> initState = new HashSet<Presence>();
-				for ( Movement m : events )
-					initState.add(new Presence(m.id()));
-				presence_writer.setInitState(time, initState);
-			}
-		};
-	}
+    @Override
+    public Listener<MovementEvent> movementEventListener() {
+        return new Listener<MovementEvent>() {
+            @Override
+            public void handle(long time, Collection<MovementEvent> events) throws IOException {
+                for (final MovementEvent event : events)
+                    switch (event.type) {
+                        case IN:
+                            presence_writer.append(time, new PresenceEvent(event.id(), PresenceEvent.Type.IN));
+                            break;
+                        case OUT:
+                            presence_writer.append(time, new PresenceEvent(event.id(), PresenceEvent.Type.OUT));
+                            break;
+                    }
+            }
+        };
+    }
+
+    @Override
+    public Listener<Movement> movementListener() {
+        return new Listener<Movement>() {
+            @Override
+            public void handle(long time, Collection<Movement> events) throws IOException {
+                final Set<Presence> initState = new HashSet<Presence>();
+                for (final Movement m : events)
+                    initState.add(new Presence(m.id()));
+                presence_writer.setInitState(time, initState);
+            }
+        };
+    }
 
 }

@@ -18,37 +18,41 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.ParseException;
 
 import ditl.WritableStore;
 
 public abstract class WriteApp extends App {
 
-	protected File store_file;
-	protected WritableStore _store;
-	protected boolean force;
-	
-	@Override
-	protected void initOptions() {
-		options.addOption(new Option("f", forceOption,false, "Force overwrite existing traces."));
-	}
-	
-	protected void parseArgs(CommandLine cli, String[] args) 
-		throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		store_file = new File(args[0]);
-		force = cli.hasOption(forceOption);
-	}
-	
-	@Override
-	protected void init() throws IOException {
-		_store = WritableStore.open(store_file);
-	}
-	
-	@Override
-	protected void close() throws IOException {
-		_store.close();
-	}
+    protected File store_file;
+    protected WritableStore _store;
+    protected boolean force;
+
+    @Override
+    protected void initOptions() {
+        options.addOption(new Option("f", forceOption, false, "Force overwrite existing traces."));
+    }
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+        store_file = new File(args[0]);
+        force = cli.hasOption(forceOption);
+    }
+
+    @Override
+    protected void init() throws IOException {
+        _store = WritableStore.open(store_file);
+    }
+
+    @Override
+    protected void close() throws IOException {
+        _store.close();
+    }
 
 }

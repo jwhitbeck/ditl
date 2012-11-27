@@ -43,14 +43,14 @@ $(TARGET): $(ORIG_DATA) $(DITL_LIB)
 	@echo " Importing infocom'06 trace"
 	@echo "   - Keep only iMote data (nodes 1-98)"
 	@echo ""
-	$(DITL) graphs import-edges \
+	$(DITL) graphs import-arcs \
 		--orig-time-unit s \
 		$@ Exp6/contacts.Exp6.dat
-	$(DITL) graphs edges-to-links --links all_links $@
-	$(DITL) rm $@ edges
-	$(DITL) filter $@ all_links links 1:98
-	$(DITL) rm $@ all_links
-	$(DITL) graphs links-to-presence $@
+	$(DITL) graphs arcs-to-edges --edges all_edges $@
+	$(DITL) rm $@ arcs
+	$(DITL) filter $@ all_edges edges 1:98
+	$(DITL) rm $@ all_edges
+	$(DITL) graphs edges-to-presence $@
 	$(DITL) graphs import-groups \
 			--labels "participants,mezzanine,floor -1,floor -2,lifts,bar,concierge"\
 			$@ -- \
@@ -71,9 +71,9 @@ $(TARGET): $(ORIG_DATA) $(DITL_LIB)
 	@echo "#################################################"
 	@echo " Inferring movement (this can take several hours)"
 	@echo ""
-	$(DITL) plausible links-to-windowed-links $@ 1000
+	$(DITL) plausible edges-to-windowed-edges $@ 1000
 	$(DITL) plausible infer --update-interval 5 --known-movement static_mv --known-nodes 1-20 $@ 500 500
-	$(DITL) rm $@ static_mv windowed_links
+	$(DITL) rm $@ static_mv windowed_edges
 
 
 clean:

@@ -19,55 +19,62 @@
 package ditl.transfers;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-import ditl.*;
+import ditl.Listener;
+import ditl.PersistentMap;
+import ditl.StateUpdater;
+import ditl.StateUpdaterFactory;
+import ditl.StatefulTrace;
+import ditl.Store;
+import ditl.Trace;
 
+@Trace.Type("messages")
 public class MessageTrace extends StatefulTrace<MessageEvent, Message> {
-	
-	public final static String type = "messages";
-	public final static String defaultName = "messages";
-	
-	public final static int defaultPriority = 50;
-	
-	public final static class Updater implements StateUpdater<MessageEvent,Message>{
-		private Set<Message> messages = new HashSet<Message>();
 
-		@Override
-		public void handleEvent(long time, MessageEvent event) {
-			Message msg = event.message();
-			if ( event.isNew() )
-				messages.add(msg);
-			else
-				messages.remove(msg);
-		}
+    public final static int defaultPriority = 50;
 
-		@Override
-		public void setState(Collection<Message> state) {
-			messages.clear();
-			messages.addAll(state);
-		}
+    public final static class Updater implements StateUpdater<MessageEvent, Message> {
+        private final Set<Message> messages = new HashSet<Message>();
 
-		@Override
-		public Set<Message> states() {
-			return messages;
-		}
-	}
-	
-	public interface Handler {
-		Listener<MessageEvent> messageEventListener();
-		Listener<Message> messageListener();
-	}
-	
-	public MessageTrace(Store store, String name, PersistentMap info) throws IOException {
-		super(store, name, info, new MessageEvent.Factory(), new Message.Factory(), 
-				new StateUpdaterFactory<MessageEvent,Message>(){
-					@Override
-					public StateUpdater<MessageEvent, Message> getNew() {
-						return new MessageTrace.Updater();
-					}
-		});
-		info.put(Trace.defaultPriorityKey, defaultPriority);
-	}
+        @Override
+        public void handleEvent(long time, MessageEvent event) {
+            final Message msg = event.message();
+            if (event.isNew())
+                messages.add(msg);
+            else
+                messages.remove(msg);
+        }
+
+        @Override
+        public void setState(Collection<Message> state) {
+            messages.clear();
+            messages.addAll(state);
+        }
+
+        @Override
+        public Set<Message> states() {
+            return messages;
+        }
+    }
+
+    public interface Handler {
+        Listener<MessageEvent> messageEventListener();
+
+        Listener<Message> messageListener();
+    }
+
+    public MessageTrace(Store store, String name, PersistentMap info) throws IOException {
+        super(store, name, info, new MessageEvent.Factory(), new Message.Factory(),
+                new StateUpdaterFactory<MessageEvent, Message>() {
+                    @Override
+                    public StateUpdater<MessageEvent, Message> getNew() {
+                        return new MessageTrace.Updater();
+                    }
+                });
+        info.put(Trace.defaultPriorityKey, defaultPriority);
+    }
 
 }

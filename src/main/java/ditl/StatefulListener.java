@@ -19,5 +19,5 @@
 package ditl;
 
 public interface StatefulListener<E> extends Listener<E> {
-	public void reset();
+    public void reset();
 }

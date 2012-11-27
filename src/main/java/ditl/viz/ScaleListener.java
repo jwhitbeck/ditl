@@ -19,5 +19,5 @@
 package ditl.viz;
 
 public interface ScaleListener {
-	public void rescale(Scaler scale); 
+    public void rescale(Scaler scale);
 }

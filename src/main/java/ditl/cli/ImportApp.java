@@ -18,35 +18,39 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.ParseException;
 
 public abstract class ImportApp extends WriteApp {
 
-	protected String in_file_name;
-	protected InputStream _in;
-	
-	@Override
-	protected void initOptions(){
-		super.initOptions();
-		options.addOption(null, outputOption, true, "output file");
-	}
-	
-	protected void parseArgs(CommandLine cli, String[] args) 
-		throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
-		super.parseArgs(cli, args);
-		in_file_name = args[1];
-	}
-	
-	@Override
-	protected void init() throws IOException {
-		super.init();
-		_in = new FileInputStream(in_file_name);
-	}
+    protected String in_file_name;
+    protected InputStream _in;
 
-	@Override
-	protected String getUsageString(){
-		return "[OPTIONS] STORE FILE";
-	}
+    @Override
+    protected void initOptions() {
+        super.initOptions();
+        options.addOption(null, outputOption, true, "output file");
+    }
+
+    @Override
+    protected void parseArgs(CommandLine cli, String[] args)
+            throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
+        super.parseArgs(cli, args);
+        in_file_name = args[1];
+    }
+
+    @Override
+    protected void init() throws IOException {
+        super.init();
+        _in = new FileInputStream(in_file_name);
+    }
+
+    @Override
+    protected String getUsageString() {
+        return "[OPTIONS] STORE FILE";
+    }
 }

@@ -18,59 +18,69 @@
  *******************************************************************************/
 package ditl.viz;
 
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import ditl.Trace;
 
 @SuppressWarnings("serial")
 public class TimeUnitPanel extends JPanel {
-	
-	final static int SECONDS = 0;
-	final static int MINUTES = 1;
-	final static int HOURS = 2;
-	final static int DAYS = 3;
-	
-	final static String[] long_units = { "seconds", "minutes", "hours", "days" };
-	final static String[] short_units = { "s", "m", "h", "d" };
-	final static int[] modifiers = { 1, 60, 3600, 24*3600 };
-	final static int[] thresholds = {300, 3*3600, 72*3600, Integer.MAX_VALUE }; 
-	
-	protected JComboBox unit_list;
-	protected int cur_unit = SECONDS;
-	protected ControlsPanel _controls;
-	
-	public TimeUnitPanel(ControlsPanel controls){
-		_controls = controls;
-		unit_list = new JComboBox();
-		for ( int i=0; i<4; ++i){
-			unit_list.addItem(long_units[i]);
-		}
-		unit_list.setSelectedIndex(SECONDS);
-		unit_list.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				cur_unit = unit_list.getSelectedIndex();
-				_controls.setModifier(modifiers[cur_unit], short_units[cur_unit]);
-			}
-		});
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		add(Box.createHorizontalGlue());
-		add(new JLabel("Unit: "));
-		add(unit_list);
-	}
-	
-	public void setPreferredTimeUnit(Trace<?> trace){
-		long d = (trace.maxTime() - trace.minTime())/trace.ticsPerSecond();
-		int i = 0;
-		while ( i < 4){
-			if ( d < thresholds[i] )
-				break;
-			i++;
-		}
-		cur_unit = i;
-		unit_list.setSelectedIndex(i);
-	}
+
+    enum Unit {
+
+        SECONDS("seconds", "s", 1, 300),
+        MINUTES("minutes", "m", 60, 3 * 3600),
+        HOURS("hours", "h", 3600, 72 * 3600),
+        DAYS("days", "d", 24 * 3600, Integer.MAX_VALUE);
+
+        private final String _long, _short;
+        private final int _mod, _thresh;
+
+        private Unit(String longUnit, String shortUnit, int mod, int thresh) {
+            _long = longUnit;
+            _short = shortUnit;
+            _mod = mod;
+            _thresh = thresh;
+        }
+    }
+
+    protected JComboBox unit_list;
+    protected Unit cur_unit = Unit.SECONDS;
+    protected ControlsPanel _controls;
+
+    public TimeUnitPanel(ControlsPanel controls) {
+        _controls = controls;
+        unit_list = new JComboBox();
+        for (final Unit u : Unit.values())
+            unit_list.addItem(u._long);
+        unit_list.setSelectedIndex(Unit.SECONDS.ordinal());
+        unit_list.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                cur_unit = Unit.values()[unit_list.getSelectedIndex()];
+                _controls.setModifier(cur_unit._mod, cur_unit._short);
+            }
+        });
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        add(Box.createHorizontalGlue());
+        add(new JLabel("Unit: "));
+        add(unit_list);
+    }
+
+    public void setPreferredTimeUnit(Trace<?> trace) {
+        final long d = (trace.maxTime() - trace.minTime()) / trace.ticsPerSecond();
+        for (final Unit u : Unit.values())
+            if (d < u._thresh) {
+                cur_unit = u;
+                break;
+            }
+        unit_list.setSelectedIndex(cur_unit.ordinal());
+    }
 
 }
