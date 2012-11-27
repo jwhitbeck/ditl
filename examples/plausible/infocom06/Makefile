@@ -1,4 +1,10 @@
-DITL_LIB:=../../../dist/ditl.jar
+DITL_DIR:=../../../
+DITL_VERSION:=$(shell sed -n -r 's/.*<version>([^<]+)<\/version>.*/\1/p' $(DITL_DIR)/pom.xml | head -1)
+DITL_LIB:=$(HOME)/.m2/repository/ditl/ditl/$(DITL_VERSION)/ditl-$(DITL_VERSION).jar
+
+$(DITL_LIB):
+	cd $(DITL_DIR) && mvn install
+
 
 ORIG_DATA:=Exp6.tar.gz
 CRAWDAD_URL:=http://www.crawdad.org/download/cambridge/haggle/Exp6.tar.gz
@@ -26,7 +32,7 @@ $(ORIG_DATA):
 	$(call GET,$(CRAWDAD_URL),$(ORIG_DATA),$$login,$$pass)
 
 
-$(TARGET): $(ORIG_DATA)
+$(TARGET): $(ORIG_DATA) $(DITL_LIB)
 	@echo ""
 	@echo "#################################################"
 	@echo " Decrompressing data from CRAWDAD "
