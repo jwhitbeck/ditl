@@ -38,7 +38,7 @@ public final class AnyContactTimesReport extends Report implements EdgeTrace.Han
     public AnyContactTimesReport(OutputStream out, boolean contacts) throws IOException {
         super(out);
         _contacts = contacts;
-        appendComment("id1 | id2 | begin | end | duration");
+        appendComment("id | begin | end | duration");
     }
 
     public static final class Factory implements ReportFactory<AnyContactTimesReport> {
