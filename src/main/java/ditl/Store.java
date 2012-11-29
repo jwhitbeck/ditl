@@ -122,8 +122,8 @@ public abstract class Store {
         return list;
     }
 
-    Reader.InputStreamOpener getStreamOpener(final String name) {
-        return new Reader.InputStreamOpener() {
+    InputStreamOpener getStreamOpener(final String name) {
+        return new InputStreamOpener() {
             @Override
             public InputStream open() throws IOException {
                 return getInputStream(name);

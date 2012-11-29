@@ -20,17 +20,12 @@ package ditl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Reader<I> implements Generator {
-
-    interface InputStreamOpener {
-        public InputStream open() throws IOException;
-    }
 
     long cur_time;
     long prev_time;
