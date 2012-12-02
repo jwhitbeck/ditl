@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-public class FilterConverter<I> implements Converter {
+public class FilterConverter<I extends Item> implements Converter {
 
     private final Trace<I> _to;
     private final Trace<I> _from;

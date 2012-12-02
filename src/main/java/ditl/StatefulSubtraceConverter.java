@@ -21,7 +21,7 @@ package ditl;
 import java.io.IOException;
 import java.util.List;
 
-public class StatefulSubtraceConverter<E, S> implements Converter {
+public class StatefulSubtraceConverter<E extends Item, S extends Item> implements Converter {
 
     private final StatefulTrace<E, S> _to;
     private final StatefulTrace<E, S> _from;
