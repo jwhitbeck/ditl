@@ -21,10 +21,8 @@ import ditl.StateUpdater;
 import ditl.StatefulReader;
 import ditl.StatefulTrace;
 import ditl.StatefulWriter;
-import ditl.Store.LoadTraceException;
 import ditl.Trace;
 import ditl.WritableStore;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.Writer;
 import ditl.graphs.Arc;
 import ditl.graphs.ArcEvent;
@@ -131,7 +129,7 @@ public class TestReadWrite {
     }
 
     @Test
-    public void testReaderAndWriter() throws IOException, AlreadyExistsException, LoadTraceException {
+    public void testReaderAndWriter() throws Exception {
         Trace<Arc> trace = store.newTrace("simple", BeaconTrace.class, true);
         Writer<Arc> writer = trace.getWriter();
 
@@ -153,7 +151,7 @@ public class TestReadWrite {
     }
 
     @Test
-    public void testSeek() throws AlreadyExistsException, LoadTraceException, IOException {
+    public void testSeek() throws Exception {
         Trace<Arc> trace = store.newTrace("seek", BeaconTrace.class, true);
         Writer<Arc> writer = trace.getWriter();
         for (int[] param : simpleTestCase) {
@@ -179,7 +177,7 @@ public class TestReadWrite {
     }
 
     @Test
-    public void stressWriter() throws IOException, AlreadyExistsException, LoadTraceException {
+    public void stressWriter() throws Exception {
         Trace<Arc> trace = store.newTrace("stress", BeaconTrace.class, true);
         Writer<Arc> writer = trace.getWriter();
 
@@ -191,7 +189,7 @@ public class TestReadWrite {
     }
 
     @Test
-    public void testStatefulReaderAndWriter() throws IOException, AlreadyExistsException, LoadTraceException {
+    public void testStatefulReaderAndWriter() throws Exception {
         StatefulTrace<ArcEvent, Arc> trace = store.newTrace("stateful", ArcTrace.class, true);
         StatefulWriter<ArcEvent, Arc> writer = trace.getWriter();
 

@@ -18,12 +18,9 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.NoSuchTraceException;
 import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.ArcTrace;
@@ -53,8 +50,8 @@ public class ExportArcs extends ExportApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException {
-        final ArcTrace arcs = (ArcTrace) _store.getTrace(graph_options.get(GraphOptions.ARCS));
+    protected void run() throws Exception {
+        final ArcTrace arcs = _store.getTrace(graph_options.get(GraphOptions.ARCS));
         final long otps = arcs.ticsPerSecond();
         final double timeMul = getTimeMul(otps, dtps);
         CRAWDADArcs.toCRAWDAD(arcs, _out, timeMul);

@@ -18,7 +18,6 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,10 +28,7 @@ import org.apache.commons.cli.ParseException;
 import ditl.GroupSpecification;
 import ditl.IdMap;
 import ditl.StatefulWriter;
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
 import ditl.Trace;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.WriteApp;
 import ditl.graphs.Group;
@@ -73,10 +69,10 @@ public class ImportStaticGroups extends WriteApp {
     }
 
     @Override
-    public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+    public void run() throws Exception {
         final Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
         final IdMap id_map = (use_id_map) ? presence.idMap() : null;
-        final GroupTrace groups = (GroupTrace) _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
+        final GroupTrace groups = _store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
         final StatefulWriter<GroupEvent, Group> groupWriter = groups.getWriter();
         final Set<Group> initState = new HashSet<Group>();
         int i = 0;

@@ -1,6 +1,5 @@
 package ditl.plausible.cli;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,9 +8,6 @@ import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
@@ -137,16 +133,15 @@ public class InferMobility extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException,
-            AlreadyExistsException, LoadTraceException {
+    protected void run() throws Exception {
 
-        final PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
-        final EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-        final WindowedEdgeTrace windowed_edges = (WindowedEdgeTrace) orig_store.getTrace(windowed_edges_name);
+        final PresenceTrace presence = orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+        final EdgeTrace edges = orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+        final WindowedEdgeTrace windowed_edges = orig_store.getTrace(windowed_edges_name);
         MovementTrace known_movement = null;
         if (known_movement_name != null)
-            known_movement = (MovementTrace) orig_store.getTrace(known_movement_name);
-        final MovementTrace movement = (MovementTrace) dest_store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.class, force);
+            known_movement = orig_store.getTrace(known_movement_name);
+        final MovementTrace movement = dest_store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.class, force);
 
         final long tps = presence.ticsPerSecond();
         update_interval *= tps;

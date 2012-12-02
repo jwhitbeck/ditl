@@ -18,15 +18,11 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
 import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
@@ -41,11 +37,11 @@ public class StaticGroupEdges extends ConvertApp {
     private String groupEdgesName;
 
     @Override
-    protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-        final EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-        final GroupTrace groups = (GroupTrace) orig_store.getTrace(graph_options.get(GraphOptions.GROUPS));
+    protected void run() throws Exception {
+        final EdgeTrace edges = orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+        final GroupTrace groups = orig_store.getTrace(graph_options.get(GraphOptions.GROUPS));
         final Set<Group> static_groups = groups.staticGroups();
-        final EdgeTrace group_edges = (EdgeTrace) dest_store.newTrace(groupEdgesName, EdgeTrace.class, force);
+        final EdgeTrace group_edges = dest_store.newTrace(groupEdgesName, EdgeTrace.class, force);
         new StaticGroupEdgeConverter(group_edges, edges, static_groups).convert();
     }
 

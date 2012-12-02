@@ -80,14 +80,14 @@ public class TransferPlayer extends GraphPlayer {
         transferSelector.setStore(_store);
         transferSelector.load(_store.listTraces(TransferTrace.class));
 
-        final BufferTrace buffers = (BufferTrace) _store.listTraces(BufferTrace.class).get(0);
+        final BufferTrace buffers = _store.listTraces(BufferTrace.class).get(0);
         try {
             ((RoutingRunner) runner).setBufferTrace(buffers);
         } catch (final IOException e) {
             JOptionPane.showMessageDialog(this, "Failed to load buffer trace '" + buffers + "'", "Warning", JOptionPane.ERROR_MESSAGE);
         }
 
-        final MessageTrace messages = (MessageTrace) _store.listTraces(MessageTrace.class).get(0);
+        final MessageTrace messages = _store.listTraces(MessageTrace.class).get(0);
         try {
             ((RoutingRunner) runner).setMessageTrace(messages);
         } catch (final IOException e) {

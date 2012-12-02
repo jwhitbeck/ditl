@@ -26,7 +26,7 @@ public class MultiStore extends Store {
 
     final private Store[] stores;
 
-    public MultiStore(File... files) throws IOException {
+    public MultiStore(File... files) throws IOException, ClassNotFoundException {
         super();
         stores = new Store[files.length];
         for (int i = 0; i < files.length; ++i) {

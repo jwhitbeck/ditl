@@ -18,14 +18,9 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
@@ -64,9 +59,9 @@ public class FloodingReachability extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-        final EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-        final PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+    protected void run() throws Exception {
+        final EdgeTrace edges = orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+        final PresenceTrace presence = orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
         if (min_time == null)
             min_time = presence.minTime();
         else
@@ -74,7 +69,7 @@ public class FloodingReachability extends ConvertApp {
         final long _tau = (long) (tau * edges.ticsPerSecond());
         delay *= edges.ticsPerSecond();
         final String name = edges.name() + "_t" + _tau + "_pd" + delay;
-        final ReachabilityTrace reachability = (ReachabilityTrace) dest_store.newTrace(name, ReachabilityTrace.class, force);
+        final ReachabilityTrace reachability = dest_store.newTrace(name, ReachabilityTrace.class, force);
         new FloodingReachableConverter(reachability, presence, edges, _tau, delay, min_time).convert();
 
     }

@@ -18,14 +18,9 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
@@ -52,9 +47,9 @@ public class EdgesToCCs extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-        final EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-        final GroupTrace ccs = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
+    protected void run() throws Exception {
+        final EdgeTrace edges = orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+        final GroupTrace ccs = dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
         new EdgesToConnectedComponentsConverter(ccs, edges).convert();
     }
 

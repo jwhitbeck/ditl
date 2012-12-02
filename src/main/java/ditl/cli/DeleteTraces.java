@@ -25,7 +25,6 @@ import java.util.Arrays;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store;
 import ditl.WritableStore;
 
 @Command(cmd = "rm")
@@ -47,7 +46,7 @@ public class DeleteTraces extends App {
     }
 
     @Override
-    protected void run() throws IOException, Store.NoSuchTraceException {
+    protected void run() throws Exception {
         for (final String name : traceNames)
             if (_store.hasTrace(name))
                 _store.deleteTrace(name);

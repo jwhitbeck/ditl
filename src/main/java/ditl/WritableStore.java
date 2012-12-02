@@ -32,20 +32,6 @@ public abstract class WritableStore extends Store {
 
     private final Map<String, Writer<?>> openWriters = new HashMap<String, Writer<?>>();
 
-    @SuppressWarnings("serial")
-    public static class AlreadyExistsException extends Exception {
-        private final String trace_name;
-
-        public AlreadyExistsException(String traceName) {
-            trace_name = traceName;
-        }
-
-        @Override
-        public String toString() {
-            return "Error! A trace named '" + trace_name + "' already exists.";
-        }
-    }
-
     public WritableStore() throws IOException {
         super();
     }
@@ -56,7 +42,7 @@ public abstract class WritableStore extends Store {
 
     public abstract OutputStream getOutputStream(String name) throws IOException;
 
-    public abstract void moveTrace(String origName, String destName, boolean force) throws AlreadyExistsException, IOException;
+    public abstract void moveTrace(String origName, String destName, boolean force) throws IOException;
 
     public void putFile(File file, String name) throws IOException {
         copy(new FileInputStream(file), getOutputStream(name));
@@ -76,7 +62,7 @@ public abstract class WritableStore extends Store {
         openWriters.remove(name);
         try {
             loadTrace(name);
-        } catch (final LoadTraceException e) {
+        } catch (final Exception e) {
             System.err.println(e);
         }
     }
@@ -111,7 +97,7 @@ public abstract class WritableStore extends Store {
     public void copyTrace(Store store, Trace<?> trace) throws IOException {
         final String[] files = new String[] {
                 infoFile(trace.name()),
-                (trace.isStateful()) ? snapshotsFile(trace.name()) : null,
+                trace.isStateful() ? indexFile(trace.name()) : null,
                 traceFile(trace.name()) };
         for (final String file : files)
             if (file != null) {
@@ -121,13 +107,13 @@ public abstract class WritableStore extends Store {
             }
     }
 
-    public Trace<?> newTrace(String name, String type, boolean force) throws AlreadyExistsException, LoadTraceException {
+    public Trace<?> newTrace(String name, String type, boolean force) throws IOException, ClassNotFoundException {
         return newTrace(name, getTraceClass(type), force);
     }
 
-    public <T extends Trace<?>> T newTrace(String name, Class<T> klass, boolean force) throws AlreadyExistsException, LoadTraceException {
+    public <T extends Trace<?>> T newTrace(String name, Class<T> klass, boolean force) throws IOException, ClassNotFoundException {
         if (traces.containsKey(name) && !force)
-            throw new AlreadyExistsException(name);
+            throw new IOException("A trace with name '" + name + "' already exists!");
         return buildTrace(name, new PersistentMap(), klass);
     }
 

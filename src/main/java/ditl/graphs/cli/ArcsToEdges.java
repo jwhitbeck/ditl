@@ -18,14 +18,9 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.ArcTrace;
@@ -58,9 +53,9 @@ public class ArcsToEdges extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-        final ArcTrace arcs = (ArcTrace) orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
-        final EdgeTrace edges = (EdgeTrace) dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.class, force);
+    protected void run() throws Exception {
+        final ArcTrace arcs = orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
+        final EdgeTrace edges = dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.class, force);
         new ArcsToEdgesConverter(edges, arcs, union).convert();
     }
 }

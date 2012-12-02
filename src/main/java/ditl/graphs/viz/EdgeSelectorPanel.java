@@ -85,7 +85,7 @@ public class EdgeSelectorPanel extends JPanel implements ActionListener, ItemLis
         _store = store;
     }
 
-    public void load(Collection<Trace<?>> traces) {
+    public void load(Collection<EdgeTrace> traces) {
         edgesChooser.removeActionListener(this);
         edgesChooser.removeAllItems();
         enabledBox.removeItemListener(this);
@@ -118,7 +118,7 @@ public class EdgeSelectorPanel extends JPanel implements ActionListener, ItemLis
             cur_edges = null;
             if (enabledBox.isSelected()) {
                 name = (String) edgesChooser.getSelectedItem();
-                cur_edges = (EdgeTrace) _store.getTrace(name);
+                cur_edges = _store.getTrace(name);
             }
             runner.setEdgesTrace(cur_edges);
         } catch (final Exception ioe) {

@@ -38,7 +38,7 @@ public abstract class ReadOnlyApp extends App {
     }
 
     @Override
-    protected void init() throws IOException {
+    protected void init() throws Exception {
         _store = Store.open(store_file);
     }
 

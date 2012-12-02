@@ -18,15 +18,10 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
 import ditl.Trace;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
@@ -67,9 +62,9 @@ public class UpperReachability extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-        final ReachabilityTrace upper_trace = (ReachabilityTrace) dest_store.newTrace(upper_name, ReachabilityTrace.class, force);
-        final ReachabilityTrace lower_trace = (ReachabilityTrace) orig_store.getTrace(lower_name);
+    protected void run() throws Exception {
+        final ReachabilityTrace upper_trace = dest_store.newTrace(upper_name, ReachabilityTrace.class, force);
+        final ReachabilityTrace lower_trace = orig_store.getTrace(lower_name);
         new UpperReachableConverter(upper_trace, lower_trace).convert();
     }
 }

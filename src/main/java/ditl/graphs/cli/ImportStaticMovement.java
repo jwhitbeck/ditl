@@ -18,7 +18,6 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,10 +27,7 @@ import org.apache.commons.cli.ParseException;
 
 import ditl.IdMap;
 import ditl.StatefulWriter;
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
 import ditl.Trace;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.WriteApp;
 import ditl.graphs.Movement;
@@ -67,10 +63,10 @@ public class ImportStaticMovement extends WriteApp {
     }
 
     @Override
-    public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+    public void run() throws Exception {
         final Trace<?> presence = _store.getTrace(graph_options.get(GraphOptions.PRESENCE));
         final IdMap id_map = presence.idMap();
-        final MovementTrace movement = (MovementTrace) _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.class, force);
+        final MovementTrace movement = _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.class, force);
         final StatefulWriter<MovementEvent, Movement> movementWriter = movement.getWriter();
         final Set<Movement> initState = new HashSet<Movement>();
         for (final String spec : positions_specs) {

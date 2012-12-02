@@ -18,14 +18,9 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.ArcTrace;
@@ -39,10 +34,10 @@ public class ArcsToDominatingSet extends ConvertApp {
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.GROUPS, GraphOptions.ARCS, GraphOptions.PRESENCE);
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-        final PresenceTrace presence = (PresenceTrace) orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
-        final ArcTrace arcs = (ArcTrace) orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
-        final GroupTrace ds = (GroupTrace) dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
+    protected void run() throws Exception {
+        final PresenceTrace presence = orig_store.getTrace(graph_options.get(GraphOptions.PRESENCE));
+        final ArcTrace arcs = orig_store.getTrace(graph_options.get(GraphOptions.ARCS));
+        final GroupTrace ds = dest_store.newTrace(graph_options.get(GraphOptions.GROUPS), GroupTrace.class, force);
         new ArcsToDominatingSetConverter(ds, arcs, presence).convert();
     }
 

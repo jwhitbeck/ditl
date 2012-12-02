@@ -18,7 +18,6 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
@@ -41,8 +40,8 @@ public class ListTraces extends ReadOnlyApp {
     }
 
     @Override
-    protected void run() throws IOException {
-        final Collection<Trace<?>> traces = (type == null) ? _store.listTraces() : _store.listTraces(type);
+    protected void run() throws Exception {
+        final Collection<? extends Trace<?>> traces = (type == null) ? _store.listTraces() : _store.listTraces(_store.getTraceClass(type));
         for (final Trace<?> trace : traces) {
             System.out.println(trace.name());
             if (show_descr) {

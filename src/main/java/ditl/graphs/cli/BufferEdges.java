@@ -18,14 +18,9 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.BufferEdgesConverter;
@@ -68,9 +63,9 @@ public class BufferEdges extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-        final EdgeTrace edges = (EdgeTrace) orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
-        final EdgeTrace buffered_edges = (EdgeTrace) dest_store.newTrace(bufferedEdgesName, EdgeTrace.class, force);
+    protected void run() throws Exception {
+        final EdgeTrace edges = orig_store.getTrace(graph_options.get(GraphOptions.EDGES));
+        final EdgeTrace buffered_edges = dest_store.newTrace(bufferedEdgesName, EdgeTrace.class, force);
         before_buffer_time *= edges.ticsPerSecond();
         after_buffer_time *= edges.ticsPerSecond();
         new BufferEdgesConverter(buffered_edges, edges, before_buffer_time, after_buffer_time, randomize).convert();

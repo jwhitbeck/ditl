@@ -25,7 +25,6 @@ import org.apache.commons.cli.ParseException;
 
 import ditl.StatefulReader;
 import ditl.StatefulTrace;
-import ditl.Store.NoSuchTraceException;
 import ditl.Trace;
 
 @Command(cmd = "ps")
@@ -42,7 +41,7 @@ public class PrintState extends ReadOnlyApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException {
+    protected void run() throws IOException {
         final Trace<?> trace = _store.getTrace(trace_name);
         if (!trace.isStateful())
             System.out.println("Trace '" + trace_name + "' is not a stateful trace.");

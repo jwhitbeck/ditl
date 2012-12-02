@@ -26,7 +26,6 @@ import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.NoSuchTraceException;
 import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.MovementTrace;
@@ -67,8 +66,8 @@ public class ExportMovement extends ExportApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException {
-        final MovementTrace movement = (MovementTrace) _store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
+    protected void run() throws IOException {
+        final MovementTrace movement = _store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
         final long otps = movement.ticsPerSecond();
         final long interval = Math.max((long) (d_interval * otps), 1);
         if (maxTime != null)

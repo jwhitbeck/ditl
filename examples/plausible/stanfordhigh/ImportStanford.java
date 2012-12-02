@@ -76,9 +76,9 @@ public class ImportStanford implements Converter {
     			moteFiles.put(id,f);
     		}
     	}
-    	BeaconTrace beacons = (BeaconTrace)store.newTrace("rand_beacons", BeaconTrace.type, true);
+    	BeaconTrace beacons = store.newTrace("rand_beacons", BeaconTrace.type, true);
 		new ImportStanford(beacons, moteFiles, true).convert();
-		BeaconTrace beacons2 = (BeaconTrace)store.newTrace(BeaconTrace.defaultName, BeaconTrace.type, true);
+		BeaconTrace beacons2 = store.newTrace(BeaconTrace.defaultName, BeaconTrace.type, true);
 		new ImportStanford(beacons2, moteFiles, false).convert();
 		
 		store.close();

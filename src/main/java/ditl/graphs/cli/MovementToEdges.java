@@ -18,14 +18,9 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
@@ -40,9 +35,9 @@ public class MovementToEdges extends ConvertApp {
     private Long max_interval = null;
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-        final MovementTrace movement = (MovementTrace) orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
-        final EdgeTrace edges = (EdgeTrace) dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.class, force);
+    protected void run() throws Exception {
+        final MovementTrace movement = orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
+        final EdgeTrace edges = dest_store.newTrace(graph_options.get(GraphOptions.EDGES), EdgeTrace.class, force);
         if (max_interval == null)
             max_interval = movement.maxTime() - movement.minTime();
         else

@@ -26,7 +26,6 @@ import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.NoSuchTraceException;
 import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.CRAWDADContacts;
@@ -61,8 +60,8 @@ public class ExportEdges extends ExportApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException {
-        final EdgeTrace edges = (EdgeTrace) _store.getTrace(graph_options.get(GraphOptions.EDGES));
+    protected void run() throws IOException {
+        final EdgeTrace edges = _store.getTrace(graph_options.get(GraphOptions.EDGES));
         final long otps = edges.ticsPerSecond();
         final double timeMul = getTimeMul(otps, dtps);
         switch (ext_fmt) {

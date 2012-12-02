@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -49,34 +48,6 @@ public abstract class Store {
     private final Set<Reader<?>> openReaders = new HashSet<Reader<?>>();
     private boolean closing = false;
 
-    @SuppressWarnings("serial")
-    public static class NoSuchTraceException extends Exception {
-        private final String trace_name;
-
-        public NoSuchTraceException(String traceName) {
-            trace_name = traceName;
-        }
-
-        @Override
-        public String toString() {
-            return "Error! Could not find trace '" + trace_name + "'";
-        }
-    }
-
-    @SuppressWarnings("serial")
-    public static class LoadTraceException extends Exception {
-        private final String _name;
-
-        public LoadTraceException(String name) {
-            _name = name;
-        }
-
-        @Override
-        public String toString() {
-            return "Error! Failed to load trace '" + _name + "'";
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private static Map<String, Class<? extends Trace<?>>> buildTypeClassMap() {
         final Map<String, Class<? extends Trace<?>>> type_class = new HashMap<String, Class<? extends Trace<?>>>();
@@ -99,10 +70,6 @@ public abstract class Store {
         return name + separator + infoFile;
     }
 
-    String snapshotsFile(String name) {
-        return name + separator + snapshotsFile;
-    }
-
     String indexFile(String name) {
         return name + separator + indexFile;
     }
@@ -111,19 +78,12 @@ public abstract class Store {
         return traces.values();
     }
 
-    public List<Trace<?>> listTraces(String type) {
-        try {
-            return listTraces(getTraceClass(type));
-        } catch (final LoadTraceException e) {
-            return Collections.emptyList();
-        }
-    }
-
-    public List<Trace<?>> listTraces(Class<? extends Trace<?>> klass) {
-        final List<Trace<?>> list = new LinkedList<Trace<?>>();
+    @SuppressWarnings("unchecked")
+    public <T extends Trace<?>> List<T> listTraces(Class<T> klass) {
+        final List<T> list = new LinkedList<T>();
         for (final Trace<?> trace : traces.values())
             if (klass.equals(trace.getClass()))
-                list.add(trace);
+                list.add((T) trace);
         return list;
     }
 
@@ -133,10 +93,11 @@ public abstract class Store {
         return traces.containsKey(name);
     }
 
-    public Trace<?> getTrace(String name) throws NoSuchTraceException {
-        final Trace<?> trace = traces.get(name);
+    @SuppressWarnings("unchecked")
+    public <T extends Trace<?>> T getTrace(String name) throws IOException {
+        final T trace = (T) traces.get(name);
         if (trace == null)
-            throw new NoSuchTraceException(name);
+            throw new IOException("No such trace '" + name + "'");
         return trace;
     }
 
@@ -152,7 +113,7 @@ public abstract class Store {
         return info;
     }
 
-    public static Store open(File... files) throws IOException {
+    public static Store open(File... files) throws IOException, ClassNotFoundException {
         switch (files.length) {
             case 0:
                 return new ClassPathStore();
@@ -182,27 +143,27 @@ public abstract class Store {
         closing = false;
     }
 
-    Class<? extends Trace<?>> getTraceClass(String type) throws LoadTraceException {
+    public Class<? extends Trace<?>> getTraceClass(String type) throws ClassNotFoundException {
         buildTypeClassMap();
         if (!type_class_map.containsKey(type))
-            throw new LoadTraceException(type);
+            throw new ClassNotFoundException("No trace class found for type '" + type + "'");
         return type_class_map.get(type);
     }
 
-    public void loadTrace(String name) throws IOException, LoadTraceException {
+    public void loadTrace(String name) throws IOException, ClassNotFoundException {
         final PersistentMap _info = readTraceInfo(name);
         final Trace<?> trace = buildTrace(name, _info, type_class_map.get(_info.get(Trace.typeKey)));
         traces.put(name, trace);
     }
 
     @SuppressWarnings("unchecked")
-    <T extends Trace<?>> T buildTrace(String name, PersistentMap info, Class<T> klass) throws LoadTraceException {
+    <T extends Trace<?>> T buildTrace(String name, PersistentMap info, Class<T> klass) throws ClassNotFoundException {
         try {
             final Constructor<?> ctor = klass.getConstructor(new Class[] { Store.class, String.class, PersistentMap.class });
             info.put(Trace.typeKey, klass.getAnnotation(Trace.Type.class).value());
             return (T) ctor.newInstance(this, name, info);
         } catch (final Exception e) {
-            throw new LoadTraceException(name);
+            throw new ClassNotFoundException("Failed to instantiate trace class for '" + name + "'");
         }
     }
 }

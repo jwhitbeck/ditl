@@ -113,7 +113,7 @@ public abstract class SimplePlayer extends JFrame {
             _store = Store.open(files);
             loadReaders();
             enableControls(true);
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             final StringBuffer s = new StringBuffer();
             for (int i = 0; i < files.length - 1; ++i)
                 s.append(files[i] + ", ");

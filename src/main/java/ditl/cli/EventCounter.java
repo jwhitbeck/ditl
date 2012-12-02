@@ -18,14 +18,12 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 import ditl.Reader;
-import ditl.Store.NoSuchTraceException;
 import ditl.Trace;
 
 @Command(cmd = "count")
@@ -53,7 +51,7 @@ public class EventCounter extends ReadOnlyApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException {
+    protected void run() throws Exception {
         final Trace<?> trace = _store.getTrace(trace_name);
         final long min_time = (d_begin != null) ?
                 (long) (d_begin * trace.ticsPerSecond())

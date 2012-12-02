@@ -19,7 +19,6 @@
 package ditl.cli;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.cli.CommandLine;
@@ -44,7 +43,7 @@ public abstract class ExportApp extends ReadOnlyApp {
     }
 
     @Override
-    protected void init() throws IOException {
+    protected void init() throws Exception {
         super.init();
         _out = (out_file_name != null) ? new FileOutputStream(out_file_name) : System.out;
     }

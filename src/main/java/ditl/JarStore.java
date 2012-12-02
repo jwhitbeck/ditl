@@ -32,15 +32,12 @@ public class JarStore extends Store {
     private final File _file;
     private final JarFile jar_file;
 
-    public JarStore(File file) throws IOException {
+    public JarStore(File file) throws IOException, ClassNotFoundException {
         _file = file;
         jar_file = new JarFile(_file);
-        for (final File f : getInfoFiles())
-            try {
-                loadTrace(f.getParentFile().getName());
-            } catch (final LoadTraceException e) {
-                System.err.println(e);
-            }
+        for (final File f : getInfoFiles()) {
+            loadTrace(f.getParentFile().getName());
+        }
     }
 
     private Set<File> getInfoFiles() throws IOException {

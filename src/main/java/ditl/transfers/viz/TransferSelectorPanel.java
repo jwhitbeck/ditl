@@ -85,7 +85,7 @@ public class TransferSelectorPanel extends JPanel implements ActionListener, Ite
         _store = store;
     }
 
-    public void load(Collection<Trace<?>> traces) {
+    public void load(Collection<TransferTrace> traces) {
         transferChooser.removeActionListener(this);
         transferChooser.removeAllItems();
         enabledBox.removeItemListener(this);
@@ -118,7 +118,7 @@ public class TransferSelectorPanel extends JPanel implements ActionListener, Ite
             cur_transfers = null;
             if (enabledBox.isSelected()) {
                 name = (String) transferChooser.getSelectedItem();
-                cur_transfers = (TransferTrace) _store.getTrace(name);
+                cur_transfers = _store.getTrace(name);
             }
             runner.setTransferTrace(cur_transfers);
         } catch (final Exception ioe) {

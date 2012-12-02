@@ -50,7 +50,7 @@ public class DirectoryStore extends WritableStore {
         for (final File file : listFiles(infoFile))
             try {
                 loadTrace(file.getParentFile().getName());
-            } catch (final LoadTraceException e) {
+            } catch (final Exception e) {
                 System.err.println(e);
             }
     }
@@ -110,13 +110,13 @@ public class DirectoryStore extends WritableStore {
     }
 
     @Override
-    public void moveTrace(String origName, String destName, boolean force) throws AlreadyExistsException, IOException {
+    public void moveTrace(String origName, String destName, boolean force) throws IOException {
         final File dest = new File(root, destName);
         if (dest.exists())
             if (force)
                 deleteTrace(destName);
             else
-                throw new AlreadyExistsException(destName);
+                throw new IOException("A trace with name '" + destName + "' already exists!");
         new File(root, origName).renameTo(dest);
     }
 

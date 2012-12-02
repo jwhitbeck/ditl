@@ -18,17 +18,12 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 import ditl.IdGenerator;
 import ditl.IdMap;
 import ditl.OffsetIdGenerator;
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ImportApp;
 import ditl.graphs.ArcTrace;
@@ -70,8 +65,8 @@ public class ImportArcs extends ImportApp {
     }
 
     @Override
-    public void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-        final ArcTrace arcs = (ArcTrace) _store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.class, force);
+    public void run() throws Exception {
+        final ArcTrace arcs = _store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.class, force);
         final IdGenerator id_gen = (use_id_map) ? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
         CRAWDADArcs.fromCRAWDAD(arcs, _in, timeMul, ticsPerSecond, offset, id_gen);
     }

@@ -18,14 +18,9 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.ArcTrace;
@@ -61,9 +56,9 @@ public class BeaconsToArcs extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-        final ArcTrace arcs = (ArcTrace) dest_store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.class, force);
-        final BeaconTrace beacons = (BeaconTrace) orig_store.getTrace(graph_options.get(GraphOptions.BEACONS));
+    protected void run() throws Exception {
+        final ArcTrace arcs = dest_store.newTrace(graph_options.get(GraphOptions.ARCS), ArcTrace.class, force);
+        final BeaconTrace beacons = orig_store.getTrace(graph_options.get(GraphOptions.BEACONS));
 
         new BeaconsToArcsConverter(arcs, beacons, tol, expansion).convert();
     }

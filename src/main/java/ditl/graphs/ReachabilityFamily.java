@@ -18,16 +18,14 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import ditl.Store;
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
 import ditl.WritableStore;
-import ditl.WritableStore.AlreadyExistsException;
 
 public class ReachabilityFamily {
 
@@ -64,22 +62,10 @@ public class ReachabilityFamily {
             final int n = 2 * (int) (_tau / _eta) - 1;
             members = new ReachabilityTrace[n];
             for (long d = _delay - _tau + _eta; d <= _delay + _tau - _eta; d += _eta)
-                try {
-                    members[j(d)] = getExisting(d);
-                } catch (final LoadTraceException e) {
-                    members[j(d)] = null;
-                } catch (final NoSuchTraceException e) {
-                    members[j(d)] = null;
-                }
+                members[j(d)] = getExisting(d);
         } else {
             members = new ReachabilityTrace[1];
-            try {
-                members[0] = getExisting(_delay);
-            } catch (final LoadTraceException e) {
-                members[0] = null;
-            } catch (final NoSuchTraceException e) {
-                members[0] = null;
-            }
+            members[0] = getExisting(_delay);
         }
     }
 
@@ -101,8 +87,8 @@ public class ReachabilityFamily {
             return members[0];
     }
 
-    public ReachabilityTrace newMember(long delay) throws AlreadyExistsException, LoadTraceException {
-        final ReachabilityTrace rt = (ReachabilityTrace) ((WritableStore) _store).newTrace(ReachabilityTrace.defaultName(_prefix, _tau, delay), ReachabilityTrace.class, true);
+    public ReachabilityTrace newMember(long delay) throws IOException, ClassNotFoundException {
+        final ReachabilityTrace rt = ((WritableStore) _store).newTrace(ReachabilityTrace.defaultName(_prefix, _tau, delay), ReachabilityTrace.class, true);
         members[j(delay)] = rt;
         return rt;
     }
@@ -149,8 +135,12 @@ public class ReachabilityFamily {
         return Collections.singleton(_delay);
     }
 
-    private ReachabilityTrace getExisting(long delay) throws LoadTraceException, NoSuchTraceException {
-        return (ReachabilityTrace) _store.getTrace(ReachabilityTrace.defaultName(_prefix, _tau, delay));
+    private ReachabilityTrace getExisting(long delay) {
+        try {
+            return _store.getTrace(ReachabilityTrace.defaultName(_prefix, _tau, delay));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

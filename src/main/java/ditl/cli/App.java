@@ -27,12 +27,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 
-import ditl.Store;
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
 import ditl.Trace;
 import ditl.Units;
-import ditl.WritableStore.AlreadyExistsException;
 
 public abstract class App {
 
@@ -68,9 +64,9 @@ public abstract class App {
     public static class HelpException extends Exception {
     }
 
-    protected abstract void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException;
+    protected abstract void run() throws Exception;
 
-    protected void init() throws IOException {
+    protected void init() throws Exception {
     }
 
     protected void close() throws IOException {
@@ -87,36 +83,18 @@ public abstract class App {
                 throw new HelpException();
             parseArgs(cli, cli.getArgs());
             return true;
-        } catch (final ParseException e) {
+        } catch (final HelpException e) {
+            printHelp();
+        } catch (final Exception e) {
             System.err.println(e);
-            printHelp();
-        } catch (final ArrayIndexOutOfBoundsException e) {
-            printHelp();
-        } catch (final NumberFormatException nfe) {
-            System.err.println(nfe);
-            printHelp();
-        } catch (final HelpException he) {
             printHelp();
         }
         return false;
     }
 
-    public void exec() throws IOException {
+    public void exec() throws Exception {
         init();
-        try {
-            run();
-        } catch (final Store.NoSuchTraceException mte) {
-            System.err.println(mte);
-            System.exit(1);
-        } catch (final AlreadyExistsException e) {
-            System.err.println(e);
-            System.err.println("Use --" + forceOption + " to overwrite existing traces");
-        } catch (final LoadTraceException e) {
-            System.err.println(e);
-        } catch (final NumberFormatException nfe) {
-            System.err.println(nfe);
-            System.err.println("Use --" + stringIdsOption + " if nodes have ids that are not integers");
-        }
+        run();
         close();
     }
 

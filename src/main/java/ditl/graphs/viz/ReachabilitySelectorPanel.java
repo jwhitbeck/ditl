@@ -39,7 +39,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import ditl.Store;
-import ditl.Trace;
 import ditl.graphs.ReachabilityTrace;
 import ditl.viz.Scene;
 
@@ -118,14 +117,14 @@ public class ReachabilitySelectorPanel extends JPanel
         _store = store;
     }
 
-    public void load(Collection<Trace<?>> traces) {
+    public void load(Collection<ReachabilityTrace> traces) {
         taus.clear();
         tauChooser.removeActionListener(this);
         enabledBox.removeItemListener(this);
         tauChooser.removeAllItems();
         if (!traces.isEmpty()) {
-            for (final Trace<?> trace : traces) {
-                final ReachabilityTrace r_trace = (ReachabilityTrace) trace;
+            for (final ReachabilityTrace trace : traces) {
+                final ReachabilityTrace r_trace = trace;
                 final long tau = r_trace.tau();
                 final long tps = r_trace.ticsPerSecond();
                 if (!taus.containsKey(tau))

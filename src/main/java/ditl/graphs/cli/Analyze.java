@@ -23,7 +23,6 @@ import static ditl.graphs.cli.GraphOptions.EDGES;
 import static ditl.graphs.cli.GraphOptions.GROUPS;
 import static ditl.graphs.cli.GraphOptions.PRESENCE;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -38,7 +37,6 @@ import ditl.ReportFactory;
 import ditl.Runner;
 import ditl.StateTimeReport;
 import ditl.StatefulReader;
-import ditl.Store.NoSuchTraceException;
 import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.AnyContactTimesReport;
@@ -149,7 +147,7 @@ public class Analyze extends ExportApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException {
+    protected void run() throws Exception {
         final Report report = factory.getNew(_out);
 
         Long minTime = null, maxTime = null, incrTime = null;
@@ -158,7 +156,7 @@ public class Analyze extends ExportApp {
         Long tps = null;
 
         if (report instanceof PresenceTrace.Handler) {
-            final PresenceTrace presence = (PresenceTrace) _store.getTrace(graph_options.get(PRESENCE));
+            final PresenceTrace presence = _store.getTrace(graph_options.get(PRESENCE));
             final StatefulReader<PresenceEvent, Presence> presenceReader = presence.getReader();
 
             final PresenceTrace.Handler ph = (PresenceTrace.Handler) report;
@@ -174,7 +172,7 @@ public class Analyze extends ExportApp {
         }
 
         if (report instanceof EdgeTrace.Handler) {
-            final EdgeTrace edges = (EdgeTrace) _store.getTrace(graph_options.get(EDGES));
+            final EdgeTrace edges = _store.getTrace(graph_options.get(EDGES));
             final StatefulReader<EdgeEvent, Edge> edgesReader = edges.getReader();
 
             final EdgeTrace.Handler lh = (EdgeTrace.Handler) report;
@@ -192,7 +190,7 @@ public class Analyze extends ExportApp {
         }
 
         if (report instanceof ArcTrace.Handler) {
-            final ArcTrace arcs = (ArcTrace) _store.getTrace(graph_options.get(ARCS));
+            final ArcTrace arcs = _store.getTrace(graph_options.get(ARCS));
             final StatefulReader<ArcEvent, Arc> arcReader = arcs.getReader();
 
             final ArcTrace.Handler eh = (ArcTrace.Handler) report;
@@ -210,7 +208,7 @@ public class Analyze extends ExportApp {
         }
 
         if (report instanceof GroupTrace.Handler) {
-            final GroupTrace groups = (GroupTrace) _store.getTrace(graph_options.get(GROUPS));
+            final GroupTrace groups = _store.getTrace(graph_options.get(GROUPS));
             final StatefulReader<GroupEvent, Group> groupReader = groups.getReader();
 
             final GroupTrace.Handler gh = (GroupTrace.Handler) report;

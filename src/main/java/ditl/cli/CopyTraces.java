@@ -19,7 +19,6 @@
 package ditl.cli;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
@@ -51,7 +50,7 @@ public class CopyTraces extends App {
     }
 
     @Override
-    protected void run() throws IOException, Store.NoSuchTraceException {
+    protected void run() throws Exception {
         final Store inStore = Store.open(inStoreFile);
         final WritableStore outStore = WritableStore.open(outStoreFile);
         for (final String name : traceNames) {

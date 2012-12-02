@@ -19,7 +19,6 @@
 package ditl.cli;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.cli.CommandLine;
@@ -44,7 +43,7 @@ public abstract class ImportApp extends WriteApp {
     }
 
     @Override
-    protected void init() throws IOException {
+    protected void init() throws Exception {
         super.init();
         _in = new FileInputStream(in_file_name);
     }

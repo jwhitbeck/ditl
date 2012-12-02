@@ -51,7 +51,7 @@ public abstract class ConvertApp extends App {
     }
 
     @Override
-    protected void init() throws IOException {
+    protected void init() throws Exception {
         dest_store = WritableStore.open(dest_store_file);
         if (orig_store_file.equals(dest_store_file))
             orig_store = dest_store;

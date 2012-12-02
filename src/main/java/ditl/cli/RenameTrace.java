@@ -18,13 +18,8 @@
  *******************************************************************************/
 package ditl.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
-
-import ditl.Store;
-import ditl.WritableStore.AlreadyExistsException;
 
 @Command(cmd = "mv")
 public class RenameTrace extends WriteApp {
@@ -44,7 +39,7 @@ public class RenameTrace extends WriteApp {
     }
 
     @Override
-    protected void run() throws IOException, Store.NoSuchTraceException, AlreadyExistsException {
+    protected void run() throws Exception {
         _store.moveTrace(orig_name, dest_name, force);
     }
 }

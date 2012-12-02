@@ -83,7 +83,7 @@ public class GraphPlayer extends SimplePlayer {
     @Override
     protected void loadReaders() {
         // use first movement trace
-        movement = (MovementTrace) _store.listTraces(MovementTrace.class).get(0);
+        movement = _store.listTraces(MovementTrace.class).get(0);
 
         setMovementTrace(movement);
 

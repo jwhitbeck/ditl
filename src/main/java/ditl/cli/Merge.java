@@ -31,10 +31,7 @@ import ditl.MergeConverter;
 import ditl.StatefulMergeConverter;
 import ditl.StatefulTrace;
 import ditl.Store;
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
 import ditl.Trace;
-import ditl.WritableStore.AlreadyExistsException;
 
 @Command(cmd = "merge")
 public class Merge extends WriteApp {
@@ -54,7 +51,7 @@ public class Merge extends WriteApp {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+    protected void run() throws Exception {
         for (final String traceName : getCommonTraceNames()) {
             final List<Trace<?>> traces = new LinkedList<Trace<?>>();
             for (final Store store : orig_stores)
@@ -81,7 +78,7 @@ public class Merge extends WriteApp {
     }
 
     @Override
-    protected void init() throws IOException {
+    protected void init() throws Exception {
         super.init();
         orig_stores = new Store[orig_store_names.length];
         for (int i = 0; i < orig_store_names.length; ++i)

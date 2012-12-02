@@ -206,7 +206,7 @@ public class GroupsPanel extends JPanel implements
         colorPanel.revalidate();
     }
 
-    public void load(Collection<Trace<?>> traces) {
+    public void load(Collection<GroupTrace> traces) {
         groupsChooser.removeActionListener(this);
         groupsChooser.removeAllItems();
         enabledBox.removeItemListener(this);
@@ -240,7 +240,7 @@ public class GroupsPanel extends JPanel implements
             cur_groups = null;
             if (enabledBox.isSelected()) {
                 name = (String) groupsChooser.getSelectedItem();
-                cur_groups = (GroupTrace) _store.getTrace(name);
+                cur_groups = _store.getTrace(name);
             }
             runner.setGroupTrace(cur_groups);
         } catch (final Exception ioe) {

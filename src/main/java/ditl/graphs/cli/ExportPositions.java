@@ -24,7 +24,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 import ditl.StatefulReader;
-import ditl.Store.NoSuchTraceException;
 import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.graphs.Movement;
@@ -51,8 +50,8 @@ public class ExportPositions extends ExportApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException {
-        final MovementTrace movement = (MovementTrace) _store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
+    protected void run() throws IOException {
+        final MovementTrace movement = _store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
         final long u_time = (long) (time * movement.ticsPerSecond());
         final StatefulReader<MovementEvent, Movement> reader = movement.getReader();
         reader.seek(u_time);

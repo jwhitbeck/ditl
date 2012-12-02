@@ -32,7 +32,6 @@ import ditl.Report;
 import ditl.ReportFactory;
 import ditl.Runner;
 import ditl.StatefulReader;
-import ditl.Store.NoSuchTraceException;
 import ditl.cli.Command;
 import ditl.cli.ExportApp;
 import ditl.transfers.BroadcastDeliveryReport;
@@ -100,14 +99,14 @@ public class AnalyzeTransfers extends ExportApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException {
+    protected void run() throws IOException {
         final Report report = factory.getNew(_out);
 
         Long min_time = null, max_time = null, incr_time = null;
         final List<Reader<?>> readers = new LinkedList<Reader<?>>();
 
         if (report instanceof MessageTrace.Handler) {
-            final MessageTrace messages = (MessageTrace) _store.getTrace(messagesName);
+            final MessageTrace messages = _store.getTrace(messagesName);
             final StatefulReader<MessageEvent, Message> msgReader = messages.getReader();
 
             final MessageTrace.Handler mh = (MessageTrace.Handler) report;
@@ -122,7 +121,7 @@ public class AnalyzeTransfers extends ExportApp {
         }
 
         if (report instanceof BufferTrace.Handler) {
-            final BufferTrace buffers = (BufferTrace) _store.getTrace(buffersName);
+            final BufferTrace buffers = _store.getTrace(buffersName);
             final StatefulReader<BufferEvent, Buffer> bufferReader = buffers.getReader();
 
             final BufferTrace.Handler bh = (BufferTrace.Handler) report;
@@ -139,7 +138,7 @@ public class AnalyzeTransfers extends ExportApp {
         }
 
         if (report instanceof TransferTrace.Handler) {
-            final TransferTrace transfers = (TransferTrace) _store.getTrace(transfersName);
+            final TransferTrace transfers = _store.getTrace(transfersName);
             final StatefulReader<TransferEvent, Transfer> transferReader = transfers.getReader();
 
             final TransferTrace.Handler th = (TransferTrace.Handler) report;

@@ -32,9 +32,6 @@ import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.AddingReachableConverter;
@@ -183,7 +180,7 @@ public class Reachability extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
+    protected void run() throws Exception {
         initTimeFile();
 
         if (u_tau == 0) {
@@ -286,7 +283,7 @@ public class Reachability extends ConvertApp {
             System.out.println(str);
     }
 
-    private ReachabilityFamily add(ReachabilityFamily rf1, ReachabilityFamily rf2) throws IOException, AlreadyExistsException, LoadTraceException {
+    private ReachabilityFamily add(ReachabilityFamily rf1, ReachabilityFamily rf2) throws Exception {
         final long _delay = rf1.delay() + rf2.delay();
         log("Initializing reachability family " + _delay / tps + " from " + rf1.delay() / tps + "+" + rf2.delay() / tps);
         final ReachabilityFamily rf = getFamily(_delay);
@@ -313,8 +310,8 @@ public class Reachability extends ConvertApp {
         log("---------------------------");
     }
 
-    private ReachabilityFamily fromEdges() throws AlreadyExistsException, LoadTraceException, NoSuchTraceException, IOException {
-        final EdgeTrace edges = (EdgeTrace) orig_store.getTrace(edgesName);
+    private ReachabilityFamily fromEdges() throws Exception {
+        final EdgeTrace edges = orig_store.getTrace(edgesName);
         log("Initializing reachability family " + tau / tps + " from edge trace '" + edges.name() + "'");
         final ReachabilityFamily rf = getFamily(tau);
         boolean has_new = false;
@@ -336,8 +333,8 @@ public class Reachability extends ConvertApp {
         return rf;
     }
 
-    private ReachabilityFamily fromConnectedComponents() throws IOException, AlreadyExistsException, LoadTraceException, NoSuchTraceException {
-        final GroupTrace ccs = (GroupTrace) orig_store.getTrace(ccsName);
+    private ReachabilityFamily fromConnectedComponents() throws Exception {
+        final GroupTrace ccs = orig_store.getTrace(ccsName);
         log("Initializing reachability family " + eta / tps + " from connected components trace '" + ccs.name() + "'");
         final ReachabilityFamily rf = getFamily(0);
         if (rf.hasMember(0)) {
@@ -374,7 +371,7 @@ public class Reachability extends ConvertApp {
         return i;
     }
 
-    private void exponentiate(ReachabilityFamily rf, int e) throws AlreadyExistsException, LoadTraceException, IOException {
+    private void exponentiate(ReachabilityFamily rf, int e) throws Exception {
         ReachabilityFamily next;
         ReachabilityFamily cur = rf;
         for (int i = 1; i < e; ++i) {
@@ -383,7 +380,7 @@ public class Reachability extends ConvertApp {
         }
     }
 
-    private ReachabilityFamily combine(long T, long delay) throws LoadTraceException, NoSuchTraceException, AlreadyExistsException, IOException {
+    private ReachabilityFamily combine(long T, long delay) throws Exception {
         ReachabilityFamily rf = null;
         long d = 1;
         long mul = delay / T;

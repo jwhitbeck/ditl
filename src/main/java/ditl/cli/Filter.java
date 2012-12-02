@@ -30,10 +30,7 @@ import ditl.FilterConverter;
 import ditl.GroupSpecification;
 import ditl.StatefulFilterConverter;
 import ditl.StatefulTrace;
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
 import ditl.Trace;
-import ditl.WritableStore.AlreadyExistsException;
 
 @Command(cmd = "filter")
 public class Filter extends ConvertApp {
@@ -60,7 +57,7 @@ public class Filter extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
+    protected void run() throws Exception {
         if (orig_trace_name != null) {
             final Trace<?> orig_trace = orig_store.getTrace(orig_trace_name);
             final Trace<?> dest_trace = dest_store.newTrace(dest_trace_name, orig_trace.type(), force);

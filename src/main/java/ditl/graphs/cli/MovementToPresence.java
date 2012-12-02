@@ -18,14 +18,9 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Store.LoadTraceException;
-import ditl.Store.NoSuchTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.cli.Command;
 import ditl.cli.ConvertApp;
 import ditl.graphs.MovementToPresenceConverter;
@@ -52,9 +47,9 @@ public class MovementToPresence extends ConvertApp {
     }
 
     @Override
-    protected void run() throws IOException, NoSuchTraceException, AlreadyExistsException, LoadTraceException {
-        final MovementTrace movement = (MovementTrace) orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
-        final PresenceTrace presence = (PresenceTrace) dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.class, force);
+    protected void run() throws Exception {
+        final MovementTrace movement = orig_store.getTrace(graph_options.get(GraphOptions.MOVEMENT));
+        final PresenceTrace presence = dest_store.newTrace(graph_options.get(GraphOptions.PRESENCE), PresenceTrace.class, force);
         new MovementToPresenceConverter(presence, movement).convert();
     }
 }
