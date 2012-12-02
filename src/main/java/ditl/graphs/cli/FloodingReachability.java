@@ -21,14 +21,14 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.FloodingReachableConverter;
 import ditl.graphs.PresenceTrace;
 import ditl.graphs.ReachabilityTrace;
 
-@Command(pkg = "graphs", cmd = "flooding-reachability", alias = "fr")
+@App.Cli(pkg = "graphs", cmd = "flooding-reachability", alias = "fr")
 public class FloodingReachability extends ConvertApp {
 
     private double tau;

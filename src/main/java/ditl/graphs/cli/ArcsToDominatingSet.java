@@ -21,14 +21,14 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.ArcTrace;
 import ditl.graphs.ArcsToDominatingSetConverter;
 import ditl.graphs.GroupTrace;
 import ditl.graphs.PresenceTrace;
 
-@Command(pkg = "graphs", cmd = "arcs-to-dominating-set", alias = "a2ds")
+@App.Cli(pkg = "graphs", cmd = "arcs-to-dominating-set", alias = "a2ds")
 public class ArcsToDominatingSet extends ConvertApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.GROUPS, GraphOptions.ARCS, GraphOptions.PRESENCE);

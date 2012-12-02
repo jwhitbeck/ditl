@@ -29,7 +29,7 @@ import ditl.FilterConverter;
 import ditl.GroupSpecification;
 import ditl.Trace;
 
-@Command(cmd = "filter")
+@App.Cli(cmd = "filter")
 public class Filter extends ConvertApp {
 
     private String orig_trace_name;

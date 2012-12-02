@@ -24,12 +24,12 @@ import org.apache.commons.cli.ParseException;
 import ditl.IdGenerator;
 import ditl.IdMap;
 import ditl.OffsetIdGenerator;
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ImportApp;
 import ditl.graphs.ArcTrace;
 import ditl.graphs.CRAWDADArcs;
 
-@Command(pkg = "graphs", cmd = "import-arcs", alias = "ia")
+@App.Cli(pkg = "graphs", cmd = "import-arcs", alias = "ia")
 public class ImportArcs extends ImportApp {
 
     private long ticsPerSecond;

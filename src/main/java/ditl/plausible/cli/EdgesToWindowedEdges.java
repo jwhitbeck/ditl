@@ -21,14 +21,14 @@ package ditl.plausible.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.cli.GraphOptions;
 import ditl.plausible.WindowedEdgeConverter;
 import ditl.plausible.WindowedEdgeTrace;
 
-@Command(pkg = "plausible", cmd = "edges-to-windowed-edges", alias = "e2we")
+@App.Cli(pkg = "plausible", cmd = "edges-to-windowed-edges", alias = "e2we")
 public class EdgesToWindowedEdges extends ConvertApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES);

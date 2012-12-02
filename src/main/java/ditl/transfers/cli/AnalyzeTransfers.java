@@ -32,7 +32,7 @@ import ditl.Report;
 import ditl.ReportFactory;
 import ditl.Runner;
 import ditl.StatefulReader;
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ExportApp;
 import ditl.transfers.BroadcastDeliveryReport;
 import ditl.transfers.Buffer;
@@ -46,7 +46,7 @@ import ditl.transfers.Transfer;
 import ditl.transfers.TransferEvent;
 import ditl.transfers.TransferTrace;
 
-@Command(pkg = "transfers", cmd = "analyze", alias = "a")
+@App.Cli(pkg = "transfers", cmd = "analyze", alias = "a")
 public class AnalyzeTransfers extends ExportApp {
 
     final static String

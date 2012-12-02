@@ -19,6 +19,10 @@
 package ditl.cli;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -31,6 +35,19 @@ import ditl.Trace;
 import ditl.Units;
 
 public abstract class App {
+
+    @Target({ ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Cli {
+
+        public final static String default_package = "DEFAULT_PACKAGE";
+
+        String pkg() default default_package;
+
+        String cmd();
+
+        String alias() default "";
+    }
 
     protected final static String
             offsetOption = "offset",

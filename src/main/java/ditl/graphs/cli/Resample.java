@@ -21,14 +21,14 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.BeaconTrace;
 import ditl.graphs.BeaconningConverter;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.PresenceTrace;
 
-@Command(pkg = "graphs", cmd = "resample", alias = "s")
+@App.Cli(pkg = "graphs", cmd = "resample", alias = "s")
 public class Resample extends ConvertApp {
 
     final static String missProbabilityOption = "miss-probability";

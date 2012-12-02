@@ -21,13 +21,13 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.MovementToPresenceConverter;
 import ditl.graphs.MovementTrace;
 import ditl.graphs.PresenceTrace;
 
-@Command(pkg = "graphs", cmd = "movement-to-presence", alias = "m2p")
+@App.Cli(pkg = "graphs", cmd = "movement-to-presence", alias = "m2p")
 public class MovementToPresence extends ConvertApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT, GraphOptions.PRESENCE);

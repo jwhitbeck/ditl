@@ -24,13 +24,13 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 import ditl.StatefulReader;
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ExportApp;
 import ditl.graphs.Movement;
 import ditl.graphs.MovementEvent;
 import ditl.graphs.MovementTrace;
 
-@Command(pkg = "graphs", cmd = "export-positions", alias = "xp")
+@App.Cli(pkg = "graphs", cmd = "export-positions", alias = "xp")
 public class ExportPositions extends ExportApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT);

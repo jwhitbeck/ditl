@@ -64,7 +64,7 @@ public class CLI {
             Class<?> klass;
 
             // check if pkg isn't really an app in the default package
-            klass = cmd_maps.get(Command.default_package).getClass(pkg);
+            klass = cmd_maps.get(App.Cli.default_package).getClass(pkg);
             if (klass != null) {
                 startApp(pkg, klass, pkg_args);
                 return;
@@ -95,10 +95,10 @@ public class CLI {
         buffer.append("Where PACKAGE is one of: \n\n");
 
         buffer.append("default package:\n");
-        if (cmd_maps.containsKey(Command.default_package))
-            appendPackageHelp(buffer, Command.default_package);
+        if (cmd_maps.containsKey(App.Cli.default_package))
+            appendPackageHelp(buffer, App.Cli.default_package);
         for (final String pkg : cmd_maps.keySet())
-            if (!pkg.equals(Command.default_package)) {
+            if (!pkg.equals(App.Cli.default_package)) {
                 buffer.append("Package: " + pkg + "\n");
                 appendPackageHelp(buffer, pkg);
             }
@@ -136,11 +136,11 @@ public class CLI {
 
     private void findPackages() throws IOException {
         final Set<Class<?>> appKlasses = new Reflections("ditl", new TypeAnnotationsScanner()).
-                getTypesAnnotatedWith(Command.class);
+                getTypesAnnotatedWith(App.Cli.class);
         for (final Class<?> klass : appKlasses) {
-            final String pkg_name = klass.getAnnotation(Command.class).pkg();
-            final String cmd_name = klass.getAnnotation(Command.class).cmd();
-            final String cmd_alias = klass.getAnnotation(Command.class).alias();
+            final String pkg_name = klass.getAnnotation(App.Cli.class).pkg();
+            final String cmd_name = klass.getAnnotation(App.Cli.class).cmd();
+            final String cmd_alias = klass.getAnnotation(App.Cli.class).alias();
             if (cmd_name != null) {
                 final CommandMap cmd_map = get_cmd_map(pkg_name);
                 cmd_map.add(cmd_name, cmd_alias, klass);

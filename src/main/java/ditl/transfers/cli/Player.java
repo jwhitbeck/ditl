@@ -25,10 +25,9 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 import ditl.cli.App;
-import ditl.cli.Command;
 import ditl.transfers.viz.TransferPlayer;
 
-@Command(pkg = "transfers", cmd = "play", alias = "p")
+@App.Cli(pkg = "transfers", cmd = "play", alias = "p")
 public class Player extends App {
 
     private File[] files;

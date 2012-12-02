@@ -37,7 +37,7 @@ import ditl.ReportFactory;
 import ditl.Runner;
 import ditl.StateTimeReport;
 import ditl.StatefulReader;
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ExportApp;
 import ditl.graphs.AnyContactTimesReport;
 import ditl.graphs.Arc;
@@ -62,7 +62,7 @@ import ditl.graphs.ReachabilityReport;
 import ditl.graphs.TimeToFirstContactReport;
 import ditl.graphs.TransitTimesReport;
 
-@Command(pkg = "graphs", cmd = "analyze", alias = "a")
+@App.Cli(pkg = "graphs", cmd = "analyze", alias = "a")
 public class Analyze extends ExportApp {
 
     final static String

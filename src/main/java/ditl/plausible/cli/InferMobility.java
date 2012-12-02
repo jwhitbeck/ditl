@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.MovementTrace;
@@ -27,7 +27,7 @@ import ditl.plausible.forces.AnticipatedForce;
 import ditl.plausible.forces.DampForce;
 import ditl.plausible.forces.WellForce;
 
-@Command(pkg = "plausible", cmd = "infer", alias = "i")
+@App.Cli(pkg = "plausible", cmd = "infer", alias = "i")
 public class InferMobility extends ConvertApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.PRESENCE, GraphOptions.EDGES, GraphOptions.MOVEMENT);

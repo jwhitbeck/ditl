@@ -25,7 +25,7 @@ import org.apache.commons.cli.ParseException;
 
 import ditl.Trace;
 
-@Command(cmd = "ls")
+@App.Cli(cmd = "ls")
 public class ListTraces extends ReadOnlyApp {
 
     private final static String detailsOption = "all";

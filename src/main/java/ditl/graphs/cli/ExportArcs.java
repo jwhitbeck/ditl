@@ -21,12 +21,12 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ExportApp;
 import ditl.graphs.ArcTrace;
 import ditl.graphs.CRAWDADArcs;
 
-@Command(pkg = "graphs", cmd = "export-arcs", alias = "xa")
+@App.Cli(pkg = "graphs", cmd = "export-arcs", alias = "xa")
 public class ExportArcs extends ExportApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.ARCS);

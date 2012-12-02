@@ -26,7 +26,7 @@ import org.apache.commons.cli.ParseException;
 import ditl.Reader;
 import ditl.Trace;
 
-@Command(cmd = "count")
+@App.Cli(cmd = "count")
 public class EventCounter extends ReadOnlyApp {
 
     private Double d_begin = null;

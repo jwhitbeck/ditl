@@ -21,7 +21,7 @@ package ditl.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-@Command(cmd = "mv")
+@App.Cli(cmd = "mv")
 public class RenameTrace extends WriteApp {
 
     private String orig_name, dest_name;

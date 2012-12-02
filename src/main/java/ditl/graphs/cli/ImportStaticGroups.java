@@ -29,13 +29,13 @@ import ditl.GroupSpecification;
 import ditl.IdMap;
 import ditl.StatefulWriter;
 import ditl.Trace;
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.WriteApp;
 import ditl.graphs.Group;
 import ditl.graphs.GroupEvent;
 import ditl.graphs.GroupTrace;
 
-@Command(pkg = "graphs", cmd = "import-groups", alias = "ig")
+@App.Cli(pkg = "graphs", cmd = "import-groups", alias = "ig")
 public class ImportStaticGroups extends WriteApp {
 
     private static String labelsOption = "labels";

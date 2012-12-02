@@ -27,7 +27,7 @@ import org.apache.commons.cli.ParseException;
 
 import ditl.WritableStore;
 
-@Command(cmd = "rm")
+@App.Cli(cmd = "rm")
 public class DeleteTraces extends App {
 
     protected String[] traceNames;

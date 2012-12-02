@@ -21,13 +21,13 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.EdgesToConnectedComponentsConverter;
 import ditl.graphs.GroupTrace;
 
-@Command(pkg = "graphs", cmd = "edges-to-ccs", alias = "e2c")
+@App.Cli(pkg = "graphs", cmd = "edges-to-ccs", alias = "e2c")
 public class EdgesToCCs extends ConvertApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.GROUPS);

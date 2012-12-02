@@ -21,12 +21,12 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.BufferEdgesConverter;
 import ditl.graphs.EdgeTrace;
 
-@Command(pkg = "graphs", cmd = "buffer-edges", alias = "be")
+@App.Cli(pkg = "graphs", cmd = "buffer-edges", alias = "be")
 public class BufferEdges extends ConvertApp {
 
     final static String randomizeOption = "randomize";

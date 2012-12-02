@@ -27,13 +27,13 @@ import org.apache.commons.cli.ParseException;
 import ditl.IdGenerator;
 import ditl.IdMap;
 import ditl.OffsetIdGenerator;
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ImportApp;
 import ditl.graphs.CRAWDADContacts;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.ONEContacts;
 
-@Command(pkg = "graphs", cmd = "import-edges", alias = "ie")
+@App.Cli(pkg = "graphs", cmd = "import-edges", alias = "ie")
 public class ImportEdges extends ImportApp {
 
     private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(CRAWDAD, ONE);

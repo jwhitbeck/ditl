@@ -26,13 +26,13 @@ import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ExportApp;
 import ditl.graphs.CRAWDADContacts;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.ONEContacts;
 
-@Command(pkg = "graphs", cmd = "export-edges", alias = "xe")
+@App.Cli(pkg = "graphs", cmd = "export-edges", alias = "xe")
 public class ExportEdges extends ExportApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES);

@@ -30,7 +30,7 @@ import ditl.MergeConverter;
 import ditl.Store;
 import ditl.Trace;
 
-@Command(cmd = "merge")
+@App.Cli(cmd = "merge")
 public class Merge extends WriteApp {
 
     private String[] orig_store_names;

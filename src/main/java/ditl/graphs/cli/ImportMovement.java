@@ -27,13 +27,13 @@ import org.apache.commons.cli.ParseException;
 import ditl.IdGenerator;
 import ditl.IdMap;
 import ditl.OffsetIdGenerator;
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ImportApp;
 import ditl.graphs.MovementTrace;
 import ditl.graphs.NS2Movement;
 import ditl.graphs.ONEMovement;
 
-@Command(pkg = "graphs", cmd = "import-movement", alias = "im")
+@App.Cli(pkg = "graphs", cmd = "import-movement", alias = "im")
 public class ImportMovement extends ImportApp {
 
     private final ExternalFormat.CLIParser ext_fmt_parser = new ExternalFormat.CLIParser(NS2, ONE);

@@ -27,7 +27,7 @@ import org.apache.commons.cli.ParseException;
 import ditl.SubtraceConverter;
 import ditl.Trace;
 
-@Command(cmd = "trunc")
+@App.Cli(cmd = "trunc")
 public class Truncate extends ConvertApp {
 
     private String orig_trace_name;

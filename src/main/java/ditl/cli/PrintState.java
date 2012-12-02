@@ -27,7 +27,7 @@ import ditl.StatefulReader;
 import ditl.StatefulTrace;
 import ditl.Trace;
 
-@Command(cmd = "ps")
+@App.Cli(cmd = "ps")
 public class PrintState extends ReadOnlyApp {
 
     private double d_time;

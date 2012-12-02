@@ -22,13 +22,13 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 import ditl.Trace;
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.ReachabilityTrace;
 import ditl.graphs.UpperReachableConverter;
 
-@Command(pkg = "graphs", cmd = "upper-reachability", alias = "ur")
+@App.Cli(pkg = "graphs", cmd = "upper-reachability", alias = "ur")
 public class UpperReachability extends ConvertApp {
 
     final static String lowerPrefixOption = "lower-prefix";

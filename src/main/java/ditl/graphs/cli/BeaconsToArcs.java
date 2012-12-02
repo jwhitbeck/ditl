@@ -21,13 +21,13 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.ArcTrace;
 import ditl.graphs.BeaconTrace;
 import ditl.graphs.BeaconsToArcsConverter;
 
-@Command(pkg = "graphs", cmd = "beacons-to-arcs", alias = "b2a")
+@App.Cli(pkg = "graphs", cmd = "beacons-to-arcs", alias = "b2a")
 public class BeaconsToArcs extends ConvertApp {
 
     final static String toleranceOption = "tolerance";

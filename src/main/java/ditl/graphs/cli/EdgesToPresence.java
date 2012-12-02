@@ -21,14 +21,14 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.EdgesToPresenceConverter;
 import ditl.graphs.PresenceTrace;
 import ditl.graphs.StrictEdgesToPresenceConverter;
 
-@Command(pkg = "graphs", cmd = "edges-to-presence", alias = "e2p")
+@App.Cli(pkg = "graphs", cmd = "edges-to-presence", alias = "e2p")
 public class EdgesToPresence extends ConvertApp {
 
     final static String strictOption = "strict";

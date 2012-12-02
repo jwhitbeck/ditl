@@ -28,7 +28,7 @@ import ditl.Store;
 import ditl.Trace;
 import ditl.WritableStore;
 
-@Command(cmd = "cp")
+@App.Cli(cmd = "cp")
 public class CopyTraces extends App {
 
     protected File inStoreFile;

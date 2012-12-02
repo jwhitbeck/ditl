@@ -23,14 +23,14 @@ import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.Group;
 import ditl.graphs.GroupTrace;
 import ditl.graphs.StaticGroupEdgeConverter;
 
-@Command(pkg = "graphs", cmd = "group-edges", alias = "ge")
+@App.Cli(pkg = "graphs", cmd = "group-edges", alias = "ge")
 public class StaticGroupEdges extends ConvertApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.GROUPS, GraphOptions.EDGES);

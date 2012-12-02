@@ -26,13 +26,13 @@ import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ExportApp;
 import ditl.graphs.MovementTrace;
 import ditl.graphs.NS2Movement;
 import ditl.graphs.ONEMovement;
 
-@Command(pkg = "graphs", cmd = "export-movement", alias = "xm")
+@App.Cli(pkg = "graphs", cmd = "export-movement", alias = "xm")
 public class ExportMovement extends ExportApp {
 
     private Long maxTime;

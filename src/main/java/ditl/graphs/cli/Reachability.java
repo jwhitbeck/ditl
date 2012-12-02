@@ -32,7 +32,7 @@ import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.AddingReachableConverter;
 import ditl.graphs.ConnectedComponentsToReachableConverter;
@@ -41,7 +41,7 @@ import ditl.graphs.EdgesToReachableConverter;
 import ditl.graphs.GroupTrace;
 import ditl.graphs.ReachabilityFamily;
 
-@Command(pkg = "graphs", cmd = "reachability", alias = "r")
+@App.Cli(pkg = "graphs", cmd = "reachability", alias = "r")
 public class Reachability extends ConvertApp {
 
     final static String

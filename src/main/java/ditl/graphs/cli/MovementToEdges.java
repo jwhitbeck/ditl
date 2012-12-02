@@ -21,13 +21,13 @@ package ditl.graphs.cli;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.MovementToEdgesConverter;
 import ditl.graphs.MovementTrace;
 
-@Command(pkg = "graphs", cmd = "movement-to-edges", alias = "m2e")
+@App.Cli(pkg = "graphs", cmd = "movement-to-edges", alias = "m2e")
 public class MovementToEdges extends ConvertApp {
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.EDGES, GraphOptions.MOVEMENT);

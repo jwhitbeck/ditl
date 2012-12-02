@@ -28,14 +28,14 @@ import org.apache.commons.cli.ParseException;
 import ditl.IdMap;
 import ditl.StatefulWriter;
 import ditl.Trace;
-import ditl.cli.Command;
+import ditl.cli.App;
 import ditl.cli.WriteApp;
 import ditl.graphs.Movement;
 import ditl.graphs.MovementEvent;
 import ditl.graphs.MovementTrace;
 import ditl.graphs.Point;
 
-@Command(pkg = "graphs", cmd = "import-positions", alias = "ip")
+@App.Cli(pkg = "graphs", cmd = "import-positions", alias = "ip")
 public class ImportStaticMovement extends WriteApp {
 
     private String[] positions_specs;
