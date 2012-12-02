@@ -102,24 +102,10 @@ public abstract class Trace<E extends Item> {
         return Long.parseLong(getValue(maxUpdateIntervalKey));
     }
 
-    public long minUpdateInterval() {
-        return Long.parseLong(getValue(minUpdateIntervalKey));
-    }
-
     public long lastSnapTime() {
         final String str = getValue(lastSnapTimeKey);
         if (str == null)
             return Long.MAX_VALUE;
-        return Long.parseLong(str);
-    }
-
-    public long stateMaxUpdateInterval() {
-        final String str = getValue(stateMaxUpdateIntervalKey);
-        return Long.parseLong(str);
-    }
-
-    public long stateMinUpdateInterval() {
-        final String str = getValue(stateMinUpdateIntervalKey);
         return Long.parseLong(str);
     }
 
@@ -160,10 +146,6 @@ public abstract class Trace<E extends Item> {
 
     public Item.Factory<E> factory() {
         return event_factory;
-    }
-
-    public boolean isStateful() {
-        return false;
     }
 
     @Override

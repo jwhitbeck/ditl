@@ -59,7 +59,7 @@ public class Merge extends WriteApp {
 
             final Trace<?> ref_trace = traces.get(0);
             final String type = ref_trace.type();
-            final boolean stateful = ref_trace.isStateful();
+            final boolean stateful = ref_trace instanceof StatefulTrace;
 
             final Trace<?> merged = _store.newTrace(traceName, type, stateful);
 

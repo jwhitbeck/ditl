@@ -97,7 +97,7 @@ public abstract class WritableStore extends Store {
     public void copyTrace(Store store, Trace<?> trace) throws IOException {
         final String[] files = new String[] {
                 infoFile(trace.name()),
-                trace.isStateful() ? indexFile(trace.name()) : null,
+                trace instanceof StatefulTrace ? indexFile(trace.name()) : null,
                 traceFile(trace.name()) };
         for (final String file : files)
             if (file != null) {

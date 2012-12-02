@@ -75,7 +75,7 @@ public class Truncate extends ConvertApp {
         final long min_time = minTime * orig.ticsPerSecond();
         final long max_time = maxTime * orig.ticsPerSecond();
         Converter truncater;
-        if (orig.isStateful())
+        if (orig instanceof StatefulTrace)
             truncater = new StatefulSubtraceConverter((StatefulTrace<?, ?>) dest,
                     (StatefulTrace<?, ?>) orig, min_time, max_time);
         else

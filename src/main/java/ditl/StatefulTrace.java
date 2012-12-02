@@ -71,9 +71,4 @@ public abstract class StatefulTrace<E extends Item, S extends Item> extends Trac
         return updater_factory;
     }
 
-    @Override
-    public boolean isStateful() {
-        return true;
-    }
-
 }

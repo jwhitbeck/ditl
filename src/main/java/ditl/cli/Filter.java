@@ -74,7 +74,7 @@ public class Filter extends ConvertApp {
         Converter filterer = null;
         final Set<Integer> group = GroupSpecification.parse(group_spec, orig.idMap());
         if (orig instanceof Trace.Filterable)
-            if (orig.isStateful()) {
+            if (orig instanceof StatefulTrace) {
                 if (orig instanceof StatefulTrace.Filterable)
                     filterer = new StatefulFilterConverter((StatefulTrace<?, ?>) dest,
                             (StatefulTrace<?, ?>) orig, group);

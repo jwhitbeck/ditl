@@ -43,7 +43,7 @@ public class PrintState extends ReadOnlyApp {
     @Override
     protected void run() throws IOException {
         final Trace<?> trace = _store.getTrace(trace_name);
-        if (!trace.isStateful())
+        if (!(trace instanceof StatefulTrace))
             System.out.println("Trace '" + trace_name + "' is not a stateful trace.");
         final StatefulTrace<?, ?> strace = (StatefulTrace<?, ?>) trace;
         final long time = (long) (d_time * strace.ticsPerSecond());
