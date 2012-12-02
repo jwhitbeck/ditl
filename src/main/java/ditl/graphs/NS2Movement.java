@@ -49,7 +49,7 @@ public class NS2Movement {
         final BufferedReader br = new BufferedReader(new InputStreamReader(in));
         final Bus<MovementEvent> buffer = new Bus<MovementEvent>();
         String line;
-        long last_time = -Trace.INFINITY;
+        long last_time = Long.MIN_VALUE;
 
         while ((line = br.readLine()) != null)
             if (!line.isEmpty()) {

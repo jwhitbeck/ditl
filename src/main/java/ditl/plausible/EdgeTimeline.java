@@ -25,16 +25,15 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import ditl.StatefulWriter;
-import ditl.Trace;
 import ditl.graphs.Edge;
 import ditl.graphs.EdgeEvent;
 
 class EdgeTimeline {
 
-    long prev_up = -Trace.INFINITY;
-    long prev_down = -Trace.INFINITY;
-    long next_up = Trace.INFINITY;
-    long next_down = Trace.INFINITY;
+    long prev_up = Long.MIN_VALUE;
+    long prev_down = Long.MIN_VALUE;
+    long next_up = Long.MAX_VALUE;
+    long next_down = Long.MAX_VALUE;
 
     private long prev_up_tmp, prev_down_tmp, next_up_tmp, next_down_tmp;
 
@@ -71,10 +70,10 @@ class EdgeTimeline {
 
     private void update_tmp_values(long time) {
 
-        prev_up_tmp = -Trace.INFINITY;
-        prev_down_tmp = -Trace.INFINITY;
-        next_up_tmp = Trace.INFINITY;
-        next_down_tmp = Trace.INFINITY;
+        prev_up_tmp = Long.MIN_VALUE;
+        prev_down_tmp = Long.MIN_VALUE;
+        next_up_tmp = Long.MAX_VALUE;
+        next_down_tmp = Long.MAX_VALUE;
 
         for (final Map.Entry<Long, List<EdgeEvent>> e : buffer.entrySet()) {
             final long t = e.getKey();
@@ -106,11 +105,11 @@ class EdgeTimeline {
     public void append(long time, long window, EdgeEvent edgeEvent) throws IOException {
         queue(time, edgeEvent);
         if (edgeEvent.isUp()) {
-            if (next_up == Trace.INFINITY) {
+            if (next_up == Long.MAX_VALUE) {
                 next_up = time;
                 window_writer.queue(time - window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTUP, next_up));
             }
-        } else if (next_down == Trace.INFINITY) {
+        } else if (next_down == Long.MAX_VALUE) {
             next_down = time;
             window_writer.queue(time - window, new WindowedEdgeEvent(_edge, WindowedEdgeEvent.Type.NEXTDOWN, next_down));
         }

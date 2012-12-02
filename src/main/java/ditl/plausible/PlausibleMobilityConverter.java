@@ -35,7 +35,6 @@ import ditl.Runner;
 import ditl.StatefulListener;
 import ditl.StatefulReader;
 import ditl.StatefulWriter;
-import ditl.Trace;
 import ditl.graphs.Edge;
 import ditl.graphs.EdgeEvent;
 import ditl.graphs.EdgeTrace;
@@ -224,7 +223,7 @@ public final class PlausibleMobilityConverter implements Converter,
             cur_time = runner.time();
             step(cur_time);
             if ((cur_time - min_time) % update_interval == 0) {
-                long min_last_time = Trace.INFINITY;
+                long min_last_time = Long.MAX_VALUE;
                 for (final Node node : inferred_nodes.values()) {
                     node.writeMovement(cur_time, prev_time, _s, _e, writer);
                     if (node.lastRefTime() < min_last_time)

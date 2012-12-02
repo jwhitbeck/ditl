@@ -25,7 +25,6 @@ import ditl.CodedBuffer;
 import ditl.CodedInputStream;
 import ditl.Filter;
 import ditl.Item;
-import ditl.Trace;
 
 public final class Movement implements Item {
 
@@ -172,7 +171,7 @@ public final class Movement implements Item {
         if (B2 == 0) { // parallel trajectories or 2 immobile nodes
             final double d2 = (x - m.x) * (x - m.x) + (y - m.y) * (y - m.y);
             if (d2 <= r2)
-                return new long[] { -Trace.INFINITY, Trace.INFINITY };
+                return new long[] { Long.MIN_VALUE, Long.MAX_VALUE };
             else
                 // will never meet
                 return null;

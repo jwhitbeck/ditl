@@ -37,8 +37,8 @@ public class StatefulMergeConverter<E extends Item, S extends Item> implements C
     @Override
     public void convert() throws IOException {
         String time_unit = "s";
-        long maxTime = Trace.INFINITY;
-        long minTime = -Trace.INFINITY;
+        long maxTime = Long.MAX_VALUE;
+        long minTime = Long.MIN_VALUE;
         final Set<S> initState = new HashSet<S>();
         for (final StatefulTrace<E, S> from : from_collection) {
             time_unit = from.timeUnit();

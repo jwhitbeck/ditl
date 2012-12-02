@@ -33,11 +33,6 @@ public abstract class Trace<E extends Item> {
         String value();
     }
 
-    final public static long INFINITY = Long.MAX_VALUE / 2; // divided by 2 to
-                                                            // avoid edge
-                                                            // effects on signs
-                                                            // of longs
-
     final public static String
             nameKey = "name",
             typeKey = "type",
@@ -114,7 +109,7 @@ public abstract class Trace<E extends Item> {
     public long lastSnapTime() {
         final String str = getValue(lastSnapTimeKey);
         if (str == null)
-            return Trace.INFINITY;
+            return Long.MAX_VALUE;
         return Long.parseLong(str);
     }
 

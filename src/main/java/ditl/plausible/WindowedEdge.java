@@ -23,16 +23,15 @@ import java.io.IOException;
 import ditl.CodedBuffer;
 import ditl.CodedInputStream;
 import ditl.Item;
-import ditl.Trace;
 import ditl.graphs.Couple;
 import ditl.graphs.Edge;
 
 public final class WindowedEdge implements Couple, Item {
 
-    long prev_up = -Trace.INFINITY;
-    long prev_down = -Trace.INFINITY;
-    long next_up = Trace.INFINITY;
-    long next_down = Trace.INFINITY;
+    long prev_up = Long.MIN_VALUE;
+    long prev_down = Long.MIN_VALUE;
+    long next_up = Long.MAX_VALUE;
+    long next_down = Long.MAX_VALUE;
 
     final Edge _edge;
 

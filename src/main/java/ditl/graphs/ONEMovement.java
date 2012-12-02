@@ -67,7 +67,7 @@ public class ONEMovement {
         final Map<Integer, Point> points = new HashMap<Integer, Point>();
 
         Collection<Movement> first = null;
-        long last_time = -Trace.INFINITY;
+        long last_time = Long.MIN_VALUE;
 
         while (!buffer.isEmpty()) {
             final Map.Entry<Long, List<Movement>> e = buffer.pollFirstEntry();

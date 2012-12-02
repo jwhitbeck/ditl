@@ -35,8 +35,8 @@ public class MergeConverter<I extends Item> implements Converter {
     @Override
     public void convert() throws IOException {
         String time_unit = "s";
-        long maxTime = -Trace.INFINITY;
-        long minTime = Trace.INFINITY;
+        long maxTime = Long.MIN_VALUE;
+        long minTime = Long.MAX_VALUE;
         for (final Trace<I> from : from_collection) {
             time_unit = from.timeUnit();
             if (from.minTime() < minTime)

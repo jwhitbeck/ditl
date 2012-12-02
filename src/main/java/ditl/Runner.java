@@ -27,8 +27,8 @@ import java.util.List;
 
 public class Runner {
 
-    private long min_time = Trace.INFINITY;
-    private long max_time = -Trace.INFINITY;
+    private long min_time = Long.MAX_VALUE;
+    private long max_time = Long.MIN_VALUE;
     private long incr_time;
     private long cur_time;
 
@@ -105,10 +105,7 @@ public class Runner {
 
     private void flush(boolean is_seek) throws IOException {
         while (true) {
-            long next_bus_time = Long.MAX_VALUE; // should be greater than
-                                                 // Trace.INFINITY which is a
-                                                 // possible value for
-                                                 // next_bus_time
+            long next_bus_time = Long.MAX_VALUE;
             Bus<?> nextBus = null;
             for (final Bus<?> bus : busses)
                 if (bus.hasNextEvent()) {
