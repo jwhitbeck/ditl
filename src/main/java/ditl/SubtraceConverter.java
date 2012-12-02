@@ -19,37 +19,38 @@
 package ditl;
 
 import java.io.IOException;
-import java.util.List;
 
-public class SubtraceConverter<I extends Item> implements Converter {
+public class SubtraceConverter implements Converter {
 
-    private final Trace<I> _to;
-    private final Trace<I> _from;
+    private final Trace<?> _to;
+    private final Trace<?> _from;
     private final long _minTime, _maxTime;
 
-    public SubtraceConverter(Trace<I> to, Trace<I> from, long minTime, long maxTime) {
+    public SubtraceConverter(Trace<?> to, Trace<?> from, long minTime, long maxTime) {
         _to = to;
         _from = from;
         _minTime = minTime;
         _maxTime = maxTime;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void convert() throws IOException {
-        final Reader<I> reader = _from.getReader();
-        final Writer<I> writer = _to.getWriter();
+        final Reader reader = _from.getReader();
+        final Writer writer = _to.getWriter();
         reader.seek(_minTime);
+        if (_from instanceof StatefulTrace) {
+            ((StatefulWriter) writer).setInitState(_minTime,
+                    ((StatefulReader) reader).referenceState());
+        }
         while (reader.hasNext() && reader.nextTime() <= _maxTime) {
-            final List<I> events = reader.next();
-            for (final I item : events)
-                writer.append(reader.time(), item);
+            writer.handle(reader.nextTime(), reader.next());
         }
         writer.setProperty(Trace.minTimeKey, _minTime);
         writer.setProperty(Trace.maxTimeKey, _maxTime);
         writer.setPropertiesFromTrace(_from);
-        if (_from instanceof Trace.Copyable<?>)
-            ((Trace.Copyable<I>) _from).copyOverTraceInfo(writer);
+        if (_from instanceof Trace.Copyable)
+            ((Trace.Copyable) _from).copyOverTraceInfo(writer);
         reader.close();
         writer.close();
     }

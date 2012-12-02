@@ -20,47 +20,65 @@ package ditl;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class MergeConverter<I extends Item> implements Converter {
+public class MergeConverter implements Converter {
 
-    private final Trace<I> _to;
-    private final Collection<Trace<I>> from_collection;
+    private final Trace<?> _to;
+    private final Collection<Trace<?>> from_collection;
 
-    public MergeConverter(Trace<I> to, Collection<Trace<I>> fromCollection) {
+    public MergeConverter(Trace<?> to, Collection<Trace<?>> fromCollection) {
         _to = to;
         from_collection = fromCollection;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void convert() throws IOException {
         String time_unit = "s";
         long maxTime = Long.MIN_VALUE;
         long minTime = Long.MAX_VALUE;
-        for (final Trace<I> from : from_collection) {
+        for (final Trace<?> from : from_collection) {
             time_unit = from.timeUnit();
-            if (from.minTime() < minTime)
+            if (_to instanceof StatefulTrace) {
+                // stateful traces have a first init state. They are not defined
+                // prior to that state.
+                if (minTime == Long.MAX_VALUE || from.minTime() > minTime) {
+                    minTime = from.minTime();
+                }
+            } else if (from.minTime() < minTime) {
                 minTime = from.minTime();
+            }
             if (from.maxTime() > maxTime)
                 maxTime = from.maxTime();
+
         }
         IdMap.Writer id_map_writer = null;
-        final Writer<I> writer = _to.getWriter();
-        for (final Trace<I> from : from_collection) {
+        final Writer writer = _to.getWriter();
+        Set initState = new HashSet();
+        for (final Trace<?> from : from_collection) {
             final IdMap id_map = from.idMap();
             if (id_map != null) {
                 if (id_map_writer == null)
                     id_map_writer = new IdMap.Writer(0);
                 id_map_writer.merge(id_map);
             }
-            final Reader<I> reader = from.getReader();
+            final Reader reader = from.getReader();
             reader.seek(minTime);
+            if (_to instanceof StatefulTrace) {
+                initState.addAll(((StatefulReader) reader).referenceState());
+            }
             while (reader.hasNext()) {
-                final List<I> events = reader.next();
-                for (final I item : events)
+                final List<? extends Item> events = reader.next();
+                for (final Item item : events)
                     writer.queue(reader.time(), item);
             }
             reader.close();
+        }
+        if (_to instanceof StatefulTrace) {
+            ((StatefulWriter) writer).setInitState(minTime, initState);
         }
         writer.flush();
         writer.setProperty(Trace.timeUnitKey, time_unit);

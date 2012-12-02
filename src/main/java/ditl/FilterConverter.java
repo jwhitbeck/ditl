@@ -19,34 +19,45 @@
 package ditl;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
-public class FilterConverter<I extends Item> implements Converter {
+public class FilterConverter implements Converter {
 
-    private final Trace<I> _to;
-    private final Trace<I> _from;
+    private final Trace<?> _to;
+    private final Trace<?> _from;
     private final Set<Integer> _group;
 
-    public FilterConverter(Trace<I> to, Trace<I> from, Set<Integer> group) {
+    public FilterConverter(Trace<?> to, Trace<?> from, Set<Integer> group) {
         _to = to;
         _from = from;
         _group = group;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void convert() throws IOException {
-        final Filter<I> filter = ((Trace.Filterable<I>) _from).eventFilter(_group);
-        final Reader<I> reader = _from.getReader();
-        final Writer<I> writer = _to.getWriter();
+        final Filter filter = ((Trace.Filterable) _from).eventFilter(_group);
+        final Reader reader = _from.getReader();
+        final Writer writer = _to.getWriter();
         reader.seek(_from.minTime());
+
+        if (_from instanceof StatefulTrace) {
+            final Filter state_filter = ((StatefulTrace.Filterable) _from).stateFilter(_group);
+            final Set initState = new HashSet();
+            for (final Object state : ((StatefulReader) reader).referenceState()) {
+                final Object f_state = state_filter.filter(state);
+                if (f_state != null)
+                    initState.add(state);
+            }
+            ((StatefulWriter) writer).setInitState(_from.minTime(), initState);
+        }
+
         while (reader.hasNext()) {
-            final List<I> events = reader.next();
-            for (final I item : events) {
-                final I f_item = filter.filter(item);
+            for (final Object item : reader.next()) {
+                final Object f_item = filter.filter(item);
                 if (f_item != null)
-                    writer.append(reader.time(), item);
+                    writer.append(reader.time(), (Item) item);
             }
         }
         final IdMap id_map = _from.idMap();
@@ -55,7 +66,7 @@ public class FilterConverter<I extends Item> implements Converter {
             writer.setProperty(Trace.idMapKey, id_map_writer.toString());
         }
         writer.setPropertiesFromTrace(_from);
-        ((Trace.Filterable<I>) _from).copyOverTraceInfo(writer);
+        ((Trace.Filterable) _from).copyOverTraceInfo(writer);
         writer.close();
         reader.close();
     }

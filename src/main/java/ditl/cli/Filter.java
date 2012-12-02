@@ -25,11 +25,8 @@ import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Converter;
 import ditl.FilterConverter;
 import ditl.GroupSpecification;
-import ditl.StatefulFilterConverter;
-import ditl.StatefulTrace;
 import ditl.Trace;
 
 @Command(cmd = "filter")
@@ -69,21 +66,13 @@ public class Filter extends ConvertApp {
             }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void filter(Trace<?> dest, Trace<?> orig) throws IOException {
-        Converter filterer = null;
         final Set<Integer> group = GroupSpecification.parse(group_spec, orig.idMap());
-        if (orig instanceof Trace.Filterable)
-            if (orig instanceof StatefulTrace) {
-                if (orig instanceof StatefulTrace.Filterable)
-                    filterer = new StatefulFilterConverter((StatefulTrace<?, ?>) dest,
-                            (StatefulTrace<?, ?>) orig, group);
-            } else
-                filterer = new FilterConverter(dest, orig, group);
-        if (filterer == null)
+        if (orig instanceof Trace.Filterable) {
+            new FilterConverter(dest, orig, group).convert();
+        } else {
             System.err.println("Trace '" + orig.name() + "' is not filterable. Skipping");
-        else
-            filterer.convert();
+        }
     }
 
     @Override

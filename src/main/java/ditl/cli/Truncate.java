@@ -24,9 +24,6 @@ import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Converter;
-import ditl.StatefulSubtraceConverter;
-import ditl.StatefulTrace;
 import ditl.SubtraceConverter;
 import ditl.Trace;
 
@@ -70,17 +67,10 @@ public class Truncate extends ConvertApp {
             }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void truncate(Trace<?> dest, Trace<?> orig) throws IOException {
         final long min_time = minTime * orig.ticsPerSecond();
         final long max_time = maxTime * orig.ticsPerSecond();
-        Converter truncater;
-        if (orig instanceof StatefulTrace)
-            truncater = new StatefulSubtraceConverter((StatefulTrace<?, ?>) dest,
-                    (StatefulTrace<?, ?>) orig, min_time, max_time);
-        else
-            truncater = new SubtraceConverter(dest, orig, min_time, max_time);
-        truncater.convert();
+        new SubtraceConverter(dest, orig, min_time, max_time).convert();
     }
 
     @Override

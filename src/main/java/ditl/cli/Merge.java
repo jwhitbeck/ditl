@@ -26,10 +26,7 @@ import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.Converter;
 import ditl.MergeConverter;
-import ditl.StatefulMergeConverter;
-import ditl.StatefulTrace;
 import ditl.Store;
 import ditl.Trace;
 
@@ -49,7 +46,6 @@ public class Merge extends WriteApp {
             orig_store_names[i - 1] = args[i];
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected void run() throws Exception {
         for (final String traceName : getCommonTraceNames()) {
@@ -58,17 +54,9 @@ public class Merge extends WriteApp {
                 traces.add(store.getTrace(traceName));
 
             final Trace<?> ref_trace = traces.get(0);
-            final String type = ref_trace.type();
-            final boolean stateful = ref_trace instanceof StatefulTrace;
+            final Trace<?> merged = _store.newTrace(traceName, ref_trace.getClass(), force);
 
-            final Trace<?> merged = _store.newTrace(traceName, type, stateful);
-
-            Converter merger;
-            if (stateful)
-                merger = new StatefulMergeConverter((StatefulTrace<?, ?>) merged, traces);
-            else
-                merger = new MergeConverter(merged, traces);
-            merger.convert();
+            new MergeConverter(merged, traces).convert();
         }
     }
 
