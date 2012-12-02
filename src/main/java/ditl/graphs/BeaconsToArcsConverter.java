@@ -20,6 +20,7 @@ package ditl.graphs;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -120,6 +121,8 @@ public final class BeaconsToArcsConverter implements Incrementable, Converter {
         beacon_reader = _beacons.getReader();
 
         beacon_reader.bus().addListener(detectedListener());
+
+        arc_writer.setInitState(_beacons.minTime(), Collections.<Arc> emptyList());
 
         final Runner runner = new Runner(_period, _beacons.minTime(), _beacons.maxTime());
         runner.addGenerator(beacon_reader);
