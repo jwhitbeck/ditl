@@ -10,7 +10,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <test>ditl.TestRWP</test>
   </properties>
 
   <dependencies>
