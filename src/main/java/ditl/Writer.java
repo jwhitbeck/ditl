@@ -18,22 +18,30 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.BufferedWriter;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Collection;
 
-public class Writer<I> extends Bus<I> implements Listener<I> {
+public class Writer<I extends Item> extends Bus<I> implements Listener<I> {
 
-    BufferedWriter writer;
+    // trigger an index action every 10,000 events
+    private final static int N_EVENT_TRIGGER = 10000;
+
+    private final static int HEADER_BUFFER_SIZE = 32;
+
+    private final BufferedOutputStream out;
+    private final SeekMap.Writer sm;
+    final CodedBuffer buffer = new CodedBuffer();
+    private final CodedBuffer header_buffer = new CodedBuffer(HEADER_BUFFER_SIZE);
     long max_time;
     long min_time;
-    long max_interval;
-    long min_interval;
-    long last_time;
-    PersistentMap _info;
-    WritableStore _store;
-    String _name;
+    private int n_events = 0;
+    private int total_bytes_written = 0;
+    private long max_update_interval = 1;
+
+    private final PersistentMap _info;
+    private final WritableStore _store;
+    private final String _name;
 
     public Writer(Store store, String name, PersistentMap info) throws IOException {
         if (!(store instanceof WritableStore))
@@ -44,29 +52,25 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
         _info = info;
         _name = name;
         _store.notifyOpen(_name, this);
-        writer = new BufferedWriter(new OutputStreamWriter(_store.getOutputStream(_store.traceFile(_name))));
-        last_time = -Trace.INFINITY;
+        sm = new SeekMap.Writer(_store.getOutputStream(_store.indexFile(_name)));
+        out = new BufferedOutputStream(_store.getOutputStream(_store.traceFile(_name)));
+        min_time = Long.MAX_VALUE;
+        max_time = Long.MIN_VALUE;
         addListener(this);
-        min_time = Trace.INFINITY;
-        max_time = -Trace.INFINITY;
-        min_interval = Trace.INFINITY;
-        max_interval = -Trace.INFINITY;
     }
 
     void setRemainingInfo() {
+        _info.put(Trace.maxUpdateIntervalKey, max_update_interval);
         _info.setIfUnset(Trace.maxTimeKey, max_time);
         _info.setIfUnset(Trace.minTimeKey, min_time);
-        if (max_interval < 0) { // single event trace
-            max_interval = Long.parseLong(_info.get(Trace.maxTimeKey)) - Long.parseLong(_info.get(Trace.minTimeKey));
-            min_interval = max_interval;
-        }
-        _info.setIfUnset(Trace.maxUpdateIntervalKey, max_interval);
-        _info.setIfUnset(Trace.minUpdateIntervalKey, min_interval);
         _info.setIfUnset(Trace.defaultPriorityKey, Trace.defaultPriority);
     }
 
     public void close() throws IOException {
-        writer.close();
+        if (!buffer.isEmpty())
+            flushBuffer();
+        out.close();
+        sm.close();
         setRemainingInfo();
         _info.save(_store.getOutputStream(_store.infoFile(_name)));
         _store.notifyClose(_name);
@@ -88,6 +92,7 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
     public void append(long time, I item) throws IOException {
         updateTime(time);
         write(time, item);
+        n_events += 1;
     }
 
     @Override
@@ -95,36 +100,55 @@ public class Writer<I> extends Bus<I> implements Listener<I> {
         updateTime(time);
         for (final I item : items)
             write(time, item);
+        n_events += items.size();
     }
 
-    public void write(long time, I item) throws IOException {
-        writer.write(item + "\n");
+    void write(long time, I item) {
+        item.write(buffer);
     }
 
-    void updateTime(long time) throws IOException {
+    private void updateTime(long time) throws IOException {
         if (time < max_time) {
-            System.err.println("States at time " + time + " are out of order");
-            return;
-        }
-        if (time > max_time) {
-            writer.write(time + "\n");
-            max_time = time;
+            throw new IOException("States at time " + time + " are out of order");
         }
         if (time < min_time)
             min_time = time;
-        if (last_time == -Trace.INFINITY)
-            last_time = time;
-        else if (time > last_time) { // we have changed times
-            final long interval = time - last_time;
-            if (interval > max_interval)
-                max_interval = interval;
-            if (interval < min_interval)
-                min_interval = interval;
-            last_time = time;
+        if (time > max_time) {
+            if (max_time != Long.MIN_VALUE) {
+                flushBuffer();
+                if (time - max_time > max_update_interval)
+                    max_update_interval = time - max_time;
+                if (n_events > N_EVENT_TRIGGER)
+                    markPosition(time);
+            }
+            max_time = time;
         }
+
+    }
+
+    void markPosition(long time) throws IOException {
+        sm.append(time, total_bytes_written);
+        n_events = 0;
+    }
+
+    private void flushBuffer() throws IOException {
+        writeItemBlockHeader((byte) 0, max_time);
+        writeItemBlock();
+    }
+
+    void writeItemBlock() throws IOException {
+        total_bytes_written += buffer.flush(out);
+    }
+
+    void writeItemBlockHeader(byte flag, long time) throws IOException {
+        header_buffer.writeByte(flag);
+        header_buffer.writeInt(buffer.bytesInBuffer());
+        header_buffer.writeSLong(time);
+        total_bytes_written += header_buffer.flush(out);
     }
 
     @Override
     public void reset() {
+        throw new UnsupportedOperationException();
     }
 }

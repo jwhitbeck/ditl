@@ -21,17 +21,17 @@ package ditl;
 import java.io.IOException;
 import java.util.Set;
 
-public abstract class StatefulTrace<E, S> extends Trace<E> {
+public abstract class StatefulTrace<E extends Item, S extends Item> extends Trace<E> {
 
-    protected ItemFactory<S> state_factory;
+    protected Item.Factory<S> state_factory;
     protected StateUpdaterFactory<E, S> updater_factory;
 
-    public interface Filterable<E, S> extends Trace.Filterable<E> {
+    public interface Filterable<E extends Item, S extends Item> extends Trace.Filterable<E> {
         public Filter<S> stateFilter(Set<Integer> group);
     }
 
-    public StatefulTrace(Store store, String name, PersistentMap info, ItemFactory<E> itemFactory,
-            ItemFactory<S> stateFactory, StateUpdaterFactory<E, S> stateUpdaterFactory)
+    public StatefulTrace(Store store, String name, PersistentMap info, Item.Factory<E> itemFactory,
+            Item.Factory<S> stateFactory, StateUpdaterFactory<E, S> stateUpdaterFactory)
             throws IOException {
         super(store, name, info, itemFactory);
         state_factory = stateFactory;
@@ -40,14 +40,12 @@ public abstract class StatefulTrace<E, S> extends Trace<E> {
 
     @Override
     public StatefulReader<E, S> getReader(int priority, long offset) throws IOException {
-        final Reader<S> snap_iterator = new Reader<S>(_store,
-                _store.getStreamOpener(_store.snapshotsFile(_name)), stateMaxUpdateInterval(),
-                state_factory, Trace.defaultPriority, offset);
         return new StatefulReader<E, S>(_store,
-                _store.getStreamOpener(_store.traceFile(_name)),
-                maxUpdateInterval(), event_factory,
-                snap_iterator, updater_factory.getNew(),
-                priority, offset, lastSnapTime());
+                _name,
+                event_factory,
+                state_factory,
+                updater_factory.getNew(),
+                priority, offset);
     }
 
     @Override
@@ -65,7 +63,7 @@ public abstract class StatefulTrace<E, S> extends Trace<E> {
         return new StatefulWriter<E, S>(_store, _name, updater_factory.getNew(), _info);
     }
 
-    public ItemFactory<S> stateFactory() {
+    public Item.Factory<S> stateFactory() {
         return state_factory;
     }
 

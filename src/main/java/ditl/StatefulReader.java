@@ -21,19 +21,16 @@ package ditl;
 import java.io.IOException;
 import java.util.Set;
 
-public class StatefulReader<E, S> extends Reader<E> {
+public class StatefulReader<E extends Item, S extends Item> extends Reader<E> {
 
-    StateUpdater<E, S> _updater;
-    Reader<S> snapshots_iterator;
-    Bus<S> state_bus = new Bus<S>();
-    long last_snap_time;
+    private final StateUpdater<E, S> _updater;
+    private Bus<S> state_bus = new Bus<S>();
+    private final Item.Factory<S> state_factory;
 
-    StatefulReader(Store store, InputStreamOpener inputStreamOpener, long eventSeekInterval, ItemFactory<E> fact,
-            Reader<S> snapshotsReader, StateUpdater<E, S> updater, int priority, long offset, long lastSnapTime) throws IOException {
-        super(store, inputStreamOpener, eventSeekInterval, fact, priority, offset);
+    StatefulReader(Store store, String name, Item.Factory<E> factory, Item.Factory<S> stateFactory, StateUpdater<E, S> updater, int priority, long offset) throws IOException {
+        super(store, name, factory, priority, offset);
         _updater = updater;
-        snapshots_iterator = snapshotsReader;
-        last_snap_time = lastSnapTime;
+        state_factory = stateFactory;
     }
 
     public Set<S> referenceState() {
@@ -42,23 +39,20 @@ public class StatefulReader<E, S> extends Reader<E> {
 
     @Override
     public void seek(long time) throws IOException {
-        final long seek_time = Math.min(time, last_snap_time - _offset);
-        snapshots_iterator.seek(seek_time);
-        if (seek_time == snapshots_iterator.nextTime()) { // we have hit exactly
-                                                          // on a snapshot, use
-                                                          // it
-            if (snapshots_iterator.has_next_time)
-                _updater.setState(snapshots_iterator.next());
-            super.seek(seek_time);
-        } else {
-            final long last_snap_time = snapshots_iterator.previousTime();
-            _updater.setState(snapshots_iterator.previous());
-            super.seek(last_snap_time);
+        if (seek_map.getOffset(time + _offset) == Long.MIN_VALUE) {
+            throw new IOException("Cannot seek before initial state");
         }
-        while (has_next_time && next_time < time + _offset)
-            for (final E event : next())
-                _updater.handleEvent(cur_time, event); // cur_time is updated by
-                                                       // call to next()
+        fastSeek(time + _offset);
+        // we always hit a state item block after this step
+        _updater.setState(readItemBlock(state_factory));
+        prev_time = next_time;
+        readHeader();
+        while (hasNext() && nextTime() < time + _offset) {
+            for (final E event : next()) {
+                // cur_time is updated by call to next
+                _updater.handleEvent(cur_time, event);
+            }
+        }
         state_bus.queue(time, _updater.states());
         cur_time = time + _offset;
     }
@@ -69,6 +63,15 @@ public class StatefulReader<E, S> extends Reader<E> {
 
     public Bus<S> stateBus() {
         return state_bus;
+    }
+
+    @Override
+    public void step() throws IOException {
+        if (next_flag == StatefulWriter.STATE) {
+            skipBlock();
+            readHeader();
+        }
+        super.step();
     }
 
     @Override

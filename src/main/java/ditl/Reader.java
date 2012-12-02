@@ -18,50 +18,50 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Reader<I> implements Generator {
+public class Reader<I extends Item> implements Generator {
 
     long cur_time;
-    long prev_time;
-    long next_time;
-    long seek_interval;
+    long prev_time = Long.MIN_VALUE;
+    long next_time = Long.MAX_VALUE;
 
-    ItemFactory<I> _factory;
-    List<I> buffer;
+    final private Item.Factory<I> _factory;
+    private List<I> buffer;
     Bus<I> _bus = new Bus<I>();
-    int _priority;
-    long _offset;
+    final private int _priority;
+    final long _offset;
+    final private String _name;
 
-    boolean has_next_time;
-    boolean has_next_item;
+    byte next_flag;
+    private int next_block_bytes;
 
-    BufferedReader reader;
-    InputStreamOpener opener;
-    String next_line;
+    private CodedInputStream cis;
+    final SeekMap seek_map;
 
-    Store _store;
+    private final Store _store;
 
-    Reader(Store store, InputStreamOpener inputStreamOpener, long seekInterval, ItemFactory<I> factory, int priority, long offset) throws IOException {
-        opener = inputStreamOpener;
+    Reader(Store store, String name, Item.Factory<I> factory, int priority, long offset) throws IOException {
         _offset = offset;
-        seek_interval = seekInterval;
         _factory = factory;
         _priority = priority;
         _store = store;
+        _name = name;
+        seek_map = SeekMap.open(_store.getInputStream(_store.indexFile(_name)));
         init();
     }
 
     @Override
     public void seek(long time) throws IOException {
-        fastSeek(time + _offset, seek_interval);
-        while (has_next_time && next_time < time + _offset)
-            next();
+        fastSeek(time + _offset);
+        while (hasNext() && next_time < time + _offset) {
+            skipBlock();
+            readHeader();
+        }
         cur_time = time + _offset;
     }
 
@@ -87,12 +87,12 @@ public class Reader<I> implements Generator {
     }
 
     public void close() throws IOException {
-        reader.close();
+        cis.close();
         _store.notifyClose(this);
     }
 
     public boolean hasNext() {
-        return has_next_time;
+        return next_time != Long.MAX_VALUE;
     }
 
     public List<I> next() throws IOException {
@@ -101,13 +101,14 @@ public class Reader<I> implements Generator {
         return buffer;
     }
 
-    private void step() throws IOException {
-        stepNextTime();
-        buffer = new LinkedList<I>();
-        while (has_next_item) {
-            final String next = getNextItem();
-            buffer.add(_factory.fromString(next));
-        }
+    void step() throws IOException {
+        buffer = readItemBlock(_factory);
+        prev_time = next_time;
+        readHeader();
+    }
+
+    void skipBlock() throws IOException {
+        cis.skip(next_block_bytes);
     }
 
     public List<I> previous() {
@@ -122,33 +123,32 @@ public class Reader<I> implements Generator {
         _bus = bus;
     }
 
-    private void peekLine() throws IOException {
-        next_line = reader.readLine();
-        if (next_line == null) { // end of file has been reached
-            has_next_time = false;
-            has_next_item = false;
-            next_time = Trace.INFINITY;
-            return;
-        }
+    private void init() throws IOException {
+        _store.notifyOpen(this);
+        cis = new CodedInputStream(new BufferedInputStream(_store.getInputStream(_store.traceFile(_name))));
+        prev_time = Long.MIN_VALUE;
+        buffer = Collections.emptyList();
+        cur_time = prev_time;
+        readHeader();
+    }
 
-        try {
-            final long time = Long.parseLong(next_line);
-            next_time = time;
-            has_next_item = false;
-            has_next_time = true;
-        } catch (final NumberFormatException nfe) {
-            has_next_item = true;
-            has_next_time = false;
+    void readHeader() throws IOException {
+        if (!cis.isAtEnd()) {
+            next_flag = cis.readByte();
+            next_block_bytes = cis.readInt();
+            next_time = cis.readSLong();
+        } else {
+            next_time = Long.MAX_VALUE;
         }
     }
 
-    private void init() throws IOException {
-        _store.notifyOpen(this);
-        reader = new BufferedReader(new InputStreamReader(opener.open()));
-        prev_time = -Trace.INFINITY;
-        buffer = Collections.emptyList();
-        cur_time = prev_time;
-        peekLine();
+    <E extends Item> List<E> readItemBlock(Item.Factory<E> factory) throws IOException {
+        List<E> items = new LinkedList<E>();
+        cis.mark();
+        while (cis.bytesReadSinceMark() < next_block_bytes) {
+            items.add(factory.fromBinaryStream(cis));
+        }
+        return items;
     }
 
     private void reset() throws IOException {
@@ -156,32 +156,17 @@ public class Reader<I> implements Generator {
         init();
     }
 
-    private void stepNextTime() throws IOException {
-        while (!has_next_time)
-            peekLine();
-        prev_time = next_time;
-        peekLine();
-    }
-
-    private String getNextItem() throws IOException {
-        if (!has_next_item)
-            return null;
-
-        final String item = next_line;
-        peekLine();
-        return item;
-    }
-
-    private void fastSeek(long time, long interval) throws IOException {
-        final long target_time = time - interval;
-        if (prev_time > target_time)
+    void fastSeek(long time) throws IOException {
+        long absolutePosition = seek_map.getOffset(time);
+        if (cis.canFastForwardTo(absolutePosition)) {
+            cis.fastForwardTo(absolutePosition);
+            readHeader();
+        } else {
             reset();
-        while (true) {
-            if (has_next_time && next_time >= target_time)
-                break;
-            else if (!has_next_time && !has_next_item)
-                break;
-            peekLine();
+            if (cis.canFastForwardTo(absolutePosition)) {
+                cis.fastForwardTo(absolutePosition);
+                readHeader();
+            }
         }
     }
 
