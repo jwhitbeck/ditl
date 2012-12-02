@@ -18,12 +18,15 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Set;
 
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
 import ditl.Filter;
-import ditl.ItemFactory;
+import ditl.Item;
 
-public final class MovementEvent {
+public final class MovementEvent implements Item {
 
     public enum Type {
         IN, OUT, NEW_DEST
@@ -68,27 +71,18 @@ public final class MovementEvent {
         return new Movement(id, dest);
     }
 
-    public static final class Factory implements ItemFactory<MovementEvent> {
+    public static final class Factory implements Item.Factory<MovementEvent> {
         @Override
-        public MovementEvent fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer id = Integer.parseInt(elems[0]);
-                if (elems[1].equals(Type.OUT.toString()))
+        public MovementEvent fromBinaryStream(CodedInputStream in) throws IOException {
+            int id = in.readSInt();
+            Type type = Type.values()[in.readByte()];
+            switch (type) {
+                case OUT:
                     return new MovementEvent(id);
-                else {
-                    final double x = Double.parseDouble(elems[2]);
-                    final double y = Double.parseDouble(elems[3]);
-                    if (elems[1].equals(Type.IN.toString()))
-                        return new MovementEvent(id, new Point(x, y));
-                    else {
-                        final double sp = Double.parseDouble(elems[1]);
-                        return new MovementEvent(id, sp, new Point(x, y));
-                    }
-                }
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
+                case IN:
+                    return new MovementEvent(id, new Point(in.readDouble(), in.readDouble()));
+                default: // NEW_DEST
+                    return new MovementEvent(id, in.readDouble(), new Point(in.readDouble(), in.readDouble()));
             }
         }
     }
@@ -121,6 +115,23 @@ public final class MovementEvent {
             if (_group.contains(item.id))
                 return item;
             return null;
+        }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(id);
+        out.writeByte(type.ordinal());
+        switch (type) {
+            case IN:
+                out.writeDouble(dest.x);
+                out.writeDouble(dest.y);
+                break;
+            case NEW_DEST:
+                out.writeDouble(speed);
+                out.writeDouble(dest.x);
+                out.writeDouble(dest.y);
+                break;
         }
     }
 }

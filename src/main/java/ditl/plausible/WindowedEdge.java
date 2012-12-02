@@ -18,12 +18,16 @@
  *******************************************************************************/
 package ditl.plausible;
 
-import ditl.ItemFactory;
+import java.io.IOException;
+
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
+import ditl.Item;
 import ditl.Trace;
 import ditl.graphs.Couple;
 import ditl.graphs.Edge;
 
-public final class WindowedEdge implements Couple {
+public final class WindowedEdge implements Couple, Item {
 
     long prev_up = -Trace.INFINITY;
     long prev_down = -Trace.INFINITY;
@@ -60,8 +64,8 @@ public final class WindowedEdge implements Couple {
 
     @Override
     public boolean equals(Object o) {
-        final WindowedEdge wl = (WindowedEdge) o;
-        return wl._edge.equals(_edge);
+        final WindowedEdge we = (WindowedEdge) o;
+        return we._edge.equals(_edge);
     }
 
     @Override
@@ -69,41 +73,42 @@ public final class WindowedEdge implements Couple {
         return _edge + " " + prev_up + " " + prev_down + " " + next_up + " " + next_down;
     }
 
-    public static final class Factory implements ItemFactory<WindowedEdge> {
+    public static final class Factory implements Item.Factory<WindowedEdge> {
         @Override
-        public WindowedEdge fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer id1 = Integer.parseInt(elems[0]);
-                final Integer id2 = Integer.parseInt(elems[1]);
-                final WindowedEdge wl = new WindowedEdge(new Edge(id1, id2));
-                wl.prev_up = Long.parseLong(elems[2]);
-                wl.prev_down = Long.parseLong(elems[3]);
-                wl.next_up = Long.parseLong(elems[4]);
-                wl.next_down = Long.parseLong(elems[5]);
-                return wl;
-
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public WindowedEdge fromBinaryStream(CodedInputStream in) throws IOException {
+            WindowedEdge we = new WindowedEdge(new Edge(in.readSInt(), in.readSInt()));
+            we.prev_up = in.readSLong();
+            we.prev_down = in.readSLong();
+            we.next_up = in.readSLong();
+            we.next_down = in.readSLong();
+            return we;
         }
     }
 
-    public void handleEvent(WindowedEdgeEvent wle) {
-        switch (wle._type) {
+    public void handleEvent(WindowedEdgeEvent wee) {
+        switch (wee._type) {
             case PREVUP:
-                prev_up = wle._value;
+                prev_up = wee._value;
                 break;
             case PREVDOWN:
-                prev_down = wle._value;
+                prev_down = wee._value;
                 break;
             case NEXTUP:
-                next_up = wle._value;
+                next_up = wee._value;
                 break;
             case NEXTDOWN:
-                next_down = wle._value;
+                next_down = wee._value;
                 break;
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(_edge.id1());
+        out.writeSInt(_edge.id2());
+        out.writeSLong(prev_up);
+        out.writeSLong(prev_down);
+        out.writeSLong(next_up);
+        out.writeSLong(next_down);
     }
 }

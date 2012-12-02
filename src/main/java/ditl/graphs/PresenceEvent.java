@@ -18,12 +18,15 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Set;
 
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
 import ditl.Filter;
-import ditl.ItemFactory;
+import ditl.Item;
 
-public final class PresenceEvent {
+public final class PresenceEvent implements Item {
 
     public enum Type {
         IN, OUT
@@ -49,18 +52,10 @@ public final class PresenceEvent {
         return new Presence(id);
     }
 
-    public static final class Factory implements ItemFactory<PresenceEvent> {
+    public static final class Factory implements Item.Factory<PresenceEvent> {
         @Override
-        public PresenceEvent fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final int id = Integer.parseInt(elems[0]);
-                final Type type = Type.valueOf(elems[1]);
-                return new PresenceEvent(id, type);
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public PresenceEvent fromBinaryStream(CodedInputStream in) throws IOException {
+            return new PresenceEvent(in.readSInt(), Type.values()[in.readByte()]);
         }
     }
 
@@ -82,6 +77,12 @@ public final class PresenceEvent {
                 return item;
             return null;
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(id);
+        out.writeByte(_type.ordinal());
     }
 
 }

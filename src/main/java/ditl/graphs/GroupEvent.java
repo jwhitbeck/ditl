@@ -18,15 +18,18 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
 import ditl.Filter;
 import ditl.GroupSpecification;
-import ditl.ItemFactory;
+import ditl.Item;
 
-public class GroupEvent {
+public class GroupEvent implements Item {
 
     public enum Type {
         NEW,
@@ -70,26 +73,19 @@ public class GroupEvent {
         return Collections.unmodifiableSet(_members);
     }
 
-    public final static class Factory implements ItemFactory<GroupEvent> {
+    public final static class Factory implements Item.Factory<GroupEvent> {
         @Override
-        public GroupEvent fromString(String s) {
-            final String[] elems = s.trim().split(" ", 3);
-            try {
-                final Type type = Type.valueOf(elems[0]);
-                final Integer gid = Integer.parseInt(elems[1]);
-                switch (type) {
-                    case NEW:
-                    case DELETE:
-                        return new GroupEvent(gid, type);
-                    default:
-                        final Set<Integer> members = GroupSpecification.parse(elems[2]);
-                        return new GroupEvent(gid, type, members);
-                }
-
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
+        public GroupEvent fromBinaryStream(CodedInputStream in) throws IOException {
+            int gid = in.readSInt();
+            Type type = Type.values()[in.readByte()];
+            if (type == Type.JOIN || type == Type.LEAVE) {
+                int n = in.readInt();
+                Set<Integer> members = new HashSet<Integer>();
+                for (int i = 0; i < n; ++i)
+                    members.add(in.readSInt());
+                return new GroupEvent(gid, type, members);
             }
+            return new GroupEvent(gid, type);
         }
     }
 
@@ -123,6 +119,18 @@ public class GroupEvent {
                 return new GroupEvent(item._gid, item._type, f_members);
             }
             return item;
+        }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(_gid);
+        out.writeByte(_type.ordinal());
+        if (_type == Type.JOIN || _type == Type.LEAVE) {
+            out.writeInt(_members.size());
+            for (Integer m : _members) {
+                out.writeSInt(m);
+            }
         }
     }
 }

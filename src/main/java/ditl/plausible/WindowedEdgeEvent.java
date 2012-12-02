@@ -18,10 +18,14 @@
  *******************************************************************************/
 package ditl.plausible;
 
-import ditl.ItemFactory;
+import java.io.IOException;
+
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
+import ditl.Item;
 import ditl.graphs.Edge;
 
-public final class WindowedEdgeEvent {
+public final class WindowedEdgeEvent implements Item {
 
     public enum Type {
         UP, DOWN, PREVUP, PREVDOWN, NEXTUP, NEXTDOWN
@@ -62,28 +66,27 @@ public final class WindowedEdgeEvent {
         }
     }
 
-    public static final class Factory implements ItemFactory<WindowedEdgeEvent> {
+    public static final class Factory implements Item.Factory<WindowedEdgeEvent> {
         @Override
-        public WindowedEdgeEvent fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer id1 = Integer.parseInt(elems[0]);
-                final Integer id2 = Integer.parseInt(elems[1]);
-                final Edge e = new Edge(id1, id2);
-                final Type type = Type.valueOf(elems[2]);
-                switch (type) {
-                    case UP:
-                    case DOWN:
-                        return new WindowedEdgeEvent(e, type);
-                    default:
-                        final long value = Long.parseLong(elems[3]);
-                        return new WindowedEdgeEvent(e, type, value);
-                }
-
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
+        public WindowedEdgeEvent fromBinaryStream(CodedInputStream in) throws IOException {
+            Edge e = new Edge(in.readSInt(), in.readSInt());
+            Type type = Type.values()[in.readByte()];
+            switch (type) {
+                case UP:
+                case DOWN:
+                    return new WindowedEdgeEvent(e, type);
+                default:
+                    return new WindowedEdgeEvent(e, type, in.readSLong());
             }
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(_edge.id1());
+        out.writeSInt(_edge.id2());
+        out.writeByte(_type.ordinal());
+        if (_type != Type.UP && _type != Type.DOWN)
+            out.writeSLong(_value);
     }
 }

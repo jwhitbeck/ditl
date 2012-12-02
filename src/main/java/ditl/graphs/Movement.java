@@ -18,13 +18,16 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Set;
 
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
 import ditl.Filter;
-import ditl.ItemFactory;
+import ditl.Item;
 import ditl.Trace;
 
-public final class Movement {
+public final class Movement implements Item {
 
     private Integer id;
     double x, y;
@@ -36,12 +39,13 @@ public final class Movement {
     private Movement() {
     };
 
+    private enum Type {
+        STATIONNARY, MOVING
+    }
+
     public Movement(Integer i, Point orig) {
         id = i;
-        x = orig.x;
-        y = orig.y;
-        sx = 0;
-        sy = 0;
+        init(orig.x, orig.y);
     }
 
     public Integer id() {
@@ -50,13 +54,24 @@ public final class Movement {
 
     public Movement(Integer i, Point orig, long t, Point dest, double sp) {
         id = i;
-        x = orig.x;
-        y = orig.y;
+        init(orig.x, orig.y, t, dest.x - orig.x, dest.y - orig.y, sp);
+    }
+
+    private void init(double ox, double oy) {
+        x = ox;
+        y = oy;
+        sx = 0;
+        sy = 0;
+    }
+
+    private void init(double ox, double oy, long t, double deltax, double deltay, double sp) {
+        x = ox;
+        y = oy;
         since = t;
-        dx = dest.x - orig.x;
-        dy = dest.y - orig.y;
+        dx = deltax;
+        dy = deltay;
         final double d = Math.sqrt(dx * dx + dy * dy);
-        if (d > 0) {
+        if (sp > 0 && d > 0) {
             arrival = since + (long) Math.ceil(d / sp);
             sx = dx * sp / d;
             sy = dy * sp / d;
@@ -67,25 +82,24 @@ public final class Movement {
         }
     }
 
-    public static final class Factory implements ItemFactory<Movement> {
+    public static final class Factory implements Item.Factory<Movement> {
         @Override
-        public Movement fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer id = Integer.parseInt(elems[0]);
-                final double ox = Double.parseDouble(elems[1]);
-                final double oy = Double.parseDouble(elems[2]);
-                if (elems.length == 3)
-                    return new Movement(id, new Point(ox, oy));
-                final long since = Long.parseLong(elems[3]);
-                final double tx = Double.parseDouble(elems[4]);
-                final double ty = Double.parseDouble(elems[5]);
-                final double sp = Double.parseDouble(elems[6]);
-                return new Movement(id, new Point(ox, oy), since, new Point(tx, ty), sp);
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
+        public Movement fromBinaryStream(CodedInputStream in) throws IOException {
+            Movement m = new Movement();
+            m.id = in.readSInt();
+            Type type = Type.values()[in.readByte()];
+            if (type == Type.STATIONNARY) {
+                m.init(in.readDouble(), in.readDouble());
+            } else {
+                m.init(in.readDouble(), // x
+                        in.readDouble(), // y
+                        in.readSLong(), // since
+                        in.readDouble(), // dx
+                        in.readDouble(), // dy
+                        in.readDouble() // sp
+                );
             }
+            return m;
         }
     }
 
@@ -106,21 +120,7 @@ public final class Movement {
 
     public void setNewDestination(long time, Point dest, double sp) {
         final Point p = positionAtTime(time);
-        x = p.x;
-        y = p.y;
-        since = time;
-        dx = dest.x - x;
-        dy = dest.y - y;
-        final double d = Math.sqrt(dx * dx + dy * dy);
-        if (sp > 0 && d > 0) {
-            arrival = since + (long) Math.ceil(d / sp);
-            sx = dx * sp / d;
-            sy = dy * sp / d;
-        } else {
-            arrival = time;
-            sx = 0;
-            sy = 0;
-        }
+        init(p.x, p.y, time, dest.x - p.x, dest.y - p.y, sp);
     }
 
     public void handleEvent(long time, MovementEvent event) {
@@ -217,5 +217,20 @@ public final class Movement {
         m.dx = dx;
         m.dy = dy;
         return m;
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(id);
+        Type type = (sx == 0 && sy == 0) ? Type.STATIONNARY : Type.MOVING;
+        out.writeByte(type.ordinal());
+        out.writeDouble(x);
+        out.writeDouble(y);
+        if (type == Type.MOVING) {
+            out.writeSLong(since);
+            out.writeDouble(dx);
+            out.writeDouble(dy);
+            out.writeDouble(Math.sqrt(sx * sx + sy * sy));
+        }
     }
 }

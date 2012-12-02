@@ -18,13 +18,16 @@
  *******************************************************************************/
 package ditl.transfers;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import ditl.ItemFactory;
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
+import ditl.Item;
 
-public class Buffer implements Iterable<Integer> {
+public class Buffer implements Iterable<Integer>, Item {
 
     public static String delim = ":";
 
@@ -66,26 +69,28 @@ public class Buffer implements Iterable<Integer> {
         return _id.equals(b._id);
     }
 
-    public static final class Factory implements ItemFactory<Buffer> {
+    public static final class Factory implements Item.Factory<Buffer> {
         @Override
-        public Buffer fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer id = Integer.parseInt(elems[0]);
-                final Buffer b = new Buffer(id);
-                if (!elems[1].equals("-"))
-                    for (final String m : elems[1].split(delim))
-                        b.msg_ids.add(Integer.parseInt(m));
-                return b;
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public Buffer fromBinaryStream(CodedInputStream in) throws IOException {
+            Buffer b = new Buffer(in.readSInt());
+            int n = in.readInt();
+            for (int i = 0; i < n; ++i)
+                b.msg_ids.add(in.readSInt());
+            return b;
         }
     }
 
     @Override
     public Iterator<Integer> iterator() {
         return msg_ids.iterator();
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(_id);
+        out.writeInt(msg_ids.size());
+        for (Integer msgId : msg_ids) {
+            out.writeSInt(msgId);
+        }
     }
 }

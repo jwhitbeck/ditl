@@ -18,9 +18,13 @@
  *******************************************************************************/
 package ditl.transfers;
 
-import ditl.ItemFactory;
+import java.io.IOException;
 
-public class Message {
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
+import ditl.Item;
+
+public class Message implements Item {
 
     private final Integer msg_id;
 
@@ -32,17 +36,10 @@ public class Message {
         return msg_id;
     }
 
-    public static final class Factory implements ItemFactory<Message> {
+    public static final class Factory implements Item.Factory<Message> {
         @Override
-        public Message fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer msgId = Integer.parseInt(elems[1]);
-                return new Message(msgId);
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public Message fromBinaryStream(CodedInputStream in) throws IOException {
+            return new Message(in.readSInt());
         }
     }
 
@@ -60,5 +57,10 @@ public class Message {
     @Override
     public String toString() {
         return "m " + msg_id;
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(msg_id);
     }
 }

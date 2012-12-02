@@ -16,55 +16,16 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl.transfers;
+package ditl;
 
 import java.io.IOException;
 
-import ditl.CodedBuffer;
-import ditl.CodedInputStream;
-import ditl.Item;
+public interface Item {
 
-public class MessageEvent implements Item {
+    public void write(CodedBuffer out);
 
-    public enum Type {
-        NEW, EXPIRE
+    public interface Factory<I> {
+        public I fromBinaryStream(CodedInputStream in) throws IOException;
     }
 
-    Integer msg_id;
-    Type _type;
-
-    public MessageEvent(Integer msgId, Type type) {
-        msg_id = msgId;
-        _type = type;
-    }
-
-    public Integer msgId() {
-        return msg_id;
-    }
-
-    public boolean isNew() {
-        return _type == Type.NEW;
-    }
-
-    public Message message() {
-        return new Message(msg_id);
-    }
-
-    public static final class Factory implements Item.Factory<MessageEvent> {
-        @Override
-        public MessageEvent fromBinaryStream(CodedInputStream in) throws IOException {
-            return new MessageEvent(in.readSInt(), Type.values()[in.readByte()]);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return msg_id + " " + _type;
-    }
-
-    @Override
-    public void write(CodedBuffer out) {
-        out.writeSInt(msg_id);
-        out.writeByte(_type.ordinal());
-    }
 }

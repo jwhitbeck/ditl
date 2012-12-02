@@ -18,10 +18,14 @@
  *******************************************************************************/
 package ditl.transfers;
 
-import ditl.ItemFactory;
+import java.io.IOException;
+
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
+import ditl.Item;
 import ditl.graphs.Arc;
 
-public class TransferEvent {
+public class TransferEvent implements Item {
 
     public enum Type {
         START, COMPLETE, ABORT
@@ -76,26 +80,28 @@ public class TransferEvent {
         }
     }
 
-    public static final class Factory implements ItemFactory<TransferEvent> {
+    public static final class Factory implements Item.Factory<TransferEvent> {
         @Override
-        public TransferEvent fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Type type = Type.valueOf(elems[0]);
-                final Integer msgId = Integer.parseInt(elems[1]);
-                final Integer from = Integer.parseInt(elems[2]);
-                final Integer to = Integer.parseInt(elems[3]);
-                switch (type) {
-                    case START:
-                        return new TransferEvent(msgId, from, to, type);
-                    default:
-                        final long bytesTransferred = Long.parseLong(elems[4]);
-                        return new TransferEvent(msgId, from, to, type, bytesTransferred);
-                }
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
+        public TransferEvent fromBinaryStream(CodedInputStream in) throws IOException {
+            Type type = Type.values()[in.readByte()];
+            int msgId = in.readSInt();
+            int from = in.readSInt();
+            int to = in.readSInt();
+            if (type == Type.START) {
+                return new TransferEvent(msgId, from, to, type);
+            } else {
+                return new TransferEvent(msgId, from, to, type, in.readLong());
             }
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeByte(_type.ordinal());
+        out.writeSInt(msg_id);
+        out.writeSInt(_from);
+        out.writeSInt(_to);
+        if (_type != Type.START)
+            out.writeLong(bytes_transferred);
     }
 }
