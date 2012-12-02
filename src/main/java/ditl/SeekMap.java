@@ -18,6 +18,56 @@
  *******************************************************************************/
 package ditl;
 
-public interface ItemFactory<I> {
-    public I fromString(String s);
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Map;
+import java.util.TreeMap;
+
+public final class SeekMap {
+
+    private final TreeMap<Long, Long> byteOffsets = new TreeMap<Long, Long>();
+
+    private SeekMap() {
+    }
+
+    public static SeekMap open(InputStream is) throws IOException {
+        SeekMap sm = new SeekMap();
+        CodedInputStream in = new CodedInputStream(new BufferedInputStream(is));
+        while (!in.isAtEnd()) {
+            sm.byteOffsets.put(in.readSLong(), in.readLong());
+        }
+        in.close();
+        return sm;
+    }
+
+    public long getOffset(long timestamp) {
+        Map.Entry<Long, Long> e = byteOffsets.floorEntry(timestamp);
+        if (e == null)
+            return Long.MIN_VALUE;
+        return e.getValue();
+    }
+
+    public static final class Writer {
+        private final OutputStream _os;
+        private final CodedBuffer _buffer;
+
+        public Writer(OutputStream out) {
+            _os = new BufferedOutputStream(out);
+            _buffer = new CodedBuffer(20);
+        }
+
+        public void append(long timestamp, long byteOffset) throws IOException {
+            _buffer.writeSLong(timestamp);
+            _buffer.writeLong(byteOffset);
+            _buffer.flush(_os);
+        }
+
+        public void close() throws IOException {
+            _os.close();
+        }
+
+    }
 }

@@ -18,12 +18,15 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Set;
 
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
 import ditl.Filter;
-import ditl.ItemFactory;
+import ditl.Item;
 
-public final class EdgeEvent {
+public final class EdgeEvent implements Item {
 
     public enum Type {
         UP, DOWN
@@ -66,20 +69,10 @@ public final class EdgeEvent {
         return new Edge(id1, id2);
     }
 
-    public static final class Factory implements ItemFactory<EdgeEvent> {
+    public static final class Factory implements Item.Factory<EdgeEvent> {
         @Override
-        public EdgeEvent fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer id1 = Integer.parseInt(elems[0]);
-                final Integer id2 = Integer.parseInt(elems[1]);
-                final Type type = Type.valueOf(elems[2]);
-                return new EdgeEvent(id1, id2, type);
-
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public EdgeEvent fromBinaryStream(CodedInputStream in) throws IOException {
+            return new EdgeEvent(in.readSInt(), in.readSInt(), Type.values()[in.readByte()]);
         }
     }
 
@@ -101,6 +94,13 @@ public final class EdgeEvent {
                 return item;
             return null;
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(id1);
+        out.writeSInt(id2);
+        out.writeByte(_type.ordinal());
     }
 
 }

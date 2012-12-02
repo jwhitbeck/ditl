@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class StatefulFilterConverter<E, S> implements Converter {
+public class StatefulFilterConverter<E extends Item, S extends Item> implements Converter {
 
     private final StatefulTrace<E, S> _to;
     private final StatefulTrace<E, S> _from;

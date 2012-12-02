@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License           *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.       *
  *******************************************************************************/
-package ditl;
+package ditl.graphs.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,12 +32,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import ditl.cli.CLI;
+
 @RunWith(Suite.class)
 @SuiteClasses({
         TestRWP.Import.class,
         TestRWP.CompareExport.class,
         TestRWP.CompareAnalyze.class })
-public class TestRWP extends TraceTest {
+public class TestRWP {
 
     @BeforeClass
     public static void checkStore() throws IOException {
@@ -46,38 +48,8 @@ public class TestRWP extends TraceTest {
             storeDir.mkdirs();
     }
 
-    private static String getStorePath() {
-        return getStorePath("rwp");
-    }
-
-    private static String getResourcePath() {
-        return getResourcePath("rwp");
-    }
-
-    private static void graphsCli(String fmtCmd) throws IOException {
-        cli(String.format("graphs " + fmtCmd, getStorePath()));
-    }
-
-    private static void graphsCliToFile(String fmtCmd, String fileName) throws IOException {
-        FileOutputStream fos = new FileOutputStream(new File(getStorePath() + "/" + fileName));
-        System.setOut(new PrintStream(fos));
-        graphsCli(fmtCmd);
-        System.setOut(System.out);
-    }
-
-    private static void graphsCliAndCompare(String fmtCmd, String fileName) throws IOException {
-        graphsCliToFile(fmtCmd, fileName);
-        compareWithResource(fileName);
-    }
-
-    private static void compareWithResource(String fileName) throws IOException {
-        assertEquals(fileName + " differs!",
-                FileUtils.readFileToString(new File(getStorePath() + "/" + fileName)),
-                FileUtils.readFileToString(new File(getResourcePath() + "/" + fileName)));
-    }
-
     public static class Import {
-
+    
         @Test
         public void importAll() throws IOException {
             // 1. movement
@@ -106,32 +78,32 @@ public class TestRWP extends TraceTest {
     }
 
     public static class CompareExport {
-
+    
         @Test
         public void compareEdges() throws IOException {
             graphsCliAndCompare("export-edges --dest-time-unit ms %s", "edges.crawdad");
         }
-
+    
         @Test
         public void compareBufferedEdges() throws IOException {
             graphsCliAndCompare("export-edges --dest-time-unit ms --edges buffered_edges %s", "buffered_edges.crawdad");
         }
-
+    
         @Test
         public void compareGroupEdges() throws IOException {
             graphsCliAndCompare("export-edges --dest-time-unit ms --edges group_edges %s", "group_edges.crawdad");
         }
-
+    
         @Test
         public void compareArcs() throws IOException {
             graphsCliAndCompare("export-arcs --dest-time-unit ms %s", "arcs.crawdad");
         }
-
+    
         @Test
         public void compareResampled() throws IOException {
             graphsCliAndCompare("export-edges --dest-time-unit ms --edges resampled %s", "resampled.crawdad");
         }
-
+    
         @Test
         public void compareReachable() throws IOException {
             graphsCliAndCompare("export-arcs --dest-time-unit ms --arcs resampled_t1000_d5000 %s", "reachable.crawdad");
@@ -139,66 +111,100 @@ public class TestRWP extends TraceTest {
     }
 
     public static class CompareAnalyze {
-
+    
         @Test
         public void compareAnyContacts() throws IOException {
             graphsCliAndCompare("analyze --any-contacts %s", "any_contacts.report");
         }
-
+    
         @Test
         public void compareClustering() throws IOException {
             graphsCliAndCompare("analyze --clustering %s", "clustering.report");
         }
-
+    
         @Test
         public void compareContacts() throws IOException {
             graphsCliAndCompare("analyze --contacts %s", "contacts.report");
         }
-
+    
         @Test
         public void compareFirstContactTime() throws IOException {
             graphsCliAndCompare("analyze --first-contact-time %s", "first_contact_time.report");
         }
-
+    
         @Test
         public void compareGroupSize() throws IOException {
             graphsCliAndCompare("analyze --group-size %s", "group_size.report");
         }
-
+    
         @Test
         public void compareCCSize() throws IOException {
             graphsCliAndCompare("analyze --group-size --groups ccs %s", "group_size.ccs.report");
         }
-
+    
         @Test
         public void compareInterAnyContacts() throws IOException {
             graphsCliAndCompare("analyze --inter-any-contacts %s", "inter_any_contacts.report");
         }
-
+    
         @Test
         public void compareInterContacts() throws IOException {
             graphsCliAndCompare("analyze --inter-contacts %s", "inter_contacts.report");
         }
-
+    
         @Test
         public void compareNodeCount() throws IOException {
             graphsCliAndCompare("analyze --node-count %s", "node_count.report");
         }
-
+    
         @Test
         public void compareNodeDegree() throws IOException {
             graphsCliAndCompare("analyze --node-degree %s", "node_degree.report");
         }
-
+    
         @Test
         public void compareNumContacts() throws IOException {
             graphsCliAndCompare("analyze --num-contacts %s", "num_contacts.report");
         }
-
+    
         @Test
         public void compareReachability() throws IOException {
             graphsCliAndCompare("analyze --reachability --arcs resampled_t1000_d5000 %s", "reachability.report");
         }
+    }
+
+    private static String getStorePath() {
+        return "target/test-data/rwp";
+    }
+
+    private static void cli(String cmd) throws IOException {
+        CLI.main(cmd.split(" "));
+    }
+
+    private static String getResourcePath() {
+        return "src/test/resources/rwp";
+    }
+
+    private static void graphsCli(String fmtCmd) throws IOException {
+        cli(String.format("graphs " + fmtCmd, getStorePath()));
+    }
+
+    private static void graphsCliToFile(String fmtCmd, String fileName) throws IOException {
+        FileOutputStream fos = new FileOutputStream(new File(getStorePath() + "/" + fileName));
+        System.setOut(new PrintStream(fos));
+        graphsCli(fmtCmd);
+        System.setOut(System.out);
+    }
+
+    private static void graphsCliAndCompare(String fmtCmd, String fileName) throws IOException {
+        graphsCliToFile(fmtCmd, fileName);
+        compareWithResource(fileName);
+    }
+
+    private static void compareWithResource(String fileName) throws IOException {
+        assertEquals(fileName + " differs!",
+                FileUtils.readFileToString(new File(getStorePath() + "/" + fileName)),
+                FileUtils.readFileToString(new File(getResourcePath() + "/" + fileName)));
     }
 
 }

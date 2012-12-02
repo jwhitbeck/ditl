@@ -39,6 +39,7 @@ public abstract class Store {
     final protected static String snapshotsFile = "snapshots";
     final protected static String infoFile = "info";
     final protected static String traceFile = "trace";
+    final protected static String indexFile = "index";
 
     protected String separator = "/";
 
@@ -102,6 +103,10 @@ public abstract class Store {
         return name + separator + snapshotsFile;
     }
 
+    String indexFile(String name) {
+        return name + separator + indexFile;
+    }
+
     public Collection<Trace<?>> listTraces() {
         return traces.values();
     }
@@ -120,15 +125,6 @@ public abstract class Store {
             if (klass.equals(trace.getClass()))
                 list.add(trace);
         return list;
-    }
-
-    Reader.InputStreamOpener getStreamOpener(final String name) {
-        return new Reader.InputStreamOpener() {
-            @Override
-            public InputStream open() throws IOException {
-                return getInputStream(name);
-            }
-        };
     }
 
     public abstract boolean hasFile(String name);
@@ -199,12 +195,12 @@ public abstract class Store {
         traces.put(name, trace);
     }
 
-    Trace<?> buildTrace(String name, PersistentMap info, Class<? extends Trace<?>> klass) throws LoadTraceException {
+    @SuppressWarnings("unchecked")
+    <T extends Trace<?>> T buildTrace(String name, PersistentMap info, Class<T> klass) throws LoadTraceException {
         try {
             final Constructor<?> ctor = klass.getConstructor(new Class[] { Store.class, String.class, PersistentMap.class });
             info.put(Trace.typeKey, klass.getAnnotation(Trace.Type.class).value());
-            final Trace<?> trace = (Trace<?>) ctor.newInstance(this, name, info);
-            return trace;
+            return (T) ctor.newInstance(this, name, info);
         } catch (final Exception e) {
             throw new LoadTraceException(name);
         }

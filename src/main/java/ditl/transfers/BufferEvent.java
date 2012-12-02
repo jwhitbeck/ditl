@@ -18,9 +18,13 @@
  *******************************************************************************/
 package ditl.transfers;
 
-import ditl.ItemFactory;
+import java.io.IOException;
 
-public class BufferEvent {
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
+import ditl.Item;
+
+public class BufferEvent implements Item {
     public enum Type {
         IN, ADD, REMOVE, OUT
     }
@@ -52,24 +56,17 @@ public class BufferEvent {
         return msg_id;
     }
 
-    public static final class Factory implements ItemFactory<BufferEvent> {
+    public static final class Factory implements Item.Factory<BufferEvent> {
         @Override
-        public BufferEvent fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer id = Integer.parseInt(elems[0]);
-                final Type type = Type.valueOf(elems[1]);
-                switch (type) {
-                    case IN:
-                    case OUT:
-                        return new BufferEvent(id, type);
-                    default:
-                        final Integer msgId = Integer.parseInt(elems[2]);
-                        return new BufferEvent(id, msgId, type);
-                }
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
+        public BufferEvent fromBinaryStream(CodedInputStream in) throws IOException {
+            int id = in.readSInt();
+            Type type = Type.values()[in.readByte()];
+            switch (type) {
+                case IN:
+                case OUT:
+                    return new BufferEvent(id, type);
+                default:
+                    return new BufferEvent(id, in.readSInt(), type);
             }
         }
     }
@@ -83,5 +80,13 @@ public class BufferEvent {
             default:
                 return _id + " " + _type + " " + msg_id;
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(_id);
+        out.writeByte(_type.ordinal());
+        if (_type != Type.IN && _type != Type.OUT)
+            out.writeSInt(msg_id);
     }
 }

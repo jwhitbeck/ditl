@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class StatefulMergeConverter<E, S> implements Converter {
+public class StatefulMergeConverter<E extends Item, S extends Item> implements Converter {
 
     private final StatefulTrace<E, S> _to;
     private final Collection<StatefulTrace<E, S>> from_collection;

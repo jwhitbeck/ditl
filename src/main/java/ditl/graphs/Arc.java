@@ -18,12 +18,15 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Set;
 
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
 import ditl.Filter;
-import ditl.ItemFactory;
+import ditl.Item;
 
-public final class Arc implements Couple {
+public final class Arc implements Item, Couple {
 
     final Integer _from;
     final Integer _to;
@@ -51,18 +54,10 @@ public final class Arc implements Couple {
         return _to;
     }
 
-    public final static class Factory implements ItemFactory<Arc> {
+    public final static class Factory implements Item.Factory<Arc> {
         @Override
-        public Arc fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer from = Integer.parseInt(elems[0]);
-                final Integer to = Integer.parseInt(elems[1]);
-                return new Arc(from, to);
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public Arc fromBinaryStream(CodedInputStream in) throws IOException {
+            return new Arc(in.readSInt(), in.readSInt());
         }
     }
 
@@ -98,6 +93,12 @@ public final class Arc implements Couple {
                 return item;
             return null;
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(_from);
+        out.writeSInt(_to);
     }
 
 }

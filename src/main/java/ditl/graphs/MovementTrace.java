@@ -164,7 +164,7 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
         }
 
         @Override
-        public void write(long time, MovementEvent event) throws IOException {
+        public void write(long time, MovementEvent event) {
             super.write(time, event);
             update(event.dest());
         }

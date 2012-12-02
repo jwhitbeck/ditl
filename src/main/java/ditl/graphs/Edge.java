@@ -18,12 +18,15 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Set;
 
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
 import ditl.Filter;
-import ditl.ItemFactory;
+import ditl.Item;
 
-public final class Edge implements Couple {
+public final class Edge implements Couple, Item {
 
     final Integer id1;
     final Integer id2;
@@ -48,18 +51,10 @@ public final class Edge implements Couple {
         return id2;
     }
 
-    public static final class Factory implements ItemFactory<Edge> {
+    public static final class Factory implements Item.Factory<Edge> {
         @Override
-        public Edge fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer id1 = Integer.parseInt(elems[0]);
-                final Integer id2 = Integer.parseInt(elems[1]);
-                return new Edge(id1, id2);
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public Edge fromBinaryStream(CodedInputStream in) throws IOException {
+            return new Edge(in.readSInt(), in.readSInt());
         }
     }
 
@@ -91,6 +86,12 @@ public final class Edge implements Couple {
                 return item;
             return null;
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(id1);
+        out.writeSInt(id2);
     }
 
 }

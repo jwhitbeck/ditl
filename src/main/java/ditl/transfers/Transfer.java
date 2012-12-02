@@ -18,10 +18,14 @@
  *******************************************************************************/
 package ditl.transfers;
 
-import ditl.ItemFactory;
+import java.io.IOException;
+
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
+import ditl.Item;
 import ditl.graphs.Arc;
 
-public class Transfer {
+public class Transfer implements Item {
 
     Integer msg_id;
     Integer _from;
@@ -62,19 +66,17 @@ public class Transfer {
         return msg_id + " " + _from + " " + _to;
     }
 
-    public static final class Factory implements ItemFactory<Transfer> {
+    public static final class Factory implements Item.Factory<Transfer> {
         @Override
-        public Transfer fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer msgId = Integer.parseInt(elems[0]);
-                final Integer from = Integer.parseInt(elems[1]);
-                final Integer to = Integer.parseInt(elems[2]);
-                return new Transfer(msgId, from, to);
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public Transfer fromBinaryStream(CodedInputStream in) throws IOException {
+            return new Transfer(in.readSInt(), in.readSInt(), in.readSInt());
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(msg_id);
+        out.writeSInt(_from);
+        out.writeSInt(_to);
     }
 }

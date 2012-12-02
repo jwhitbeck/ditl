@@ -18,15 +18,18 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
 import ditl.Filter;
 import ditl.GroupSpecification;
-import ditl.ItemFactory;
+import ditl.Item;
 
-public class Group {
+public class Group implements Item {
 
     Integer _gid;
     Set<Integer> _members;
@@ -49,18 +52,15 @@ public class Group {
         return _members.size();
     }
 
-    public final static class Factory implements ItemFactory<Group> {
+    public final static class Factory implements Item.Factory<Group> {
         @Override
-        public Group fromString(String s) {
-            final String[] elems = s.trim().split(" ", 2);
-            try {
-                final Integer gid = Integer.parseInt(elems[0]);
-                final Set<Integer> members = GroupSpecification.parse(elems[1]);
-                return new Group(gid, members);
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public Group fromBinaryStream(CodedInputStream in) throws IOException {
+            int gid = in.readSInt();
+            int n = in.readInt();
+            Set<Integer> members = new HashSet<Integer>();
+            for (int i = 0; i < n; ++i)
+                members.add(in.readSInt());
+            return new Group(gid, members);
         }
     }
 
@@ -109,5 +109,14 @@ public class Group {
             return f_group;
         }
 
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(_gid);
+        out.writeInt(_members.size());
+        for (Integer m : _members) {
+            out.writeSInt(m);
+        }
     }
 }

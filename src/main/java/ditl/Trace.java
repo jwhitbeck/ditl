@@ -25,7 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Set;
 
-public abstract class Trace<E> {
+public abstract class Trace<E extends Item> {
 
     @Target({ ElementType.TYPE })
     @Retention(RetentionPolicy.RUNTIME)
@@ -62,17 +62,17 @@ public abstract class Trace<E> {
     protected Store _store;
     protected PersistentMap _info;
 
-    protected ItemFactory<E> event_factory;
+    protected Item.Factory<E> event_factory;
 
-    public interface Copyable<E> {
+    public interface Copyable<E extends Item> {
         public void copyOverTraceInfo(Writer<E> writer);
     }
 
-    public interface Filterable<E> extends Copyable<E> {
+    public interface Filterable<E extends Item> extends Copyable<E> {
         public Filter<E> eventFilter(Set<Integer> group);
     }
 
-    public Trace(Store store, String name, PersistentMap info, ItemFactory<E> itemFactory) throws IOException {
+    public Trace(Store store, String name, PersistentMap info, Item.Factory<E> itemFactory) throws IOException {
         _store = store;
         _name = name;
         _info = info;
@@ -148,8 +148,7 @@ public abstract class Trace<E> {
     }
 
     public Reader<E> getReader(int priority, long offset) throws IOException {
-        return new Reader<E>(_store, _store.getStreamOpener(_store.traceFile(_name)),
-                maxUpdateInterval(), event_factory, priority, offset);
+        return new Reader<E>(_store, _name, event_factory, priority, offset);
     }
 
     public Reader<E> getReader(int priority) throws IOException {
@@ -164,7 +163,7 @@ public abstract class Trace<E> {
         return new Writer<E>(_store, _name, _info);
     }
 
-    public ItemFactory<E> factory() {
+    public Item.Factory<E> factory() {
         return event_factory;
     }
 

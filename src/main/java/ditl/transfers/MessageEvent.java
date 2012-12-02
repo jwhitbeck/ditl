@@ -18,9 +18,13 @@
  *******************************************************************************/
 package ditl.transfers;
 
-import ditl.ItemFactory;
+import java.io.IOException;
 
-public class MessageEvent {
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
+import ditl.Item;
+
+public class MessageEvent implements Item {
 
     public enum Type {
         NEW, EXPIRE
@@ -46,23 +50,21 @@ public class MessageEvent {
         return new Message(msg_id);
     }
 
-    public static final class Factory implements ItemFactory<MessageEvent> {
+    public static final class Factory implements Item.Factory<MessageEvent> {
         @Override
-        public MessageEvent fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer msgId = Integer.parseInt(elems[0]);
-                final Type type = Type.valueOf(elems[1]);
-                return new MessageEvent(msgId, type);
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public MessageEvent fromBinaryStream(CodedInputStream in) throws IOException {
+            return new MessageEvent(in.readSInt(), Type.values()[in.readByte()]);
         }
     }
 
     @Override
     public String toString() {
         return msg_id + " " + _type;
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(msg_id);
+        out.writeByte(_type.ordinal());
     }
 }

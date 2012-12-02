@@ -18,32 +18,19 @@
  *******************************************************************************/
 package ditl;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Collection;
 import java.util.Set;
 
-public class StatefulWriter<E, S> extends Writer<E> {
+public class StatefulWriter<E extends Item, S extends Item> extends Writer<E> {
 
-    private final static int n_event_trigger = 10000; // trigger a snapshot
-                                                      // every 10,000 events
+    private final StateUpdater<E, S> _updater;
 
-    long last_snap;
-    long next_snap_trigger = Trace.INFINITY;
-    long state_max_interval;
-    long state_min_interval;
-    int event_count = 0;
-    BufferedWriter snap_writer;
-    StateUpdater<E, S> _updater;
+    final static byte STATE = 1;
 
     public StatefulWriter(Store store, String name, StateUpdater<E, S> updater, PersistentMap info) throws IOException {
         super(store, name, info);
-        last_snap = -Trace.INFINITY;
         _updater = updater;
-        snap_writer = new BufferedWriter(new OutputStreamWriter(_store.getOutputStream(_store.snapshotsFile(_name))));
-        state_min_interval = Trace.INFINITY;
-        state_max_interval = -Trace.INFINITY;
     }
 
     public Set<S> states() {
@@ -51,60 +38,24 @@ public class StatefulWriter<E, S> extends Writer<E> {
     }
 
     @Override
-    public void write(long time, E event) throws IOException {
+    public void write(long time, E event) {
         super.write(time, event);
-        event_count++;
         _updater.handleEvent(time, event);
-    }
-
-    @Override
-    void updateTime(long time) throws IOException {
-        super.updateTime(time);
-        if (last_snap == -Trace.INFINITY) { // no snap has yet been made
-            last_snap = last_time;
-            write_snapshot(last_snap);
-        } else if (time > next_snap_trigger) {
-            write_snapshot(time);
-            final long dt = time - last_snap;
-            if (dt > state_max_interval)
-                state_max_interval = dt;
-            if (dt < state_min_interval)
-                state_min_interval = dt;
-            next_snap_trigger = Trace.INFINITY;
-            last_snap = time;
-            event_count = 0;
-        } else if (event_count > n_event_trigger)
-            next_snap_trigger = time;
-    }
-
-    @Override
-    void setRemainingInfo() {
-        super.setRemainingInfo();
-        if (state_max_interval < 0) { // single event trace
-            state_max_interval = Long.parseLong(_info.get(Trace.maxTimeKey)) - Long.parseLong(_info.get(Trace.minTimeKey));
-            state_min_interval = state_max_interval;
-        }
-        _info.setIfUnset(Trace.stateMaxUpdateIntervalKey, state_max_interval);
-        _info.setIfUnset(Trace.stateMinUpdateIntervalKey, state_min_interval);
-        _info.setIfUnset(Trace.lastSnapTimeKey, last_snap);
-    }
-
-    @Override
-    public void close() throws IOException {
-        snap_writer.close();
-        super.close();
     }
 
     public void setInitState(long time, Collection<S> states) throws IOException {
         _updater.setState(states);
-        write_snapshot(time);
-        last_snap = time;
         min_time = time;
+        markPosition(time);
     }
 
-    private void write_snapshot(long time) throws IOException {
-        snap_writer.write(time + "\n");
-        for (final S state : _updater.states())
-            snap_writer.write(state + "\n");
+    @Override
+    void markPosition(long time) throws IOException {
+        super.markPosition(time);
+        for (S state : _updater.states()) {
+            state.write(buffer);
+        }
+        writeItemBlockHeader(STATE, time);
+        writeItemBlock();
     }
 }

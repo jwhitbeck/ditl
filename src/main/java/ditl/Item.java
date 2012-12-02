@@ -20,20 +20,12 @@ package ditl;
 
 import java.io.IOException;
 
-import ditl.cli.CLI;
+public interface Item {
 
-public abstract class TraceTest {
-    
-    public static void cli(String cmd) throws IOException{
-        CLI.main(cmd.split(" "));
-    }
-    
-    public static String getStorePath(String name){
-        return "target/test-data/" + name;
-    }
-    
-    public static String getResourcePath(String name){
-        return "src/test/resources/" + name;
+    public void write(CodedBuffer out);
+
+    public interface Factory<I> {
+        public I fromBinaryStream(CodedInputStream in) throws IOException;
     }
 
 }

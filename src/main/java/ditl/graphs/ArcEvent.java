@@ -18,12 +18,15 @@
  *******************************************************************************/
 package ditl.graphs;
 
+import java.io.IOException;
 import java.util.Set;
 
+import ditl.CodedBuffer;
+import ditl.CodedInputStream;
 import ditl.Filter;
-import ditl.ItemFactory;
+import ditl.Item;
 
-public final class ArcEvent {
+public final class ArcEvent implements Item {
 
     public enum Type {
         UP, DOWN
@@ -61,20 +64,10 @@ public final class ArcEvent {
         return new Arc(_from, _to);
     }
 
-    public static final class Factory implements ItemFactory<ArcEvent> {
+    public static final class Factory implements Item.Factory<ArcEvent> {
         @Override
-        public ArcEvent fromString(String s) {
-            final String[] elems = s.trim().split(" ");
-            try {
-                final Integer from = Integer.parseInt(elems[0]);
-                final Integer to = Integer.parseInt(elems[1]);
-                final Type type = Type.valueOf(elems[2]);
-                return new ArcEvent(from, to, type);
-
-            } catch (final Exception e) {
-                System.err.println("Error parsing '" + s + "': " + e.getMessage());
-                return null;
-            }
+        public ArcEvent fromBinaryStream(CodedInputStream in) throws IOException {
+            return new ArcEvent(in.readSInt(), in.readSInt(), Type.values()[in.readByte()]);
         }
     }
 
@@ -96,6 +89,13 @@ public final class ArcEvent {
                 return item;
             return null;
         }
+    }
+
+    @Override
+    public void write(CodedBuffer out) {
+        out.writeSInt(_from);
+        out.writeSInt(_to);
+        out.writeByte(_type.ordinal());
     }
 
 }

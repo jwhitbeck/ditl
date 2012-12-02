@@ -125,11 +125,10 @@ public abstract class WritableStore extends Store {
         return newTrace(name, getTraceClass(type), force);
     }
 
-    public Trace<?> newTrace(String name, Class<? extends Trace<?>> klass, boolean force) throws AlreadyExistsException, LoadTraceException {
+    public <T extends Trace<?>> T newTrace(String name, Class<T> klass, boolean force) throws AlreadyExistsException, LoadTraceException {
         if (traces.containsKey(name) && !force)
             throw new AlreadyExistsException(name);
-        final Trace<?> trace = buildTrace(name, new PersistentMap(), klass);
-        return trace;
+        return buildTrace(name, new PersistentMap(), klass);
     }
 
 }

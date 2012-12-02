@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-public class MergeConverter<I> implements Converter {
+public class MergeConverter<I extends Item> implements Converter {
 
     private final Trace<I> _to;
     private final Collection<Trace<I>> from_collection;

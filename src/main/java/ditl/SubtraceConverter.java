@@ -21,7 +21,7 @@ package ditl;
 import java.io.IOException;
 import java.util.List;
 
-public class SubtraceConverter<I> implements Converter {
+public class SubtraceConverter<I extends Item> implements Converter {
 
     private final Trace<I> _to;
     private final Trace<I> _from;
