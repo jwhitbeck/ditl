@@ -18,9 +18,12 @@
  *******************************************************************************/
 package ditl;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,6 +32,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import net.sf.json.JSONObject;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -107,10 +112,13 @@ public abstract class Store {
         return trace.name() + separator + resource;
     }
 
-    PersistentMap readTraceInfo(String path) throws IOException {
-        final PersistentMap info = new PersistentMap();
-        info.read(getInputStream(infoFile(path)));
-        return info;
+    private String getFileAsString(String path) throws IOException {
+        StringWriter sw = new StringWriter();
+        BufferedReader bis = new BufferedReader(new InputStreamReader(getInputStream(path)));
+        String line = null;
+        while ((line = bis.readLine()) != null)
+            sw.write(line);
+        return sw.toString();
     }
 
     public static Store open(File... files) throws IOException, ClassNotFoundException {
@@ -151,17 +159,17 @@ public abstract class Store {
     }
 
     public void loadTrace(String name) throws IOException, ClassNotFoundException {
-        final PersistentMap _info = readTraceInfo(name);
-        final Trace<?> trace = buildTrace(name, _info, type_class_map.get(_info.get(Trace.typeKey)));
+        final JSONObject config = JSONObject.fromObject(getFileAsString(infoFile(name)));
+        final Trace<?> trace = buildTrace(name, config, type_class_map.get(config.get(Trace.typeKey)));
         traces.put(name, trace);
     }
 
     @SuppressWarnings("unchecked")
-    <T extends Trace<?>> T buildTrace(String name, PersistentMap info, Class<T> klass) throws ClassNotFoundException {
+    <T extends Trace<?>> T buildTrace(String name, JSONObject config, Class<T> klass) throws ClassNotFoundException {
         try {
-            final Constructor<?> ctor = klass.getConstructor(new Class[] { Store.class, String.class, PersistentMap.class });
-            info.put(Trace.typeKey, klass.getAnnotation(Trace.Type.class).value());
-            return (T) ctor.newInstance(this, name, info);
+            final Constructor<?> ctor = klass.getConstructor(new Class[] { Store.class, String.class, JSONObject.class });
+            config.put(Trace.typeKey, klass.getAnnotation(Trace.Type.class).value());
+            return (T) ctor.newInstance(this, name, config);
         } catch (final Exception e) {
             throw new ClassNotFoundException("Failed to instantiate trace class for '" + name + "'");
         }

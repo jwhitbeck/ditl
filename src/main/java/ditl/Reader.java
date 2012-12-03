@@ -35,7 +35,6 @@ public class Reader<I extends Item> implements Generator {
     Bus<I> _bus = new Bus<I>();
     final private int _priority;
     final long _offset;
-    final private String _name;
 
     byte next_flag;
     private int next_block_bytes;
@@ -44,14 +43,15 @@ public class Reader<I extends Item> implements Generator {
     final SeekMap seek_map;
 
     private final Store _store;
+    private final Trace<I> _trace;
 
-    Reader(Store store, String name, Item.Factory<I> factory, int priority, long offset) throws IOException {
+    Reader(Trace<I> trace, int priority, long offset) throws IOException {
         _offset = offset;
-        _factory = factory;
+        _trace = trace;
+        _factory = _trace.factory();
         _priority = priority;
-        _store = store;
-        _name = name;
-        seek_map = SeekMap.open(_store.getInputStream(_store.indexFile(_name)));
+        _store = trace._store;
+        seek_map = SeekMap.open(_store.getInputStream(_trace.indexFile()));
         init();
     }
 
@@ -125,7 +125,7 @@ public class Reader<I extends Item> implements Generator {
 
     private void init() throws IOException {
         _store.notifyOpen(this);
-        cis = new CodedInputStream(new BufferedInputStream(_store.getInputStream(_store.traceFile(_name))));
+        cis = new CodedInputStream(new BufferedInputStream(_store.getInputStream(_trace.traceFile())));
         prev_time = Long.MIN_VALUE;
         buffer = Collections.emptyList();
         cur_time = prev_time;

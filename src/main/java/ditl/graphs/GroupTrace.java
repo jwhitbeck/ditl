@@ -25,9 +25,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
 import ditl.Filter;
+import ditl.IdMap;
 import ditl.Listener;
-import ditl.PersistentMap;
 import ditl.StateUpdater;
 import ditl.StateUpdaterFactory;
 import ditl.StatefulReader;
@@ -41,16 +42,11 @@ public class GroupTrace extends StatefulTrace<GroupEvent, Group>
         implements StatefulTrace.Filterable<GroupEvent, Group> {
 
     final public static String labelsKey = "labels";
-    final public static String delim = ",";
 
-    private final Map<Integer, String> labels = new HashMap<Integer, String>();
+    private IdMap labels = null;
 
-    public String getLabel(Integer id) {
-        return labels.get(id);
-    }
-
-    public boolean hasLabels() {
-        return !labels.isEmpty();
+    public IdMap getGroupIdMap() {
+        return labels;
     }
 
     public Set<Group> staticGroups() throws IOException {
@@ -117,22 +113,16 @@ public class GroupTrace extends StatefulTrace<GroupEvent, Group>
         public Listener<GroupEvent> groupEventListener();
     }
 
-    public GroupTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info, new GroupEvent.Factory(), new Group.Factory(),
+    public GroupTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config, new GroupEvent.Factory(), new Group.Factory(),
                 new StateUpdaterFactory<GroupEvent, Group>() {
                     @Override
                     public StateUpdater<GroupEvent, Group> getNew() {
                         return new GroupTrace.Updater();
                     }
                 });
-        final String labelsString = getValue(labelsKey);
-        if (labelsString != null) {
-            int id = 0;
-            for (final String label : labelsString.split(delim)) {
-                labels.put(id, label);
-                id++;
-            }
-        }
+        if (config.has(labelsKey))
+            labels = new IdMap(config.getJSONObject(labelsKey));
     }
 
     @Override
@@ -147,7 +137,6 @@ public class GroupTrace extends StatefulTrace<GroupEvent, Group>
 
     @Override
     public void copyOverTraceInfo(Writer<GroupEvent> writer) {
-        final String labels = getValue(labelsKey);
         if (labels != null)
             writer.setProperty(labelsKey, labels);
     }

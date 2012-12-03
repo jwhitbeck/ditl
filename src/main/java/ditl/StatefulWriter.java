@@ -28,9 +28,9 @@ public class StatefulWriter<E extends Item, S extends Item> extends Writer<E> {
 
     final static byte STATE = 1;
 
-    public StatefulWriter(Store store, String name, StateUpdater<E, S> updater, PersistentMap info) throws IOException {
-        super(store, name, info);
-        _updater = updater;
+    public StatefulWriter(StatefulTrace<E, S> trace) throws IOException {
+        super(trace);
+        _updater = trace.getNewUpdaterFactory();
     }
 
     public Set<S> states() {

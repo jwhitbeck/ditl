@@ -21,6 +21,8 @@ package ditl;
 import java.io.IOException;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
+
 public abstract class StatefulTrace<E extends Item, S extends Item> extends Trace<E> {
 
     protected Item.Factory<S> state_factory;
@@ -30,22 +32,17 @@ public abstract class StatefulTrace<E extends Item, S extends Item> extends Trac
         public Filter<S> stateFilter(Set<Integer> group);
     }
 
-    public StatefulTrace(Store store, String name, PersistentMap info, Item.Factory<E> itemFactory,
+    public StatefulTrace(Store store, String name, JSONObject config, Item.Factory<E> itemFactory,
             Item.Factory<S> stateFactory, StateUpdaterFactory<E, S> stateUpdaterFactory)
             throws IOException {
-        super(store, name, info, itemFactory);
+        super(store, name, config, itemFactory);
         state_factory = stateFactory;
         updater_factory = stateUpdaterFactory;
     }
 
     @Override
     public StatefulReader<E, S> getReader(int priority, long offset) throws IOException {
-        return new StatefulReader<E, S>(_store,
-                _name,
-                event_factory,
-                state_factory,
-                updater_factory.getNew(),
-                priority, offset);
+        return new StatefulReader<E, S>(this, priority, offset);
     }
 
     @Override
@@ -60,15 +57,20 @@ public abstract class StatefulTrace<E extends Item, S extends Item> extends Trac
 
     @Override
     public StatefulWriter<E, S> getWriter() throws IOException {
-        return new StatefulWriter<E, S>(_store, _name, updater_factory.getNew(), _info);
+        return new StatefulWriter<E, S>(this);
     }
 
     public Item.Factory<S> stateFactory() {
         return state_factory;
     }
 
+    @Deprecated
     public StateUpdaterFactory<E, S> stateUpdateFactory() {
         return updater_factory;
+    }
+
+    public StateUpdater<E, S> getNewUpdaterFactory() {
+        return updater_factory.getNew();
     }
 
 }

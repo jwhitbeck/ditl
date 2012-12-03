@@ -49,7 +49,7 @@ public class TestRWP {
     }
 
     public static class Import {
-    
+
         @Test
         public void importAll() throws IOException {
             // 1. movement
@@ -61,7 +61,7 @@ public class TestRWP {
             // 4. connected components
             graphsCli("edges-to-ccs --groups ccs --force %s");
             // 5. groups
-            graphsCli("import-groups --force %s 0:3 4,6 5,7:9");
+            graphsCli("import-groups --force %s [{members:[[0,3]]},{members:[4,6]},{members:[5,[7,9]]}]");
             // 6. resample with 1 second
             graphsCli("resample --force %s 1");
             // 7. calculate arcs from beacons
@@ -78,32 +78,32 @@ public class TestRWP {
     }
 
     public static class CompareExport {
-    
+
         @Test
         public void compareEdges() throws IOException {
             graphsCliAndCompare("export-edges --dest-time-unit ms %s", "edges.crawdad");
         }
-    
+
         @Test
         public void compareBufferedEdges() throws IOException {
             graphsCliAndCompare("export-edges --dest-time-unit ms --edges buffered_edges %s", "buffered_edges.crawdad");
         }
-    
+
         @Test
         public void compareGroupEdges() throws IOException {
             graphsCliAndCompare("export-edges --dest-time-unit ms --edges group_edges %s", "group_edges.crawdad");
         }
-    
+
         @Test
         public void compareArcs() throws IOException {
             graphsCliAndCompare("export-arcs --dest-time-unit ms %s", "arcs.crawdad");
         }
-    
+
         @Test
         public void compareResampled() throws IOException {
             graphsCliAndCompare("export-edges --dest-time-unit ms --edges resampled %s", "resampled.crawdad");
         }
-    
+
         @Test
         public void compareReachable() throws IOException {
             graphsCliAndCompare("export-arcs --dest-time-unit ms --arcs resampled_t1000_d5000 %s", "reachable.crawdad");
@@ -111,62 +111,62 @@ public class TestRWP {
     }
 
     public static class CompareAnalyze {
-    
+
         @Test
         public void compareAnyContacts() throws IOException {
             graphsCliAndCompare("analyze --any-contacts %s", "any_contacts.report");
         }
-    
+
         @Test
         public void compareClustering() throws IOException {
             graphsCliAndCompare("analyze --clustering %s", "clustering.report");
         }
-    
+
         @Test
         public void compareContacts() throws IOException {
             graphsCliAndCompare("analyze --contacts %s", "contacts.report");
         }
-    
+
         @Test
         public void compareFirstContactTime() throws IOException {
             graphsCliAndCompare("analyze --first-contact-time %s", "first_contact_time.report");
         }
-    
+
         @Test
         public void compareGroupSize() throws IOException {
             graphsCliAndCompare("analyze --group-size %s", "group_size.report");
         }
-    
+
         @Test
         public void compareCCSize() throws IOException {
             graphsCliAndCompare("analyze --group-size --groups ccs %s", "group_size.ccs.report");
         }
-    
+
         @Test
         public void compareInterAnyContacts() throws IOException {
             graphsCliAndCompare("analyze --inter-any-contacts %s", "inter_any_contacts.report");
         }
-    
+
         @Test
         public void compareInterContacts() throws IOException {
             graphsCliAndCompare("analyze --inter-contacts %s", "inter_contacts.report");
         }
-    
+
         @Test
         public void compareNodeCount() throws IOException {
             graphsCliAndCompare("analyze --node-count %s", "node_count.report");
         }
-    
+
         @Test
         public void compareNodeDegree() throws IOException {
             graphsCliAndCompare("analyze --node-degree %s", "node_degree.report");
         }
-    
+
         @Test
         public void compareNumContacts() throws IOException {
             graphsCliAndCompare("analyze --num-contacts %s", "num_contacts.report");
         }
-    
+
         @Test
         public void compareReachability() throws IOException {
             graphsCliAndCompare("analyze --reachability --arcs resampled_t1000_d5000 %s", "reachability.report");

@@ -23,9 +23,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
 import ditl.Filter;
 import ditl.Listener;
-import ditl.PersistentMap;
 import ditl.StateUpdater;
 import ditl.StateUpdaterFactory;
 import ditl.StatefulTrace;
@@ -69,15 +69,15 @@ public class PresenceTrace extends StatefulTrace<PresenceEvent, Presence>
         public Listener<PresenceEvent> presenceEventListener();
     }
 
-    public PresenceTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info, new PresenceEvent.Factory(), new Presence.Factory(),
+    public PresenceTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config, new PresenceEvent.Factory(), new Presence.Factory(),
                 new StateUpdaterFactory<PresenceEvent, Presence>() {
                     @Override
                     public StateUpdater<PresenceEvent, Presence> getNew() {
                         return new PresenceTrace.Updater();
                     }
                 });
-        info.setIfUnset(Trace.defaultPriorityKey, defaultPriority);
+        setIfUnset(Trace.defaultPriorityKey, defaultPriority);
     }
 
     @Override

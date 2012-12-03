@@ -28,6 +28,8 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.json.JSONObject;
+
 public abstract class WritableStore extends Store {
 
     private final Map<String, Writer<?>> openWriters = new HashMap<String, Writer<?>>();
@@ -114,7 +116,7 @@ public abstract class WritableStore extends Store {
     public <T extends Trace<?>> T newTrace(String name, Class<T> klass, boolean force) throws IOException, ClassNotFoundException {
         if (traces.containsKey(name) && !force)
             throw new IOException("A trace with name '" + name + "' already exists!");
-        return buildTrace(name, new PersistentMap(), klass);
+        return buildTrace(name, new JSONObject(), klass);
     }
 
 }

@@ -27,10 +27,10 @@ public class StatefulReader<E extends Item, S extends Item> extends Reader<E> {
     private Bus<S> state_bus = new Bus<S>();
     private final Item.Factory<S> state_factory;
 
-    StatefulReader(Store store, String name, Item.Factory<E> factory, Item.Factory<S> stateFactory, StateUpdater<E, S> updater, int priority, long offset) throws IOException {
-        super(store, name, factory, priority, offset);
-        _updater = updater;
-        state_factory = stateFactory;
+    StatefulReader(StatefulTrace<E, S> trace, int priority, long offset) throws IOException {
+        super(trace, priority, offset);
+        _updater = trace.getNewUpdaterFactory();
+        state_factory = trace.stateFactory();
     }
 
     public Set<S> referenceState() {

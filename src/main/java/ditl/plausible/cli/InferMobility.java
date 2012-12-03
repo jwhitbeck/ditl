@@ -1,13 +1,12 @@
 package ditl.plausible.cli;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
+import ditl.Groups;
 import ditl.cli.App;
 import ditl.cli.ConvertApp;
 import ditl.graphs.EdgeTrace;
@@ -36,7 +35,7 @@ public class InferMobility extends ConvertApp {
     private final String knownMovementOption = "known-movement";
     private String known_movement_name;
     private final String constraintsOption = "constraints";
-    private String constraints;
+    private JSONObject constraints;
 
     private double width;
     private double height;
@@ -125,11 +124,12 @@ public class InferMobility extends ConvertApp {
         n_steps = Integer.parseInt(cli.getOptionValue(nStepsOption, String.valueOf(PlausibleMobilityConverter.defaultNSteps)));
         update_interval = Long.parseLong(cli.getOptionValue(updateIntervalOption, String.valueOf(PlausibleMobilityConverter.defaultUpdateInterval)));
         warm_time = Long.parseLong(cli.getOptionValue(warmTimeOption, String.valueOf(PlausibleMobilityConverter.defaultWarmTime)));
-        constraints = cli.getOptionValue(constraintsOption);
+        if (cli.hasOption(constraintsOption))
+            constraints = JSONObject.fromObject(cli.getOptionValue(constraintsOption));
         known_movement_name = cli.getOptionValue(knownMovementOption);
         overlap = !cli.hasOption(noOverlapOption);
         if (cli.hasOption(knownNodesOption))
-            known_nodes = parseKnownNodes(cli.getOptionValue(knownNodesOption));
+            known_nodes = Groups.parse(JSONArray.fromObject(cli.getOptionValue(knownNodesOption))).toArray(new Integer[] {});
     }
 
     @Override
@@ -166,7 +166,7 @@ public class InferMobility extends ConvertApp {
         plausible.addGlobalConstraint(new MaxSpeedConstraint(vmax));
 
         if (constraints != null)
-            parseConstraintString(plausible, constraints);
+            setConstraints(plausible);
 
         plausible.convert();
     }
@@ -176,86 +176,35 @@ public class InferMobility extends ConvertApp {
         return "[OPTIONS] STORE WIDTH HEIGHT";
     }
 
-    private final class Elem {
-        String cmd;
-        Map<String, String> map = new HashMap<String, String>();
-
-        Elem(String cmd_string) {
-            final String[] elems = cmd_string.split(",");
-            cmd = elems[0];
-            for (int i = 1; i < elems.length; ++i) {
-                final String[] kv = elems[i].split("@");
-                map.put(kv[0].toLowerCase(), kv[1]);
-            }
-        }
-
-        Integer getInt(String key) {
-            return Integer.parseInt(map.get(key.toLowerCase()));
-        }
-
-        Double getDouble(String key) {
-            return Double.parseDouble(map.get(key.toLowerCase()));
-        }
-
-        boolean hasKey(String key) {
-            return map.containsKey(key.toLowerCase());
-        }
-    }
-
-    private Elem[] stringToElems(String s) {
-        final String[] cmds = s.split(":");
-        final Elem[] elems = new Elem[cmds.length];
-        for (int i = 0; i < cmds.length; ++i)
-            elems[i] = new Elem(cmds[i]);
-        return elems;
-    }
-
-    private void parseConstraintString(PlausibleMobilityConverter pmc, String s) {
-        for (final Elem elem : stringToElems(s)) {
+    private void setConstraints(PlausibleMobilityConverter pmc) {
+        for (final Object key : constraints.keySet()) {
             Constraint c = null;
-            if (elem.cmd.equals("Box")) {
-                if (elem.hasKey("width") && elem.hasKey("height") && elem.hasKey("border")) {
-                    final double w = elem.getDouble("width");
-                    final double h = elem.getDouble("height");
-                    final double b = elem.getDouble("border");
+            JSONObject params = constraints.getJSONObject((String) key);
+            if (key.equals("Box")) {
+                if (params.has("width") && params.has("height") && params.has("border")) {
+                    final double w = params.getDouble("width");
+                    final double h = params.getDouble("height");
+                    final double b = params.getDouble("border");
                     c = new BoxConstraint(w, h, b);
                 }
-            } else if (elem.cmd.equals("Horizontal")) {
-                if (elem.hasKey("height"))
-                    c = new HorizontalConstraint(elem.getDouble("height"));
-            } else if (elem.cmd.equals("Vertical")) {
-                if (elem.hasKey("width"))
-                    c = new VerticalConstraint(elem.getDouble("width"));
-            } else if (elem.cmd.equals("LeftOutlier")) {
-                if (elem.hasKey("node"))
+            } else if (key.equals("Horizontal")) {
+                if (params.has("height"))
+                    c = new HorizontalConstraint(params.getDouble("height"));
+            } else if (key.equals("Vertical")) {
+                if (params.has("width"))
+                    c = new VerticalConstraint(params.getDouble("width"));
+            } else if (key.equals("LeftOutlier")) {
+                if (params.has("node"))
                     c = new LeftOutlierConstraint();
-            } else if (elem.cmd.equals("RightOutlier"))
-                if (elem.hasKey("node"))
+            } else if (key.equals("RightOutlier"))
+                if (params.has("node"))
                     c = new RightOutlierConstraint();
             if (c != null)
-                if (elem.hasKey("node")) {
-                    final Integer id = elem.getInt("node");
+                if (params.has("node")) {
+                    final Integer id = params.getInt("node");
                     pmc.addNodeConstraint(id, c);
                 } else
                     pmc.addGlobalConstraint(c);
         }
-    }
-
-    private Integer[] parseKnownNodes(String s) {
-        final List<Integer> list = new LinkedList<Integer>();
-        final String[] ranges = s.split(":");
-        int j = 0;
-        while (j < ranges.length) {
-            final String[] bounds = ranges[j].split("-");
-            Integer n;
-            if (bounds.length == 1) {
-                n = Integer.parseInt(bounds[0]);
-                list.add(n);
-            } else
-                for (n = Integer.parseInt(bounds[0]); n <= Integer.parseInt(bounds[1]); ++n)
-                    list.add(n);
-            ++j;
-        }
-        return list.toArray(new Integer[] {});
     }
 }

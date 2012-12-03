@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
 import ditl.Filter;
 import ditl.Listener;
-import ditl.PersistentMap;
 import ditl.StateUpdater;
 import ditl.StateUpdaterFactory;
 import ditl.StatefulTrace;
@@ -67,8 +67,8 @@ public class ArcTrace extends StatefulTrace<ArcEvent, Arc>
         public Listener<ArcEvent> arcEventListener();
     }
 
-    public ArcTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info, new ArcEvent.Factory(), new Arc.Factory(),
+    public ArcTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config, new ArcEvent.Factory(), new Arc.Factory(),
                 new StateUpdaterFactory<ArcEvent, Arc>() {
                     @Override
                     public StateUpdater<ArcEvent, Arc> getNew() {

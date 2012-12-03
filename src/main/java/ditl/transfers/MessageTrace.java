@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
 import ditl.Listener;
-import ditl.PersistentMap;
 import ditl.StateUpdater;
 import ditl.StateUpdaterFactory;
 import ditl.StatefulTrace;
@@ -66,15 +66,15 @@ public class MessageTrace extends StatefulTrace<MessageEvent, Message> {
         Listener<Message> messageListener();
     }
 
-    public MessageTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info, new MessageEvent.Factory(), new Message.Factory(),
+    public MessageTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config, new MessageEvent.Factory(), new Message.Factory(),
                 new StateUpdaterFactory<MessageEvent, Message>() {
                     @Override
                     public StateUpdater<MessageEvent, Message> getNew() {
                         return new MessageTrace.Updater();
                     }
                 });
-        info.put(Trace.defaultPriorityKey, defaultPriority);
+        set(Trace.defaultPriorityKey, defaultPriority);
     }
 
 }

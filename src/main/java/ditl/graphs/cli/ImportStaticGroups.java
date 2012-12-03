@@ -18,14 +18,16 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
-import ditl.GroupSpecification;
+import ditl.Groups;
 import ditl.IdMap;
 import ditl.StatefulWriter;
 import ditl.Trace;
@@ -38,16 +40,14 @@ import ditl.graphs.GroupTrace;
 @App.Cli(pkg = "graphs", cmd = "import-groups", alias = "ig")
 public class ImportStaticGroups extends WriteApp {
 
-    private static String labelsOption = "labels";
     private boolean use_id_map;
 
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.PRESENCE, GraphOptions.GROUPS);
-    private String[] group_specs;
-    String[] labels;
+    private JSONArray groups_json;
 
     @Override
     protected String getUsageString() {
-        return "[OPTIONS] STORE GROUP [GROUP..]";
+        return "[OPTIONS] STORE GROUPS";
     }
 
     @Override
@@ -63,9 +63,7 @@ public class ImportStaticGroups extends WriteApp {
     protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
         super.parseArgs(cli, args);
         graph_options.parse(cli);
-        group_specs = Arrays.copyOfRange(args, 1, args.length);
-        if (cli.hasOption(labelsOption))
-            labels = cli.getOptionValue(labelsOption).split(",");
+        groups_json = JSONArray.fromObject(args[1]);
         use_id_map = cli.hasOption(stringIdsOption);
     }
 
@@ -73,7 +71,6 @@ public class ImportStaticGroups extends WriteApp {
     protected void initOptions() {
         super.initOptions();
         graph_options.setOptions(options);
-        options.addOption(null, labelsOption, true, "comma-separated list of groups labels");
         options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
     }
 
@@ -85,8 +82,12 @@ public class ImportStaticGroups extends WriteApp {
         final StatefulWriter<GroupEvent, Group> groupWriter = groups.getWriter();
         final Set<Group> initState = new HashSet<Group>();
         int i = 0;
-        for (final String g_spec : group_specs) {
-            final Set<Integer> members = GroupSpecification.parse(g_spec, id_map);
+        JSONObject labels = new JSONObject();
+        for (final Object obj : groups_json) {
+            JSONObject gspec = (JSONObject) obj;
+            final Set<Integer> members = Groups.parse(gspec.getJSONArray("members"), id_map);
+            if (gspec.has("label"))
+                labels.accumulate(gspec.getString("label"), i);
             initState.add(new Group(i, members));
             i++;
         }
@@ -94,14 +95,8 @@ public class ImportStaticGroups extends WriteApp {
         groupWriter.setInitState(presence.minTime(), initState);
         groupWriter.setPropertiesFromTrace(presence);
 
-        if (labels != null) {
-            final StringBuffer buffer = new StringBuffer();
-            for (int j = 0; j < labels.length; ++j) {
-                buffer.append(labels[j].trim());
-                if (j < labels.length - 1)
-                    buffer.append(GroupTrace.delim);
-            }
-            groupWriter.setProperty(GroupTrace.labelsKey, buffer.toString());
+        if (!labels.isEmpty()) {
+            groupWriter.setProperty(GroupTrace.labelsKey, labels);
         }
 
         groupWriter.close();

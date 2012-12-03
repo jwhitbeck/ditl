@@ -24,22 +24,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class IdMap {
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 
-    private final static String id_sep = ",";
-    private final static String pair_sep = ":";
+public class IdMap {
 
     private final Map<Integer, String> iid_map = new HashMap<Integer, String>();
     private final Map<String, Integer> eid_map = new HashMap<String, Integer>();
 
-    public IdMap(String idMapString) {
-        final String[] pairs = idMapString.split(id_sep);
-        for (final String pair : pairs) {
-            final String[] elems = pair.split(pair_sep);
-            final Integer iid = Integer.parseInt(elems[0]);
-            final String eid = elems[1];
-            iid_map.put(iid, eid);
-            eid_map.put(eid, iid);
+    public IdMap(JSONObject json) {
+        for (Object key : json.keySet()) {
+            String name = (String) key;
+            Integer id = json.getInt(name);
+            iid_map.put(id, name);
+            eid_map.put(name, id);
         }
     }
 
@@ -96,15 +94,7 @@ public class IdMap {
 
         @Override
         public void writeTraceInfo(ditl.Writer<?> writer) {
-            final StringBuffer buffer = new StringBuffer();
-            final Iterator<Map.Entry<String, Integer>> i = eid_map.entrySet().iterator();
-            while (i.hasNext()) {
-                final Map.Entry<String, Integer> e = i.next();
-                buffer.append(e.getValue() + pair_sep + e.getKey());
-                if (i.hasNext())
-                    buffer.append(id_sep);
-            }
-            writer.setProperty(Trace.idMapKey, buffer.toString());
+            writer.setProperty(Trace.idMapKey, JSONSerializer.toJSON(eid_map));
         }
     }
 }

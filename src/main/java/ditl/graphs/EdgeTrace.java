@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
 import ditl.Filter;
 import ditl.Listener;
-import ditl.PersistentMap;
 import ditl.StateUpdater;
 import ditl.StateUpdaterFactory;
 import ditl.StatefulTrace;
@@ -66,8 +66,8 @@ public class EdgeTrace extends StatefulTrace<EdgeEvent, Edge>
         public Listener<EdgeEvent> edgeEventListener();
     }
 
-    public EdgeTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info, new EdgeEvent.Factory(), new Edge.Factory(),
+    public EdgeTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config, new EdgeEvent.Factory(), new Edge.Factory(),
                 new StateUpdaterFactory<EdgeEvent, Edge>() {
                     @Override
                     public StateUpdater<EdgeEvent, Edge> getNew() {

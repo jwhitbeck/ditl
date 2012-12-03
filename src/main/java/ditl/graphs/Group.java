@@ -26,7 +26,7 @@ import java.util.Set;
 import ditl.CodedBuffer;
 import ditl.CodedInputStream;
 import ditl.Filter;
-import ditl.GroupSpecification;
+import ditl.Groups;
 import ditl.Item;
 
 public class Group implements Item {
@@ -74,7 +74,7 @@ public class Group implements Item {
 
     @Override
     public String toString() {
-        return _gid + " " + GroupSpecification.toString(_members);
+        return _gid + " " + Groups.toJSON(_members);
     }
 
     @Override

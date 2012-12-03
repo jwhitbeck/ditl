@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
 import ditl.Listener;
-import ditl.PersistentMap;
 import ditl.StateUpdater;
 import ditl.StateUpdaterFactory;
 import ditl.StatefulTrace;
@@ -99,8 +99,8 @@ public class WindowedEdgeTrace extends StatefulTrace<WindowedEdgeEvent, Windowed
         public Listener<WindowedEdgeEvent> windowedEdgesEventListener();
     }
 
-    public WindowedEdgeTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info, new WindowedEdgeEvent.Factory(), new WindowedEdge.Factory(),
+    public WindowedEdgeTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config, new WindowedEdgeEvent.Factory(), new WindowedEdge.Factory(),
                 new StateUpdaterFactory<WindowedEdgeEvent, WindowedEdge>() {
                     @Override
                     public StateUpdater<WindowedEdgeEvent, WindowedEdge> getNew() {
@@ -110,6 +110,6 @@ public class WindowedEdgeTrace extends StatefulTrace<WindowedEdgeEvent, Windowed
     }
 
     public long windowLength() {
-        return Long.parseLong(getValue(windowLengthKey));
+        return config.getLong(windowLengthKey);
     }
 }

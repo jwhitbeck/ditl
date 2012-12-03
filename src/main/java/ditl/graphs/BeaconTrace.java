@@ -21,8 +21,8 @@ package ditl.graphs;
 import java.io.IOException;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
 import ditl.Filter;
-import ditl.PersistentMap;
 import ditl.Store;
 import ditl.Trace;
 import ditl.Writer;
@@ -32,8 +32,8 @@ public class BeaconTrace extends Trace<Arc> implements Trace.Filterable<Arc> {
 
     public final static String beaconningPeriodKey = "beaconning period";
 
-    public BeaconTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info, new Arc.Factory());
+    public BeaconTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config, new Arc.Factory());
     }
 
     @Override
@@ -42,11 +42,11 @@ public class BeaconTrace extends Trace<Arc> implements Trace.Filterable<Arc> {
     }
 
     public long beaconningPeriod() {
-        return Long.parseLong(getValue(beaconningPeriodKey));
+        return config.getLong(beaconningPeriodKey);
     }
 
     @Override
     public void copyOverTraceInfo(Writer<Arc> writer) {
-        writer.setProperty(beaconningPeriodKey, getValue(beaconningPeriodKey));
+        writer.setProperty(beaconningPeriodKey, config.get(beaconningPeriodKey));
     }
 }

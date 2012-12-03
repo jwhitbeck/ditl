@@ -24,8 +24,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
 import ditl.Listener;
-import ditl.PersistentMap;
 import ditl.StateUpdater;
 import ditl.StateUpdaterFactory;
 import ditl.StatefulTrace;
@@ -80,8 +80,8 @@ public class TransferTrace extends StatefulTrace<TransferEvent, Transfer> {
         Listener<Transfer> transferListener();
     }
 
-    public TransferTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info, new TransferEvent.Factory(), new Transfer.Factory(),
+    public TransferTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config, new TransferEvent.Factory(), new Transfer.Factory(),
                 new StateUpdaterFactory<TransferEvent, Transfer>() {
                     @Override
                     public StateUpdater<TransferEvent, Transfer> getNew() {

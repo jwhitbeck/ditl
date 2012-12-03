@@ -20,7 +20,7 @@ package ditl.graphs;
 
 import java.io.IOException;
 
-import ditl.PersistentMap;
+import net.sf.json.JSONObject;
 import ditl.Store;
 import ditl.Trace;
 import ditl.Writer;
@@ -34,23 +34,23 @@ public class ReachabilityTrace extends ArcTrace {
             delayKey = "delay";
 
     public long tau() {
-        return Long.parseLong(getValue(tauKey));
+        return config.getLong(tauKey);
     }
 
     public long eta() {
-        return Long.parseLong(getValue(etaKey));
+        return config.getLong(etaKey);
     }
 
     public long delay() {
-        return Integer.parseInt(getValue(delayKey));
+        return config.getLong(delayKey);
     }
 
     public static String defaultName(String prefix, long tau, long delay) {
         return prefix + "_t" + tau + "_d" + delay;
     }
 
-    public ReachabilityTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info);
+    public ReachabilityTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config);
     }
 
     @Override

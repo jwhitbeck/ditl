@@ -192,8 +192,8 @@ public class GroupsPanel extends JPanel implements
                 c.fill = GridBagConstraints.HORIZONTAL;
                 c.weightx = 1.0;
                 String label = null;
-                if (cur_groups.hasLabels())
-                    label = cur_groups.getLabel(gid);
+                if (cur_groups.idMap() != null)
+                    label = cur_groups.idMap().getExternalId(gid);
                 if (label == null)
                     label = gid.toString();
                 final JLabel groupLabel = new JLabel(label);

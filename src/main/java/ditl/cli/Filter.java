@@ -22,11 +22,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
+import net.sf.json.JSONArray;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 
 import ditl.FilterConverter;
-import ditl.GroupSpecification;
+import ditl.Groups;
 import ditl.Trace;
 
 @App.Cli(cmd = "filter")
@@ -34,7 +36,7 @@ public class Filter extends ConvertApp {
 
     private String orig_trace_name;
     private String dest_trace_name;
-    private String group_spec;
+    private JSONArray group_json;
 
     @Override
     protected void parseArgs(CommandLine cli, String[] args)
@@ -44,11 +46,11 @@ public class Filter extends ConvertApp {
             super.parseArgs(cli, args);
             orig_trace_name = args[1];
             dest_trace_name = args[2];
-            group_spec = args[3];
+            group_json = JSONArray.fromObject(args[3]);
         } else {
             orig_store_file = new File(args[0]);
             dest_store_file = new File(args[1]);
-            group_spec = args[2];
+            group_json = JSONArray.fromObject(args[2]);
             force = cli.hasOption(forceOption);
         }
     }
@@ -67,7 +69,7 @@ public class Filter extends ConvertApp {
     }
 
     private void filter(Trace<?> dest, Trace<?> orig) throws IOException {
-        final Set<Integer> group = GroupSpecification.parse(group_spec, orig.idMap());
+        final Set<Integer> group = Groups.parse(group_json, orig.idMap());
         if (orig instanceof Trace.Filterable) {
             new FilterConverter(dest, orig, group).convert();
         } else {

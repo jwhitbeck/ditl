@@ -20,7 +20,10 @@ package ditl;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Collection;
+
+import net.sf.json.JSONObject;
 
 public class Writer<I extends Item> extends Bus<I> implements Listener<I> {
 
@@ -39,31 +42,29 @@ public class Writer<I extends Item> extends Bus<I> implements Listener<I> {
     private int total_bytes_written = 0;
     private long max_update_interval = 1;
 
-    private final PersistentMap _info;
     private final WritableStore _store;
-    private final String _name;
+    private final Trace<I> _trace;
 
-    public Writer(Store store, String name, PersistentMap info) throws IOException {
-        if (!(store instanceof WritableStore))
+    public Writer(Trace<I> trace) throws IOException {
+        if (!(trace._store instanceof WritableStore))
             throw new IOException();
-        _store = (WritableStore) store;
-        if (_store.isAlreadyWriting(name))
+        _store = (WritableStore) trace._store;
+        if (_store.isAlreadyWriting(trace.name()))
             throw new IOException();
-        _info = info;
-        _name = name;
-        _store.notifyOpen(_name, this);
-        sm = new SeekMap.Writer(_store.getOutputStream(_store.indexFile(_name)));
-        out = new BufferedOutputStream(_store.getOutputStream(_store.traceFile(_name)));
+        _trace = trace;
+        _store.notifyOpen(trace.name(), this);
+        sm = new SeekMap.Writer(_store.getOutputStream(trace.indexFile()));
+        out = new BufferedOutputStream(_store.getOutputStream(trace.traceFile()));
         min_time = Long.MAX_VALUE;
         max_time = Long.MIN_VALUE;
         addListener(this);
     }
 
     void setRemainingInfo() {
-        _info.put(Trace.maxUpdateIntervalKey, max_update_interval);
-        _info.setIfUnset(Trace.maxTimeKey, max_time);
-        _info.setIfUnset(Trace.minTimeKey, min_time);
-        _info.setIfUnset(Trace.defaultPriorityKey, Trace.defaultPriority);
+        _trace.set(Trace.maxUpdateIntervalKey, max_update_interval);
+        _trace.setIfUnset(Trace.maxTimeKey, max_time);
+        _trace.setIfUnset(Trace.minTimeKey, min_time);
+        _trace.setIfUnset(Trace.defaultPriorityKey, Trace.defaultPriority);
     }
 
     public void close() throws IOException {
@@ -72,21 +73,23 @@ public class Writer<I extends Item> extends Bus<I> implements Listener<I> {
         out.close();
         sm.close();
         setRemainingInfo();
-        _info.save(_store.getOutputStream(_store.infoFile(_name)));
-        _store.notifyClose(_name);
+        OutputStreamWriter info_os = new OutputStreamWriter(_store.getOutputStream(_trace.infoFile()));
+        info_os.write(_trace.config.toString(4));
+        info_os.close();
+        _store.notifyClose(_trace.name());
     }
 
     public void setProperty(String key, Object value) {
-        _info.put(key, value);
+        _trace.set(key, value);
     }
 
     public void setPropertiesFromTrace(Trace<?> trace) {
-        _info.setIfUnset(Trace.minTimeKey, trace.minTime());
-        _info.setIfUnset(Trace.maxTimeKey, trace.maxTime());
-        _info.setIfUnset(Trace.timeUnitKey, trace.timeUnit());
-        final String id_map_str = trace.getValue(Trace.idMapKey);
+        _trace.setIfUnset(Trace.minTimeKey, trace.minTime());
+        _trace.setIfUnset(Trace.maxTimeKey, trace.maxTime());
+        _trace.setIfUnset(Trace.timeUnitKey, trace.timeUnit());
+        final JSONObject id_map_str = (JSONObject) trace.config.get(Trace.idMapKey);
         if (id_map_str != null)
-            _info.setIfUnset(Trace.idMapKey, id_map_str);
+            _trace.setIfUnset(Trace.idMapKey, id_map_str);
     }
 
     public void append(long time, I item) throws IOException {

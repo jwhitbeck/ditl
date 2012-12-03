@@ -25,6 +25,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
+
 public abstract class Trace<E extends Item> {
 
     @Target({ ElementType.TYPE })
@@ -38,11 +40,7 @@ public abstract class Trace<E extends Item> {
             typeKey = "type",
             timeUnitKey = "time unit",
             descriptionKey = "description",
-            minUpdateIntervalKey = "min update interval",
             maxUpdateIntervalKey = "max update interval",
-            stateMinUpdateIntervalKey = "snapshots min update interval",
-            stateMaxUpdateIntervalKey = "snapshots max update interval",
-            lastSnapTimeKey = "last snapshot time",
             minTimeKey = "min time",
             maxTimeKey = "max time",
             defaultPriorityKey = "default priority",
@@ -53,9 +51,9 @@ public abstract class Trace<E extends Item> {
             highestPriority = 0,
             lowestPriority = Integer.MAX_VALUE;
 
-    protected String _name;
-    protected Store _store;
-    protected PersistentMap _info;
+    final private String _name;
+    final Store _store;
+    final protected JSONObject config;
 
     protected Item.Factory<E> event_factory;
 
@@ -67,69 +65,69 @@ public abstract class Trace<E extends Item> {
         public Filter<E> eventFilter(Set<Integer> group);
     }
 
-    public Trace(Store store, String name, PersistentMap info, Item.Factory<E> itemFactory) throws IOException {
+    public Trace(Store store, String name, JSONObject jsonConfig, Item.Factory<E> itemFactory) throws IOException {
         _store = store;
         _name = name;
-        _info = info;
+        config = jsonConfig;
         event_factory = itemFactory;
-    }
-
-    public String getValue(String key) {
-        return _info.get(key);
     }
 
     public String name() {
         return _name;
     }
 
+    String indexFile() {
+        return _store.indexFile(_name);
+    }
+
+    String traceFile() {
+        return _store.traceFile(_name);
+    }
+
+    String infoFile() {
+        return _store.infoFile(_name);
+    }
+
     public String description() {
-        return getValue(descriptionKey);
+        return config.getString(descriptionKey);
     }
 
     public String type() {
-        return getValue(typeKey);
+        return config.getString(typeKey);
     }
 
     public long minTime() {
-        return Long.parseLong(getValue(minTimeKey));
+        return config.getLong(minTimeKey);
     }
 
     public long maxTime() {
-        return Long.parseLong(getValue(maxTimeKey));
+        return config.getLong(maxTimeKey);
     }
 
     public long maxUpdateInterval() {
-        return Long.parseLong(getValue(maxUpdateIntervalKey));
-    }
-
-    public long lastSnapTime() {
-        final String str = getValue(lastSnapTimeKey);
-        if (str == null)
-            return Long.MAX_VALUE;
-        return Long.parseLong(str);
+        return config.getLong(maxUpdateIntervalKey);
     }
 
     public int defaultPriority() {
-        return Integer.parseInt(getValue(defaultPriorityKey));
+        return config.getInt(defaultPriorityKey);
     }
 
     public long ticsPerSecond() {
-        return Units.getTicsPerSecond(getValue(timeUnitKey));
+        return Units.getTicsPerSecond(timeUnit());
     }
 
     public String timeUnit() {
-        return getValue(timeUnitKey);
+        return config.getString(timeUnitKey);
     }
 
     public IdMap idMap() {
-        final String id_map_str = getValue(idMapKey);
-        if (id_map_str == null)
+        if (!config.has(idMapKey))
             return null;
-        return new IdMap(id_map_str);
+        return new IdMap(config.getJSONObject(idMapKey));
     }
 
     public Reader<E> getReader(int priority, long offset) throws IOException {
-        return new Reader<E>(_store, _name, event_factory, priority, offset);
+        return new Reader<E>(this, priority, offset);
     }
 
     public Reader<E> getReader(int priority) throws IOException {
@@ -141,11 +139,20 @@ public abstract class Trace<E extends Item> {
     }
 
     public Writer<E> getWriter() throws IOException {
-        return new Writer<E>(_store, _name, _info);
+        return new Writer<E>(this);
     }
 
     public Item.Factory<E> factory() {
         return event_factory;
+    }
+
+    public void set(String key, Object value) {
+        config.accumulate(key, value);
+    }
+
+    public void setIfUnset(String key, Object value) {
+        if (!config.containsKey(key))
+            config.accumulate(key, value);
     }
 
     @Override

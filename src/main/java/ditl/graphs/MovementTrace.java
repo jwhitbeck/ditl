@@ -25,9 +25,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.json.JSONObject;
 import ditl.Filter;
 import ditl.Listener;
-import ditl.PersistentMap;
 import ditl.StateUpdater;
 import ditl.StateUpdaterFactory;
 import ditl.StatefulTrace;
@@ -49,19 +49,19 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
     public final static int defaultPriority = 20;
 
     public double minX() {
-        return Double.parseDouble(getValue(minXKey));
+        return config.getDouble(minXKey);
     }
 
     public double maxX() {
-        return Double.parseDouble(getValue(maxXKey));
+        return config.getDouble(maxXKey);
     }
 
     public double minY() {
-        return Double.parseDouble(getValue(minYKey));
+        return config.getDouble(minYKey);
     }
 
     public double maxY() {
-        return Double.parseDouble(getValue(maxYKey));
+        return config.getDouble(maxYKey);
     }
 
     public interface Handler {
@@ -70,15 +70,15 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
         public Listener<MovementEvent> movementEventListener();
     }
 
-    public MovementTrace(Store store, String name, PersistentMap info) throws IOException {
-        super(store, name, info, new MovementEvent.Factory(), new Movement.Factory(),
+    public MovementTrace(Store store, String name, JSONObject config) throws IOException {
+        super(store, name, config, new MovementEvent.Factory(), new Movement.Factory(),
                 new StateUpdaterFactory<MovementEvent, Movement>() {
                     @Override
                     public StateUpdater<MovementEvent, Movement> getNew() {
                         return new MovementTrace.Updater();
                     }
                 });
-        info.setIfUnset(Trace.defaultPriorityKey, defaultPriority);
+        setIfUnset(Trace.defaultPriorityKey, defaultPriority);
     }
 
     public final static class Updater implements StateUpdater<MovementEvent, Movement> {
@@ -127,7 +127,7 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
 
     @Override
     public StatefulWriter<MovementEvent, Movement> getWriter() throws IOException {
-        return new MovementWriter(_store, _name, _info);
+        return new MovementWriter(this);
     }
 
     private static class MovementWriter extends StatefulWriter<MovementEvent, Movement> {
@@ -138,8 +138,8 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
                 minY = Double.MAX_VALUE,
                 maxY = Double.MIN_VALUE;
 
-        public MovementWriter(Store store, String name, PersistentMap info) throws IOException {
-            super(store, name, new MovementTrace.Updater(), info);
+        public MovementWriter(MovementTrace trace) throws IOException {
+            super(trace);
         }
 
         public void update(Point p) {
