@@ -79,11 +79,7 @@ public class GroupEvent implements Item {
             int gid = in.readSInt();
             Type type = Type.values()[in.readByte()];
             if (type == Type.JOIN || type == Type.LEAVE) {
-                int n = in.readInt();
-                Set<Integer> members = new HashSet<Integer>();
-                for (int i = 0; i < n; ++i)
-                    members.add(in.readSInt());
-                return new GroupEvent(gid, type, members);
+                return new GroupEvent(gid, type, in.readSIntSet());
             }
             return new GroupEvent(gid, type);
         }
@@ -127,10 +123,7 @@ public class GroupEvent implements Item {
         out.writeSInt(_gid);
         out.writeByte(_type.ordinal());
         if (_type == Type.JOIN || _type == Type.LEAVE) {
-            out.writeInt(_members.size());
-            for (Integer m : _members) {
-                out.writeSInt(m);
-            }
+            out.writeSIntSet(_members);
         }
     }
 }

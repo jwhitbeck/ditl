@@ -55,12 +55,7 @@ public class Group implements Item {
     public final static class Factory implements Item.Factory<Group> {
         @Override
         public Group fromBinaryStream(CodedInputStream in) throws IOException {
-            int gid = in.readSInt();
-            int n = in.readInt();
-            Set<Integer> members = new HashSet<Integer>();
-            for (int i = 0; i < n; ++i)
-                members.add(in.readSInt());
-            return new Group(gid, members);
+            return new Group(in.readSInt(), in.readSIntSet());
         }
     }
 
@@ -114,9 +109,6 @@ public class Group implements Item {
     @Override
     public void write(CodedBuffer out) {
         out.writeSInt(_gid);
-        out.writeInt(_members.size());
-        for (Integer m : _members) {
-            out.writeSInt(m);
-        }
+        out.writeSIntSet(_members);
     }
 }

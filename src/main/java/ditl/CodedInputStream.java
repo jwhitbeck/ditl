@@ -20,6 +20,8 @@ package ditl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CodedInputStream {
 
@@ -91,6 +93,14 @@ public class CodedInputStream {
 
     public double readDouble() throws IOException {
         return Double.longBitsToDouble(readRawLittleEndian64());
+    }
+
+    public Set<Integer> readSIntSet() throws IOException {
+        Set<Integer> integers = new HashSet<Integer>();
+        int size = readInt();
+        for (int i = 0; i < size; ++i)
+            integers.add(readSInt());
+        return integers;
     }
 
     private long readRawLittleEndian64() throws IOException {

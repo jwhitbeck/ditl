@@ -20,6 +20,7 @@ package ditl;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Set;
 
 public class CodedBuffer {
 
@@ -93,6 +94,12 @@ public class CodedBuffer {
 
     public void writeDouble(final double value) {
         writeRawLittleEndian64(Double.doubleToRawLongBits(value));
+    }
+
+    public void writeSIntSet(final Set<Integer> integers) {
+        writeInt(integers.size());
+        for (Integer i : integers)
+            writeSInt(i);
     }
 
     private int encodeZigZag32(final int n) {

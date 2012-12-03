@@ -5,7 +5,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -103,6 +105,21 @@ public class TestCoding {
         for (double d : randomDoubles) {
             assertTrue(cis.readDouble() == d);
         }
+    }
+
+    @Test
+    public void testSetInt() throws IOException {
+        ByteArrayOutputStream bis = new ByteArrayOutputStream();
+        CodedBuffer cb = new CodedBuffer();
+        Set<Integer> integers = new HashSet<Integer>();
+        for (int i : randomSIntegers) {
+            integers.add(i);
+        }
+        cb.writeSIntSet(integers);
+        cb.flush(bis);
+        CodedInputStream cis = new CodedInputStream(new ByteArrayInputStream(bis.toByteArray()));
+        Set<Integer> integers2 = cis.readSIntSet();
+        assertTrue(integers.equals(integers2));
     }
 
 }
