@@ -115,8 +115,16 @@ public abstract class App {
         close();
     }
 
+    protected String getHelpHeader() {
+        return null;
+    }
+
+    protected String getHelpFooter() {
+        return null;
+    }
+
     protected void printHelp() {
-        new HelpFormatter().printHelp(usageString, options);
+        new HelpFormatter().printHelp(usageString, getHelpHeader(), options, getHelpFooter());
         System.exit(1);
     }
 

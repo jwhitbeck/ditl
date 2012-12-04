@@ -51,6 +51,15 @@ public class ImportStaticGroups extends WriteApp {
     }
 
     @Override
+    protected String getHelpHeader() {
+        return "A group is specified as a json array. For example, " +
+                "[[1,3],5,[8,12]] corresponds to the group {1,2,3,5,8,9,10,11,12}.\n" +
+                " The GROUPS parameter is an array of groups. For example: \n" +
+                " [ {label:cars, members:[[1,3],5]}, {label:busses, members:[4,6]}] \n" +
+                " describes two groups labeled 'cars' and 'busses'.";
+    }
+
+    @Override
     protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
         super.parseArgs(cli, args);
         graph_options.parse(cli);
