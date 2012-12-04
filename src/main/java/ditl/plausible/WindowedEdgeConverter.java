@@ -125,11 +125,12 @@ public class WindowedEdgeConverter implements Converter, Generator, EdgeTrace.Ha
                 // here time is the time in the window-shifted edge event trace
                 for (final EdgeEvent eev : events) {
                     final Edge e = eev.edge();
-                    if (!edge_timelines.containsKey(e)) {
-                        edge_timelines.put(e, new EdgeTimeline(e, windowed_writer));
+                    EdgeTimeline timeline = edge_timelines.get(e);
+                    if (timeline == null) {
+                        timeline = new EdgeTimeline(e, windowed_writer);
+                        edge_timelines.put(e, timeline);
                         windowed_writer.queue(time, new WindowedEdgeEvent(e, WindowedEdgeEvent.Type.UP));
                     }
-                    final EdgeTimeline timeline = edge_timelines.get(e);
                     timeline.append(time + _window, _window, eev);
 
                     pop_bus.queue(time + 2 * _window, e);

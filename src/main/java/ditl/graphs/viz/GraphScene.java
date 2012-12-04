@@ -166,13 +166,13 @@ public class GraphScene extends Scene implements
                     final Edge e = a.edge();
                     ArcElement ae;
                     if (aev.isUp()) {
-                        if (!arcs.containsKey(e)) {
+                        ae = arcs.get(e);
+                        if (ae == null) {
                             final NodeElement n1 = nodes.get(aev.from());
                             final NodeElement n2 = nodes.get(aev.to());
                             ae = new ArcElement(n1, n2);
                             arcs.put(e, ae);
                         }
-                        ae = arcs.get(e);
                         ae.bringArcUp(a);
                     } else {
                         ae = arcs.get(e);
@@ -192,14 +192,14 @@ public class GraphScene extends Scene implements
             public void handle(long time, Collection<Arc> events) {
                 for (final Arc a : events) {
                     final Edge e = a.edge();
-                    ArcElement ae;
-                    if (!arcs.containsKey(e)) {
+                    ArcElement ae = arcs.get(e);
+                    if (ae == null) {
                         final NodeElement n1 = nodes.get(a.from());
                         final NodeElement n2 = nodes.get(a.to());
                         ae = new ArcElement(n1, n2);
                         arcs.put(e, ae);
                     }
-                    arcs.get(e).bringArcUp(a);
+                    ae.bringArcUp(a);
                 }
             }
 

@@ -54,14 +54,20 @@ public class Bus<E> {
     }
 
     public void queue(long time, Collection<E> events) {
-        if (!buffer.containsKey(time))
-            buffer.put(time, new LinkedList<E>());
-        buffer.get(time).addAll(events);
+        List<E> eventsAtTime = buffer.get(time);
+        if (eventsAtTime == null) {
+            eventsAtTime = new LinkedList<E>();
+            buffer.put(time, eventsAtTime);
+        }
+        eventsAtTime.addAll(events);
     }
 
     public void queue(long time, E event) {
-        if (!buffer.containsKey(time))
-            buffer.put(time, new LinkedList<E>());
+        List<E> eventsAtTime = buffer.get(time);
+        if (eventsAtTime == null) {
+            eventsAtTime = new LinkedList<E>();
+            buffer.put(time, eventsAtTime);
+        }
         buffer.get(time).add(event);
     }
 

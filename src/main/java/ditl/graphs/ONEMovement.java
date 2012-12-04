@@ -58,9 +58,12 @@ public class ONEMovement {
             final Integer id = idGen.getInternalId(elems[1]);
             final double x = Double.parseDouble(elems[2]);
             final double y = Double.parseDouble(elems[3]);
-            if (!buffer.containsKey(t))
-                buffer.put(t, new LinkedList<Movement>());
-            buffer.get(t).add(new Movement(id, new Point(x, y)));
+            List<Movement> movementsAtTime = buffer.get(t);
+            if (movementsAtTime == null) {
+                movementsAtTime = new LinkedList<Movement>();
+                buffer.put(t, movementsAtTime);
+            }
+            movementsAtTime.add(new Movement(id, new Point(x, y)));
         }
         reader.close();
 

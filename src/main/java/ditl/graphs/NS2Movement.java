@@ -65,9 +65,11 @@ public class NS2Movement {
                     id = idGen.getInternalId(id_str);
                     final double c = Double.parseDouble(elems[3]);
 
-                    if (!positions.containsKey(id))
-                        positions.put(id, new Movement(id, new Point(0, 0)));
                     m = positions.get(id);
+                    if (m == null) {
+                        m = new Movement(id, new Point(0, 0));
+                        positions.put(id, m);
+                    }
 
                     if (elems[2].equals("X_"))
                         m.x = c;

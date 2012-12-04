@@ -80,9 +80,12 @@ public final class BeaconsToArcsConverter implements Incrementable, Converter {
             if (arcs.isEmpty())
                 arcsBuffer.remove(prevTime);
         }
-        if (!arcsBuffer.containsKey(time))
-            arcsBuffer.put(time, new AdjacencySet.Arcs());
-        arcsBuffer.get(time).add(arc);
+        Set<Arc> arcsAtTime = arcsBuffer.get(time);
+        if (arcsAtTime == null) {
+            arcsAtTime = new AdjacencySet.Arcs();
+            arcsBuffer.put(time, arcsAtTime);
+        }
+        arcsAtTime.add(arc);
         lastArcs.put(arc, time);
     }
 

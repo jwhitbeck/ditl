@@ -221,9 +221,12 @@ public final class ArcsToDominatingSetConverter implements Converter,
         }
 
         void setNodeDegree(Integer node, Integer new_degree) {
-            if (!degree_map.containsKey(new_degree))
-                degree_map.put(new_degree, new HashSet<Integer>());
-            degree_map.get(new_degree).add(node);
+            Set<Integer> degrees = degree_map.get(new_degree);
+            if (degrees == null) {
+                degrees = new HashSet<Integer>();
+                degree_map.put(new_degree, degrees);
+            }
+            degrees.add(node);
         }
 
     }

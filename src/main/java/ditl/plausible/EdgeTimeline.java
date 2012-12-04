@@ -95,9 +95,12 @@ class EdgeTimeline {
     }
 
     public void queue(long time, EdgeEvent edgeEvent) {
-        if (!buffer.containsKey(time))
-            buffer.put(time, new LinkedList<EdgeEvent>());
-        buffer.get(time).add(edgeEvent);
+        List<EdgeEvent> eventsAtTime = buffer.get(time);
+        if (eventsAtTime == null) {
+            eventsAtTime = new LinkedList<EdgeEvent>();
+            buffer.put(time, eventsAtTime);
+        }
+        eventsAtTime.add(edgeEvent);
     }
 
     public void append(long time, long window, EdgeEvent edgeEvent) throws IOException {

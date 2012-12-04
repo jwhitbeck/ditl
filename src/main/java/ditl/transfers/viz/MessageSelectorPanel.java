@@ -177,19 +177,22 @@ public class MessageSelectorPanel extends JPanel
                 for (final BufferEvent event : events) {
                     final Integer id = event.id();
                     Integer msgId;
+                    Set<Integer> holders;
                     switch (event.type()) {
                         case ADD:
                             msgId = event.msgId();
-                            if (message_holders.containsKey(msgId)) {
-                                message_holders.get(msgId).add(id);
+                            holders = message_holders.get(msgId);
+                            if (holders != null) {
+                                holders.add(id);
                                 if (cur_msg != null && cur_msg.equals(msgId))
                                     scene.addInfected(id);
                             }
                             break;
                         case REMOVE:
                             msgId = event.msgId();
-                            if (message_holders.containsKey(msgId)) {
-                                message_holders.get(msgId).remove(id);
+                            holders = message_holders.get(msgId);
+                            if (holders != null) {
+                                holders.remove(id);
                                 if (cur_msg != null && cur_msg.equals(msgId))
                                     scene.removeInfected(id);
                             }

@@ -60,9 +60,12 @@ public class StaticGroupEdgeConverter implements Converter {
         for (final Edge e : edges) {
             final Edge gl = groupEdges(e);
             if (gl != null) {
-                if (!group_edges.containsKey(gl))
-                    group_edges.put(gl, new AdjacencySet.Edges());
-                group_edges.get(gl).add(e);
+                Set<Edge> supporting_edges = group_edges.get(gl);
+                if (supporting_edges == null) {
+                    supporting_edges = new AdjacencySet.Edges();
+                    group_edges.put(gl, supporting_edges);
+                }
+                supporting_edges.add(e);
             }
         }
         group_edge_writer.setInitState(minTime, group_edges.keySet());
