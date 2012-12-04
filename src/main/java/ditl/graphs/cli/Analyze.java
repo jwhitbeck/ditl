@@ -23,7 +23,7 @@ import static ditl.graphs.cli.GraphOptions.EDGES;
 import static ditl.graphs.cli.GraphOptions.GROUPS;
 import static ditl.graphs.cli.GraphOptions.PRESENCE;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -151,7 +151,7 @@ public class Analyze extends ExportApp {
         final Report report = factory.getNew(_out);
 
         Long minTime = null, maxTime = null, incrTime = null;
-        final List<Reader<?>> readers = new LinkedList<Reader<?>>();
+        final List<Reader<?>> readers = new ArrayList<Reader<?>>();
 
         Long tps = null;
 

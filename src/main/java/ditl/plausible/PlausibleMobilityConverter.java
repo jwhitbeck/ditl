@@ -19,6 +19,7 @@
 package ditl.plausible;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,8 +62,8 @@ public final class PlausibleMobilityConverter implements Converter,
     private final Map<Integer, InferredNode> inferred_nodes = new HashMap<Integer, InferredNode>();
     private final List<Node> all_nodes = new LinkedList<Node>();
 
-    private final List<Constraint> global_constraints = new LinkedList<Constraint>();
-    private final List<Force> global_forces = new LinkedList<Force>();
+    private final List<Constraint> global_constraints = new ArrayList<Constraint>();
+    private final List<Force> global_forces = new ArrayList<Force>();
     private final Map<Integer, List<Constraint>> node_constraints = new HashMap<Integer, List<Constraint>>();
 
     private final double _height, _width;
@@ -135,7 +136,7 @@ public final class PlausibleMobilityConverter implements Converter,
 
     public void addNodeConstraint(Integer id, Constraint constraint) {
         if (!node_constraints.containsKey(id))
-            node_constraints.put(id, new LinkedList<Constraint>());
+            node_constraints.put(id, new ArrayList<Constraint>());
         node_constraints.get(id).add(constraint);
         if (constraint instanceof Interaction)
             ((Interaction) constraint).setNodeCollection(Collections.unmodifiableList(all_nodes));

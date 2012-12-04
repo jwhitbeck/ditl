@@ -168,11 +168,9 @@ public final class EdgesToConnectedComponentsConverter implements Converter {
 
     private void setInitState(long time) throws IOException {
         final Set<Group> initCCs = new HashSet<Group>();
-        final LinkedList<Integer> toVisit = new LinkedList<Integer>(adjacency.vertices());
         final LinkedList<Integer> toVisitInCC = new LinkedList<Integer>();
-        final Set<Integer> visited = new HashSet<Integer>(toVisit.size() * 2);
-        while (!toVisit.isEmpty()) {
-            final Integer i = toVisit.pop();
+        final Set<Integer> visited = new HashSet<Integer>(adjacency.vertices().size() * 2);
+        for (Integer i : adjacency.vertices()) {
             if (!visited.contains(i)) {
                 final Set<Integer> neighbs = adjacency.getNext(i);
                 if (!neighbs.isEmpty()) {

@@ -22,7 +22,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JSlider;
@@ -40,8 +40,8 @@ public abstract class SceneRunner extends Component {
     private final Timer timer;
     private int fps = 20;
     private int speed = 1;
-    private final List<TimeChangeListener> timeListeners = new LinkedList<TimeChangeListener>();
-    private final List<PlayListener> playListeners = new LinkedList<PlayListener>();
+    private final List<TimeChangeListener> timeListeners = new ArrayList<TimeChangeListener>();
+    private final List<PlayListener> playListeners = new ArrayList<PlayListener>();
     private boolean blockSeek = false;
     private final ChangeListener sliderListener;
     public long tics_per_second = 1L;

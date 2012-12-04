@@ -20,7 +20,7 @@ package ditl.transfers.viz;
 
 import java.awt.Dimension;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -58,7 +58,7 @@ public class TransferPlayer extends GraphPlayer {
         runner.addArcHandler(scene);
         ((RoutingRunner) runner).addTransferHandler((TransferScene) scene);
 
-        final List<JPanel> widgets = new LinkedList<JPanel>();
+        final List<JPanel> widgets = new ArrayList<JPanel>();
         widgets.add(timeUnitPanel);
         widgets.add(new SpeedPanel(runner));
         widgets.add(new FPSPanel(runner));

@@ -20,7 +20,7 @@ package ditl.graphs.viz;
 
 import java.awt.Dimension;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -66,7 +66,7 @@ public class GraphPlayer extends SimplePlayer {
         runner.addGroupHandler(scene);
         scene.setGroupColorMap(groups.colorMap());
 
-        final List<JPanel> widgets = new LinkedList<JPanel>();
+        final List<JPanel> widgets = new ArrayList<JPanel>();
         widgets.add(timeUnitPanel);
         widgets.add(new SpeedPanel(runner));
         widgets.add(new FPSPanel(runner));

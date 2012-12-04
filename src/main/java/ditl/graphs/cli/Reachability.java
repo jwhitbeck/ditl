@@ -21,11 +21,11 @@ package ditl.graphs.cli;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -69,7 +69,7 @@ public class Reachability extends ConvertApp {
     private String ccsName;
     private String prefix;
     private Long min_delay;
-    private final List<ReachabilityFamily> created_families = new LinkedList<ReachabilityFamily>();
+    private final List<ReachabilityFamily> created_families = new ArrayList<ReachabilityFamily>();
     private final Set<Long> families_to_keep = new HashSet<Long>();
     private boolean delete = true;
     private boolean prune = true;

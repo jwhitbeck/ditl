@@ -19,6 +19,7 @@
 package ditl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -31,7 +32,7 @@ public class Bus<E> {
     private final TreeMap<Long, List<E>> buffer;
 
     public Bus() {
-        listeners = new LinkedList<Listener<E>>();
+        listeners = new ArrayList<Listener<E>>();
         buffer = new TreeMap<Long, List<E>>();
     }
 

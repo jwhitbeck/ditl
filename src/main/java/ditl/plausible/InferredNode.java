@@ -18,7 +18,7 @@
  *******************************************************************************/
 package ditl.plausible;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import ditl.graphs.Point;
@@ -38,8 +38,8 @@ public class InferredNode extends Node {
 
     private final Point a = new Point(0.0F, 0.0F);
 
-    private final List<Force> forces = new LinkedList<Force>();
-    private final List<Constraint> constraints = new LinkedList<Constraint>();
+    private final List<Force> forces = new ArrayList<Force>();
+    private final List<Constraint> constraints = new ArrayList<Constraint>();
 
     public InferredNode(Integer id) {
         super(id);

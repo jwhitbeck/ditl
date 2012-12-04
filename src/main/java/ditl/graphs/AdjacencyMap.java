@@ -21,11 +21,9 @@ package ditl.graphs;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -442,7 +440,7 @@ public abstract class AdjacencyMap<C extends Couple, T> implements Map<C, T> {
     }
 
     class ValuesIterator implements Iterator<T> {
-        Deque<Integer> froms = new LinkedList<Integer>(map.keySet());
+        Iterator<Integer> ki = map.keySet().iterator();
         Iterator<Map.Entry<Integer, T>> vi = null;
         Integer id1 = null;
         Integer id2 = null;
@@ -454,14 +452,14 @@ public abstract class AdjacencyMap<C extends Couple, T> implements Map<C, T> {
 
         void peek() {
             if (vi == null || !vi.hasNext()) {
-                if (froms.isEmpty()) {
+                if (!ki.hasNext()) {
                     vi = null;
                     id1 = null;
                     id2 = null;
                     next = null;
                     return;
                 }
-                id1 = froms.pop();
+                id1 = ki.next();
                 vi = map.get(id1).entrySet().iterator();
             }
             final Map.Entry<Integer, T> e = vi.next();
@@ -488,7 +486,7 @@ public abstract class AdjacencyMap<C extends Couple, T> implements Map<C, T> {
     }
 
     class KeysIterator implements Iterator<C> {
-        Deque<Integer> froms = new LinkedList<Integer>(map.keySet());
+        Iterator<Integer> ki = map.keySet().iterator();
         Iterator<Integer> vi = null;
         Integer id1 = null;
         Integer id2 = null;
@@ -499,13 +497,13 @@ public abstract class AdjacencyMap<C extends Couple, T> implements Map<C, T> {
 
         void peek() {
             if (vi == null || !vi.hasNext()) {
-                if (froms.isEmpty()) {
+                if (!ki.hasNext()) {
                     vi = null;
                     id1 = null;
                     id2 = null;
                     return;
                 }
-                id1 = froms.pop();
+                id1 = ki.next();
                 vi = map.get(id1).keySet().iterator();
             }
             id2 = vi.next();
@@ -530,7 +528,7 @@ public abstract class AdjacencyMap<C extends Couple, T> implements Map<C, T> {
     }
 
     class EntriesIterator implements Iterator<Map.Entry<C, T>> {
-        Deque<Integer> froms = new LinkedList<Integer>(map.keySet());
+        Iterator<Integer> ki = map.keySet().iterator();
         Iterator<Map.Entry<Integer, T>> vi = null;
         Integer id1 = null;
         Integer id2 = null;
@@ -542,14 +540,14 @@ public abstract class AdjacencyMap<C extends Couple, T> implements Map<C, T> {
 
         void peek() {
             if (vi == null || !vi.hasNext()) {
-                if (froms.isEmpty()) {
+                if (!ki.hasNext()) {
                     vi = null;
                     id1 = null;
                     id2 = null;
                     next = null;
                     return;
                 }
-                id1 = froms.pop();
+                id1 = ki.next();
                 vi = map.get(id1).entrySet().iterator();
             }
             final Map.Entry<Integer, T> e = vi.next();

@@ -19,7 +19,7 @@
 package ditl.transfers.cli;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -103,7 +103,7 @@ public class AnalyzeTransfers extends ExportApp {
         final Report report = factory.getNew(_out);
 
         Long min_time = null, max_time = null, incr_time = null;
-        final List<Reader<?>> readers = new LinkedList<Reader<?>>();
+        final List<Reader<?>> readers = new ArrayList<Reader<?>>();
 
         if (report instanceof MessageTrace.Handler) {
             final MessageTrace messages = _store.getTrace(messagesName);

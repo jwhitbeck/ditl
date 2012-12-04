@@ -45,8 +45,6 @@ class EdgeTimeline {
     public EdgeTimeline(Edge edge, StatefulWriter<WindowedEdgeEvent, WindowedEdge> windowWriter) {
         _edge = edge;
         window_writer = windowWriter;
-        // window_writer.append(time, new WindowedEdgesEvent(_edge,
-        // WindowedEdgesEvent.UP));
     }
 
     private void write_events_if_changed(long time) throws IOException {

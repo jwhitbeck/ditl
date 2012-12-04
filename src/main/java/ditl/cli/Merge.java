@@ -20,7 +20,7 @@ package ditl.cli;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -49,7 +49,7 @@ public class Merge extends WriteApp {
     @Override
     protected void run() throws Exception {
         for (final String traceName : getCommonTraceNames()) {
-            final List<Trace<?>> traces = new LinkedList<Trace<?>>();
+            final List<Trace<?>> traces = new ArrayList<Trace<?>>();
             for (final Store store : orig_stores)
                 traces.add(store.getTrace(traceName));
 
@@ -81,7 +81,7 @@ public class Merge extends WriteApp {
     }
 
     private List<String> getCommonTraceNames() {
-        final List<String> names = new LinkedList<String>();
+        final List<String> names = new ArrayList<String>();
         for (final Trace<?> trace : orig_stores[0].listTraces()) {
             final String name = trace.name();
             boolean ok = true;

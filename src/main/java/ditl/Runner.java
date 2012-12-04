@@ -19,10 +19,10 @@
 package ditl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Runner {
@@ -32,8 +32,8 @@ public class Runner {
     private long incr_time;
     private long cur_time;
 
-    private final List<Incrementable> incrementors = new LinkedList<Incrementable>();
-    private final List<Generator> generators = new LinkedList<Generator>();
+    private final List<Incrementable> incrementors = new ArrayList<Incrementable>();
+    private final List<Generator> generators = new ArrayList<Generator>();
     private final LinkedHashSet<Bus<?>> busses = new LinkedHashSet<Bus<?>>();
 
     public Runner(long incrTime, long minTime, long maxTime) {
