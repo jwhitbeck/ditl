@@ -47,7 +47,6 @@ public class JarStore extends Store {
             final JarEntry entry = entries.nextElement();
             if (entry.getName().endsWith(infoFile))
                 infoFiles.add(new File(entry.getName()));
-            infoFiles.add(new File(entry.getName()));
         }
         return infoFiles;
     }
