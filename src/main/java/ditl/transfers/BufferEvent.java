@@ -29,31 +29,20 @@ public class BufferEvent implements Item {
         IN, ADD, REMOVE, OUT
     }
 
-    Integer _id;
-    Integer msg_id;
-    Type _type;
+    public final Integer id;
+    public final Integer msgId;
+    public final Type type;
 
-    public BufferEvent(Integer id, Type type) {
-        _id = id;
-        _type = type;
+    public BufferEvent(Integer i, Type bufferEventType) {
+        id = i;
+        type = bufferEventType;
+        msgId = null;
     }
 
-    public BufferEvent(Integer id, Integer msgId, Type type) {
-        _id = id;
-        msg_id = msgId;
-        _type = type;
-    }
-
-    public Type type() {
-        return _type;
-    }
-
-    public Integer id() {
-        return _id;
-    }
-
-    public Integer msgId() {
-        return msg_id;
+    public BufferEvent(Integer i, Integer messageId, Type buffereEventType) {
+        id = i;
+        msgId = messageId;
+        type = buffereEventType;
     }
 
     public static final class Factory implements Item.Factory<BufferEvent> {
@@ -73,20 +62,20 @@ public class BufferEvent implements Item {
 
     @Override
     public String toString() {
-        switch (_type) {
+        switch (type) {
             case IN:
             case OUT:
-                return _id + " " + _type;
+                return id + " " + type;
             default:
-                return _id + " " + _type + " " + msg_id;
+                return id + " " + type + " " + msgId;
         }
     }
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(_id);
-        out.writeByte(_type.ordinal());
-        if (_type != Type.IN && _type != Type.OUT)
-            out.writeSInt(msg_id);
+        out.writeSInt(id);
+        out.writeByte(type.ordinal());
+        if (type != Type.IN && type != Type.OUT)
+            out.writeSInt(msgId);
     }
 }

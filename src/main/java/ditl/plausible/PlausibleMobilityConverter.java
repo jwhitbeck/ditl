@@ -258,7 +258,7 @@ public final class PlausibleMobilityConverter implements Converter,
                     throws IOException {
                 Integer id;
                 for (final Movement mv : events) {
-                    id = mv.id();
+                    id = mv.id;
                     if (known_movement_ids.contains(id)) {
                         final KnownNode node = new KnownNode(id, mv);
                         known_nodes.put(id, node);
@@ -278,9 +278,9 @@ public final class PlausibleMobilityConverter implements Converter,
                 KnownNode node;
                 Integer id;
                 for (final MovementEvent mev : events) {
-                    id = mev.id();
+                    id = mev.id;
                     if (known_movement_ids.contains(id)) {
-                        switch (mev.type()) {
+                        switch (mev.type) {
                             case IN:
                                 node = new KnownNode(id, mev.origMovement());
                                 known_nodes.put(id, node);
@@ -314,7 +314,7 @@ public final class PlausibleMobilityConverter implements Converter,
                     throws IOException {
                 Integer id;
                 for (final Presence p : events) {
-                    id = p.id();
+                    id = p.id;
                     if (!known_movement_ids.contains(id))
                         initInferredNode(id);
                 }
@@ -330,7 +330,7 @@ public final class PlausibleMobilityConverter implements Converter,
                     throws IOException {
                 Integer id;
                 for (final PresenceEvent pev : events) {
-                    id = pev.id();
+                    id = pev.id;
                     if (!known_movement_ids.contains(id))
                         if (pev.isIn())
                             initInferredNode(id);

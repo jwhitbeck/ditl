@@ -32,11 +32,11 @@ public final class EdgeEvent implements Item {
         UP, DOWN
     };
 
-    final Integer id1;
-    final Integer id2;
-    final Type _type;
+    final public Integer id1;
+    final public Integer id2;
+    final public Type type;
 
-    public EdgeEvent(Integer i1, Integer i2, Type type) {
+    public EdgeEvent(Integer i1, Integer i2, Type edgeEventType) {
         if (i1 < i2) {
             id1 = i1;
             id2 = i2;
@@ -44,25 +44,17 @@ public final class EdgeEvent implements Item {
             id1 = i2;
             id2 = i1;
         }
-        _type = type;
+        type = edgeEventType;
     }
 
-    public EdgeEvent(Edge edge, Type type) {
+    public EdgeEvent(Edge edge, Type edgeEventType) {
         id1 = edge.id1;
         id2 = edge.id2;
-        _type = type;
-    }
-
-    public Integer id1() {
-        return id1;
-    }
-
-    public Integer id2() {
-        return id2;
+        type = edgeEventType;
     }
 
     public boolean isUp() {
-        return _type == Type.UP;
+        return type == Type.UP;
     }
 
     public Edge edge() {
@@ -78,7 +70,7 @@ public final class EdgeEvent implements Item {
 
     @Override
     public String toString() {
-        return id1 + " " + id2 + " " + _type;
+        return id1 + " " + id2 + " " + type;
     }
 
     public static final class InternalGroupFilter implements Filter<EdgeEvent> {
@@ -100,7 +92,7 @@ public final class EdgeEvent implements Item {
     public void write(CodedBuffer out) {
         out.writeSInt(id1);
         out.writeSInt(id2);
-        out.writeByte(_type.ordinal());
+        out.writeByte(type.ordinal());
     }
 
 }

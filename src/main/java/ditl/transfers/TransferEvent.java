@@ -31,52 +31,53 @@ public class TransferEvent implements Item {
         START, COMPLETE, ABORT
     }
 
-    Integer msg_id;
-    Type _type;
-    long bytes_transferred;
-    Integer _from;
-    Integer _to;
+    public final Integer msgId;
+    public final Type type;
+    public final long bytesTransferred;
+    public final Integer from;
+    public final Integer to;
 
-    public TransferEvent(Integer msgId, Integer from, Integer to, Type type) {
-        msg_id = msgId;
-        _type = type;
-        _from = from;
-        _to = to;
+    public TransferEvent(Integer messageId, Integer f, Integer t, Type transferEventType) {
+        msgId = messageId;
+        type = transferEventType;
+        from = f;
+        to = t;
+        bytesTransferred = 0;
     }
 
-    public TransferEvent(Integer msgId, Integer from, Integer to, Type type, long bytesTransferred) {
-        msg_id = msgId;
-        _type = type;
-        _from = from;
-        _to = to;
-        bytes_transferred = bytesTransferred;
+    public TransferEvent(Integer messageId, Integer f, Integer t, Type transferEventType, long totalBytesTransferred) {
+        msgId = messageId;
+        type = transferEventType;
+        from = f;
+        to = t;
+        bytesTransferred = totalBytesTransferred;
     }
 
     public long bytesTransferred() {
-        return bytes_transferred;
+        return bytesTransferred;
     }
 
     public Type type() {
-        return _type;
+        return type;
     }
 
     public Integer msgId() {
-        return msg_id;
+        return msgId;
     }
 
     public Arc arc() {
-        return new Arc(_from, _to);
+        return new Arc(from, to);
     }
 
     @Override
     public String toString() {
-        switch (_type) {
+        switch (type) {
             case START:
-                return "START " + msg_id + " " + _from + " " + _to;
+                return "START " + msgId + " " + from + " " + to;
             case COMPLETE:
-                return "COMPLETE " + msg_id + " " + _from + " " + _to + " " + bytes_transferred;
+                return "COMPLETE " + msgId + " " + from + " " + to + " " + bytesTransferred;
             default:
-                return "ABORT " + msg_id + " " + _from + " " + _to + " " + bytes_transferred;
+                return "ABORT " + msgId + " " + from + " " + to + " " + bytesTransferred;
         }
     }
 
@@ -97,11 +98,11 @@ public class TransferEvent implements Item {
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeByte(_type.ordinal());
-        out.writeSInt(msg_id);
-        out.writeSInt(_from);
-        out.writeSInt(_to);
-        if (_type != Type.START)
-            out.writeLong(bytes_transferred);
+        out.writeByte(type.ordinal());
+        out.writeSInt(msgId);
+        out.writeSInt(from);
+        out.writeSInt(to);
+        if (type != Type.START)
+            out.writeLong(bytesTransferred);
     }
 }

@@ -63,10 +63,10 @@ public class MovementToPresenceConverter implements Converter, MovementTrace.Han
                 for (final MovementEvent event : events)
                     switch (event.type) {
                         case IN:
-                            presence_writer.append(time, new PresenceEvent(event.id(), PresenceEvent.Type.IN));
+                            presence_writer.append(time, new PresenceEvent(event.id, PresenceEvent.Type.IN));
                             break;
                         case OUT:
-                            presence_writer.append(time, new PresenceEvent(event.id(), PresenceEvent.Type.OUT));
+                            presence_writer.append(time, new PresenceEvent(event.id, PresenceEvent.Type.OUT));
                             break;
                     }
             }
@@ -80,7 +80,7 @@ public class MovementToPresenceConverter implements Converter, MovementTrace.Han
             public void handle(long time, Collection<Movement> events) throws IOException {
                 final Set<Presence> initState = new HashSet<Presence>();
                 for (final Movement m : events)
-                    initState.add(new Presence(m.id()));
+                    initState.add(new Presence(m.id));
                 presence_writer.setInitState(time, initState);
             }
         };

@@ -28,14 +28,15 @@ import ditl.Item;
 
 public final class Movement implements Item {
 
-    private Integer id;
+    public final Integer id;
     double x, y;
     private double sx, sy;
     private long since;
     long arrival;
     private double dx, dy;
 
-    private Movement() {
+    private Movement(Integer mid) {
+        id = mid;
     };
 
     private enum Type {
@@ -45,10 +46,6 @@ public final class Movement implements Item {
     public Movement(Integer i, Point orig) {
         id = i;
         init(orig.x, orig.y);
-    }
-
-    public Integer id() {
-        return id;
     }
 
     public Movement(Integer i, Point orig, long t, Point dest, double sp) {
@@ -84,8 +81,7 @@ public final class Movement implements Item {
     public static final class Factory implements Item.Factory<Movement> {
         @Override
         public Movement fromBinaryStream(CodedInputStream in) throws IOException {
-            Movement m = new Movement();
-            m.id = in.readSInt();
+            Movement m = new Movement(in.readSInt());
             Type type = Type.values()[in.readByte()];
             if (type == Type.STATIONNARY) {
                 m.init(in.readDouble(), in.readDouble());
@@ -205,8 +201,7 @@ public final class Movement implements Item {
 
     @Override
     public Movement clone() {
-        final Movement m = new Movement();
-        m.id = id;
+        final Movement m = new Movement(id);
         m.x = x;
         m.y = y;
         m.sx = sx;

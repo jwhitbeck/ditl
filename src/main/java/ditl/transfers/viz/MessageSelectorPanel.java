@@ -142,9 +142,9 @@ public class MessageSelectorPanel extends JPanel
             public void handle(long time, Collection<MessageEvent> events) {
                 for (final MessageEvent event : events) {
                     if (event.isNew())
-                        message_holders.put(event.msgId(), new HashSet<Integer>());
+                        message_holders.put(event.msgId, new HashSet<Integer>());
                     else
-                        message_holders.remove(event.msgId());
+                        message_holders.remove(event.msgId);
                     updateMsgChooser();
                 }
             }
@@ -163,7 +163,7 @@ public class MessageSelectorPanel extends JPanel
             @Override
             public void handle(long time, Collection<Message> events) {
                 for (final Message msg : events)
-                    message_holders.put(msg.msgId(), new HashSet<Integer>());
+                    message_holders.put(msg.msgId, new HashSet<Integer>());
                 updateMsgChooser();
             }
         };
@@ -175,12 +175,12 @@ public class MessageSelectorPanel extends JPanel
             @Override
             public void handle(long time, Collection<BufferEvent> events) throws IOException {
                 for (final BufferEvent event : events) {
-                    final Integer id = event.id();
+                    final Integer id = event.id;
                     Integer msgId;
                     Set<Integer> holders;
-                    switch (event.type()) {
+                    switch (event.type) {
                         case ADD:
-                            msgId = event.msgId();
+                            msgId = event.msgId;
                             holders = message_holders.get(msgId);
                             if (holders != null) {
                                 holders.add(id);
@@ -189,7 +189,7 @@ public class MessageSelectorPanel extends JPanel
                             }
                             break;
                         case REMOVE:
-                            msgId = event.msgId();
+                            msgId = event.msgId;
                             holders = message_holders.get(msgId);
                             if (holders != null) {
                                 holders.remove(id);
@@ -214,7 +214,7 @@ public class MessageSelectorPanel extends JPanel
             @Override
             public void handle(long time, Collection<Buffer> events) {
                 for (final Buffer buffer : events) {
-                    final Integer id = buffer.id();
+                    final Integer id = buffer.id;
                     for (final Integer msgId : buffer)
                         message_holders.get(msgId).add(id);
                 }

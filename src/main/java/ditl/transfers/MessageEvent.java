@@ -30,24 +30,20 @@ public class MessageEvent implements Item {
         NEW, EXPIRE
     }
 
-    Integer msg_id;
-    Type _type;
+    public final Integer msgId;
+    public final Type type;
 
-    public MessageEvent(Integer msgId, Type type) {
-        msg_id = msgId;
-        _type = type;
-    }
-
-    public Integer msgId() {
-        return msg_id;
+    public MessageEvent(Integer messageId, Type messageEventType) {
+        msgId = messageId;
+        type = messageEventType;
     }
 
     public boolean isNew() {
-        return _type == Type.NEW;
+        return type == Type.NEW;
     }
 
     public Message message() {
-        return new Message(msg_id);
+        return new Message(msgId);
     }
 
     public static final class Factory implements Item.Factory<MessageEvent> {
@@ -59,12 +55,12 @@ public class MessageEvent implements Item {
 
     @Override
     public String toString() {
-        return msg_id + " " + _type;
+        return msgId + " " + type;
     }
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(msg_id);
-        out.writeByte(_type.ordinal());
+        out.writeSInt(msgId);
+        out.writeByte(type.ordinal());
     }
 }

@@ -46,9 +46,9 @@ public class WindowedEdgeTrace extends StatefulTrace<WindowedEdgeEvent, Windowed
 
         @Override
         public void handleEvent(long time, WindowedEdgeEvent event) {
-            final Edge edge = event.edge();
+            final Edge edge = event.edge;
             WindowedEdge wl;
-            switch (event.type()) {
+            switch (event.type) {
                 case UP:
                     wl = new WindowedEdge(edge);
                     state.add(wl);
@@ -71,7 +71,7 @@ public class WindowedEdgeTrace extends StatefulTrace<WindowedEdgeEvent, Windowed
             map.clear();
             state.addAll(states);
             for (final WindowedEdge wl : states)
-                map.put(wl.edge(), wl);
+                map.put(wl.edge, wl);
         }
 
         @Override

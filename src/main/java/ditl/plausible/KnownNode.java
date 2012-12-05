@@ -26,7 +26,7 @@ public class KnownNode extends Node {
     Movement _movement;
 
     public KnownNode(long time, Movement movement) {
-        super(movement.id());
+        super(movement.id);
         _movement = movement;
         cur = _movement.positionAtTime(time);
         next = _movement.positionAtTime(time);

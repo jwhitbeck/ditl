@@ -51,9 +51,9 @@ public final class EdgesToConnectedComponentsConverter implements Converter {
         cc1._members.addAll(cc2._members);
         for (final Integer i : cc2._members)
             cc_map.put(i, cc1);
-        group_writer.append(time, new GroupEvent(cc2.gid(), GroupEvent.Type.LEAVE, cc2._members));
-        delCC(time, cc2.gid());
-        group_writer.append(time, new GroupEvent(cc1.gid(), GroupEvent.Type.JOIN, cc2._members));
+        group_writer.append(time, new GroupEvent(cc2.gid, GroupEvent.Type.LEAVE, cc2._members));
+        delCC(time, cc2.gid);
+        group_writer.append(time, new GroupEvent(cc1.gid, GroupEvent.Type.JOIN, cc2._members));
     }
 
     private void checkSplit(long time, Integer i, Group cc) throws IOException {
@@ -79,10 +79,10 @@ public final class EdgesToConnectedComponentsConverter implements Converter {
                 cc._members = visited;
             } else
                 ncc._members = visited;
-            group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.Type.LEAVE, ncc._members));
+            group_writer.append(time, new GroupEvent(cc.gid, GroupEvent.Type.LEAVE, ncc._members));
             for (final Integer j : ncc._members)
                 cc_map.put(j, ncc);
-            group_writer.append(time, new GroupEvent(ncc.gid(), GroupEvent.Type.JOIN, ncc._members));
+            group_writer.append(time, new GroupEvent(ncc.gid, GroupEvent.Type.JOIN, ncc._members));
         }
     }
 
@@ -106,18 +106,18 @@ public final class EdgesToConnectedComponentsConverter implements Converter {
                 cc_map.put(e.id1, cc);
                 cc_map.put(e.id2, cc);
                 group_writer.append(time,
-                        new GroupEvent(cc.gid(), GroupEvent.Type.JOIN, new Integer[] { e.id1, e.id2 }));
+                        new GroupEvent(cc.gid, GroupEvent.Type.JOIN, new Integer[] { e.id1, e.id2 }));
             } else { // add id1 to id2's cc
                 cc = cc_map.get(e.id2);
                 cc._members.add(e.id1);
                 cc_map.put(e.id1, cc);
-                group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.Type.JOIN, Collections.singleton(e.id1)));
+                group_writer.append(time, new GroupEvent(cc.gid, GroupEvent.Type.JOIN, Collections.singleton(e.id1)));
             }
         } else if (!cc_map.containsKey(e.id2)) { // add id2 to id1's cc
             cc = cc_map.get(e.id1);
             cc._members.add(e.id2);
             cc_map.put(e.id2, cc);
-            group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.Type.JOIN, Collections.singleton(e.id2)));
+            group_writer.append(time, new GroupEvent(cc.gid, GroupEvent.Type.JOIN, Collections.singleton(e.id2)));
         } else {
             cc = cc_map.get(e.id1);
             occ = cc_map.get(e.id2);
@@ -133,9 +133,9 @@ public final class EdgesToConnectedComponentsConverter implements Converter {
         final Group cc = cc_map.get(i);
         cc._members.remove(i);
         cc_map.remove(i);
-        group_writer.append(time, new GroupEvent(cc.gid(), GroupEvent.Type.LEAVE, new Integer[] { i }));
+        group_writer.append(time, new GroupEvent(cc.gid, GroupEvent.Type.LEAVE, new Integer[] { i }));
         if (cc._members.isEmpty())
-            delCC(time, cc.gid());
+            delCC(time, cc.gid);
     }
 
     private void removeEdge(long time, Edge e) throws IOException {
@@ -197,7 +197,7 @@ public final class EdgesToConnectedComponentsConverter implements Converter {
             }
         }
         for (final Group g : initCCs) {
-            final Group h = new Group(g.gid(), new HashSet<Integer>(g._members));
+            final Group h = new Group(g.gid, new HashSet<Integer>(g._members));
             for (final Integer i : h._members)
                 cc_map.put(i, h);
         }

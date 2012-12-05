@@ -32,20 +32,16 @@ public final class PresenceEvent implements Item {
         IN, OUT
     }
 
-    private final Integer id;
-    private final Type _type;
+    public final Integer id;
+    public final Type type;
 
-    public PresenceEvent(Integer i, Type type) {
+    public PresenceEvent(Integer i, Type presenceEventType) {
         id = i;
-        _type = type;
-    }
-
-    public Integer id() {
-        return id;
+        type = presenceEventType;
     }
 
     public boolean isIn() {
-        return _type == Type.IN;
+        return type == Type.IN;
     }
 
     public Presence presence() {
@@ -61,7 +57,7 @@ public final class PresenceEvent implements Item {
 
     @Override
     public String toString() {
-        return id + " " + _type;
+        return id + " " + type;
     }
 
     public static final class GroupFilter implements Filter<PresenceEvent> {
@@ -82,7 +78,7 @@ public final class PresenceEvent implements Item {
     @Override
     public void write(CodedBuffer out) {
         out.writeSInt(id);
-        out.writeByte(_type.ordinal());
+        out.writeByte(type.ordinal());
     }
 
 }

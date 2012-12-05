@@ -78,7 +78,7 @@ public class CRAWDADContacts {
                     final double beg = activeContacts.get(e) * timeMul;
                     final double end = edgeReader.time() * timeMul;
                     activeContacts.remove(e);
-                    bw.write(e.id1() + "\t" + e.id2() + "\t" + beg + "\t" + end + "\n");
+                    bw.write(e.id1 + "\t" + e.id2 + "\t" + beg + "\t" + end + "\n");
                 }
             }
         edgeReader.close();

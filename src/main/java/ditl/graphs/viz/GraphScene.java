@@ -73,9 +73,9 @@ public class GraphScene extends Scene implements
                     if (id_map == null)
                         node = new NodeElement(m);
                     else
-                        node = new NodeElement(m, id_map.getExternalId(m.id()));
+                        node = new NodeElement(m, id_map.getExternalId(m.id));
                     node.setShowId(showIds);
-                    nodes.put(m.id(), node);
+                    nodes.put(m.id, node);
                     addScaleListener(node);
                 }
             }
@@ -94,8 +94,8 @@ public class GraphScene extends Scene implements
             public void handle(long time, Collection<MovementEvent> events) {
                 for (final MovementEvent mev : events) {
                     NodeElement node;
-                    final Integer id = mev.id();
-                    switch (mev.type()) {
+                    final Integer id = mev.id;
+                    switch (mev.type) {
                         case IN:
                             node = new NodeElement(mev.origMovement());
                             nodes.put(id, node);
@@ -125,8 +125,8 @@ public class GraphScene extends Scene implements
                 for (final EdgeEvent eev : events) {
                     final Edge e = eev.edge();
                     if (eev.isUp()) {
-                        final NodeElement n1 = nodes.get(eev.id1());
-                        final NodeElement n2 = nodes.get(eev.id2());
+                        final NodeElement n1 = nodes.get(eev.id1);
+                        final NodeElement n2 = nodes.get(eev.id2);
                         final EdgeElement edge = new EdgeElement(n1, n2);
                         edges.put(e, edge);
                     } else
@@ -142,8 +142,8 @@ public class GraphScene extends Scene implements
             @Override
             public void handle(long time, Collection<Edge> events) {
                 for (final Edge e : events) {
-                    final NodeElement n1 = nodes.get(e.id1());
-                    final NodeElement n2 = nodes.get(e.id2());
+                    final NodeElement n1 = nodes.get(e.id1);
+                    final NodeElement n2 = nodes.get(e.id2);
                     final EdgeElement edge = new EdgeElement(n1, n2);
                     edges.put(e, edge);
                 }
@@ -168,8 +168,8 @@ public class GraphScene extends Scene implements
                     if (aev.isUp()) {
                         ae = arcs.get(e);
                         if (ae == null) {
-                            final NodeElement n1 = nodes.get(aev.from());
-                            final NodeElement n2 = nodes.get(aev.to());
+                            final NodeElement n1 = nodes.get(aev.from);
+                            final NodeElement n2 = nodes.get(aev.to);
                             ae = new ArcElement(n1, n2);
                             arcs.put(e, ae);
                         }
@@ -194,8 +194,8 @@ public class GraphScene extends Scene implements
                     final Edge e = a.edge();
                     ArcElement ae = arcs.get(e);
                     if (ae == null) {
-                        final NodeElement n1 = nodes.get(a.from());
-                        final NodeElement n2 = nodes.get(a.to());
+                        final NodeElement n1 = nodes.get(a.from);
+                        final NodeElement n2 = nodes.get(a.to);
                         ae = new ArcElement(n1, n2);
                         arcs.put(e, ae);
                     }
@@ -249,7 +249,7 @@ public class GraphScene extends Scene implements
             @Override
             public void handle(long time, Collection<GroupEvent> events) {
                 for (final GroupEvent gev : events)
-                    switch (gev.type()) {
+                    switch (gev.type) {
                         case LEAVE:
                             for (final Integer i : gev.members()) {
                                 final NodeElement node = nodes.get(i);
@@ -260,7 +260,7 @@ public class GraphScene extends Scene implements
                             break;
                         case JOIN:
                             for (final Integer i : gev.members())
-                                nodes.get(i).setFillColor(group_color_map.get(gev.gid()));
+                                nodes.get(i).setFillColor(group_color_map.get(gev.gid));
                             break;
                     }
             }
@@ -282,7 +282,7 @@ public class GraphScene extends Scene implements
                 for (final NodeElement node : nodes.values())
                     node.setFillColor(GroupsPanel.noGroupColor);
                 for (final Group group : events) {
-                    final Color c = group_color_map.get(group.gid());
+                    final Color c = group_color_map.get(group.gid);
                     for (final Integer i : group.members()) {
                         final NodeElement node = nodes.get(i);
                         if (node != null)

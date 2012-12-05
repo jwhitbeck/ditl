@@ -26,14 +26,10 @@ import ditl.Item;
 
 public class Message implements Item {
 
-    private final Integer msg_id;
+    public final Integer msgId;
 
-    public Message(Integer msgId) {
-        msg_id = msgId;
-    }
-
-    public Integer msgId() {
-        return msg_id;
+    public Message(Integer messageId) {
+        msgId = messageId;
     }
 
     public static final class Factory implements Item.Factory<Message> {
@@ -45,22 +41,22 @@ public class Message implements Item {
 
     @Override
     public int hashCode() {
-        return msg_id;
+        return msgId;
     }
 
     @Override
     public boolean equals(Object o) {
         final Message m = (Message) o;
-        return m.msg_id.equals(msg_id);
+        return m.msgId.equals(msgId);
     }
 
     @Override
     public String toString() {
-        return "m " + msg_id;
+        return "m " + msgId;
     }
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(msg_id);
+        out.writeSInt(msgId);
     }
 }

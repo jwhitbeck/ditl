@@ -127,9 +127,9 @@ public final class ArcsToDominatingSetConverter implements Converter,
             public void handle(long time, Collection<PresenceEvent> events) {
                 for (final PresenceEvent pev : events)
                     if (pev.isIn())
-                        present.add(pev.id());
+                        present.add(pev.id);
                     else
-                        present.remove(pev.id());
+                        present.remove(pev.id);
                 scheduleUpdate(time);
             }
         };
@@ -141,7 +141,7 @@ public final class ArcsToDominatingSetConverter implements Converter,
             @Override
             public void handle(long time, Collection<Presence> events) {
                 for (final Presence p : events)
-                    present.add(p.id());
+                    present.add(p.id);
                 scheduleUpdate(time);
             }
         };

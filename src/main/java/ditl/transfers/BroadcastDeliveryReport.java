@@ -61,7 +61,7 @@ public class BroadcastDeliveryReport extends Report
             @Override
             public void handle(long time, Collection<MessageEvent> events) throws IOException {
                 for (final MessageEvent mev : events) {
-                    final Integer msgId = mev.msgId();
+                    final Integer msgId = mev.msgId;
                     if (mev.isNew()) {
                         delivery_times.put(msgId, new LinkedList<Long>());
                         ctimes.put(msgId, time);
@@ -90,10 +90,10 @@ public class BroadcastDeliveryReport extends Report
             public void handle(long time, Collection<BufferEvent> events)
                     throws IOException {
                 for (final BufferEvent event : events) {
-                    final Integer msgId = event.msgId();
+                    final Integer msgId = event.msgId;
                     final List<Long> deliveries = delivery_times.get(msgId);
                     if (deliveries != null)
-                        if (event.type() == BufferEvent.Type.ADD) {
+                        if (event.type == BufferEvent.Type.ADD) {
                             final Long dtime = time - ctimes.get(msgId);
                             deliveries.add(dtime);
                         }

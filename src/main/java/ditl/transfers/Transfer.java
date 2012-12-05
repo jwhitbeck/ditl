@@ -27,43 +27,29 @@ import ditl.graphs.Arc;
 
 public class Transfer implements Item {
 
-    Integer msg_id;
-    Integer _from;
-    Integer _to;
+    final public Integer msgId;
+    final public Integer from;
+    final public Integer to;
 
-    public Transfer(Integer msgId, Integer from, Integer to) {
-        msg_id = msgId;
-        _from = from;
-        _to = to;
+    public Transfer(Integer messageId, Integer f, Integer t) {
+        msgId = messageId;
+        from = f;
+        to = t;
     }
 
     public Transfer(TransferEvent event) {
-        if (event.type() == TransferEvent.Type.START) {
-            msg_id = event.msg_id;
-            _to = event._to;
-            _from = event._from;
-        }
+        msgId = event.msgId;
+        to = event.to;
+        from = event.from;
     }
 
     public Arc arc() {
-        return new Arc(_from, _to);
-    }
-
-    public Integer from() {
-        return _from;
-    }
-
-    public Integer to() {
-        return _to;
-    }
-
-    public Integer msgId() {
-        return msg_id;
+        return new Arc(from, to);
     }
 
     @Override
     public String toString() {
-        return msg_id + " " + _from + " " + _to;
+        return msgId + " " + from + " " + to;
     }
 
     public static final class Factory implements Item.Factory<Transfer> {
@@ -75,8 +61,8 @@ public class Transfer implements Item {
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(msg_id);
-        out.writeSInt(_from);
-        out.writeSInt(_to);
+        out.writeSInt(msgId);
+        out.writeSInt(from);
+        out.writeSInt(to);
     }
 }

@@ -72,7 +72,7 @@ public class GroupTrace extends StatefulTrace<GroupEvent, Group>
             group_map.clear();
             for (final Group g : groupState) {
                 groups.add(g);
-                group_map.put(g._gid, g);
+                group_map.put(g.gid, g);
             }
         }
 
@@ -84,8 +84,8 @@ public class GroupTrace extends StatefulTrace<GroupEvent, Group>
         @Override
         public void handleEvent(long time, GroupEvent event) {
             Group g;
-            final Integer gid = event._gid;
-            switch (event._type) {
+            final Integer gid = event.gid;
+            switch (event.type) {
                 case NEW:
                     g = new Group(gid);
                     groups.add(g);

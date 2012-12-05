@@ -44,15 +44,15 @@ public class BufferTrace extends StatefulTrace<BufferEvent, Buffer> {
         @Override
         public void handleEvent(long time, BufferEvent event) {
             Buffer b;
-            final Integer id = event._id;
-            switch (event._type) {
+            final Integer id = event.id;
+            switch (event.type) {
                 case ADD:
                     b = buffer_map.get(id);
-                    b.msg_ids.add(event.msg_id);
+                    b.msg_ids.add(event.msgId);
                     break;
                 case REMOVE:
                     b = buffer_map.get(id);
-                    b.msg_ids.remove(event.msg_id);
+                    b.msg_ids.remove(event.msgId);
                     break;
                 case IN:
                     b = new Buffer(id);
@@ -71,7 +71,7 @@ public class BufferTrace extends StatefulTrace<BufferEvent, Buffer> {
             buffer_map.clear();
             buffers.clear();
             for (final Buffer b : state) {
-                buffer_map.put(b._id, b);
+                buffer_map.put(b.id, b);
                 buffers.add(b);
             }
         }

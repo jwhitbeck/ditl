@@ -56,7 +56,7 @@ public class ExportPositions extends ExportApp {
         final StatefulReader<MovementEvent, Movement> reader = movement.getReader();
         reader.seek(u_time);
         for (final Movement m : reader.referenceState())
-            System.out.println(m.id() + " " + m.positionAtTime(u_time));
+            System.out.println(m.id + " " + m.positionAtTime(u_time));
         reader.close();
     }
 

@@ -52,9 +52,9 @@ public final class NodeDegreeReport extends StateTimeReport implements EdgeTrace
             public void handle(long time, Collection<PresenceEvent> events) throws IOException {
                 for (final PresenceEvent p : events)
                     if (p.isIn())
-                        degrees.put(p.id(), 0);
+                        degrees.put(p.id, 0);
                     else
-                        degrees.remove(p.id());
+                        degrees.remove(p.id);
                 update(time);
             }
         };
@@ -67,11 +67,11 @@ public final class NodeDegreeReport extends StateTimeReport implements EdgeTrace
             public void handle(long time, Collection<EdgeEvent> events) throws IOException {
                 for (final EdgeEvent ce : events)
                     if (ce.isUp()) {
-                        incrDegree(ce.id1(), 1);
-                        incrDegree(ce.id2(), 1);
+                        incrDegree(ce.id1, 1);
+                        incrDegree(ce.id2, 1);
                     } else {
-                        incrDegree(ce.id1(), -1);
-                        incrDegree(ce.id2(), -1);
+                        incrDegree(ce.id1, -1);
+                        incrDegree(ce.id2, -1);
                     }
                 update(time);
             }
@@ -84,7 +84,7 @@ public final class NodeDegreeReport extends StateTimeReport implements EdgeTrace
             @Override
             public void handle(long time, Collection<Presence> events) throws IOException {
                 for (final Presence p : events)
-                    degrees.put(p.id(), 0);
+                    degrees.put(p.id, 0);
             }
 
             @Override
@@ -100,8 +100,8 @@ public final class NodeDegreeReport extends StateTimeReport implements EdgeTrace
             @Override
             public void handle(long time, Collection<Edge> events) throws IOException {
                 for (final Edge c : events) {
-                    incrDegree(c.id1(), 1);
-                    incrDegree(c.id2(), 1);
+                    incrDegree(c.id1, 1);
+                    incrDegree(c.id2, 1);
                 }
                 update(time);
             }

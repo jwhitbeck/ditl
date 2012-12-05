@@ -51,11 +51,11 @@ public final class TransitTimesReport extends Report implements PresenceTrace.Ha
             public void handle(long time, Collection<PresenceEvent> events) throws IOException {
                 for (final PresenceEvent pev : events)
                     if (pev.isIn())
-                        entry_times.put(pev.id(), time);
+                        entry_times.put(pev.id, time);
                     else {
-                        final long transit_time = time - entry_times.get(pev.id());
+                        final long transit_time = time - entry_times.get(pev.id);
                         append(transit_time);
-                        entry_times.remove(pev.id());
+                        entry_times.remove(pev.id);
                     }
             }
         };
@@ -67,7 +67,7 @@ public final class TransitTimesReport extends Report implements PresenceTrace.Ha
             @Override
             public void handle(long time, Collection<Presence> events) {
                 for (final Presence p : events)
-                    entry_times.put(p.id(), time);
+                    entry_times.put(p.id, time);
             }
 
             @Override

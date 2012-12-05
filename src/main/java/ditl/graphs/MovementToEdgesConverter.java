@@ -60,7 +60,7 @@ public class MovementToEdgesConverter implements Incrementable, MovementTrace.Ha
             @Override
             public void handle(long time, Collection<Movement> events) throws IOException {
                 for (final Movement m : events)
-                    invalid_movements.put(m.id(), m);
+                    invalid_movements.put(m.id, m);
                 setInitialState(time);
             }
 
@@ -81,7 +81,7 @@ public class MovementToEdgesConverter implements Incrementable, MovementTrace.Ha
                 final long[] meetings = im.meetingTimes(vm, r2);
                 if (meetings != null) {
                     final long begin = meetings[0], end = meetings[1];
-                    final Edge e = new Edge(im.id(), vm.id());
+                    final Edge e = new Edge(im.id, vm.id);
                     if (begin < time) {
                         if (time <= end) {
                             initEdges.add(e); // edge is already up
@@ -98,7 +98,7 @@ public class MovementToEdgesConverter implements Incrementable, MovementTrace.Ha
                 }
             }
             i.remove();
-            valid_movements.put(im.id(), im);
+            valid_movements.put(im.id, im);
         }
         edge_writer.setInitState(time, initEdges);
     }
@@ -109,7 +109,7 @@ public class MovementToEdgesConverter implements Incrementable, MovementTrace.Ha
             @Override
             public void handle(long time, Collection<MovementEvent> events) throws IOException {
                 for (final MovementEvent event : events) {
-                    final Integer id = event.id();
+                    final Integer id = event.id;
                     switch (event.type) {
                         case IN:
                             invalid_movements.put(id, event.origMovement());
@@ -147,7 +147,7 @@ public class MovementToEdgesConverter implements Incrementable, MovementTrace.Ha
                 final long[] meetings = m.meetingTimes(vm, r2);
                 if (meetings != null) {
                     final long begin = meetings[0], end = meetings[1];
-                    final Edge e = new Edge(m.id(), vm.id());
+                    final Edge e = new Edge(m.id, vm.id);
                     if (begin >= time && begin - time < max_interval)
                         edge_writer.queue(begin, new EdgeEvent(e, EdgeEvent.Type.UP));
                     if (end >= time && end - time < max_interval) // edge goes
@@ -156,7 +156,7 @@ public class MovementToEdgesConverter implements Incrementable, MovementTrace.Ha
                         edge_writer.queue(end, new EdgeEvent(e, EdgeEvent.Type.DOWN));
                 }
             }
-            valid_movements.put(m.id(), m);
+            valid_movements.put(m.id, m);
             i.remove();
         }
     }

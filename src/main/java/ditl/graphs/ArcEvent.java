@@ -32,36 +32,28 @@ public final class ArcEvent implements Item {
         UP, DOWN
     };
 
-    final Integer _to;
-    final Integer _from;
-    final Type _type;
+    final public Integer to;
+    final public Integer from;
+    final public Type type;
 
-    public ArcEvent(Integer from, Integer to, Type type) {
-        _from = from;
-        _to = to;
-        _type = type;
+    public ArcEvent(Integer nodeFrom, Integer nodeTo, Type arcEventType) {
+        from = nodeFrom;
+        to = nodeTo;
+        type = arcEventType;
     }
 
-    public ArcEvent(Arc a, Type type) {
-        _from = a._from;
-        _to = a._to;
-        _type = type;
-    }
-
-    public Integer from() {
-        return _from;
-    }
-
-    public Integer to() {
-        return _to;
+    public ArcEvent(Arc a, Type arcEventType) {
+        from = a.from;
+        to = a.to;
+        type = arcEventType;
     }
 
     public boolean isUp() {
-        return _type == Type.UP;
+        return type == Type.UP;
     }
 
     public Arc arc() {
-        return new Arc(_from, _to);
+        return new Arc(from, to);
     }
 
     public static final class Factory implements Item.Factory<ArcEvent> {
@@ -73,7 +65,7 @@ public final class ArcEvent implements Item {
 
     @Override
     public String toString() {
-        return _from + " " + _to + " " + _type;
+        return from + " " + to + " " + type;
     }
 
     public static final class InternalGroupFilter implements Filter<ArcEvent> {
@@ -85,7 +77,7 @@ public final class ArcEvent implements Item {
 
         @Override
         public ArcEvent filter(ArcEvent item) {
-            if (_group.contains(item._from) && _group.contains(item._to))
+            if (_group.contains(item.from) && _group.contains(item.to))
                 return item;
             return null;
         }
@@ -93,9 +85,9 @@ public final class ArcEvent implements Item {
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(_from);
-        out.writeSInt(_to);
-        out.writeByte(_type.ordinal());
+        out.writeSInt(from);
+        out.writeSInt(to);
+        out.writeByte(type.ordinal());
     }
 
 }

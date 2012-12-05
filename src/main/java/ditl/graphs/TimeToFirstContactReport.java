@@ -76,8 +76,8 @@ public final class TimeToFirstContactReport extends Report
             @Override
             public void handle(long time, Collection<Edge> events) throws IOException {
                 for (final Edge e : events) {
-                    done.add(e.id1());
-                    done.add(e.id2());
+                    done.add(e.id1);
+                    done.add(e.id2);
                     append(0);
                     append(0);
                 }
@@ -97,10 +97,10 @@ public final class TimeToFirstContactReport extends Report
             public void handle(long time, Collection<PresenceEvent> events) {
                 for (final PresenceEvent pev : events)
                     if (pev.isIn())
-                        entry_times.put(pev.id(), time);
+                        entry_times.put(pev.id, time);
                     else {
-                        entry_times.remove(pev.id());
-                        done.remove(pev.id());
+                        entry_times.remove(pev.id);
+                        done.remove(pev.id);
                     }
             }
         };
@@ -112,7 +112,7 @@ public final class TimeToFirstContactReport extends Report
             @Override
             public void handle(long time, Collection<Presence> events) {
                 for (final Presence p : events)
-                    entry_times.put(p.id(), time);
+                    entry_times.put(p.id, time);
             }
 
             @Override

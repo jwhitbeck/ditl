@@ -81,9 +81,9 @@ public class ONEMovement {
                 first = events;
             else if (points.isEmpty()) {
                 for (final Movement m : events)
-                    points.put(m.id(), m.from());
+                    points.put(m.id, m.from());
                 for (final Movement m : first) {
-                    final Point dest = points.get(m.id());
+                    final Point dest = points.get(m.id);
                     final double s = speed(m.from(), dest, dt);
                     m.setNewDestination(last_time, dest, s);
                 }
@@ -91,9 +91,9 @@ public class ONEMovement {
             } else
                 for (final Movement m : events) {
                     final Point dest = m.from();
-                    final double s = speed(points.get(m.id()), dest, dt);
-                    movementWriter.append(last_time, new MovementEvent(m.id(), s, dest));
-                    points.put(m.id(), dest); // update last point
+                    final double s = speed(points.get(m.id), dest, dt);
+                    movementWriter.append(last_time, new MovementEvent(m.id, s, dest));
+                    points.put(m.id, dest); // update last point
                 }
             last_time = time;
         }

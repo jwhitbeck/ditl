@@ -75,17 +75,17 @@ public final class StrictEdgesToPresenceConverter implements Converter, EdgeTrac
             public void handle(long time, Collection<EdgeEvent> events) {
                 for (final EdgeEvent event : events)
                     if (event.isUp()) {
-                        if (!seen_nodes.contains(event.id1())) {
-                            presence_writer.queue(time, new PresenceEvent(event.id1(), PresenceEvent.Type.IN));
-                            seen_nodes.add(event.id1());
+                        if (!seen_nodes.contains(event.id1)) {
+                            presence_writer.queue(time, new PresenceEvent(event.id1, PresenceEvent.Type.IN));
+                            seen_nodes.add(event.id1);
                         }
-                        if (!seen_nodes.contains(event.id2())) {
-                            presence_writer.queue(time, new PresenceEvent(event.id2(), PresenceEvent.Type.IN));
-                            seen_nodes.add(event.id2());
+                        if (!seen_nodes.contains(event.id2)) {
+                            presence_writer.queue(time, new PresenceEvent(event.id2, PresenceEvent.Type.IN));
+                            seen_nodes.add(event.id2);
                         }
                     } else {
-                        exit_times.put(event.id1(), time);
-                        exit_times.put(event.id2(), time);
+                        exit_times.put(event.id1, time);
+                        exit_times.put(event.id2, time);
                     }
             }
         };
@@ -98,10 +98,10 @@ public final class StrictEdgesToPresenceConverter implements Converter, EdgeTrac
             public void handle(long time, Collection<Edge> events) throws IOException {
                 final Set<Presence> init_nodes = new HashSet<Presence>();
                 for (final Edge e : events) {
-                    init_nodes.add(new Presence(e.id1()));
-                    init_nodes.add(new Presence(e.id2()));
-                    seen_nodes.add(e.id1());
-                    seen_nodes.add(e.id2());
+                    init_nodes.add(new Presence(e.id1));
+                    init_nodes.add(new Presence(e.id2));
+                    seen_nodes.add(e.id1);
+                    seen_nodes.add(e.id2);
                 }
                 presence_writer.setInitState(time, init_nodes);
             }

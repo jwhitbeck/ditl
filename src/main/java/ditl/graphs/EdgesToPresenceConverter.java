@@ -42,8 +42,8 @@ public final class EdgesToPresenceConverter implements Converter, EdgeTrace.Hand
     }
 
     private void addEdge(Edge e) {
-        ids.add(new Presence(e.id1()));
-        ids.add(new Presence(e.id2()));
+        ids.add(new Presence(e.id1));
+        ids.add(new Presence(e.id2));
     }
 
     @Override

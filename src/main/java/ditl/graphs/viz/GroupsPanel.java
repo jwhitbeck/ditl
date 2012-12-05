@@ -135,13 +135,13 @@ public class GroupsPanel extends JPanel implements
             @Override
             public void handle(long time, Collection<GroupEvent> events) {
                 for (final GroupEvent gev : events)
-                    switch (gev.type()) {
+                    switch (gev.type) {
                         case NEW:
-                            addGroup(gev.gid());
+                            addGroup(gev.gid);
                             updateColorPanel();
                             break;
                         case DELETE:
-                            color_map.remove(gev.gid());
+                            color_map.remove(gev.gid);
                             updateColorPanel();
                             break;
                     }
@@ -160,7 +160,7 @@ public class GroupsPanel extends JPanel implements
             @Override
             public void handle(long time, Collection<Group> events) {
                 for (final Group g : events)
-                    addGroup(g.gid());
+                    addGroup(g.gid);
                 updateColorPanel();
             }
 

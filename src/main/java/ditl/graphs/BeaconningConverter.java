@@ -80,7 +80,7 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
             @Override
             public void handle(long time, Collection<Presence> events) {
                 for (final Presence p : events)
-                    initBeaconning(time, p.id());
+                    initBeaconning(time, p.id);
             }
 
             @Override
@@ -111,9 +111,9 @@ public final class BeaconningConverter implements PresenceTrace.Handler, Convert
             public void handle(long time, Collection<PresenceEvent> events) {
                 for (final PresenceEvent pev : events)
                     if (pev.isIn())
-                        initBeaconning(time, pev.id());
+                        initBeaconning(time, pev.id);
                     else
-                        stopBeaconning(time, pev.id());
+                        stopBeaconning(time, pev.id);
             }
         };
     }

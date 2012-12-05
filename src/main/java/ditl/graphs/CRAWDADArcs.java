@@ -78,7 +78,7 @@ public class CRAWDADArcs {
                     final double beg = activeArcs.get(a) * timeMul;
                     final double end = arcReader.time() * timeMul;
                     activeArcs.remove(a);
-                    bw.write(a.from() + "\t" + a.to() + "\t" + beg + "\t" + end + "\n");
+                    bw.write(a.from + "\t" + a.to + "\t" + beg + "\t" + end + "\n");
                 }
             }
 

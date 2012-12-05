@@ -90,7 +90,7 @@ public class ConnectedComponentsToReachableConverter
                         for (final Integer j : g.members())
                             if (!i.equals(j))
                                 init_state.add(new Arc(i, j));
-                    group_map.put(g.gid(), g);
+                    group_map.put(g.gid, g);
                 }
                 arc_writer.setInitState(time, init_state);
             }
@@ -104,8 +104,8 @@ public class ConnectedComponentsToReachableConverter
             public void handle(long time, Collection<GroupEvent> events) throws IOException {
                 for (final GroupEvent gev : events) {
                     Group g;
-                    final Integer gid = gev.gid();
-                    switch (gev.type()) {
+                    final Integer gid = gev.gid;
+                    switch (gev.type) {
                         case NEW:
                             g = new Group(gid);
                             group_map.put(gid, g);

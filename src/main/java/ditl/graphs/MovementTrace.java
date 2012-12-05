@@ -93,7 +93,7 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
             for (final Movement m : states) {
                 final Movement mv = m.clone();
                 movements.add(mv);
-                movement_map.put(mv.id(), mv);
+                movement_map.put(mv.id, mv);
             }
         }
 
@@ -109,17 +109,17 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
                 case IN:
                     m = event.origMovement();
                     movements.add(m);
-                    movement_map.put(m.id(), m);
+                    movement_map.put(m.id, m);
                     break;
 
                 case OUT:
-                    m = movement_map.get(event.id());
+                    m = movement_map.get(event.id);
                     movements.remove(m);
-                    movement_map.remove(m.id());
+                    movement_map.remove(m.id);
                     break;
 
                 default:
-                    m = movement_map.get(event.id());
+                    m = movement_map.get(event.id);
                     m.handleEvent(time, event);
             }
         }
@@ -166,7 +166,7 @@ public class MovementTrace extends StatefulTrace<MovementEvent, Movement>
         @Override
         public void write(long time, MovementEvent event) {
             super.write(time, event);
-            update(event.dest());
+            update(event.dest);
         }
 
         @Override

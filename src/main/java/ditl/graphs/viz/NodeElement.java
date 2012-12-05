@@ -46,7 +46,7 @@ public class NodeElement implements Clickable, SceneElement, ScaleListener, Time
 
     public NodeElement(Movement m) {
         movement = m;
-        name = String.valueOf(movement.id());
+        name = String.valueOf(movement.id);
     }
 
     public NodeElement(Movement m, String nodeName) {
@@ -55,7 +55,7 @@ public class NodeElement implements Clickable, SceneElement, ScaleListener, Time
     }
 
     public Integer id() {
-        return movement.id();
+        return movement.id;
     }
 
     public String name() {

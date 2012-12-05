@@ -32,20 +32,23 @@ public final class MovementEvent implements Item {
         IN, OUT, NEW_DEST
     }
 
-    Integer id;
-    Point dest;
-    double speed;
-    Type type;
+    public final Integer id;
+    public final Point dest;
+    final double speed;
+    public final Type type;
 
     public MovementEvent(Integer i) {
         id = i;
         type = Type.OUT;
+        speed = 0.0;
+        dest = null;
     }
 
     public MovementEvent(Integer i, Point d) {
         id = i;
         type = Type.IN;
         dest = d;
+        speed = 0.0;
     }
 
     public MovementEvent(Integer i, double sp, Point d) {
@@ -53,18 +56,6 @@ public final class MovementEvent implements Item {
         dest = d;
         speed = sp;
         type = Type.NEW_DEST;
-    }
-
-    public Integer id() {
-        return id;
-    }
-
-    public Type type() {
-        return type;
-    }
-
-    public Point dest() {
-        return dest;
     }
 
     public Movement origMovement() {

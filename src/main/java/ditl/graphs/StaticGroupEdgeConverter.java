@@ -42,15 +42,14 @@ public class StaticGroupEdgeConverter implements Converter {
         _edges = edges;
         group_map = new HashMap<Integer, Integer>();
         for (final Group g : groups) {
-            final Integer gid = g.gid();
             for (final Integer id : g.members())
-                group_map.put(id, gid);
+                group_map.put(id, g.gid);
         }
     }
 
     private Edge groupEdges(Edge e) {
-        final Integer gid1 = group_map.get(e.id1());
-        final Integer gid2 = group_map.get(e.id2());
+        final Integer gid1 = group_map.get(e.id1);
+        final Integer gid2 = group_map.get(e.id2);
         if (gid2.equals(gid1))
             return null;
         return new Edge(gid1, gid2);

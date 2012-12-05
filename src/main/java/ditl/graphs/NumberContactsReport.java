@@ -52,8 +52,8 @@ public final class NumberContactsReport extends Report implements EdgeTrace.Hand
             public void handle(long time, Collection<EdgeEvent> events) {
                 for (final EdgeEvent cev : events)
                     if (cev.isUp()) {
-                        incr(cev.id1());
-                        incr(cev.id2());
+                        incr(cev.id1);
+                        incr(cev.id2);
                     }
             }
         };
@@ -71,8 +71,8 @@ public final class NumberContactsReport extends Report implements EdgeTrace.Hand
             @Override
             public void handle(long time, Collection<Edge> events) {
                 for (final Edge e : events) {
-                    incr(e.id1());
-                    incr(e.id2());
+                    incr(e.id1);
+                    incr(e.id2);
                 }
             }
 

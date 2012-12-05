@@ -78,16 +78,16 @@ public class FloodingReachableConverter implements
                     final Edge e = eev.edge();
                     if (eev.isUp()) {
                         matrix.add(e);
-                        final Set<Integer> already_inf_1 = rev_matrix.getNext(e.id1());
-                        final Set<Integer> already_inf_2 = rev_matrix.getNext(e.id2());
+                        final Set<Integer> already_inf_1 = rev_matrix.getNext(e.id1);
+                        final Set<Integer> already_inf_2 = rev_matrix.getNext(e.id2);
                         if (already_inf_1 != null) {
-                            final Arc a = new Arc(e.id1(), e.id2());
+                            final Arc a = new Arc(e.id1, e.id2);
                             for (final Integer orig : already_inf_1)
                                 if (already_inf_2 == null || !already_inf_2.contains(orig))
                                     infection_bus.queue(time + _tau, new Infection(orig, a));
                         }
                         if (already_inf_2 != null) {
-                            final Arc a = new Arc(e.id2(), e.id1());
+                            final Arc a = new Arc(e.id2, e.id1);
                             for (final Integer orig : already_inf_2)
                                 if (already_inf_1 == null || !already_inf_1.contains(orig))
                                     infection_bus.queue(time + _tau, new Infection(orig, a));
@@ -172,11 +172,11 @@ public class FloodingReachableConverter implements
         }
 
         Arc arc() {
-            return new Arc(_orig, _arc.to());
+            return new Arc(_orig, _arc.to);
         }
 
         Integer rcpt() {
-            return _arc.to();
+            return _arc.to;
         }
 
         @Override
@@ -271,7 +271,7 @@ public class FloodingReachableConverter implements
 
         @Override
         public boolean matches(Infection item) {
-            return item._arc.from().equals(_id) || item._arc.to().equals(_id);
+            return item._arc.from.equals(_id) || item._arc.to.equals(_id);
         }
     }
 
@@ -286,7 +286,7 @@ public class FloodingReachableConverter implements
 
         @Override
         public boolean matches(Infection item) {
-            return _orig.equals(item._orig) && item._arc.to().equals(_id);
+            return _orig.equals(item._orig) && item._arc.to.equals(_id);
         }
     }
 
@@ -296,7 +296,7 @@ public class FloodingReachableConverter implements
             @Override
             public void handle(long time, Collection<Presence> events) {
                 for (final Presence p : events)
-                    present.add(p.id());
+                    present.add(p.id);
             }
         };
     }
@@ -307,7 +307,7 @@ public class FloodingReachableConverter implements
             @Override
             public void handle(long time, Collection<PresenceEvent> events) {
                 for (final PresenceEvent pev : events) {
-                    final Integer id = pev.id();
+                    final Integer id = pev.id;
                     if (pev.isIn()) {
                         present.add(id);
                         rev_matrix.add(new Arc(id, id));

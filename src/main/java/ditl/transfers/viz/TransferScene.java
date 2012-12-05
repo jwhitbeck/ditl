@@ -116,8 +116,8 @@ public class TransferScene extends GraphScene implements TransferTrace.Handler {
     private void incrTransfer(Edge e) {
         if (!transfer_count.containsKey(e)) {
             transfer_count.put(e, 1);
-            final NodeElement n1 = nodes.get(e.id1());
-            final NodeElement n2 = nodes.get(e.id2());
+            final NodeElement n1 = nodes.get(e.id1);
+            final NodeElement n2 = nodes.get(e.id2);
             active_transfers.put(e, new EdgeElement(n1, n2));
         } else {
             final int c = transfer_count.get(e);

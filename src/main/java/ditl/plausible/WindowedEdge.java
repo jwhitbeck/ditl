@@ -33,24 +33,20 @@ public final class WindowedEdge implements Couple, Item {
     long next_up = Long.MAX_VALUE;
     long next_down = Long.MAX_VALUE;
 
-    final Edge _edge;
+    public final Edge edge;
 
-    public WindowedEdge(Edge edge) {
-        _edge = edge;
-    }
-
-    public Edge edge() {
-        return _edge;
+    public WindowedEdge(Edge e) {
+        edge = e;
     }
 
     @Override
     public Integer id1() {
-        return _edge.id1();
+        return edge.id1;
     }
 
     @Override
     public Integer id2() {
-        return _edge.id2();
+        return edge.id2;
     }
 
     public long minUpTime(long t) {
@@ -64,12 +60,12 @@ public final class WindowedEdge implements Couple, Item {
     @Override
     public boolean equals(Object o) {
         final WindowedEdge we = (WindowedEdge) o;
-        return we._edge.equals(_edge);
+        return we.edge.equals(edge);
     }
 
     @Override
     public String toString() {
-        return _edge + " " + prev_up + " " + prev_down + " " + next_up + " " + next_down;
+        return edge + " " + prev_up + " " + prev_down + " " + next_up + " " + next_down;
     }
 
     public static final class Factory implements Item.Factory<WindowedEdge> {
@@ -85,7 +81,7 @@ public final class WindowedEdge implements Couple, Item {
     }
 
     public void handleEvent(WindowedEdgeEvent wee) {
-        switch (wee._type) {
+        switch (wee.type) {
             case PREVUP:
                 prev_up = wee._value;
                 break;
@@ -103,8 +99,8 @@ public final class WindowedEdge implements Couple, Item {
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(_edge.id1());
-        out.writeSInt(_edge.id2());
+        out.writeSInt(edge.id1);
+        out.writeSInt(edge.id2);
         out.writeSLong(prev_up);
         out.writeSLong(prev_down);
         out.writeSLong(next_up);

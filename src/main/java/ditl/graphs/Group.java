@@ -31,21 +31,17 @@ import ditl.Item;
 
 public class Group implements Item {
 
-    Integer _gid;
+    final public Integer gid;
     Set<Integer> _members;
 
-    public Group(Integer gid) {
-        _gid = gid;
+    public Group(Integer groupId) {
+        gid = groupId;
         _members = new HashSet<Integer>();
     }
 
-    public Group(Integer gid, Set<Integer> members) {
-        _gid = gid;
+    public Group(Integer groupId, Set<Integer> members) {
+        gid = groupId;
         _members = members;
-    }
-
-    public Integer gid() {
-        return _gid;
     }
 
     public int size() {
@@ -60,7 +56,7 @@ public class Group implements Item {
     }
 
     public void handleEvent(GroupEvent event) {
-        switch (event._type) {
+        switch (event.type) {
             case JOIN:
                 for (final Integer m : event._members)
                     _members.add(m);
@@ -74,12 +70,12 @@ public class Group implements Item {
 
     @Override
     public String toString() {
-        return _gid + " " + Groups.toJSON(_members);
+        return gid + " " + Groups.toJSON(_members);
     }
 
     @Override
     public int hashCode() {
-        return _gid;
+        return gid;
     }
 
     public Set<Integer> members() {
@@ -95,7 +91,7 @@ public class Group implements Item {
 
         @Override
         public Group filter(Group item) {
-            final Group f_group = new Group(item._gid);
+            final Group f_group = new Group(item.gid);
             for (final Integer i : item._members)
                 if (_group.contains(i))
                     f_group._members.add(i);
@@ -108,7 +104,7 @@ public class Group implements Item {
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(_gid);
+        out.writeSInt(gid);
         out.writeSIntSet(_members);
     }
 }

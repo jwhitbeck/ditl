@@ -186,8 +186,8 @@ public class AnticipatedForce implements Force, Interaction,
             @Override
             public void handle(long time, Collection<WindowedEdgeEvent> events) {
                 for (final WindowedEdgeEvent wle : events) {
-                    final Edge e = wle.edge();
-                    switch (wle.type()) {
+                    final Edge e = wle.edge;
+                    switch (wle.type) {
                         case UP:
                             window_map.put(e, new WindowedEdge(e));
                             break;
@@ -212,10 +212,8 @@ public class AnticipatedForce implements Force, Interaction,
 
             @Override
             public void handle(long time, Collection<WindowedEdge> events) {
-                Edge e;
                 for (final WindowedEdge wl : events) {
-                    e = wl.edge();
-                    window_map.put(e, wl);
+                    window_map.put(wl.edge, wl);
                 }
             }
 

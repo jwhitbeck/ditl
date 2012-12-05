@@ -28,30 +28,22 @@ import ditl.Item;
 
 public final class Arc implements Item, Couple {
 
-    final Integer _from;
-    final Integer _to;
+    final public Integer from;
+    final public Integer to;
 
-    public Arc(Integer from, Integer to) {
-        _from = from;
-        _to = to;
+    public Arc(Integer nodeFrom, Integer nodeTo) {
+        from = nodeFrom;
+        to = nodeTo;
     }
 
     @Override
     public Integer id1() {
-        return _from;
+        return from;
     }
 
     @Override
     public Integer id2() {
-        return _to;
-    }
-
-    public Integer from() {
-        return _from;
-    }
-
-    public Integer to() {
-        return _to;
+        return to;
     }
 
     public final static class Factory implements Item.Factory<Arc> {
@@ -62,22 +54,22 @@ public final class Arc implements Item, Couple {
     }
 
     public Arc reverse() {
-        return new Arc(_to, _from);
+        return new Arc(to, from);
     }
 
     public Edge edge() {
-        return new Edge(_from, _to);
+        return new Edge(from, to);
     }
 
     @Override
     public boolean equals(Object o) {
         final Arc l = (Arc) o;
-        return (l._from.equals(_from)) && (l._to.equals(_to));
+        return (l.from.equals(from)) && (l.to.equals(to));
     }
 
     @Override
     public String toString() {
-        return _from + " " + _to;
+        return from + " " + to;
     }
 
     public static final class InternalGroupFilter implements Filter<Arc> {
@@ -89,7 +81,7 @@ public final class Arc implements Item, Couple {
 
         @Override
         public Arc filter(Arc item) {
-            if (_group.contains(item._from) && _group.contains(item._to))
+            if (_group.contains(item.from) && _group.contains(item.to))
                 return item;
             return null;
         }
@@ -97,8 +89,8 @@ public final class Arc implements Item, Couple {
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(_from);
-        out.writeSInt(_to);
+        out.writeSInt(from);
+        out.writeSInt(to);
     }
 
 }

@@ -115,30 +115,30 @@ public final class AddingReachableConverter implements Converter, Generator, Lis
 
         void addDeltaArc(Arc de) {
             delta_arcs.add(de.reverse());
-            for (final Integer to : mu_arcs.getNext(de.to()))
-                if (!to.equals(de.from())) // prevent loops on self
-                    increment(new Arc(de.from(), to));
+            for (final Integer to : mu_arcs.getNext(de.to))
+                if (!to.equals(de.from)) // prevent loops on self
+                    increment(new Arc(de.from, to));
         }
 
         void addShiftedMuArc(Arc me) {
             mu_arcs.add(me);
-            for (final Integer from : delta_arcs.getNext(me.from()))
-                if (!from.equals(me.to())) // prevent loops on self
-                    increment(new Arc(from, me.to()));
+            for (final Integer from : delta_arcs.getNext(me.from))
+                if (!from.equals(me.to)) // prevent loops on self
+                    increment(new Arc(from, me.to));
         }
 
         void removeDeltaArc(Arc de) {
             delta_arcs.remove(de.reverse());
-            for (final Integer to : mu_arcs.getNext(de.to()))
-                if (!to.equals(de.from())) // prevent loops on self
-                    decrement(new Arc(de.from(), to));
+            for (final Integer to : mu_arcs.getNext(de.to))
+                if (!to.equals(de.from)) // prevent loops on self
+                    decrement(new Arc(de.from, to));
         }
 
         void removeShiftedMuArc(Arc me) {
             mu_arcs.remove(me);
-            for (final Integer from : delta_arcs.getNext(me.from()))
-                if (!from.equals(me.to())) // prevent loops on self
-                    decrement(new Arc(from, me.to()));
+            for (final Integer from : delta_arcs.getNext(me.from))
+                if (!from.equals(me.to)) // prevent loops on self
+                    decrement(new Arc(from, me.to));
         }
 
     };

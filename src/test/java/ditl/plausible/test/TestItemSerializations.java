@@ -39,16 +39,16 @@ public class TestItemSerializations {
         we1.handleEvent(wee3);
 
         WindowedEdge we2 = writeAndRead(we1, new WindowedEdge.Factory());
-        assertTrue(we2.edge().equals(we1.edge()));
+        assertTrue(we2.edge.equals(we1.edge));
         assertTrue(we2.minUpTime(150) == we1.minUpTime(150));
         assertTrue(we2.minDownTime(150) == we1.minDownTime(150));
 
         WindowedEdgeEvent wee5 = writeAndRead(wee2, new WindowedEdgeEvent.Factory());
-        assertTrue(wee2.type() == wee5.type());
-        assertTrue(wee2.edge().equals(wee5.edge()));
+        assertTrue(wee2.type == wee5.type);
+        assertTrue(wee2.edge.equals(wee5.edge));
 
         WindowedEdgeEvent wee6 = writeAndRead(wee4, new WindowedEdgeEvent.Factory());
-        assertTrue(wee4.type() == wee6.type());
-        assertTrue(wee4.edge().equals(wee6.edge()));
+        assertTrue(wee4.type == wee6.type);
+        assertTrue(wee4.edge.equals(wee6.edge));
     }
 }

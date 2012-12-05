@@ -31,26 +31,22 @@ public class Buffer implements Iterable<Integer>, Item {
 
     public static String delim = ":";
 
-    Integer _id;
+    public final Integer id;
     Set<Integer> msg_ids = new HashSet<Integer>();
 
-    public Buffer(Integer id) {
-        _id = id;
-    }
-
-    public Integer id() {
-        return _id;
+    public Buffer(Integer i) {
+        id = i;
     }
 
     @Override
     public int hashCode() {
-        return _id;
+        return id;
     }
 
     @Override
     public String toString() {
         final StringBuffer buffer = new StringBuffer();
-        buffer.append(_id + " ");
+        buffer.append(id + " ");
         if (!msg_ids.isEmpty())
             for (final Iterator<Integer> i = msg_ids.iterator(); i.hasNext();) {
                 final Integer msgId = i.next();
@@ -66,7 +62,7 @@ public class Buffer implements Iterable<Integer>, Item {
     @Override
     public boolean equals(Object o) {
         final Buffer b = (Buffer) o;
-        return _id.equals(b._id);
+        return id.equals(b.id);
     }
 
     public static final class Factory implements Item.Factory<Buffer> {
@@ -87,7 +83,7 @@ public class Buffer implements Iterable<Integer>, Item {
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(_id);
+        out.writeSInt(id);
         out.writeInt(msg_ids.size());
         for (Integer msgId : msg_ids) {
             out.writeSInt(msgId);

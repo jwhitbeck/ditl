@@ -110,9 +110,9 @@ public final class ClusteringCoefficientReport extends StateTimeReport
             public void handle(long time, Collection<PresenceEvent> events) {
                 for (final PresenceEvent pev : events)
                     if (pev.isIn())
-                        coeffs.put(pev.id(), 0.0);
+                        coeffs.put(pev.id, 0.0);
                     else
-                        coeffs.remove(pev.id());
+                        coeffs.remove(pev.id);
             }
         };
     }
@@ -128,7 +128,7 @@ public final class ClusteringCoefficientReport extends StateTimeReport
             @Override
             public void handle(long time, Collection<Presence> events) {
                 for (final Presence p : events)
-                    coeffs.put(p.id(), 0.0);
+                    coeffs.put(p.id, 0.0);
             }
         };
     }

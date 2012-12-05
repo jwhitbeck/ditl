@@ -28,14 +28,10 @@ import ditl.Item;
 
 public final class Presence implements Item {
 
-    private final Integer id;
+    public final Integer id;
 
     public Presence(Integer i) {
         id = i;
-    }
-
-    public Integer id() {
-        return id;
     }
 
     public static final class Factory implements Item.Factory<Presence> {

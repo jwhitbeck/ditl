@@ -53,7 +53,7 @@ public class ArcElement implements SceneElement {
     }
 
     public void bringArcUp(Arc a) { // from n1 to n2
-        if (node1.id().equals(a.from()))
+        if (node1.id().equals(a.from))
             switch (state) {
                 case DOWN:
                     state = State.RIGHT;
@@ -74,7 +74,7 @@ public class ArcElement implements SceneElement {
     }
 
     public void bringArcDown(Arc a) { // from n1 to n2
-        if (node1.id().equals(a.from()))
+        if (node1.id().equals(a.from))
             switch (state) {
                 case SYM:
                     state = State.LEFT;

@@ -28,8 +28,8 @@ import ditl.Item;
 
 public final class Edge implements Couple, Item {
 
-    final Integer id1;
-    final Integer id2;
+    final public Integer id1;
+    final public Integer id2;
 
     public Edge(Integer i1, Integer i2) {
         if (i1 < i2) {

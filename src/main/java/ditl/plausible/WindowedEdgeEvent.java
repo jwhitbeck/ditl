@@ -31,38 +31,30 @@ public final class WindowedEdgeEvent implements Item {
         UP, DOWN, PREVUP, PREVDOWN, NEXTUP, NEXTDOWN
     }
 
-    final Type _type;
-    final Edge _edge;
+    final public Type type;
+    final public Edge edge;
     final long _value;
 
-    public WindowedEdgeEvent(Edge edge, Type type) {
-        _type = type;
-        _edge = edge;
+    public WindowedEdgeEvent(Edge e, Type t) {
+        type = t;
+        edge = e;
         _value = 0;
     }
 
-    public WindowedEdgeEvent(Edge edge, Type type, long value) {
-        _type = type;
-        _edge = edge;
+    public WindowedEdgeEvent(Edge e, Type t, long value) {
+        type = t;
+        edge = e;
         _value = value;
-    }
-
-    public Type type() {
-        return _type;
-    }
-
-    public Edge edge() {
-        return _edge;
     }
 
     @Override
     public String toString() {
-        switch (_type) {
+        switch (type) {
             case UP:
             case DOWN:
-                return _edge + " " + _type;
+                return edge + " " + type;
             default:
-                return _edge + " " + _type + " " + _value;
+                return edge + " " + type + " " + _value;
         }
     }
 
@@ -83,10 +75,10 @@ public final class WindowedEdgeEvent implements Item {
 
     @Override
     public void write(CodedBuffer out) {
-        out.writeSInt(_edge.id1());
-        out.writeSInt(_edge.id2());
-        out.writeByte(_type.ordinal());
-        if (_type != Type.UP && _type != Type.DOWN)
+        out.writeSInt(edge.id1);
+        out.writeSInt(edge.id2);
+        out.writeByte(type.ordinal());
+        if (type != Type.UP && type != Type.DOWN)
             out.writeSLong(_value);
     }
 }
