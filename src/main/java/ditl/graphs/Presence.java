@@ -54,7 +54,7 @@ public final class Presence implements Item {
 
     @Override
     public String toString() {
-        return "p " + id;
+        return id.toString();
     }
 
     public static final class GroupFilter implements Filter<Presence> {
