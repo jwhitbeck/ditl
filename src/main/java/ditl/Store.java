@@ -152,7 +152,6 @@ public abstract class Store {
     }
 
     public Class<? extends Trace<?>> getTraceClass(String type) throws ClassNotFoundException {
-        buildTypeClassMap();
         if (!type_class_map.containsKey(type))
             throw new ClassNotFoundException("No trace class found for type '" + type + "'");
         return type_class_map.get(type);
