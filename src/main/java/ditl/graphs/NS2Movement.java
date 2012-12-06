@@ -83,7 +83,7 @@ public class NS2Movement {
                     id_str = elems[3].split("\\(|\\)")[1];
                     id = idGen.getInternalId(id_str);
                     final Point dest = new Point(Double.parseDouble(elems[5]), Double.parseDouble(elems[6]));
-                    s = Double.parseDouble(elems[7].substring(0, elems[7].length() - 2)) / timeMul;
+                    s = Double.parseDouble(elems[7].substring(0, elems[7].length() - 1)) / timeMul;
                     buffer.queue(time, new MovementEvent(id, s, dest));
                 }
             }
