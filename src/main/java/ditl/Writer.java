@@ -106,7 +106,7 @@ public class Writer<I extends Item> extends Bus<I> implements Listener<I> {
         n_events += items.size();
     }
 
-    void write(long time, I item) {
+    void write(long time, I item) throws IOException {
         item.write(buffer);
     }
 

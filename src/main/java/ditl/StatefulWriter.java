@@ -20,11 +20,13 @@ package ditl;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 public class StatefulWriter<E extends Item, S extends Item> extends Writer<E> {
 
     private final StateUpdater<E, S> _updater;
+    private boolean init_state_set = false;
 
     final static byte STATE = 1;
 
@@ -38,7 +40,9 @@ public class StatefulWriter<E extends Item, S extends Item> extends Writer<E> {
     }
 
     @Override
-    public void write(long time, E event) {
+    public void write(long time, E event) throws IOException {
+        if (!init_state_set)
+            setInitState(min_time, Collections.<S> emptySet());
         super.write(time, event);
         _updater.handleEvent(time, event);
     }
@@ -46,6 +50,7 @@ public class StatefulWriter<E extends Item, S extends Item> extends Writer<E> {
     public void setInitState(long time, Collection<S> states) throws IOException {
         _updater.setState(states);
         min_time = time;
+        init_state_set = true;
         markPosition(time);
     }
 
