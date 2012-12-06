@@ -41,6 +41,7 @@ public class ImportMovement extends ImportApp {
     private Long maxTime;
     private long ticsPerSecond;
     private Double timeMul;
+    private Long initStateTime;
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.MOVEMENT);
     private long offset;
     private boolean fix_pause_times;
@@ -48,6 +49,7 @@ public class ImportMovement extends ImportApp {
     private int min_id;
 
     private final String fixPauseTimesOption = "fix-pause-times";
+    private final String initStateTimeOption = "init-state-time";
 
     @Override
     protected void parseArgs(CommandLine cli, String[] args) throws ParseException, ArrayIndexOutOfBoundsException, HelpException {
@@ -62,6 +64,8 @@ public class ImportMovement extends ImportApp {
         offset = Long.parseLong(cli.getOptionValue(offsetOption, "0")) * ticsPerSecond;
         if (cli.hasOption(maxTimeOption))
             maxTime = Long.parseLong(cli.getOptionValue(maxTimeOption)) * ticsPerSecond;
+        if (cli.hasOption(initStateTimeOption))
+            initStateTime = Long.parseLong(cli.getOptionValue(initStateTimeOption)) * ticsPerSecond;
         fix_pause_times = cli.hasOption(fixPauseTimesOption);
         use_id_map = cli.hasOption(stringIdsOption);
         min_id = Integer.parseInt(cli.getOptionValue(minIdOption, "0"));
@@ -73,7 +77,7 @@ public class ImportMovement extends ImportApp {
         final IdGenerator id_gen = (use_id_map) ? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
         switch (ext_fmt) {
             case NS2:
-                NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, fix_pause_times, id_gen);
+                NS2Movement.fromNS2(movement, _in, maxTime, timeMul, ticsPerSecond, offset, fix_pause_times, initStateTime, id_gen);
                 break;
             case ONE:
                 ONEMovement.fromONE(movement, _in, maxTime, timeMul, ticsPerSecond, offset, id_gen);
@@ -93,5 +97,6 @@ public class ImportMovement extends ImportApp {
         options.addOption(null, fixPauseTimesOption, false, "fix missing pause times in NS2");
         options.addOption(null, stringIdsOption, false, "treat node ids as strings (default: false)");
         options.addOption(null, minIdOption, true, "ensure that all imported ids are greater than <arg> (default: 0)");
+        options.addOption(null, initStateTimeOption, true, "set the time if the initial state if importing from NS2 (default: 0)");
     }
 }

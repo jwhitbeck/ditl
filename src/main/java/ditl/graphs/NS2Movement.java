@@ -42,7 +42,7 @@ public class NS2Movement {
 
     public static void fromNS2(MovementTrace movement,
             InputStream in, Long maxTime, double timeMul, long ticsPerSecond,
-            long offset, final boolean fixPauseTimes, IdGenerator idGen) throws IOException {
+            long offset, final boolean fixPauseTimes, Long initStateTime, IdGenerator idGen) throws IOException {
 
         final StatefulWriter<MovementEvent, Movement> movementWriter = movement.getWriter();
         final Map<Integer, Movement> positions = new HashMap<Integer, Movement>();
@@ -89,7 +89,8 @@ public class NS2Movement {
             }
         br.close();
 
-        movementWriter.setInitState(offset, positions.values());
+        final long init_time = (initStateTime != null) ? initStateTime : 0;
+        movementWriter.setInitState(init_time + offset, positions.values());
 
         buffer.addListener(new Listener<MovementEvent>() {
             @Override
