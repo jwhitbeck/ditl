@@ -1,7 +1,5 @@
 import ditl.*;
 import ditl.Writer;
-import ditl.Store.LoadTraceException;
-import ditl.WritableStore.AlreadyExistsException;
 import ditl.graphs.*;
 import java.util.*;
 import java.io.*;
@@ -64,7 +62,7 @@ public class ImportStanford implements Converter {
 		beacon_writer.close();
     }
 
-    public static void main(String[] args) throws IOException, AlreadyExistsException, LoadTraceException {
+    public static void main(String[] args) throws Exception {
     	WritableStore store = WritableStore.open(new File(args[0]));
     	Map<Integer,File> moteFiles = new HashMap<Integer,File>();
     	for ( int i=1; i<args.length; ++i){
@@ -76,9 +74,9 @@ public class ImportStanford implements Converter {
     			moteFiles.put(id,f);
     		}
     	}
-    	BeaconTrace beacons = store.newTrace("rand_beacons", BeaconTrace.type, true);
+    	BeaconTrace beacons = store.newTrace("rand_beacons", BeaconTrace.class, true);
 		new ImportStanford(beacons, moteFiles, true).convert();
-		BeaconTrace beacons2 = store.newTrace(BeaconTrace.defaultName, BeaconTrace.type, true);
+		BeaconTrace beacons2 = store.newTrace(BeaconTrace.class.getAnnotation(Trace.Type.class).value(), BeaconTrace.class, true);
 		new ImportStanford(beacons2, moteFiles, false).convert();
 		
 		store.close();

@@ -29,12 +29,10 @@ Original data at [www.salathegroup.com](http://www.salathegroup.com/guide/school
 Instructions
 ------------
 
-1. Make sure that the DITL\_LIB variable point to the proper jar file.
-
-2. To build, run:
+1. To build, run:
 
     $ make
 
-3. To play the mobility, use the ditl built-in player:
+2. To build & play the mobility, use the ditl built-in player:
 
-    $ java -jar ../../../ditl.jar graphs play stanford.jar
+    $ make play
