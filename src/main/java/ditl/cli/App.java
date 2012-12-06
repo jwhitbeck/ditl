@@ -56,7 +56,6 @@ public abstract class App {
             maxTimeOption = "max-time",
             minTimeOption = "min-time",
             intervalOption = "interval",
-            traceOption = "trace",
             outputOption = "output",
             storeOutputOption = "out-store",
             forceOption = "force",
