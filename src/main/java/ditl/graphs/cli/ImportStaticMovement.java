@@ -18,9 +18,11 @@
  *******************************************************************************/
 package ditl.graphs.cli;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
@@ -38,20 +40,27 @@ import ditl.graphs.Point;
 @App.Cli(pkg = "graphs", cmd = "import-positions", alias = "ip")
 public class ImportStaticMovement extends WriteApp {
 
-    private String[] positions_specs;
+    private JSONObject positions_specs;
     private boolean use_id_map;
     private final GraphOptions.CliParser graph_options = new GraphOptions.CliParser(GraphOptions.PRESENCE, GraphOptions.MOVEMENT);
 
     @Override
     protected String getUsageString() {
-        return "[OPTIONS] STORE ID1:X:Y [ID2:X:Y..]";
+        return "[OPTIONS] STORE POSITION_SPEC";
+    }
+
+    @Override
+    protected String getHelpHeader() {
+        return "POSITION_SPEC is a json string such as : \n" +
+                "{ 1:[5,4], 3:[0,1] }\n" +
+                "which states that node 1 is at position (x=5,y=4) and node 3 at position (x=0,y=1).";
     }
 
     @Override
     protected void parseArgs(CommandLine cli, String[] args) throws ArrayIndexOutOfBoundsException, ParseException, HelpException {
         super.parseArgs(cli, args);
         graph_options.parse(cli);
-        positions_specs = Arrays.copyOfRange(args, 1, args.length);
+        positions_specs = JSONObject.fromObject(args[1]);
         use_id_map = cli.hasOption(stringIdsOption);
     }
 
@@ -69,18 +78,11 @@ public class ImportStaticMovement extends WriteApp {
         final MovementTrace movement = _store.newTrace(graph_options.get(GraphOptions.MOVEMENT), MovementTrace.class, force);
         final StatefulWriter<MovementEvent, Movement> movementWriter = movement.getWriter();
         final Set<Movement> initState = new HashSet<Movement>();
-        for (final String spec : positions_specs) {
-            final String[] elems = spec.split(":");
-            Integer id;
-            if (use_id_map)
-                id = id_map.getInternalId(elems[0]);
-            else
-                id = Integer.parseInt(elems[0]);
-            final double x = Double.parseDouble(elems[1]);
-            final double y = Double.parseDouble(elems[2]);
-            final Point p = new Point(x, y);
-            final Movement m = new Movement(id, p);
-            initState.add(m);
+        for (Object obj : positions_specs.keySet()) {
+            String key = (String) obj;
+            Integer id = use_id_map ? id_map.getInternalId(key) : Integer.parseInt(key);
+            JSONArray coords = positions_specs.getJSONArray(key);
+            initState.add(new Movement(id, new Point(coords.getDouble(0), coords.getDouble(1))));
         }
 
         movementWriter.setInitState(presence.minTime(), initState);
