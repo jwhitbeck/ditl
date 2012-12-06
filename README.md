@@ -11,20 +11,17 @@ standardized way.  Its core is very generic and can handle either
 _stateless_ events (e.g., a received beacon), or _stateful_ events
 (e.g., groups modified by join and leave events).
 
-The DITL library has grown out my realization that I was always coding
-similar things over and over. It has been used in some form or another
-in all my PhD work. I am releasing the code _as is_ under popular
-pressure for the [plausible mobility](http://plausible.lip6.fr) code
+I am releasing the code _as is_ under popular pressure for the
+[plausible mobility](http://plausible.lip6.fr) and reachability code
 built on top of it. It is under active development but documentation
 is unfortunately still lacking at this point. However, rudimentary
 documentation is built into the CLI interface (see below).
 
 The _core_ and _graphs_ module are being used in research projects by
-myself and others and haven't been modified for a while so they can be
-considered quite stable. The _transfers_ module is currently serving
-as the basis for an opportunistic network simulator, but will probably
-see some changes and improvement as development of the simulator
-continues.
+myself and others can be considered quite stable. The _transfers_
+module is currently serving as the basis for an opportunistic network
+simulator, but will probably see some changes and improvement as
+development of the simulator continues.
 
 DITL is built around the following design choices:
 
@@ -134,7 +131,7 @@ Download
 --------
 
 A pre-built jar archive file is available for download:
-[ditl.jar](http://neush.net/static/ditl.jar)
+[ditl-2.0.0.jar](https://github.com/downloads/neush/ditl/ditl-2.0.0.jar)
 
 
 CLI Interface
@@ -186,6 +183,16 @@ and run it locally:
 
     $ wget http://plausible.lip6.fr/rollernet.jar
     $ ditl graphs play rollernet.jar
+
+
+Publications
+------------
+
+The following publications are based on this code.
+
+* [Temporal Reachability Graphs](http://dx.doi.org/10.1145/2348543.2348589) - _ACM Mobicom 2012_
+* [Push-and-Track: Saving Infrastructure Bandwidth Through Opportunistic Forwarding](http://dx.doi.org/10.1016/j.pmcj.2012.02.001) - _Pervasive and Mobile Computing_ (August 2012)
+* [From Encounters to Plausible Mobility](http://www-npa.lip6.fr/~whitbeck/img/doi.png) - _Pervasive and Mobile Computing_ (April 2011)
 
 
 License
