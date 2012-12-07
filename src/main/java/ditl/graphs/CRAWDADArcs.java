@@ -47,8 +47,8 @@ public class CRAWDADArcs {
             final String[] elems = line.split("[ \t]+");
             final Integer id1 = idGen.getInternalId(elems[0]);
             final Integer id2 = idGen.getInternalId(elems[1]);
-            final long begin = (long) (Long.parseLong(elems[2]) * timeMul) + offset;
-            final long end = (long) (Long.parseLong(elems[3]) * timeMul) + offset;
+            final long begin = (long) (Double.parseDouble(elems[2]) * timeMul) + offset;
+            final long end = (long) (Double.parseDouble(elems[3]) * timeMul) + offset;
             arcWriter.queue(begin, new ArcEvent(id1, id2, ArcEvent.Type.UP));
             arcWriter.queue(end, new ArcEvent(id1, id2, ArcEvent.Type.DOWN));
         }

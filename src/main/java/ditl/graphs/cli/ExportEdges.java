@@ -28,7 +28,7 @@ import org.apache.commons.cli.ParseException;
 
 import ditl.cli.App;
 import ditl.cli.ExportApp;
-import ditl.graphs.CRAWDADContacts;
+import ditl.graphs.CRAWDADEdges;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.ONEContacts;
 
@@ -66,7 +66,7 @@ public class ExportEdges extends ExportApp {
         final double timeMul = getTimeMul(otps, dtps);
         switch (ext_fmt) {
             case CRAWDAD:
-                CRAWDADContacts.toCRAWDAD(edges, _out, timeMul);
+                CRAWDADEdges.toCRAWDAD(edges, _out, timeMul);
                 break;
             case ONE:
                 ONEContacts.toONE(edges, _out, timeMul);

@@ -29,7 +29,7 @@ import ditl.IdMap;
 import ditl.OffsetIdGenerator;
 import ditl.cli.App;
 import ditl.cli.ImportApp;
-import ditl.graphs.CRAWDADContacts;
+import ditl.graphs.CRAWDADEdges;
 import ditl.graphs.EdgeTrace;
 import ditl.graphs.ONEContacts;
 
@@ -78,7 +78,7 @@ public class ImportEdges extends ImportApp {
         final IdGenerator id_gen = (use_id_map) ? new IdMap.Writer(min_id) : new OffsetIdGenerator(min_id);
         switch (ext_fmt) {
             case CRAWDAD:
-                CRAWDADContacts.fromCRAWDAD(edges, _in, timeMul, ticsPerSecond, offset, id_gen);
+                CRAWDADEdges.fromCRAWDAD(edges, _in, timeMul, ticsPerSecond, offset, id_gen);
                 break;
             case ONE:
                 ONEContacts.fromONE(edges, _in, timeMul, ticsPerSecond, offset, id_gen);

@@ -33,7 +33,7 @@ import ditl.StatefulWriter;
 import ditl.Trace;
 import ditl.Units;
 
-public class CRAWDADContacts {
+public class CRAWDADEdges {
 
     public static void fromCRAWDAD(EdgeTrace edges,
             InputStream in, double timeMul, long ticsPerSecond,
@@ -47,8 +47,8 @@ public class CRAWDADContacts {
             final String[] elems = line.split("[ \t]+");
             final Integer id1 = idGen.getInternalId(elems[0]);
             final Integer id2 = idGen.getInternalId(elems[1]);
-            final long begin = (long) (Long.parseLong(elems[2]) * timeMul) + offset;
-            final long end = (long) (Long.parseLong(elems[3]) * timeMul) + offset;
+            final long begin = (long) (Double.parseDouble(elems[2]) * timeMul) + offset;
+            final long end = (long) (Double.parseDouble(elems[3]) * timeMul) + offset;
             edgeWriter.queue(begin, new EdgeEvent(id1, id2, EdgeEvent.Type.UP));
             edgeWriter.queue(end, new EdgeEvent(id1, id2, EdgeEvent.Type.DOWN));
         }
