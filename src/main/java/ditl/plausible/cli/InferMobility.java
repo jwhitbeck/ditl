@@ -1,5 +1,8 @@
 package ditl.plausible.cli;
 
+import java.util.Collections;
+import java.util.Set;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -180,6 +183,7 @@ public class InferMobility extends ConvertApp {
         for (final Object key : constraints.keySet()) {
             Constraint c = null;
             JSONObject params = constraints.getJSONObject((String) key);
+            Set<Integer> nodes = params.has("nodes") ? Groups.parse(params.getJSONArray("nodes")) : Collections.<Integer> emptySet();
             if (key.equals("Box")) {
                 if (params.has("width") && params.has("height") && params.has("border")) {
                     final double w = params.getDouble("width");
@@ -194,15 +198,15 @@ public class InferMobility extends ConvertApp {
                 if (params.has("width"))
                     c = new VerticalConstraint(params.getDouble("width"));
             } else if (key.equals("LeftOutlier")) {
-                if (params.has("node"))
+                if (nodes.size() == 1)
                     c = new LeftOutlierConstraint();
             } else if (key.equals("RightOutlier"))
-                if (params.has("node"))
+                if (nodes.size() == 1)
                     c = new RightOutlierConstraint();
             if (c != null)
-                if (params.has("node")) {
-                    final Integer id = params.getInt("node");
-                    pmc.addNodeConstraint(id, c);
+                if (!nodes.isEmpty()) {
+                    for (Integer id : nodes)
+                        pmc.addNodeConstraint(id, c);
                 } else
                     pmc.addGlobalConstraint(c);
         }
