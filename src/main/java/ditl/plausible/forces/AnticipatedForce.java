@@ -84,10 +84,8 @@ public class AnticipatedForce implements Force, Interaction,
     }
 
     private double defaultG() {
-        return _K * Math.pow(_epsilon + 1, _alpha) * _range * (1 - _lambda / _range); // balance
-                                                                                      // at
-                                                                                      // distance
-                                                                                      // range
+        // balance at distance range
+        return _K * Math.pow(_epsilon + 1, _alpha) * _range * (1 - _lambda / _range);
     }
 
     @Override
@@ -113,8 +111,9 @@ public class AnticipatedForce implements Force, Interaction,
             final Integer oid = other_node.id();
             final Edge e = new Edge(id, oid);
             double dt = 0;
-            if (active_edges.contains(e))
+            if (active_edges.contains(e)) {
                 dt = (double) window_map.get(e).minUpTime(time) / (double) _tps;
+            }
             final double F = _G / Math.pow(_epsilon + (d + _vmax * dt) / _range, _alpha);
             f.x += F * dx / d;
             f.y += F * dy / d;
@@ -185,9 +184,9 @@ public class AnticipatedForce implements Force, Interaction,
         return new Listener<WindowedEdgeEvent>() {
             @Override
             public void handle(long time, Collection<WindowedEdgeEvent> events) {
-                for (final WindowedEdgeEvent wle : events) {
-                    final Edge e = wle.edge;
-                    switch (wle.type) {
+                for (final WindowedEdgeEvent wee : events) {
+                    final Edge e = wee.edge;
+                    switch (wee.type) {
                         case UP:
                             window_map.put(e, new WindowedEdge(e));
                             break;
@@ -195,7 +194,7 @@ public class AnticipatedForce implements Force, Interaction,
                             window_map.remove(e);
                             break;
                         default:
-                            window_map.get(e).handleEvent(wle);
+                            window_map.get(e).handleEvent(wee);
                     }
                 }
             }
@@ -212,8 +211,8 @@ public class AnticipatedForce implements Force, Interaction,
 
             @Override
             public void handle(long time, Collection<WindowedEdge> events) {
-                for (final WindowedEdge wl : events) {
-                    window_map.put(wl.edge, wl);
+                for (final WindowedEdge we : events) {
+                    window_map.put(we.edge, we);
                 }
             }
 
