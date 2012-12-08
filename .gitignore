@@ -1,5 +1,4 @@
-build/
-bin/
-dist/
 .classpath
 .project
+target/
+dependency-reduced-pom.xml

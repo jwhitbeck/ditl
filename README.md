@@ -11,29 +11,26 @@ standardized way.  Its core is very generic and can handle either
 _stateless_ events (e.g., a received beacon), or _stateful_ events
 (e.g., groups modified by join and leave events).
 
-The DITL library has grown out my realization that I was always coding
-similar things over and over. It has been used in some form or another
-in all my PhD work. I am releasing the code _as is_ under popular
-pressure for the [plausible mobility](http://plausible.lip6.fr) code
+I am releasing the code _as is_ under popular pressure for the
+[plausible mobility](http://plausible.lip6.fr) and reachability code
 built on top of it. It is under active development but documentation
 is unfortunately still lacking at this point. However, rudimentary
 documentation is built into the CLI interface (see below).
 
 The _core_ and _graphs_ module are being used in research projects by
-myself and others and haven't been modified for a while so they can be
-considered quite stable. The _transfers_ module is currently serving
-as the basis for an opportunistic network simulator, but will probably
-see some changes and improvement as development of the simulator
-continues.
+myself and others can be considered quite stable. The _transfers_
+module is currently serving as the basis for an opportunistic network
+simulator, but will probably see some changes and improvement as
+development of the simulator continues.
 
 DITL is built around the following design choices:
 
 * Everything is a trace. Calculations and simulations all become
 transformations of one set of traces into another set of traces. For
-example, an opportunistic network simulator merely converts a _link_
+example, an opportunistic network simulator merely converts a _edge_
 trace to a _message_ and a _buffer_ trace.
 
-* Pre-calculate as much as possible. For example, links arising from
+* Pre-calculate as much as possible. For example, edges arising from
 the proximity of two nodes (i.e., the disk-based radio model) should
 only be calculated once and not for every run of a simulation. Same
 goes for connected components, etc.
@@ -74,8 +71,8 @@ Here is a list of the trace types currently in the library:
 
 * Graphs module
   * presence
+  * arc
   * edge
-  * link
   * movement
   * beacon (stateless)
   * group
@@ -84,7 +81,7 @@ Here is a list of the trace types currently in the library:
   * buffer
   * transfer
 * Plausibile module
-  * windowed link
+  * windowed edge
 
 
 ### Store
@@ -92,7 +89,7 @@ Here is a list of the trace types currently in the library:
 A store is a collection of traces. It is intended to be used as a
 container for several traces relating to the same source of
 events. For example, a store could be used to contain a simulated
-Random Waypoint _movement_ trace, several _link_ traces highlighting
+Random Waypoint _movement_ trace, several _edge_ traces highlighting
 potential contact opportunities at various transmission ranges, and
 several _group_ traces representing the pre-calculated connected
 components.
@@ -121,8 +118,10 @@ buses. It supports seeking and incrementing.
 Building
 --------
 
-This project assumes a recent JDK (&ge;1.6). At the project root just run:
-    $ ant
+This project assumes a recent JDK (&ge;1.6) and uses maven. At the
+project root just run:
+
+    $ mvn install
 
 This will build a single jar archive _ditl.jar_ containing both the
 core and module classes.
@@ -132,7 +131,7 @@ Download
 --------
 
 A pre-built jar archive file is available for download:
-[ditl.jar](http://neush.net/static/ditl.jar)
+[ditl-2.0.0.jar](https://github.com/downloads/neush/ditl/ditl-2.0.0.jar)
 
 
 CLI Interface
@@ -174,7 +173,7 @@ Player
 
 When a movement trace is present in a store, the ditl library contains
 a built-in player to view it. It will automatically detect other
-traces (e.g., link or static group traces) and add the relevant
+traces (e.g., edge or static group traces) and add the relevant
 information to the player.
 
 For example, the [Plausible Mobility](http://plausible.lip6.fr) page
@@ -184,6 +183,16 @@ and run it locally:
 
     $ wget http://plausible.lip6.fr/rollernet.jar
     $ ditl graphs play rollernet.jar
+
+
+Publications
+------------
+
+The following publications are based on this code.
+
+* [Temporal Reachability Graphs](http://dx.doi.org/10.1145/2348543.2348589) - _ACM Mobicom 2012_
+* [Push-and-Track: Saving Infrastructure Bandwidth Through Opportunistic Forwarding](http://dx.doi.org/10.1016/j.pmcj.2012.02.001) - _Pervasive and Mobile Computing_ (August 2012)
+* [From Encounters to Plausible Mobility](http://www-npa.lip6.fr/~whitbeck/img/doi.png) - _Pervasive and Mobile Computing_ (April 2011)
 
 
 License
