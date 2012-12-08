@@ -47,7 +47,7 @@ public class StatefulReader<E extends Item, S extends Item> extends Reader<E> {
         _updater.setState(readItemBlock(state_factory));
         prev_time = next_time;
         readHeader();
-        while (hasNext() && nextTime() < time + _offset) {
+        while (hasNext() && next_time < time + _offset) {
             for (final E event : next()) {
                 // cur_time is updated by call to next
                 _updater.handleEvent(cur_time, event);
