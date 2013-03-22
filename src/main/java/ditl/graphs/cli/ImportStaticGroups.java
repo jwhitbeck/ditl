@@ -87,7 +87,7 @@ public class ImportStaticGroups extends WriteApp {
             JSONObject gspec = (JSONObject) obj;
             final Set<Integer> members = Groups.parse(gspec.getJSONArray("members"), id_map);
             if (gspec.has("label"))
-                labels.accumulate(gspec.getString("label"), i);
+                labels.put(gspec.getString("label"), i);
             initState.add(new Group(i, members));
             i++;
         }

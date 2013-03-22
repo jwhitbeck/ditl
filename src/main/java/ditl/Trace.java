@@ -147,12 +147,12 @@ public abstract class Trace<E extends Item> {
     }
 
     public void set(String key, Object value) {
-        config.accumulate(key, value);
+        config.put(key, value);
     }
 
     public void setIfUnset(String key, Object value) {
         if (!config.containsKey(key))
-            config.accumulate(key, value);
+            config.put(key, value);
     }
 
     @Override
