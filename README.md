@@ -131,7 +131,7 @@ Download
 --------
 
 A pre-built jar archive file is available for download:
-[ditl-2.0.0.jar](https://github.com/downloads/neush/ditl/ditl-2.0.0.jar)
+[ditl-2.0.1.jar](http://neush.net/static/ditl-2.0.1.jar)
 
 
 CLI Interface
