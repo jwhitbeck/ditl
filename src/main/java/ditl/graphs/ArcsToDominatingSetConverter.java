@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.sf.json.JSONObject;
 import ditl.Bus;
 import ditl.Converter;
 import ditl.Generator;
@@ -79,7 +80,9 @@ public final class ArcsToDominatingSetConverter implements Converter,
         runner.addGenerator(this);
         runner.run();
 
-        group_writer.setProperty(GroupTrace.labelsKey, "dominating set");
+        JSONObject labels = new JSONObject();
+        labels.put("dominating set", gid);
+        group_writer.setProperty(GroupTrace.labelsKey, labels);
         group_writer.setPropertiesFromTrace(_arcs);
         group_writer.close();
         arc_reader.close();
