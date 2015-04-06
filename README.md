@@ -169,7 +169,7 @@ calls to the ditl cli interface.
 Player
 ------
 
-![Ditl player screenshot](http://plausible.lip6.fr/rollernet.png)
+![Ditl player screenshot](http://plausible.lip6.fr/img/rollernet.png)
 
 When a movement trace is present in a store, the ditl library contains
 a built-in player to view it. It will automatically detect other
@@ -196,7 +196,7 @@ The following publications are based on this code.
 
 
 License
-------- 
+-------
 
 This program is free software; you can redistribute it
 and/or modify it under the terms of the GNU Library General Public
