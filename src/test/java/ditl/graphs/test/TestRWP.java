@@ -193,6 +193,7 @@ public class TestRWP {
         FileOutputStream fos = new FileOutputStream(new File(getStorePath() + "/" + fileName));
         System.setOut(new PrintStream(fos));
         graphsCli(fmtCmd);
+        fos.close();
         System.setOut(System.out);
     }
 
