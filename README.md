@@ -1,6 +1,9 @@
 DITL - DynamIc Trace Library
 ============================
 
+[![Build Status](https://travis-ci.org/jwhitbeck/ditl.png)](https://travis-ci.org/jwhitbeck/ditl.png)
+
+
 Introduction
 -----------
 
